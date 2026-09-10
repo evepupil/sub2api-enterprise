@@ -86,6 +86,7 @@ type AuthService struct {
 	affiliateService      *AffiliateService
 	defaultSubAssigner    DefaultSubscriptionAssigner
 	userPlatformQuotaRepo UserPlatformQuotaRepository
+	organizationService   *OrganizationService
 }
 
 type CaptchaProof struct {
@@ -154,6 +155,10 @@ func (s *AuthService) SetAliyunCaptchaService(aliyunCaptchaService *AliyunCaptch
 	s.aliyunCaptchaService = aliyunCaptchaService
 }
 
+func (s *AuthService) SetOrganizationService(organizationService *OrganizationService) {
+	s.organizationService = organizationService
+}
+
 // Register 用户注册，返回token和用户
 func (s *AuthService) Register(ctx context.Context, email, password string) (string, *User, error) {
 	return s.RegisterWithVerification(ctx, email, password, "", "", "", "")
@@ -161,6 +166,19 @@ func (s *AuthService) Register(ctx context.Context, email, password string) (str
 
 // RegisterWithVerification 用户注册（支持邮件验证、优惠码、邀请码和邀请返利码），返回token和用户。
 func (s *AuthService) RegisterWithVerification(ctx context.Context, email, password, verifyCode, promoCode, invitationCode, affiliateCode string) (string, *User, error) {
+	return s.RegisterWithOrganizationVerification(ctx, email, password, verifyCode, promoCode, invitationCode, affiliateCode, "")
+}
+
+func (s *AuthService) RegisterWithOrganizationVerification(
+	ctx context.Context,
+	email string,
+	password string,
+	verifyCode string,
+	promoCode string,
+	invitationCode string,
+	affiliateCode string,
+	organizationName string,
+) (string, *User, error) {
 	// 检查是否开放注册（默认关闭：settingService 未配置时不允许注册）
 	if s.settingService == nil || !s.settingService.IsRegistrationEnabled(ctx) {
 		return "", nil, ErrRegDisabled
@@ -170,9 +188,24 @@ func (s *AuthService) RegisterWithVerification(ctx context.Context, email, passw
 	if isReservedEmail(email) {
 		return "", nil, ErrEmailReserved
 	}
-	// 检查是否需要邀请码
+	// 解析个人注册、创建组织或加入组织。未装配组织模块的测试和兼容场景
+	// 保留原有平台邀请码行为。
+	var organizationIntent *OrganizationRegistrationIntent
 	var invitationRedeemCode *RedeemCode
-	if s.settingService != nil && s.settingService.IsInvitationCodeEnabled(ctx) {
+	if s.organizationService != nil {
+		var err error
+		organizationIntent, err = s.organizationService.ResolveRegistrationIntent(
+			ctx,
+			organizationName,
+			invitationCode,
+			s.settingService.IsInvitationCodeEnabled(ctx),
+		)
+		if err != nil {
+			return "", nil, err
+		}
+	} else if strings.TrimSpace(organizationName) != "" {
+		return "", nil, ErrServiceUnavailable
+	} else if s.settingService.IsInvitationCodeEnabled(ctx) {
 		if invitationCode == "" {
 			return "", nil, ErrInvitationCodeRequired
 		}
@@ -245,17 +278,32 @@ func (s *AuthService) RegisterWithVerification(ctx context.Context, email, passw
 		Status:       StatusActive,
 	}
 
-	if err := s.createUserAndClaimInvitation(ctx, user, invitationRedeemCode); err != nil {
+	var createErr error
+	if organizationIntent != nil {
+		createErr = s.createUserAndCompleteOrganizationRegistration(
+			ctx,
+			user,
+			organizationIntent,
+			s.createUserWithRegistrationEmailGuard,
+		)
+	} else {
+		createErr = s.createUserAndClaimInvitation(ctx, user, invitationRedeemCode)
+	}
+	if createErr != nil {
 		// 优先检查邮箱冲突错误（竞态条件下可能发生）
 		switch {
-		case errors.Is(err, ErrEmailExists):
+		case errors.Is(createErr, ErrEmailExists):
 			return "", nil, ErrEmailExists
-		case errors.Is(err, ErrEmailDomainRegistrationLimit):
+		case errors.Is(createErr, ErrEmailDomainRegistrationLimit):
 			return "", nil, ErrEmailDomainRegistrationLimit
-		case errors.Is(err, ErrInvitationCodeInvalid):
+		case errors.Is(createErr, ErrInvitationCodeInvalid):
 			return "", nil, ErrInvitationCodeInvalid
+		case errors.Is(createErr, ErrOrganizationNameInvalid),
+			errors.Is(createErr, ErrOrganizationRegistrationConflict),
+			errors.Is(createErr, ErrUserAlreadyInOrganization):
+			return "", nil, createErr
 		default:
-			logger.LegacyPrintf("service.auth", "[Auth] Database error creating user: %v", err)
+			logger.LegacyPrintf("service.auth", "[Auth] Database error creating user: %v", createErr)
 			return "", nil, ErrServiceUnavailable
 		}
 	}
@@ -682,17 +730,30 @@ func (s *AuthService) canBypassRegistrationDisabledForOAuth(ctx context.Context,
 // affiliateCode 用于邀请返利绑定，仅在新用户注册时使用。
 // signupSource 标识来源渠道（"dingtalk"/"linuxdo"/"wechat"/"oidc" 等），仅用于豁免检查。
 func (s *AuthService) LoginOrRegisterOAuthWithTokenPair(ctx context.Context, email, username, invitationCode, affiliateCode, signupSource string) (*TokenPair, *User, error) {
-	return s.loginOrRegisterOAuthWithTokenPair(ctx, email, username, invitationCode, affiliateCode, "", signupSource)
+	return s.loginOrRegisterOAuthWithTokenPair(ctx, email, username, invitationCode, affiliateCode, "", "", signupSource)
 }
 
 // LoginOrRegisterOAuthWithTokenPairAndPromoCode behaves like
 // LoginOrRegisterOAuthWithTokenPair and applies promoCode only when a new user
 // is created.
 func (s *AuthService) LoginOrRegisterOAuthWithTokenPairAndPromoCode(ctx context.Context, email, username, invitationCode, affiliateCode, promoCode, signupSource string) (*TokenPair, *User, error) {
-	return s.loginOrRegisterOAuthWithTokenPair(ctx, email, username, invitationCode, affiliateCode, promoCode, signupSource)
+	return s.loginOrRegisterOAuthWithTokenPair(ctx, email, username, invitationCode, affiliateCode, promoCode, "", signupSource)
 }
 
-func (s *AuthService) loginOrRegisterOAuthWithTokenPair(ctx context.Context, email, username, invitationCode, affiliateCode, promoCode, signupSource string) (*TokenPair, *User, error) {
+func (s *AuthService) LoginOrRegisterOAuthWithTokenPairAndOrganization(
+	ctx context.Context,
+	email string,
+	username string,
+	invitationCode string,
+	affiliateCode string,
+	promoCode string,
+	organizationName string,
+	signupSource string,
+) (*TokenPair, *User, error) {
+	return s.loginOrRegisterOAuthWithTokenPair(ctx, email, username, invitationCode, affiliateCode, promoCode, organizationName, signupSource)
+}
+
+func (s *AuthService) loginOrRegisterOAuthWithTokenPair(ctx context.Context, email, username, invitationCode, affiliateCode, promoCode, organizationName, signupSource string) (*TokenPair, *User, error) {
 	// 检查 refreshTokenCache 是否可用
 	if s.refreshTokenCache == nil {
 		return nil, nil, errors.New("refresh token cache not configured")
@@ -716,13 +777,32 @@ func (s *AuthService) loginOrRegisterOAuthWithTokenPair(ctx context.Context, ema
 	if err != nil {
 		if errors.Is(err, ErrUserNotFound) {
 			// OAuth 首次登录视为注册
-			if s.settingService == nil || (!s.settingService.IsRegistrationEnabled(ctx) && !s.canBypassRegistrationDisabledForOAuth(ctx, signupSource)) {
+			allowRegistrationBypass := strings.TrimSpace(organizationName) == "" &&
+				strings.TrimSpace(invitationCode) == "" &&
+				s.canBypassRegistrationDisabledForOAuth(ctx, signupSource)
+			if s.settingService == nil || (!s.settingService.IsRegistrationEnabled(ctx) && !allowRegistrationBypass) {
 				return nil, nil, ErrRegDisabled
 			}
 
-			// 检查是否需要邀请码
+			// 解析组织注册意图；未装配组织模块时保留原有平台邀请码流程。
+			var organizationIntent *OrganizationRegistrationIntent
 			var invitationRedeemCode *RedeemCode
-			if s.settingService != nil && s.settingService.IsInvitationCodeEnabled(ctx) {
+			if s.organizationService != nil {
+				organizationIntent, err = s.organizationService.ResolveRegistrationIntent(
+					ctx,
+					organizationName,
+					invitationCode,
+					s.settingService.IsInvitationCodeEnabled(ctx),
+				)
+				if errors.Is(err, ErrInvitationCodeRequired) {
+					return nil, nil, ErrOAuthInvitationRequired
+				}
+				if err != nil {
+					return nil, nil, err
+				}
+			} else if strings.TrimSpace(organizationName) != "" {
+				return nil, nil, ErrServiceUnavailable
+			} else if s.settingService != nil && s.settingService.IsInvitationCodeEnabled(ctx) {
 				if invitationCode == "" {
 					return nil, nil, ErrOAuthInvitationRequired
 				}
@@ -769,7 +849,30 @@ func (s *AuthService) loginOrRegisterOAuthWithTokenPair(ctx context.Context, ema
 				SignupSource: signupSource,
 			}
 
-			if s.entClient != nil && invitationRedeemCode != nil {
+			if organizationIntent != nil {
+				if err := s.createUserAndCompleteOrganizationRegistration(
+					ctx,
+					newUser,
+					organizationIntent,
+					s.userRepo.Create,
+				); err != nil {
+					if errors.Is(err, ErrEmailExists) {
+						user, err = s.userRepo.GetByEmail(ctx, email)
+						if err != nil {
+							return nil, nil, ErrServiceUnavailable
+						}
+					} else {
+						return nil, nil, err
+					}
+				} else {
+					user = newUser
+					created = true
+					s.postAuthUserBootstrap(ctx, user, signupSource, false)
+					s.assignSubscriptions(ctx, user.ID, grantPlan.Subscriptions, "auto assigned by signup defaults")
+					_ = s.snapshotPlatformQuotaDefaults(ctx, user.ID, &grantPlan)
+					s.bindOAuthAffiliate(ctx, user.ID, affiliateCode)
+				}
+			} else if s.entClient != nil && invitationRedeemCode != nil {
 				tx, err := s.entClient.Tx(ctx)
 				if err != nil {
 					logger.LegacyPrintf("service.auth", "[Auth] Failed to begin transaction for oauth registration: %v", err)

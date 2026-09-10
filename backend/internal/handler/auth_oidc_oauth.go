@@ -147,6 +147,7 @@ func (h *AuthHandler) OIDCOAuthStart(c *gin.Context) {
 	intent := normalizeOAuthIntent(c.Query("intent"))
 	oidcSetCookie(c, oidcOAuthIntentCookieName, encodeCookieValue(intent), oidcOAuthCookieMaxAgeSec, secureCookie)
 	captureOAuthPromoCode(c, secureCookie)
+	captureOAuthOrganizationRegistration(c, secureCookie)
 	setOAuthPendingBrowserCookie(c, browserSessionKey, secureCookie)
 	clearOAuthPendingSessionCookie(c, secureCookie)
 	if intent == oauthIntentBindCurrentUser {
@@ -231,6 +232,7 @@ func (h *AuthHandler) OIDCOAuthCallback(c *gin.Context) {
 		oidcClearCookie(c, oidcOAuthIntentCookieName, secureCookie)
 		oidcClearCookie(c, oidcOAuthBindUserCookieName, secureCookie)
 		clearOAuthPromoCodeCookie(c, secureCookie)
+		clearOAuthOrganizationRegistration(c, secureCookie)
 	}()
 
 	expectedState, err := readCookieDecoded(c, oidcOAuthStateCookieName)
@@ -605,7 +607,8 @@ func (h *AuthHandler) createOIDCOAuthChoicePendingSession(
 }
 
 type completeOIDCOAuthRequest struct {
-	InvitationCode   string `json:"invitation_code" binding:"required"`
+	InvitationCode   string `json:"invitation_code,omitempty"`
+	OrganizationName string `json:"organization_name,omitempty"`
 	AffCode          string `json:"aff_code,omitempty"`
 	AdoptDisplayName *bool  `json:"adopt_display_name,omitempty"`
 	AdoptAvatar      *bool  `json:"adopt_avatar,omitempty"`
@@ -690,13 +693,15 @@ func (h *AuthHandler) CompleteOIDCOAuthRegistration(c *gin.Context) {
 		response.ErrorFrom(c, err)
 		return
 	}
-	tokenPair, user, err := h.authService.LoginOrRegisterOAuthWithTokenPairAndPromoCode(
+	organizationName, invitationCode := pendingOAuthRegistrationValues(session, req.OrganizationName, req.InvitationCode)
+	tokenPair, user, err := h.authService.LoginOrRegisterOAuthWithTokenPairAndOrganization(
 		c.Request.Context(),
 		email,
 		username,
-		req.InvitationCode,
+		invitationCode,
 		req.AffCode,
 		pendingOAuthPromoCode(session),
+		organizationName,
 		"oidc",
 	)
 	if err != nil {
@@ -1241,6 +1246,10 @@ func (h *AuthHandler) tryOIDCVerifiedEmailFastPath(
 		return false
 	}
 	if h.settingSvc.IsInvitationCodeEnabled(ctx) {
+		return false
+	}
+	if readOAuthRegistrationCookie(c, oauthOrganizationNameCookie) != "" ||
+		readOAuthRegistrationCookie(c, oauthInvitationCodeCookie) != "" {
 		return false
 	}
 	if err := h.ensureBackendModeAllowsNewUserLogin(ctx); err != nil {

@@ -57,6 +57,7 @@ type RegisterRequest struct {
 	PromoCode             string `json:"promo_code"`      // 注册优惠码
 	InvitationCode        string `json:"invitation_code"` // 邀请码
 	AffCode               string `json:"aff_code"`        // 邀请返利码
+	OrganizationName      string `json:"organization_name"`
 }
 
 // SendVerifyCodeRequest 发送验证码请求
@@ -117,6 +118,10 @@ func (h *AuthHandler) respondWithTokenPair(c *gin.Context, user *service.User) {
 
 func respondWithTokenPair(c *gin.Context, authService *service.AuthService, user *service.User) {
 	if err := ensureLoginUserActive(user); err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+	if err := authService.AttachOrganizationSummary(c.Request.Context(), user); err != nil {
 		response.ErrorFrom(c, err)
 		return
 	}
@@ -190,7 +195,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	_, user, err := h.authService.RegisterWithVerification(
+	_, user, err := h.authService.RegisterWithOrganizationVerification(
 		c.Request.Context(),
 		req.Email,
 		req.Password,
@@ -198,6 +203,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		req.PromoCode,
 		req.InvitationCode,
 		req.AffCode,
+		req.OrganizationName,
 	)
 	if err != nil {
 		response.ErrorFrom(c, err)
@@ -433,6 +439,10 @@ func (h *AuthHandler) GetCurrentUser(c *gin.Context) {
 		response.ErrorFrom(c, err)
 		return
 	}
+	if err := h.authService.AttachOrganizationSummary(c.Request.Context(), user); err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
 
 	identities, err := h.userService.GetProfileIdentitySummaries(c.Request.Context(), subject.UserID, user)
 	if err != nil {
@@ -534,20 +544,12 @@ type ValidateInvitationCodeRequest struct {
 type ValidateInvitationCodeResponse struct {
 	Valid     bool   `json:"valid"`
 	ErrorCode string `json:"error_code,omitempty"`
+	Type      string `json:"type,omitempty"`
 }
 
 // ValidateInvitationCode 验证邀请码（公开接口，注册前调用）
 // POST /api/v1/auth/validate-invitation-code
 func (h *AuthHandler) ValidateInvitationCode(c *gin.Context) {
-	// 检查邀请码功能是否启用
-	if h.settingSvc == nil || !h.settingSvc.IsInvitationCodeEnabled(c.Request.Context()) {
-		response.Success(c, ValidateInvitationCodeResponse{
-			Valid:     false,
-			ErrorCode: "INVITATION_CODE_DISABLED",
-		})
-		return
-	}
-
 	var req ValidateInvitationCodeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.BadRequest(c, "Invalid request: "+err.Error())
@@ -573,16 +575,39 @@ func (h *AuthHandler) ValidateInvitationCode(c *gin.Context) {
 		return
 	}
 
+	invitationType := "platform"
+	if redeemCode.OrganizationID != nil {
+		invitationType = "organization"
+	}
+	if redeemCode.IsExpired() {
+		response.Success(c, ValidateInvitationCodeResponse{
+			Valid:     false,
+			ErrorCode: "INVITATION_CODE_EXPIRED",
+			Type:      invitationType,
+		})
+		return
+	}
+
 	if redeemCode.Status != service.StatusUnused {
 		response.Success(c, ValidateInvitationCodeResponse{
 			Valid:     false,
 			ErrorCode: "INVITATION_CODE_USED",
+			Type:      invitationType,
+		})
+		return
+	}
+	if invitationType == "platform" && (h.settingSvc == nil || !h.settingSvc.IsInvitationCodeEnabled(c.Request.Context())) {
+		response.Success(c, ValidateInvitationCodeResponse{
+			Valid:     false,
+			ErrorCode: "INVITATION_CODE_DISABLED",
+			Type:      invitationType,
 		})
 		return
 	}
 
 	response.Success(c, ValidateInvitationCodeResponse{
 		Valid: true,
+		Type:  invitationType,
 	})
 }
 

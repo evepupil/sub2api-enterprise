@@ -27,6 +27,8 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/group"
 	"github.com/Wei-Shaw/sub2api/ent/idempotencyrecord"
 	"github.com/Wei-Shaw/sub2api/ent/identityadoptiondecision"
+	"github.com/Wei-Shaw/sub2api/ent/organization"
+	"github.com/Wei-Shaw/sub2api/ent/organizationmember"
 	"github.com/Wei-Shaw/sub2api/ent/paymentauditlog"
 	"github.com/Wei-Shaw/sub2api/ent/paymentorder"
 	"github.com/Wei-Shaw/sub2api/ent/paymentproviderinstance"
@@ -619,6 +621,60 @@ func (f TraverseIdentityAdoptionDecision) Traverse(ctx context.Context, q ent.Qu
 	return fmt.Errorf("unexpected query type %T. expect *ent.IdentityAdoptionDecisionQuery", q)
 }
 
+// The OrganizationFunc type is an adapter to allow the use of ordinary function as a Querier.
+type OrganizationFunc func(context.Context, *ent.OrganizationQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f OrganizationFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.OrganizationQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.OrganizationQuery", q)
+}
+
+// The TraverseOrganization type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseOrganization func(context.Context, *ent.OrganizationQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseOrganization) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseOrganization) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.OrganizationQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.OrganizationQuery", q)
+}
+
+// The OrganizationMemberFunc type is an adapter to allow the use of ordinary function as a Querier.
+type OrganizationMemberFunc func(context.Context, *ent.OrganizationMemberQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f OrganizationMemberFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.OrganizationMemberQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.OrganizationMemberQuery", q)
+}
+
+// The TraverseOrganizationMember type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseOrganizationMember func(context.Context, *ent.OrganizationMemberQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseOrganizationMember) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseOrganizationMember) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.OrganizationMemberQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.OrganizationMemberQuery", q)
+}
+
 // The PaymentAuditLogFunc type is an adapter to allow the use of ordinary function as a Querier.
 type PaymentAuditLogFunc func(context.Context, *ent.PaymentAuditLogQuery) (ent.Value, error)
 
@@ -1200,6 +1256,10 @@ func NewQuery(q ent.Query) (Query, error) {
 		return &query[*ent.IdempotencyRecordQuery, predicate.IdempotencyRecord, idempotencyrecord.OrderOption]{typ: ent.TypeIdempotencyRecord, tq: q}, nil
 	case *ent.IdentityAdoptionDecisionQuery:
 		return &query[*ent.IdentityAdoptionDecisionQuery, predicate.IdentityAdoptionDecision, identityadoptiondecision.OrderOption]{typ: ent.TypeIdentityAdoptionDecision, tq: q}, nil
+	case *ent.OrganizationQuery:
+		return &query[*ent.OrganizationQuery, predicate.Organization, organization.OrderOption]{typ: ent.TypeOrganization, tq: q}, nil
+	case *ent.OrganizationMemberQuery:
+		return &query[*ent.OrganizationMemberQuery, predicate.OrganizationMember, organizationmember.OrderOption]{typ: ent.TypeOrganizationMember, tq: q}, nil
 	case *ent.PaymentAuditLogQuery:
 		return &query[*ent.PaymentAuditLogQuery, predicate.PaymentAuditLog, paymentauditlog.OrderOption]{typ: ent.TypePaymentAuditLog, tq: q}, nil
 	case *ent.PaymentOrderQuery:

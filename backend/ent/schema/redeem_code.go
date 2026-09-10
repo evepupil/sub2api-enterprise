@@ -70,6 +70,9 @@ func (RedeemCode) Fields() []ent.Field {
 		field.Int64("group_id").
 			Optional().
 			Nillable(),
+		field.Int64("organization_id").
+			Optional().
+			Nillable(),
 		field.Int("validity_days").
 			Default(30),
 	}
@@ -85,6 +88,10 @@ func (RedeemCode) Edges() []ent.Edge {
 			Ref("redeem_codes").
 			Field("group_id").
 			Unique(),
+		edge.From("organization", Organization.Type).
+			Ref("invitations").
+			Field("organization_id").
+			Unique(),
 	}
 }
 
@@ -94,6 +101,7 @@ func (RedeemCode) Indexes() []ent.Index {
 		index.Fields("status"),
 		index.Fields("used_by"),
 		index.Fields("group_id"),
+		index.Fields("organization_id"),
 		index.Fields("expires_at"),
 	}
 }

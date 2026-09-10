@@ -15,6 +15,8 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/apikey"
 	"github.com/Wei-Shaw/sub2api/ent/authidentity"
 	"github.com/Wei-Shaw/sub2api/ent/group"
+	"github.com/Wei-Shaw/sub2api/ent/organization"
+	"github.com/Wei-Shaw/sub2api/ent/organizationmember"
 	"github.com/Wei-Shaw/sub2api/ent/paymentorder"
 	"github.com/Wei-Shaw/sub2api/ent/pendingauthsession"
 	"github.com/Wei-Shaw/sub2api/ent/promocodeusage"
@@ -563,6 +565,44 @@ func (_c *UserCreate) AddPlatformQuotas(v ...*UserPlatformQuota) *UserCreate {
 	return _c.AddPlatformQuotaIDs(ids...)
 }
 
+// SetOwnedOrganizationID sets the "owned_organization" edge to the Organization entity by ID.
+func (_c *UserCreate) SetOwnedOrganizationID(id int64) *UserCreate {
+	_c.mutation.SetOwnedOrganizationID(id)
+	return _c
+}
+
+// SetNillableOwnedOrganizationID sets the "owned_organization" edge to the Organization entity by ID if the given value is not nil.
+func (_c *UserCreate) SetNillableOwnedOrganizationID(id *int64) *UserCreate {
+	if id != nil {
+		_c = _c.SetOwnedOrganizationID(*id)
+	}
+	return _c
+}
+
+// SetOwnedOrganization sets the "owned_organization" edge to the Organization entity.
+func (_c *UserCreate) SetOwnedOrganization(v *Organization) *UserCreate {
+	return _c.SetOwnedOrganizationID(v.ID)
+}
+
+// SetOrganizationMembershipID sets the "organization_membership" edge to the OrganizationMember entity by ID.
+func (_c *UserCreate) SetOrganizationMembershipID(id int64) *UserCreate {
+	_c.mutation.SetOrganizationMembershipID(id)
+	return _c
+}
+
+// SetNillableOrganizationMembershipID sets the "organization_membership" edge to the OrganizationMember entity by ID if the given value is not nil.
+func (_c *UserCreate) SetNillableOrganizationMembershipID(id *int64) *UserCreate {
+	if id != nil {
+		_c = _c.SetOrganizationMembershipID(*id)
+	}
+	return _c
+}
+
+// SetOrganizationMembership sets the "organization_membership" edge to the OrganizationMember entity.
+func (_c *UserCreate) SetOrganizationMembership(v *OrganizationMember) *UserCreate {
+	return _c.SetOrganizationMembershipID(v.ID)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_c *UserCreate) Mutation() *UserMutation {
 	return _c.mutation
@@ -1098,6 +1138,38 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(userplatformquota.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.OwnedOrganizationIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.OwnedOrganizationTable,
+			Columns: []string{user.OwnedOrganizationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(organization.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.OrganizationMembershipIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.OrganizationMembershipTable,
+			Columns: []string{user.OrganizationMembershipColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(organizationmember.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {

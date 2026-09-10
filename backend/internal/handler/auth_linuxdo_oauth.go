@@ -114,6 +114,7 @@ func (h *AuthHandler) LinuxDoOAuthStart(c *gin.Context) {
 	intent := normalizeOAuthIntent(c.Query("intent"))
 	setCookie(c, linuxDoOAuthIntentCookieName, encodeCookieValue(intent), linuxDoOAuthCookieMaxAgeSec, secureCookie)
 	captureOAuthPromoCode(c, secureCookie)
+	captureOAuthOrganizationRegistration(c, secureCookie)
 	setOAuthPendingBrowserCookie(c, browserSessionKey, secureCookie)
 	clearOAuthPendingSessionCookie(c, secureCookie)
 	if intent == oauthIntentBindCurrentUser {
@@ -187,6 +188,7 @@ func (h *AuthHandler) LinuxDoOAuthCallback(c *gin.Context) {
 		clearCookie(c, linuxDoOAuthIntentCookieName, secureCookie)
 		clearCookie(c, linuxDoOAuthBindUserCookieName, secureCookie)
 		clearOAuthPromoCodeCookie(c, secureCookie)
+		clearOAuthOrganizationRegistration(c, secureCookie)
 	}()
 
 	expectedState, err := readCookieDecoded(c, linuxDoOAuthStateCookieName)
@@ -329,7 +331,9 @@ func (h *AuthHandler) LinuxDoOAuthCallback(c *gin.Context) {
 	}
 	emailVerificationRequired := h != nil && h.authService != nil && h.authService.IsEmailVerifyEnabled(c.Request.Context())
 	forceEmailOnSignup := h.isForceEmailOnThirdPartySignup(c.Request.Context())
-	if compatEmailUser == nil && !emailVerificationRequired && !forceEmailOnSignup {
+	hasOrganizationRegistration := readOAuthRegistrationCookie(c, oauthOrganizationNameCookie) != "" ||
+		readOAuthRegistrationCookie(c, oauthInvitationCodeCookie) != ""
+	if compatEmailUser == nil && !emailVerificationRequired && !forceEmailOnSignup && !hasOrganizationRegistration {
 		if err := h.ensureBackendModeAllowsNewUserLogin(c.Request.Context()); err != nil {
 			redirectOAuthError(c, frontendCallback, "session_error", infraerrors.Reason(err), infraerrors.Message(err))
 			return
@@ -502,7 +506,8 @@ func (h *AuthHandler) createLinuxDoOAuthChoicePendingSession(
 }
 
 type completeLinuxDoOAuthRequest struct {
-	InvitationCode   string `json:"invitation_code" binding:"required"`
+	InvitationCode   string `json:"invitation_code,omitempty"`
+	OrganizationName string `json:"organization_name,omitempty"`
 	AffCode          string `json:"aff_code,omitempty"`
 	AdoptDisplayName *bool  `json:"adopt_display_name,omitempty"`
 	AdoptAvatar      *bool  `json:"adopt_avatar,omitempty"`
@@ -587,13 +592,15 @@ func (h *AuthHandler) CompleteLinuxDoOAuthRegistration(c *gin.Context) {
 		response.ErrorFrom(c, err)
 		return
 	}
-	tokenPair, user, err := h.authService.LoginOrRegisterOAuthWithTokenPairAndPromoCode(
+	organizationName, invitationCode := pendingOAuthRegistrationValues(session, req.OrganizationName, req.InvitationCode)
+	tokenPair, user, err := h.authService.LoginOrRegisterOAuthWithTokenPairAndOrganization(
 		c.Request.Context(),
 		email,
 		username,
-		req.InvitationCode,
+		invitationCode,
 		req.AffCode,
 		pendingOAuthPromoCode(session),
+		organizationName,
 		"linuxdo",
 	)
 	if err != nil {

@@ -66,6 +66,7 @@ type User struct {
 
 	APIKeys       []APIKey
 	Subscriptions []UserSubscription
+	Organization  *OrganizationSummary
 }
 
 func (u *User) IsAdmin() bool {

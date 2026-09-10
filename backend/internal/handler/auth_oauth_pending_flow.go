@@ -33,11 +33,15 @@ const (
 	oauthPendingSessionCookiePath = "/api/v1/auth/oauth"
 	oauthPendingSessionCookieName = "oauth_pending_session"
 	oauthPromoCodeCookieName      = "oauth_promo_code"
+	oauthOrganizationNameCookie   = "oauth_organization_name"
+	oauthInvitationCodeCookie     = "oauth_invitation_code"
 	oauthPendingCookieMaxAgeSec   = 10 * 60
 	oauthPendingChoiceStep        = "choose_account_action_required"
 
 	oauthCompletionResponseKey = "completion_response"
 	oauthPromoCodeStateKey     = "promo_code"
+	oauthOrganizationNameKey   = "organization_name"
+	oauthInvitationCodeKey     = "invitation_code"
 )
 
 var pendingOAuthCreateAccountPreCommitHook func(context.Context, *dbent.PendingAuthSession) error
@@ -73,6 +77,7 @@ type createPendingOAuthAccountRequest struct {
 	TencentCaptchaTicket  string `json:"tencent_captcha_ticket,omitempty"`
 	TencentCaptchaRandstr string `json:"tencent_captcha_randstr,omitempty"`
 	InvitationCode        string `json:"invitation_code,omitempty"`
+	OrganizationName      string `json:"organization_name,omitempty"`
 	AffCode               string `json:"aff_code,omitempty"`
 	AdoptDisplayName      *bool  `json:"adopt_display_name,omitempty"`
 	AdoptAvatar           *bool  `json:"adopt_avatar,omitempty"`
@@ -197,6 +202,58 @@ func clearOAuthPromoCodeCookie(c *gin.Context, secure bool) {
 	})
 }
 
+func captureOAuthOrganizationRegistration(c *gin.Context, secure bool) {
+	if c == nil {
+		return
+	}
+	setOAuthRegistrationCookie(c, oauthOrganizationNameCookie, strings.TrimSpace(c.Query("organization_name")), 400, secure)
+	setOAuthRegistrationCookie(c, oauthInvitationCodeCookie, strings.TrimSpace(c.Query("invitation_code")), 128, secure)
+}
+
+func setOAuthRegistrationCookie(c *gin.Context, name, value string, maxLength int, secure bool) {
+	if value == "" || len(value) > maxLength {
+		clearOAuthRegistrationCookie(c, name, secure)
+		return
+	}
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     name,
+		Value:    encodeCookieValue(value),
+		Path:     oauthPendingBrowserCookiePath,
+		MaxAge:   oauthPendingCookieMaxAgeSec,
+		HttpOnly: true,
+		Secure:   secure,
+		SameSite: http.SameSiteLaxMode,
+	})
+}
+
+func clearOAuthRegistrationCookie(c *gin.Context, name string, secure bool) {
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     name,
+		Value:    "",
+		Path:     oauthPendingBrowserCookiePath,
+		MaxAge:   -1,
+		HttpOnly: true,
+		Secure:   secure,
+		SameSite: http.SameSiteLaxMode,
+	})
+}
+
+func clearOAuthOrganizationRegistration(c *gin.Context, secure bool) {
+	clearOAuthRegistrationCookie(c, oauthOrganizationNameCookie, secure)
+	clearOAuthRegistrationCookie(c, oauthInvitationCodeCookie, secure)
+}
+
+func readOAuthRegistrationCookie(c *gin.Context, name string) string {
+	if c == nil {
+		return ""
+	}
+	value, err := readCookieDecoded(c, name)
+	if err != nil {
+		return ""
+	}
+	return strings.TrimSpace(value)
+}
+
 func readOAuthPromoCode(c *gin.Context) string {
 	if c == nil {
 		return ""
@@ -213,6 +270,32 @@ func pendingOAuthPromoCode(session *dbent.PendingAuthSession) string {
 		return ""
 	}
 	return pendingSessionStringValue(session.LocalFlowState, oauthPromoCodeStateKey)
+}
+
+func pendingOAuthOrganizationName(session *dbent.PendingAuthSession) string {
+	if session == nil {
+		return ""
+	}
+	return pendingSessionStringValue(session.LocalFlowState, oauthOrganizationNameKey)
+}
+
+func pendingOAuthInvitationCode(session *dbent.PendingAuthSession) string {
+	if session == nil {
+		return ""
+	}
+	return pendingSessionStringValue(session.LocalFlowState, oauthInvitationCodeKey)
+}
+
+func pendingOAuthRegistrationValues(session *dbent.PendingAuthSession, organizationName, invitationCode string) (string, string) {
+	organizationName = strings.TrimSpace(organizationName)
+	if organizationName == "" {
+		organizationName = pendingOAuthOrganizationName(session)
+	}
+	invitationCode = strings.TrimSpace(invitationCode)
+	if invitationCode == "" {
+		invitationCode = pendingOAuthInvitationCode(session)
+	}
+	return organizationName, invitationCode
 }
 
 func redirectToFrontendCallback(c *gin.Context, frontendCallback string) {
@@ -242,6 +325,12 @@ func (h *AuthHandler) createOAuthPendingSession(c *gin.Context, payload oauthPen
 	}
 	if promoCode := readOAuthPromoCode(c); promoCode != "" {
 		localFlowState[oauthPromoCodeStateKey] = promoCode
+	}
+	if organizationName := readOAuthRegistrationCookie(c, oauthOrganizationNameCookie); organizationName != "" {
+		localFlowState[oauthOrganizationNameKey] = organizationName
+	}
+	if invitationCode := readOAuthRegistrationCookie(c, oauthInvitationCodeCookie); invitationCode != "" {
+		localFlowState[oauthInvitationCodeKey] = invitationCode
 	}
 
 	session, err := svc.CreatePendingSession(c.Request.Context(), service.CreatePendingAuthSessionInput{
@@ -1504,6 +1593,8 @@ func clearOAuthLogoutCookies(c *gin.Context) {
 	clearOAuthPendingSessionCookie(c, secureCookie)
 	clearOAuthPendingBrowserCookie(c, secureCookie)
 	clearOAuthBindAccessTokenCookie(c, secureCookie)
+	clearOAuthPromoCodeCookie(c, secureCookie)
+	clearOAuthOrganizationRegistration(c, secureCookie)
 
 	clearCookie(c, linuxDoOAuthStateCookieName, secureCookie)
 	clearCookie(c, linuxDoOAuthVerifierCookie, secureCookie)
@@ -1766,13 +1857,15 @@ func (h *AuthHandler) createPendingOAuthAccount(c *gin.Context, provider string)
 		return
 	}
 
-	tokenPair, user, err := h.authService.RegisterOAuthEmailAccount(
+	organizationName, invitationCode := pendingOAuthRegistrationValues(session, req.OrganizationName, req.InvitationCode)
+	tokenPair, user, err := h.authService.RegisterOAuthEmailAccountWithOrganization(
 		c.Request.Context(),
 		email,
 		req.Password,
 		strings.TrimSpace(req.VerifyCode),
-		strings.TrimSpace(req.InvitationCode),
+		invitationCode,
 		strings.TrimSpace(session.ProviderType),
+		organizationName,
 	)
 	if err != nil {
 		if errors.Is(err, service.ErrEmailExists) {
@@ -1800,7 +1893,7 @@ func (h *AuthHandler) createPendingOAuthAccount(c *gin.Context, provider string)
 		if rollbackErr := h.authService.RollbackOAuthEmailAccountCreation(
 			c.Request.Context(),
 			user.ID,
-			strings.TrimSpace(req.InvitationCode),
+			invitationCode,
 		); rollbackErr != nil {
 			response.ErrorFrom(c, infraerrors.InternalServer(
 				"PENDING_AUTH_ACCOUNT_ROLLBACK_FAILED",
@@ -1841,12 +1934,13 @@ func (h *AuthHandler) createPendingOAuthAccount(c *gin.Context, provider string)
 		return
 	}
 
-	if err := h.authService.FinalizeOAuthEmailAccount(
+	if err := h.authService.FinalizeOAuthEmailAccountWithOrganization(
 		txCtx,
 		user,
-		strings.TrimSpace(req.InvitationCode),
+		invitationCode,
 		strings.TrimSpace(session.ProviderType),
 		strings.TrimSpace(req.AffCode),
+		organizationName,
 	); err != nil {
 		_ = tx.Rollback()
 		if rollbackCreatedUser(err) {

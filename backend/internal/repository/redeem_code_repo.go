@@ -34,6 +34,7 @@ func (r *redeemCodeRepository) Create(ctx context.Context, code *service.RedeemC
 		SetNillableUsedBy(code.UsedBy).
 		SetNillableUsedAt(code.UsedAt).
 		SetNillableGroupID(code.GroupID).
+		SetNillableOrganizationID(code.OrganizationID).
 		Save(ctx)
 	if err == nil {
 		code.ID = created.ID
@@ -61,6 +62,7 @@ func (r *redeemCodeRepository) CreateBatch(ctx context.Context, codes []service.
 			SetNillableUsedBy(c.UsedBy).
 			SetNillableUsedAt(c.UsedAt).
 			SetNillableGroupID(c.GroupID)
+		b = b.SetNillableOrganizationID(c.OrganizationID)
 		builders = append(builders, b)
 	}
 
@@ -219,6 +221,11 @@ func (r *redeemCodeRepository) Update(ctx context.Context, code *service.RedeemC
 	} else {
 		up.ClearGroupID()
 	}
+	if code.OrganizationID != nil {
+		up.SetOrganizationID(*code.OrganizationID)
+	} else {
+		up.ClearOrganizationID()
+	}
 	if code.ExpiresAt != nil {
 		up.SetExpiresAt(*code.ExpiresAt)
 	} else {
@@ -325,7 +332,11 @@ func (r *redeemCodeRepository) Use(ctx context.Context, id, userID int64) error 
 	now := time.Now()
 	client := clientFromContext(ctx, r.client)
 	affected, err := client.RedeemCode.Update().
-		Where(redeemcode.IDEQ(id), redeemcode.StatusEQ(service.StatusUnused)).
+		Where(
+			redeemcode.IDEQ(id),
+			redeemcode.StatusEQ(service.StatusUnused),
+			redeemcode.Or(redeemcode.ExpiresAtIsNil(), redeemcode.ExpiresAtGT(now)),
+		).
 		SetStatus(service.StatusUsed).
 		SetUsedBy(userID).
 		SetUsedAt(now).
@@ -413,18 +424,19 @@ func redeemCodeEntityToService(m *dbent.RedeemCode) *service.RedeemCode {
 		return nil
 	}
 	out := &service.RedeemCode{
-		ID:           m.ID,
-		Code:         m.Code,
-		Type:         m.Type,
-		Value:        m.Value,
-		Status:       m.Status,
-		UsedBy:       m.UsedBy,
-		UsedAt:       m.UsedAt,
-		Notes:        derefString(m.Notes),
-		CreatedAt:    m.CreatedAt,
-		ExpiresAt:    m.ExpiresAt,
-		GroupID:      m.GroupID,
-		ValidityDays: m.ValidityDays,
+		ID:             m.ID,
+		Code:           m.Code,
+		Type:           m.Type,
+		Value:          m.Value,
+		Status:         m.Status,
+		UsedBy:         m.UsedBy,
+		UsedAt:         m.UsedAt,
+		Notes:          derefString(m.Notes),
+		CreatedAt:      m.CreatedAt,
+		ExpiresAt:      m.ExpiresAt,
+		GroupID:        m.GroupID,
+		OrganizationID: m.OrganizationID,
+		ValidityDays:   m.ValidityDays,
 	}
 	if m.Edges.User != nil {
 		out.User = userEntityToService(m.Edges.User)

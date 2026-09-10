@@ -397,6 +397,26 @@ func (s *RedeemCodeRepoSuite) TestUse_AlreadyUsed() {
 	s.Require().ErrorIs(err, service.ErrRedeemCodeUsed)
 }
 
+func (s *RedeemCodeRepoSuite) TestUse_Expired() {
+	user := s.createUser(uniqueTestValue(s.T(), "expired") + "@example.com")
+	expiresAt := time.Now().Add(-time.Minute)
+	code := &service.RedeemCode{
+		Code:      "EXPIRED-CODE",
+		Type:      service.RedeemTypeInvitation,
+		Status:    service.StatusUnused,
+		ExpiresAt: &expiresAt,
+	}
+	s.Require().NoError(s.repo.Create(s.ctx, code))
+
+	err := s.repo.Use(s.ctx, code.ID, user.ID)
+	s.Require().ErrorIs(err, service.ErrRedeemCodeUsed)
+
+	got, getErr := s.repo.GetByID(s.ctx, code.ID)
+	s.Require().NoError(getErr)
+	s.Require().Equal(service.StatusUnused, got.Status)
+	s.Require().Nil(got.UsedBy)
+}
+
 // --- ListByUser ---
 
 func (s *RedeemCodeRepoSuite) TestListByUser() {

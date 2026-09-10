@@ -13,7 +13,7 @@ func UserFromServiceShallow(u *service.User) *User {
 	if u == nil {
 		return nil
 	}
-	return &User{
+	out := &User{
 		ID:                         u.ID,
 		Email:                      u.Email,
 		Username:                   u.Username,
@@ -34,6 +34,15 @@ func UserFromServiceShallow(u *service.User) *User {
 		RPMLimit:                   u.RPMLimit,
 		DeletedAt:                  u.DeletedAt,
 	}
+	if u.Organization != nil {
+		out.Organization = &OrganizationSummary{
+			ID:        u.Organization.ID,
+			Name:      u.Organization.Name,
+			IsOwner:   u.Organization.IsOwner,
+			CreatedAt: u.Organization.CreatedAt,
+		}
+	}
+	return out
 }
 
 func UserFromService(u *service.User) *User {

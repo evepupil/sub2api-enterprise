@@ -9,6 +9,8 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/Wei-Shaw/sub2api/ent/organization"
+	"github.com/Wei-Shaw/sub2api/ent/organizationmember"
 	"github.com/Wei-Shaw/sub2api/ent/user"
 )
 
@@ -101,11 +103,15 @@ type UserEdges struct {
 	PendingAuthSessions []*PendingAuthSession `json:"pending_auth_sessions,omitempty"`
 	// PlatformQuotas holds the value of the platform_quotas edge.
 	PlatformQuotas []*UserPlatformQuota `json:"platform_quotas,omitempty"`
+	// OwnedOrganization holds the value of the owned_organization edge.
+	OwnedOrganization *Organization `json:"owned_organization,omitempty"`
+	// OrganizationMembership holds the value of the organization_membership edge.
+	OrganizationMembership *OrganizationMember `json:"organization_membership,omitempty"`
 	// UserAllowedGroups holds the value of the user_allowed_groups edge.
 	UserAllowedGroups []*UserAllowedGroup `json:"user_allowed_groups,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [14]bool
+	loadedTypes [16]bool
 }
 
 // APIKeysOrErr returns the APIKeys value or an error if the edge
@@ -225,10 +231,32 @@ func (e UserEdges) PlatformQuotasOrErr() ([]*UserPlatformQuota, error) {
 	return nil, &NotLoadedError{edge: "platform_quotas"}
 }
 
+// OwnedOrganizationOrErr returns the OwnedOrganization value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) OwnedOrganizationOrErr() (*Organization, error) {
+	if e.OwnedOrganization != nil {
+		return e.OwnedOrganization, nil
+	} else if e.loadedTypes[13] {
+		return nil, &NotFoundError{label: organization.Label}
+	}
+	return nil, &NotLoadedError{edge: "owned_organization"}
+}
+
+// OrganizationMembershipOrErr returns the OrganizationMembership value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) OrganizationMembershipOrErr() (*OrganizationMember, error) {
+	if e.OrganizationMembership != nil {
+		return e.OrganizationMembership, nil
+	} else if e.loadedTypes[14] {
+		return nil, &NotFoundError{label: organizationmember.Label}
+	}
+	return nil, &NotLoadedError{edge: "organization_membership"}
+}
+
 // UserAllowedGroupsOrErr returns the UserAllowedGroups value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) UserAllowedGroupsOrErr() ([]*UserAllowedGroup, error) {
-	if e.loadedTypes[13] {
+	if e.loadedTypes[15] {
 		return e.UserAllowedGroups, nil
 	}
 	return nil, &NotLoadedError{edge: "user_allowed_groups"}
@@ -502,6 +530,16 @@ func (_m *User) QueryPendingAuthSessions() *PendingAuthSessionQuery {
 // QueryPlatformQuotas queries the "platform_quotas" edge of the User entity.
 func (_m *User) QueryPlatformQuotas() *UserPlatformQuotaQuery {
 	return NewUserClient(_m.config).QueryPlatformQuotas(_m)
+}
+
+// QueryOwnedOrganization queries the "owned_organization" edge of the User entity.
+func (_m *User) QueryOwnedOrganization() *OrganizationQuery {
+	return NewUserClient(_m.config).QueryOwnedOrganization(_m)
+}
+
+// QueryOrganizationMembership queries the "organization_membership" edge of the User entity.
+func (_m *User) QueryOrganizationMembership() *OrganizationMemberQuery {
+	return NewUserClient(_m.config).QueryOrganizationMembership(_m)
 }
 
 // QueryUserAllowedGroups queries the "user_allowed_groups" edge of the User entity.

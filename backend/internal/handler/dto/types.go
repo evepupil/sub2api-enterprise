@@ -34,8 +34,16 @@ type User struct {
 	// RPMLimit 用户级每分钟请求数上限（0 = 不限制），仅在所用分组未设置 rpm_limit 时作为兜底生效。
 	RPMLimit int `json:"rpm_limit"`
 
-	APIKeys       []APIKey           `json:"api_keys,omitempty"`
-	Subscriptions []UserSubscription `json:"subscriptions,omitempty"`
+	APIKeys       []APIKey             `json:"api_keys,omitempty"`
+	Subscriptions []UserSubscription   `json:"subscriptions,omitempty"`
+	Organization  *OrganizationSummary `json:"organization,omitempty"`
+}
+
+type OrganizationSummary struct {
+	ID        int64     `json:"id"`
+	Name      string    `json:"name"`
+	IsOwner   bool      `json:"is_owner"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 // AdminUser 是管理员接口使用的 user DTO（包含敏感/内部字段）。

@@ -110,10 +110,33 @@ func (s *AuthService) RegisterOAuthEmailAccount(
 	invitationCode string,
 	signupSource string,
 ) (*TokenPair, *User, error) {
+	return s.RegisterOAuthEmailAccountWithOrganization(
+		ctx,
+		email,
+		password,
+		verifyCode,
+		invitationCode,
+		signupSource,
+		"",
+	)
+}
+
+func (s *AuthService) RegisterOAuthEmailAccountWithOrganization(
+	ctx context.Context,
+	email string,
+	password string,
+	verifyCode string,
+	invitationCode string,
+	signupSource string,
+	organizationName string,
+) (*TokenPair, *User, error) {
 	if s == nil {
 		return nil, nil, ErrServiceUnavailable
 	}
-	if s.settingService == nil || (!s.settingService.IsRegistrationEnabled(ctx) && !s.canBypassRegistrationDisabledForOAuth(ctx, signupSource)) {
+	allowRegistrationBypass := strings.TrimSpace(organizationName) == "" &&
+		strings.TrimSpace(invitationCode) == "" &&
+		s.canBypassRegistrationDisabledForOAuth(ctx, signupSource)
+	if s.settingService == nil || (!s.settingService.IsRegistrationEnabled(ctx) && !allowRegistrationBypass) {
 		return nil, nil, ErrRegDisabled
 	}
 
@@ -126,7 +149,7 @@ func (s *AuthService) RegisterOAuthEmailAccount(
 		return nil, nil, err
 	}
 
-	if _, err := s.validateOAuthRegistrationInvitation(ctx, invitationCode); err != nil {
+	if err := s.validateOAuthOrganizationRegistration(ctx, organizationName, invitationCode); err != nil {
 		slog.Error("oauth email register: invitation failed", "email", email, "error", err.Error())
 		return nil, nil, err
 	}
@@ -192,10 +215,31 @@ func (s *AuthService) RegisterVerifiedOAuthEmailAccount(
 	invitationCode string,
 	signupSource string,
 ) (*TokenPair, *User, error) {
+	return s.RegisterVerifiedOAuthEmailAccountWithOrganization(
+		ctx,
+		email,
+		password,
+		invitationCode,
+		signupSource,
+		"",
+	)
+}
+
+func (s *AuthService) RegisterVerifiedOAuthEmailAccountWithOrganization(
+	ctx context.Context,
+	email string,
+	password string,
+	invitationCode string,
+	signupSource string,
+	organizationName string,
+) (*TokenPair, *User, error) {
 	if s == nil {
 		return nil, nil, ErrServiceUnavailable
 	}
-	if s.settingService == nil || (!s.settingService.IsRegistrationEnabled(ctx) && !s.canBypassRegistrationDisabledForOAuth(ctx, signupSource)) {
+	allowRegistrationBypass := strings.TrimSpace(organizationName) == "" &&
+		strings.TrimSpace(invitationCode) == "" &&
+		s.canBypassRegistrationDisabledForOAuth(ctx, signupSource)
+	if s.settingService == nil || (!s.settingService.IsRegistrationEnabled(ctx) && !allowRegistrationBypass) {
 		return nil, nil, ErrRegDisabled
 	}
 
@@ -212,7 +256,7 @@ func (s *AuthService) RegisterVerifiedOAuthEmailAccount(
 	if strings.TrimSpace(password) == "" {
 		return nil, nil, infraerrors.BadRequest("PASSWORD_REQUIRED", "password is required")
 	}
-	if _, err := s.validateOAuthRegistrationInvitation(ctx, invitationCode); err != nil {
+	if err := s.validateOAuthOrganizationRegistration(ctx, organizationName, invitationCode); err != nil {
 		return nil, nil, err
 	}
 
@@ -278,18 +322,53 @@ func (s *AuthService) FinalizeOAuthEmailAccount(
 	signupSource string,
 	affiliateCode string,
 ) error {
+	return s.FinalizeOAuthEmailAccountWithOrganization(
+		ctx,
+		user,
+		invitationCode,
+		signupSource,
+		affiliateCode,
+		"",
+	)
+}
+
+func (s *AuthService) FinalizeOAuthEmailAccountWithOrganization(
+	ctx context.Context,
+	user *User,
+	invitationCode string,
+	signupSource string,
+	affiliateCode string,
+	organizationName string,
+) error {
 	if s == nil || user == nil || user.ID <= 0 {
 		return ErrServiceUnavailable
 	}
 
 	signupSource = normalizeOAuthSignupSource(signupSource)
-	invitationRedeemCode, err := s.validateOAuthRegistrationInvitation(ctx, invitationCode)
-	if err != nil {
-		return err
-	}
-	if invitationRedeemCode != nil {
-		if err := s.useOAuthRegistrationInvitation(ctx, invitationRedeemCode.ID, user.ID); err != nil {
-			return ErrInvitationCodeInvalid
+	if s.organizationService != nil {
+		intent, err := s.organizationService.ResolveRegistrationIntent(
+			ctx,
+			organizationName,
+			invitationCode,
+			s.settingService != nil && s.settingService.IsInvitationCodeEnabled(ctx),
+		)
+		if err != nil {
+			return err
+		}
+		summary, err := s.organizationService.CompleteRegistration(ctx, user.ID, intent)
+		if err != nil {
+			return err
+		}
+		user.Organization = summary
+	} else {
+		invitationRedeemCode, err := s.validateOAuthRegistrationInvitation(ctx, invitationCode)
+		if err != nil {
+			return err
+		}
+		if invitationRedeemCode != nil {
+			if err := s.useOAuthRegistrationInvitation(ctx, invitationRedeemCode.ID, user.ID); err != nil {
+				return ErrInvitationCodeInvalid
+			}
 		}
 	}
 
@@ -300,6 +379,23 @@ func (s *AuthService) FinalizeOAuthEmailAccount(
 	_ = s.snapshotPlatformQuotaDefaults(ctx, user.ID, &grantPlan)
 	s.bindOAuthAffiliate(ctx, user.ID, affiliateCode)
 	return nil
+}
+
+func (s *AuthService) validateOAuthOrganizationRegistration(ctx context.Context, organizationName, invitationCode string) error {
+	if s != nil && s.organizationService != nil {
+		_, err := s.organizationService.ResolveRegistrationIntent(
+			ctx,
+			organizationName,
+			invitationCode,
+			s.settingService != nil && s.settingService.IsInvitationCodeEnabled(ctx),
+		)
+		return err
+	}
+	if strings.TrimSpace(organizationName) != "" {
+		return ErrServiceUnavailable
+	}
+	_, err := s.validateOAuthRegistrationInvitation(ctx, invitationCode)
+	return err
 }
 
 // RollbackOAuthEmailAccountCreation removes a partially-created local account
@@ -370,18 +466,19 @@ func (s *AuthService) loadOAuthRegistrationInvitation(ctx context.Context, invit
 			return nil, err
 		}
 		return &RedeemCode{
-			ID:           entity.ID,
-			Code:         entity.Code,
-			Type:         entity.Type,
-			Value:        entity.Value,
-			Status:       entity.Status,
-			UsedBy:       entity.UsedBy,
-			UsedAt:       entity.UsedAt,
-			Notes:        oauthEmailFlowStringValue(entity.Notes),
-			CreatedAt:    entity.CreatedAt,
-			ExpiresAt:    entity.ExpiresAt,
-			GroupID:      entity.GroupID,
-			ValidityDays: entity.ValidityDays,
+			ID:             entity.ID,
+			Code:           entity.Code,
+			Type:           entity.Type,
+			Value:          entity.Value,
+			Status:         entity.Status,
+			UsedBy:         entity.UsedBy,
+			UsedAt:         entity.UsedAt,
+			Notes:          oauthEmailFlowStringValue(entity.Notes),
+			CreatedAt:      entity.CreatedAt,
+			ExpiresAt:      entity.ExpiresAt,
+			GroupID:        entity.GroupID,
+			OrganizationID: entity.OrganizationID,
+			ValidityDays:   entity.ValidityDays,
 		}, nil
 	}
 	return s.redeemRepo.GetByCode(ctx, invitationCode)

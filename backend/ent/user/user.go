@@ -91,6 +91,10 @@ const (
 	EdgePendingAuthSessions = "pending_auth_sessions"
 	// EdgePlatformQuotas holds the string denoting the platform_quotas edge name in mutations.
 	EdgePlatformQuotas = "platform_quotas"
+	// EdgeOwnedOrganization holds the string denoting the owned_organization edge name in mutations.
+	EdgeOwnedOrganization = "owned_organization"
+	// EdgeOrganizationMembership holds the string denoting the organization_membership edge name in mutations.
+	EdgeOrganizationMembership = "organization_membership"
 	// EdgeUserAllowedGroups holds the string denoting the user_allowed_groups edge name in mutations.
 	EdgeUserAllowedGroups = "user_allowed_groups"
 	// Table holds the table name of the user in the database.
@@ -184,6 +188,20 @@ const (
 	PlatformQuotasInverseTable = "user_platform_quotas"
 	// PlatformQuotasColumn is the table column denoting the platform_quotas relation/edge.
 	PlatformQuotasColumn = "user_id"
+	// OwnedOrganizationTable is the table that holds the owned_organization relation/edge.
+	OwnedOrganizationTable = "organizations"
+	// OwnedOrganizationInverseTable is the table name for the Organization entity.
+	// It exists in this package in order to avoid circular dependency with the "organization" package.
+	OwnedOrganizationInverseTable = "organizations"
+	// OwnedOrganizationColumn is the table column denoting the owned_organization relation/edge.
+	OwnedOrganizationColumn = "owner_user_id"
+	// OrganizationMembershipTable is the table that holds the organization_membership relation/edge.
+	OrganizationMembershipTable = "organization_members"
+	// OrganizationMembershipInverseTable is the table name for the OrganizationMember entity.
+	// It exists in this package in order to avoid circular dependency with the "organizationmember" package.
+	OrganizationMembershipInverseTable = "organization_members"
+	// OrganizationMembershipColumn is the table column denoting the organization_membership relation/edge.
+	OrganizationMembershipColumn = "user_id"
 	// UserAllowedGroupsTable is the table that holds the user_allowed_groups relation/edge.
 	UserAllowedGroupsTable = "user_allowed_groups"
 	// UserAllowedGroupsInverseTable is the table name for the UserAllowedGroup entity.
@@ -612,6 +630,20 @@ func ByPlatformQuotas(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByOwnedOrganizationField orders the results by owned_organization field.
+func ByOwnedOrganizationField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newOwnedOrganizationStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByOrganizationMembershipField orders the results by organization_membership field.
+func ByOrganizationMembershipField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newOrganizationMembershipStep(), sql.OrderByField(field, opts...))
+	}
+}
+
 // ByUserAllowedGroupsCount orders the results by user_allowed_groups count.
 func ByUserAllowedGroupsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -714,6 +746,20 @@ func newPlatformQuotasStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PlatformQuotasInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, PlatformQuotasTable, PlatformQuotasColumn),
+	)
+}
+func newOwnedOrganizationStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(OwnedOrganizationInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, OwnedOrganizationTable, OwnedOrganizationColumn),
+	)
+}
+func newOrganizationMembershipStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(OrganizationMembershipInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, OrganizationMembershipTable, OrganizationMembershipColumn),
 	)
 }
 func newUserAllowedGroupsStep() *sqlgraph.Step {

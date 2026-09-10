@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/Wei-Shaw/sub2api/ent/group"
+	"github.com/Wei-Shaw/sub2api/ent/organization"
 	"github.com/Wei-Shaw/sub2api/ent/redeemcode"
 	"github.com/Wei-Shaw/sub2api/ent/user"
 )
@@ -156,6 +157,20 @@ func (_c *RedeemCodeCreate) SetNillableGroupID(v *int64) *RedeemCodeCreate {
 	return _c
 }
 
+// SetOrganizationID sets the "organization_id" field.
+func (_c *RedeemCodeCreate) SetOrganizationID(v int64) *RedeemCodeCreate {
+	_c.mutation.SetOrganizationID(v)
+	return _c
+}
+
+// SetNillableOrganizationID sets the "organization_id" field if the given value is not nil.
+func (_c *RedeemCodeCreate) SetNillableOrganizationID(v *int64) *RedeemCodeCreate {
+	if v != nil {
+		_c.SetOrganizationID(*v)
+	}
+	return _c
+}
+
 // SetValidityDays sets the "validity_days" field.
 func (_c *RedeemCodeCreate) SetValidityDays(v int) *RedeemCodeCreate {
 	_c.mutation.SetValidityDays(v)
@@ -192,6 +207,11 @@ func (_c *RedeemCodeCreate) SetUser(v *User) *RedeemCodeCreate {
 // SetGroup sets the "group" edge to the Group entity.
 func (_c *RedeemCodeCreate) SetGroup(v *Group) *RedeemCodeCreate {
 	return _c.SetGroupID(v.ID)
+}
+
+// SetOrganization sets the "organization" edge to the Organization entity.
+func (_c *RedeemCodeCreate) SetOrganization(v *Organization) *RedeemCodeCreate {
+	return _c.SetOrganizationID(v.ID)
 }
 
 // Mutation returns the RedeemCodeMutation object of the builder.
@@ -381,6 +401,23 @@ func (_c *RedeemCodeCreate) createSpec() (*RedeemCode, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.GroupID = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.OrganizationIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   redeemcode.OrganizationTable,
+			Columns: []string{redeemcode.OrganizationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(organization.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.OrganizationID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -576,6 +613,24 @@ func (u *RedeemCodeUpsert) UpdateGroupID() *RedeemCodeUpsert {
 // ClearGroupID clears the value of the "group_id" field.
 func (u *RedeemCodeUpsert) ClearGroupID() *RedeemCodeUpsert {
 	u.SetNull(redeemcode.FieldGroupID)
+	return u
+}
+
+// SetOrganizationID sets the "organization_id" field.
+func (u *RedeemCodeUpsert) SetOrganizationID(v int64) *RedeemCodeUpsert {
+	u.Set(redeemcode.FieldOrganizationID, v)
+	return u
+}
+
+// UpdateOrganizationID sets the "organization_id" field to the value that was provided on create.
+func (u *RedeemCodeUpsert) UpdateOrganizationID() *RedeemCodeUpsert {
+	u.SetExcluded(redeemcode.FieldOrganizationID)
+	return u
+}
+
+// ClearOrganizationID clears the value of the "organization_id" field.
+func (u *RedeemCodeUpsert) ClearOrganizationID() *RedeemCodeUpsert {
+	u.SetNull(redeemcode.FieldOrganizationID)
 	return u
 }
 
@@ -807,6 +862,27 @@ func (u *RedeemCodeUpsertOne) UpdateGroupID() *RedeemCodeUpsertOne {
 func (u *RedeemCodeUpsertOne) ClearGroupID() *RedeemCodeUpsertOne {
 	return u.Update(func(s *RedeemCodeUpsert) {
 		s.ClearGroupID()
+	})
+}
+
+// SetOrganizationID sets the "organization_id" field.
+func (u *RedeemCodeUpsertOne) SetOrganizationID(v int64) *RedeemCodeUpsertOne {
+	return u.Update(func(s *RedeemCodeUpsert) {
+		s.SetOrganizationID(v)
+	})
+}
+
+// UpdateOrganizationID sets the "organization_id" field to the value that was provided on create.
+func (u *RedeemCodeUpsertOne) UpdateOrganizationID() *RedeemCodeUpsertOne {
+	return u.Update(func(s *RedeemCodeUpsert) {
+		s.UpdateOrganizationID()
+	})
+}
+
+// ClearOrganizationID clears the value of the "organization_id" field.
+func (u *RedeemCodeUpsertOne) ClearOrganizationID() *RedeemCodeUpsertOne {
+	return u.Update(func(s *RedeemCodeUpsert) {
+		s.ClearOrganizationID()
 	})
 }
 
@@ -1207,6 +1283,27 @@ func (u *RedeemCodeUpsertBulk) UpdateGroupID() *RedeemCodeUpsertBulk {
 func (u *RedeemCodeUpsertBulk) ClearGroupID() *RedeemCodeUpsertBulk {
 	return u.Update(func(s *RedeemCodeUpsert) {
 		s.ClearGroupID()
+	})
+}
+
+// SetOrganizationID sets the "organization_id" field.
+func (u *RedeemCodeUpsertBulk) SetOrganizationID(v int64) *RedeemCodeUpsertBulk {
+	return u.Update(func(s *RedeemCodeUpsert) {
+		s.SetOrganizationID(v)
+	})
+}
+
+// UpdateOrganizationID sets the "organization_id" field to the value that was provided on create.
+func (u *RedeemCodeUpsertBulk) UpdateOrganizationID() *RedeemCodeUpsertBulk {
+	return u.Update(func(s *RedeemCodeUpsert) {
+		s.UpdateOrganizationID()
+	})
+}
+
+// ClearOrganizationID clears the value of the "organization_id" field.
+func (u *RedeemCodeUpsertBulk) ClearOrganizationID() *RedeemCodeUpsertBulk {
+	return u.Update(func(s *RedeemCodeUpsert) {
+		s.ClearOrganizationID()
 	})
 }
 

@@ -1699,6 +1699,52 @@ func HasPlatformQuotasWith(preds ...predicate.UserPlatformQuota) predicate.User 
 	})
 }
 
+// HasOwnedOrganization applies the HasEdge predicate on the "owned_organization" edge.
+func HasOwnedOrganization() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, OwnedOrganizationTable, OwnedOrganizationColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasOwnedOrganizationWith applies the HasEdge predicate on the "owned_organization" edge with a given conditions (other predicates).
+func HasOwnedOrganizationWith(preds ...predicate.Organization) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newOwnedOrganizationStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasOrganizationMembership applies the HasEdge predicate on the "organization_membership" edge.
+func HasOrganizationMembership() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, OrganizationMembershipTable, OrganizationMembershipColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasOrganizationMembershipWith applies the HasEdge predicate on the "organization_membership" edge with a given conditions (other predicates).
+func HasOrganizationMembershipWith(preds ...predicate.OrganizationMember) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newOrganizationMembershipStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasUserAllowedGroups applies the HasEdge predicate on the "user_allowed_groups" edge.
 func HasUserAllowedGroups() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
