@@ -143,6 +143,7 @@ docs/*
 !docs/PLUGIN_DEVELOPMENT.md
 !docs/channel-monitor-v2-safe-defaults.md
 !docs/技术设计.md
+!docs/架构设计.md
 !docs/legal/
 !docs/legal/*.md
 !docs/screenshots/
