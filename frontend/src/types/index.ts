@@ -99,6 +99,23 @@ export interface User {
   created_at: string
   updated_at: string
   deleted_at?: string | null
+  organization?: OrganizationSummary | null
+}
+
+export interface OrganizationSummary {
+  id: number
+  name: string
+  is_owner: boolean
+  created_at: string
+}
+
+export interface OrganizationInvitation {
+  id: number
+  code: string
+  status: 'unused' | 'used' | 'disabled' | 'expired'
+  created_at: string
+  expires_at?: string | null
+  used_at?: string | null
 }
 
 export interface AdminUser extends User {
@@ -143,6 +160,7 @@ export interface RegisterRequest {
   promo_code?: string
   invitation_code?: string
   aff_code?: string
+  organization_name?: string
 }
 
 export interface AffiliateInvitee {

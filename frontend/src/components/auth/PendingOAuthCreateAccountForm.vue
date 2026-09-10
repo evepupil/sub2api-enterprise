@@ -67,20 +67,40 @@
     <p v-else-if="emailVerifyEnabled" class="text-xs text-gray-500 dark:text-dark-400">
       {{ t('auth.verificationCodeHint') }}
     </p>
-    <input
-      v-if="invitationCodeEnabled"
-      v-model="invitationCode"
-      :data-testid="`${testIdPrefix}-create-account-invitation-code`"
-      type="text"
-      class="input w-full"
-      :placeholder="t('auth.invitationCodePlaceholder')"
-      :disabled="isSubmitting"
-    />
+    <div class="space-y-2">
+      <input
+        v-model="invitationCode"
+        :data-testid="`${testIdPrefix}-create-account-invitation-code`"
+        type="text"
+        class="input w-full"
+        :placeholder="invitationCodeEnabled ? t('auth.invitationCodePlaceholder') : t('auth.invitationCodeOptionalPlaceholder')"
+        :disabled="isSubmitting"
+      />
+      <button
+        type="button"
+        class="inline-flex items-center gap-1.5 text-sm font-medium text-primary-600 transition-colors hover:text-primary-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
+        :disabled="isSubmitting"
+        @click="toggleOrganizationRegistration"
+      >
+        <span>{{ isCreatingOrganization ? t('auth.registerPersonalAccount') : t('auth.createOrganization') }}</span>
+      </button>
+      <input
+        v-if="isCreatingOrganization"
+        v-model="organizationName"
+        :data-testid="`${testIdPrefix}-create-account-organization-name`"
+        type="text"
+        maxlength="100"
+        autocomplete="organization"
+        class="input w-full"
+        :placeholder="t('auth.organizationNamePlaceholder')"
+        :disabled="isSubmitting"
+      />
+    </div>
     <button
       :data-testid="`${testIdPrefix}-create-account-submit`"
       type="button"
       class="btn btn-primary w-full"
-      :disabled="isSubmitting || !email.trim() || password.length < 6 || (invitationCodeEnabled && !invitationCode.trim()) || (turnstileEnabled && !turnstileToken)"
+      :disabled="isSubmitting || !email.trim() || password.length < 6 || (invitationCodeEnabled && !invitationCode.trim()) || (isCreatingOrganization && !organizationName.trim()) || (turnstileEnabled && !turnstileToken)"
       @click="handleSubmit"
     >
       {{ isSubmitting ? t('common.processing') : t('auth.createAccount') }}
@@ -102,6 +122,7 @@ import { useI18n } from 'vue-i18n'
 import TurnstileWidget from '@/components/CaptchaChallenge.vue'
 import { getPublicSettings, sendPendingOAuthVerifyCode } from '@/api/auth'
 import { useAppStore } from '@/stores'
+import { loadOrganizationRegistrationContext } from '@/utils/organizationRegistration'
 
 export type PendingOAuthCreateAccountPayload = {
   email: string
@@ -111,6 +132,7 @@ export type PendingOAuthCreateAccountPayload = {
   tencentCaptchaTicket?: string
   tencentCaptchaRandstr?: string
   invitationCode?: string
+  organizationName?: string
 }
 
 const props = defineProps<{
@@ -132,6 +154,8 @@ const email = ref('')
 const password = ref('')
 const verifyCode = ref('')
 const invitationCode = ref('')
+const organizationName = ref('')
+const isCreatingOrganization = ref(false)
 const isSendingCode = ref(false)
 const sendCodeError = ref('')
 const sendCodeSuccess = ref(false)
@@ -331,11 +355,19 @@ async function handleSubmit() {
           tencentCaptchaRandstr: tencentCaptchaRandstr.value
         }
       : {}),
-    invitationCode: invitationCode.value.trim() || undefined
+    invitationCode: invitationCode.value.trim() || undefined,
+    organizationName: isCreatingOrganization.value ? organizationName.value.trim() || undefined : undefined
   })
 
   if (actionCaptchaEnabled.value) {
     resetTurnstile()
+  }
+}
+
+function toggleOrganizationRegistration(): void {
+  isCreatingOrganization.value = !isCreatingOrganization.value
+  if (!isCreatingOrganization.value) {
+    organizationName.value = ''
   }
 }
 
@@ -344,6 +376,10 @@ function emitSwitchToBind() {
 }
 
 onMounted(async () => {
+  const organizationContext = loadOrganizationRegistrationContext()
+  invitationCode.value = organizationContext.invitationCode
+  organizationName.value = organizationContext.organizationName
+  isCreatingOrganization.value = organizationContext.organizationName !== ''
   try {
     const settings = await getPublicSettings()
     invitationCodeEnabled.value = settings.invitation_code_enabled === true

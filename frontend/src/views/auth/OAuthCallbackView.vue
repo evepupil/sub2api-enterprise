@@ -163,6 +163,7 @@ import {
   loadOAuthAffiliateCode,
   oauthAffiliatePayload
 } from '@/utils/oauthAffiliate'
+import { loadOrganizationRegistrationContext } from '@/utils/organizationRegistration'
 
 const route = useRoute()
 const router = useRouter()
@@ -342,12 +343,21 @@ async function handleSubmitRegistration() {
 
   isSubmitting.value = true
   try {
-    const payload: { password: string; invitation_code?: string; aff_code?: string } = {
+    const organizationContext = loadOrganizationRegistrationContext()
+    const payload: {
+      password: string
+      invitation_code?: string
+      aff_code?: string
+      organization_name?: string
+    } = {
       password: password.value,
       ...oauthAffiliatePayload(loadOAuthAffiliateCode())
     }
-    if (invitationRequired.value) {
-      payload.invitation_code = code
+    if (code || organizationContext.invitationCode) {
+      payload.invitation_code = code || organizationContext.invitationCode
+    }
+    if (organizationContext.organizationName) {
+      payload.organization_name = organizationContext.organizationName
     }
     const { data } = await apiClient.post<OAuthTokenResponse>(
       `/auth/oauth/${pendingProvider.value}/complete-registration`,
@@ -364,6 +374,8 @@ async function handleSubmitRegistration() {
 }
 
 onMounted(async () => {
+  const organizationContext = loadOrganizationRegistrationContext()
+  invitationCode.value = organizationContext.invitationCode
   const params = parseFragmentParams()
   const tokenResponse = readTokenResponse(params)
   const fragmentError = params.get('error') || ''

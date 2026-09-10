@@ -2,10 +2,11 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import RegisterView from '@/views/auth/RegisterView.vue'
 
-const { getPublicSettingsMock, registerMock, showErrorMock } = vi.hoisted(() => ({
+const { getPublicSettingsMock, registerMock, showErrorMock, validateInvitationCodeMock } = vi.hoisted(() => ({
   getPublicSettingsMock: vi.fn(),
   registerMock: vi.fn(),
-  showErrorMock: vi.fn()
+  showErrorMock: vi.fn(),
+  validateInvitationCodeMock: vi.fn()
 }))
 
 const publicSettings = {
@@ -58,7 +59,8 @@ vi.mock('@/api/auth', async () => {
   const actual = await vi.importActual<typeof import('@/api/auth')>('@/api/auth')
   return {
     ...actual,
-    getPublicSettings: (...args: unknown[]) => getPublicSettingsMock(...args)
+    getPublicSettings: (...args: unknown[]) => getPublicSettingsMock(...args),
+    validateInvitationCode: (...args: unknown[]) => validateInvitationCodeMock(...args)
   }
 })
 
@@ -86,8 +88,10 @@ describe('RegisterView invitation layout', () => {
     getPublicSettingsMock.mockReset()
     registerMock.mockReset()
     showErrorMock.mockReset()
+    validateInvitationCodeMock.mockReset()
     getPublicSettingsMock.mockResolvedValue(publicSettings)
     registerMock.mockResolvedValue({})
+    validateInvitationCodeMock.mockResolvedValue({ valid: true, type: 'platform' })
   })
 
   it('keeps the optional affiliate invitation field before Turnstile', async () => {
@@ -105,7 +109,7 @@ describe('RegisterView invitation layout', () => {
     ).toBeTruthy()
   })
 
-  it('uses the mandatory invitation field without duplicating the affiliate field', async () => {
+  it('keeps registration and affiliate codes as separate fields when invitations are mandatory', async () => {
     getPublicSettingsMock.mockResolvedValueOnce({
       ...publicSettings,
       invitation_code_enabled: true
@@ -114,8 +118,35 @@ describe('RegisterView invitation layout', () => {
     const wrapper = mountRegister()
     await flushPromises()
 
-    expect(wrapper.find('[data-testid="affiliate-invitation-field"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="affiliate-invitation-field"]').exists()).toBe(true)
     expect(wrapper.get('#invitation_code').exists()).toBe(true)
+  })
+
+  it('submits an organization name when creating an organization', async () => {
+    getPublicSettingsMock.mockResolvedValueOnce({
+      ...publicSettings,
+      turnstile_enabled: false
+    })
+
+    const wrapper = mountRegister()
+    await flushPromises()
+    const createOrganizationButton = wrapper
+      .findAll('button')
+      .find(button => button.text().includes('auth.createOrganization'))
+    expect(createOrganizationButton).toBeDefined()
+    await createOrganizationButton!.trigger('click')
+    await wrapper.get('#organization_name').setValue('Example Team')
+    await wrapper.get('#email').setValue('owner@example.com')
+    await wrapper.get('#password').setValue('secret-123')
+    await wrapper.get('form').trigger('submit.prevent')
+    await flushPromises()
+
+    expect(registerMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        email: 'owner@example.com',
+        organization_name: 'Example Team'
+      })
+    )
   })
 
   it('submits a non-whitelist email domain so the backend can enforce its registration quota', async () => {

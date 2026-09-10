@@ -923,6 +923,7 @@ async function handleCreateAccount(payload: PendingOAuthCreateAccountPayload) {
         }
         : {}),
       invitation_code: payload.invitationCode || undefined,
+      organization_name: payload.organizationName || undefined,
       ...oauthAffiliatePayload(loadOAuthAffiliateCode()),
       ...serializeAdoptionDecision(currentAdoptionDecision())
     })

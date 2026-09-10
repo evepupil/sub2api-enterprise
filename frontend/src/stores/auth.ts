@@ -13,6 +13,7 @@ import type {
   AuthResponse,
   ActionCaptchaRequestProof
 } from '@/types'
+import { clearOrganizationRegistrationContext } from '@/utils/organizationRegistration'
 
 const AUTH_TOKEN_KEY = 'auth_token'
 const AUTH_USER_KEY = 'auth_user'
@@ -317,6 +318,7 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.setItem(AUTH_TOKEN_KEY, response.access_token)
     localStorage.setItem(AUTH_USER_KEY, JSON.stringify(userData))
     clearPendingAuthSession()
+    clearOrganizationRegistrationContext()
 
     // Start auto-refresh interval for user data
     startAutoRefresh()
@@ -387,6 +389,7 @@ export const useAuthStore = defineStore('auth', () => {
       }
 
       clearPendingAuthSession()
+      clearOrganizationRegistrationContext()
       return userData
     } catch (error) {
       clearAuth({ preservePendingAuthSession: pendingAuthSession.value !== null })

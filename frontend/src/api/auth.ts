@@ -513,6 +513,7 @@ export async function validatePromoCode(code: string): Promise<ValidatePromoCode
 export interface ValidateInvitationCodeResponse {
   valid: boolean
   error_code?: string
+  type?: 'platform' | 'organization'
 }
 
 /**

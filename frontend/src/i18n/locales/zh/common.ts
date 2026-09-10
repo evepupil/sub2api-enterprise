@@ -176,6 +176,7 @@ export default {
     affiliateTransferRecords: '提取记录',
     profile: '个人资料',
     users: '用户管理',
+    organization: '组织',
     groups: '分组管理',
     channels: '渠道管理',
     availableChannels: '可用渠道',
@@ -297,9 +298,21 @@ export default {
     invitationCodePlaceholder: '请输入邀请码',
     invitationCodeRequired: '请输入邀请码',
     invitationCodeValid: '邀请码有效',
+    organizationInvitationCodeValid: '组织邀请码有效，注册后将加入该组织',
     invitationCodeInvalid: '邀请码无效或已被使用',
+    invitationCodeExpired: '邀请码已过期',
     invitationCodeValidating: '正在验证邀请码...',
     invitationCodeInvalidCannotRegister: '邀请码无效，请检查后重试',
+    invitationCodeOptionalPlaceholder: '组织邀请码（可选）',
+    createOrganization: '创建组织',
+    registerPersonalAccount: '注册个人账户',
+    organizationNameLabel: '组织名称',
+    organizationNamePlaceholder: '请输入组织名称',
+    organizationNameRequired: '请输入组织名称',
+    organizationRegistrationConflict: '组织邀请码只能用于加入组织，请关闭创建组织后重试',
+    userAlreadyInOrganization: '该账户已属于一个组织',
+    affiliateCodeLabel: '邀请返利码',
+    affiliateCodePlaceholder: '输入邀请返利码',
     oauthOrContinue: '或使用其他继续',
     linuxdo: {
       signIn: '使用 Linux.do 登录',
@@ -442,6 +455,29 @@ export default {
     invalidResetLinkHint: '此密码重置链接无效或已过期。请重新请求一个新链接。',
     requestNewResetLink: '请求新的重置链接',
     invalidOrExpiredToken: '密码重置链接无效或已过期。请重新请求一个新链接。'
+  },
+
+  organization: {
+    title: '组织',
+    owner: '组织管理员',
+    invitations: '组织邀请码',
+    createInvitation: '创建邀请码',
+    creatingInvitation: '正在创建...',
+    invitationEmpty: '暂无可用邀请码',
+    invitationCopied: '邀请码已复制',
+    loadFailed: '加载组织信息失败',
+    createFailed: '创建邀请码失败',
+    retry: '重试',
+    noOrganization: '当前账户不属于组织',
+    createdAt: '创建时间',
+    expiresAt: '有效期',
+    neverExpires: '长期有效',
+    status: {
+      unused: '未使用',
+      used: '已使用',
+      disabled: '已停用',
+      expired: '已过期'
+    }
   },
 
   // Step-up（敏感操作二次验证）

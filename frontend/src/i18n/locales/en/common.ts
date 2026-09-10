@@ -176,6 +176,7 @@ export default {
     affiliateTransferRecords: 'Transfer Records',
     profile: 'Profile',
     users: 'Users',
+    organization: 'Organization',
     groups: 'Groups',
     channels: 'Channels',
     availableChannels: 'Available Channels',
@@ -298,9 +299,21 @@ export default {
     invitationCodePlaceholder: 'Enter invitation code',
     invitationCodeRequired: 'Invitation code is required',
     invitationCodeValid: 'Invitation code is valid',
+    organizationInvitationCodeValid: 'Organization invitation is valid. You will join this organization.',
     invitationCodeInvalid: 'Invalid or used invitation code',
+    invitationCodeExpired: 'Invitation code has expired',
     invitationCodeValidating: 'Validating invitation code...',
     invitationCodeInvalidCannotRegister: 'Invalid invitation code. Please check and try again',
+    invitationCodeOptionalPlaceholder: 'Organization invitation (optional)',
+    createOrganization: 'Create an organization',
+    registerPersonalAccount: 'Register a personal account',
+    organizationNameLabel: 'Organization name',
+    organizationNamePlaceholder: 'Enter organization name',
+    organizationNameRequired: 'Organization name is required',
+    organizationRegistrationConflict: 'An organization invitation can only be used to join. Turn off organization creation and try again.',
+    userAlreadyInOrganization: 'This account already belongs to an organization',
+    affiliateCodeLabel: 'Affiliate code',
+    affiliateCodePlaceholder: 'Enter affiliate code',
     oauthOrContinue: 'or continue with others',
     linuxdo: {
       signIn: 'Continue with Linux.do',
@@ -443,6 +456,29 @@ export default {
     invalidResetLinkHint: 'This password reset link is invalid or has expired. Please request a new one.',
     requestNewResetLink: 'Request New Reset Link',
     invalidOrExpiredToken: 'The password reset link is invalid or has expired. Please request a new one.'
+  },
+
+  organization: {
+    title: 'Organization',
+    owner: 'Organization owner',
+    invitations: 'Organization invitations',
+    createInvitation: 'Create invitation',
+    creatingInvitation: 'Creating...',
+    invitationEmpty: 'No invitations yet',
+    invitationCopied: 'Invitation copied',
+    loadFailed: 'Failed to load organization',
+    createFailed: 'Failed to create invitation',
+    retry: 'Retry',
+    noOrganization: 'This account does not belong to an organization',
+    createdAt: 'Created',
+    expiresAt: 'Expires',
+    neverExpires: 'No expiration',
+    status: {
+      unused: 'Unused',
+      used: 'Used',
+      disabled: 'Disabled',
+      expired: 'Expired'
+    }
   },
 
   // Step-up (sudo) 2FA prompt

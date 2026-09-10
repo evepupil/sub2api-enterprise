@@ -87,10 +87,13 @@
           </p>
         </div>
 
-        <!-- Invitation Code Input (Required when enabled) -->
-        <div v-if="invitationCodeEnabled">
+        <!-- Platform or organization invitation -->
+        <div>
           <label for="invitation_code" class="input-label">
             {{ t('auth.invitationCodeLabel') }}
+            <span v-if="!invitationCodeEnabled" class="ml-1 text-xs font-normal text-gray-400 dark:text-dark-500">
+              ({{ t('common.optional') }})
+            </span>
           </label>
           <div class="relative">
             <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
@@ -128,16 +131,56 @@
             <div v-if="invitationValidation.valid" class="mt-2 flex items-center gap-2 rounded-lg bg-green-50 px-3 py-2 dark:bg-green-900/20">
               <Icon name="checkCircle" size="sm" class="text-green-600 dark:text-green-400" />
               <span class="text-sm text-green-700 dark:text-green-400">
-                {{ t('auth.invitationCodeValid') }}
+                {{ invitationValidation.type === 'organization'
+                  ? t('auth.organizationInvitationCodeValid')
+                  : t('auth.invitationCodeValid') }}
               </span>
+            </div>
+          </transition>
+
+          <button
+            v-if="invitationValidation.type !== 'organization'"
+            type="button"
+            class="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-primary-600 transition-colors hover:text-primary-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:text-primary-400 dark:hover:text-primary-300"
+            :disabled="registrationActionDisabled"
+            @click="toggleOrganizationRegistration"
+          >
+            <Icon name="users" size="sm" />
+            {{ isCreatingOrganization ? t('auth.registerPersonalAccount') : t('auth.createOrganization') }}
+          </button>
+
+          <transition name="fade">
+            <div v-if="isCreatingOrganization" class="mt-4">
+              <label for="organization_name" class="input-label">
+                {{ t('auth.organizationNameLabel') }}
+              </label>
+              <div class="relative">
+                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
+                  <Icon name="users" size="md" class="text-gray-400 dark:text-dark-500" />
+                </div>
+                <input
+                  id="organization_name"
+                  v-model="formData.organization_name"
+                  type="text"
+                  maxlength="100"
+                  autocomplete="organization"
+                  :disabled="registrationActionDisabled"
+                  class="input pl-11"
+                  :class="{ 'input-error': errors.organization_name }"
+                  :placeholder="t('auth.organizationNamePlaceholder')"
+                />
+              </div>
+              <p v-if="errors.organization_name" class="input-error-text">
+                {{ errors.organization_name }}
+              </p>
             </div>
           </transition>
         </div>
 
-        <!-- Affiliate Invitation Code Input (Optional) -->
-        <div v-else-if="affiliateEnabled" data-testid="affiliate-invitation-field">
+        <!-- Affiliate code remains separate from registration invitations. -->
+        <div v-if="affiliateEnabled" data-testid="affiliate-invitation-field">
           <label for="affiliate_code" class="input-label">
-            {{ t('auth.invitationCodeLabel') }}
+            {{ t('auth.affiliateCodeLabel') }}
             <span class="ml-1 text-xs font-normal text-gray-400 dark:text-dark-500">({{ t('common.optional') }})</span>
           </label>
           <div class="relative">
@@ -150,7 +193,7 @@
               type="text"
               :disabled="registrationActionDisabled"
               class="input pl-11"
-              :placeholder="t('auth.invitationCodePlaceholder')"
+              :placeholder="t('auth.affiliateCodePlaceholder')"
             />
           </div>
         </div>
@@ -366,6 +409,7 @@ import {
   loadAffiliateReferralCode,
   resolveAffiliateReferralCode
 } from '@/utils/oauthAffiliate'
+import { storeOrganizationRegistrationContext } from '@/utils/organizationRegistration'
 import type { LoginAgreementDocument } from '@/types'
 
 const { t, locale } = useI18n()
@@ -454,7 +498,8 @@ const invitationValidating = ref<boolean>(false)
 const invitationValidation = reactive({
   valid: false,
   invalid: false,
-  message: ''
+  message: '',
+  type: null as 'platform' | 'organization' | null
 })
 let invitationValidateTimeout: ReturnType<typeof setTimeout> | null = null
 
@@ -463,14 +508,18 @@ const formData = reactive({
   password: '',
   promo_code: '',
   invitation_code: '',
-  aff_code: ''
+  aff_code: '',
+  organization_name: ''
 })
+
+const isCreatingOrganization = ref(false)
 
 const errors = reactive({
   email: '',
   password: '',
   turnstile: '',
-  invitation_code: ''
+  invitation_code: '',
+  organization_name: ''
 })
 
 const validationToastMessage = computed(() =>
@@ -478,6 +527,7 @@ const validationToastMessage = computed(() =>
   errors.password ||
   (invitationValidation.invalid ? invitationValidation.message : '') ||
   errors.invitation_code ||
+  errors.organization_name ||
   (promoValidation.invalid ? promoValidation.message : '') ||
   errors.turnstile ||
   ''
@@ -727,6 +777,7 @@ function handleInvitationCodeInput(): void {
   invitationValidation.valid = false
   invitationValidation.invalid = false
   invitationValidation.message = ''
+  invitationValidation.type = null
   errors.invitation_code = ''
 
   if (!code) {
@@ -753,15 +804,23 @@ async function validateInvitationCodeDebounced(code: string): Promise<void> {
       invitationValidation.valid = true
       invitationValidation.invalid = false
       invitationValidation.message = ''
+      invitationValidation.type = result.type || 'platform'
+      if (result.type === 'organization') {
+        isCreatingOrganization.value = false
+        formData.organization_name = ''
+        errors.organization_name = ''
+      }
     } else {
       invitationValidation.valid = false
       invitationValidation.invalid = true
       invitationValidation.message = getInvitationErrorMessage(result.error_code)
+      invitationValidation.type = result.type || null
     }
   } catch {
     invitationValidation.valid = false
     invitationValidation.invalid = true
     invitationValidation.message = t('auth.invitationCodeInvalid')
+    invitationValidation.type = null
   } finally {
     invitationValidating.value = false
   }
@@ -777,8 +836,19 @@ function getInvitationErrorMessage(errorCode?: string): string {
       return t('auth.invitationCodeInvalid')
     case 'INVITATION_CODE_DISABLED':
       return t('auth.invitationCodeInvalid')
+    case 'INVITATION_CODE_EXPIRED':
+      return t('auth.invitationCodeExpired')
     default:
       return t('auth.invitationCodeInvalid')
+  }
+}
+
+function toggleOrganizationRegistration(): void {
+  if (invitationValidation.type === 'organization') return
+  isCreatingOrganization.value = !isCreatingOrganization.value
+  errors.organization_name = ''
+  if (!isCreatingOrganization.value) {
+    formData.organization_name = ''
   }
 }
 
@@ -823,8 +893,25 @@ async function acquireActionProof(): Promise<boolean> {
 async function handleOAuthStart(request: OAuthLoginStart): Promise<void> {
   if (registrationActionDisabled.value) return
 
+  const organizationName = isCreatingOrganization.value ? formData.organization_name.trim() : ''
+  const invitationCode = formData.invitation_code.trim()
+  if (isCreatingOrganization.value && !organizationName) {
+    errors.organization_name = t('auth.organizationNameRequired')
+    appStore.showError(errors.organization_name)
+    return
+  }
+  storeOrganizationRegistrationContext({ organizationName, invitationCode })
+  const organizationRequest: OAuthLoginStart = {
+    ...request,
+    params: {
+      ...request.params,
+      ...(organizationName ? { organization_name: organizationName } : {}),
+      ...(invitationCode ? { invitation_code: invitationCode } : {})
+    }
+  }
+
   if (!actionCaptchaEnabled.value) {
-    window.location.href = buildOAuthLoginStartURL(request)
+    window.location.href = buildOAuthLoginStartURL(organizationRequest)
     return
   }
 
@@ -834,7 +921,7 @@ async function handleOAuthStart(request: OAuthLoginStart): Promise<void> {
     if (!proof) return
 
     const result = await startOAuthLogin(
-      request,
+      organizationRequest,
       tencentCaptchaEnabled.value
         ? {
             tencent_captcha_ticket: proof.token,
@@ -886,6 +973,7 @@ function validateForm(): boolean {
   errors.password = ''
   errors.turnstile = ''
   errors.invitation_code = ''
+  errors.organization_name = ''
 
   let isValid = true
 
@@ -930,6 +1018,11 @@ function validateForm(): boolean {
     }
   }
 
+  if (isCreatingOrganization.value && !formData.organization_name.trim()) {
+    errors.organization_name = t('auth.organizationNameRequired')
+    isValid = false
+  }
+
   // Turnstile validation
   if (turnstileEnabled.value && !turnstileToken.value) {
     errors.turnstile = t('auth.completeVerification')
@@ -964,8 +1057,8 @@ async function handleRegister(): Promise<void> {
     }
   }
 
-  // Check invitation code validation status (if enabled and code provided)
-  if (invitationCodeEnabled.value) {
+  // Every supplied code is validated; the switch only controls whether it is required.
+  if (formData.invitation_code.trim()) {
     // If still validating, wait
     if (invitationValidating.value) {
       errorMessage.value = t('auth.invitationCodeValidating')
@@ -977,7 +1070,7 @@ async function handleRegister(): Promise<void> {
       return
     }
     // If invitation code is required but not validated yet
-    if (formData.invitation_code.trim() && !invitationValidation.valid) {
+    if (!invitationValidation.valid) {
       errorMessage.value = t('auth.invitationCodeValidating')
       // Trigger validation
       await validateInvitationCodeDebounced(formData.invitation_code.trim())
@@ -1014,6 +1107,7 @@ async function handleRegister(): Promise<void> {
           tencent_captcha_randstr: tencentCaptchaEnabled.value ? tencentCaptchaRandstr.value : undefined,
           promo_code: formData.promo_code || undefined,
           invitation_code: formData.invitation_code || undefined,
+          organization_name: isCreatingOrganization.value ? formData.organization_name.trim() : undefined,
           ...(affCode ? { aff_code: affCode } : {})
         })
       )
@@ -1033,6 +1127,7 @@ async function handleRegister(): Promise<void> {
       tencent_captcha_randstr: tencentCaptchaEnabled.value ? tencentCaptchaRandstr.value : undefined,
       promo_code: formData.promo_code || undefined,
       invitation_code: formData.invitation_code || undefined,
+      organization_name: isCreatingOrganization.value ? formData.organization_name.trim() : undefined,
       ...(affCode ? { aff_code: affCode } : {})
     })
     clearAffiliateReferralCode()
@@ -1057,10 +1152,18 @@ async function handleRegister(): Promise<void> {
 }
 
 function buildRegistrationErrorMessage(error: unknown, fallback: string): string {
-  if (extractApiErrorCode(error) === 'EMAIL_DOMAIN_REGISTRATION_LIMIT') {
-    return t('auth.emailDomainRegistrationLimit')
+  switch (extractApiErrorCode(error)) {
+    case 'EMAIL_DOMAIN_REGISTRATION_LIMIT':
+      return t('auth.emailDomainRegistrationLimit')
+    case 'ORGANIZATION_NAME_INVALID':
+      return t('auth.organizationNameRequired')
+    case 'ORGANIZATION_REGISTRATION_CONFLICT':
+      return t('auth.organizationRegistrationConflict')
+    case 'USER_ALREADY_IN_ORGANIZATION':
+      return t('auth.userAlreadyInOrganization')
+    default:
+      return buildAuthErrorMessage(error, { fallback })
   }
-  return buildAuthErrorMessage(error, { fallback })
 }
 </script>
 

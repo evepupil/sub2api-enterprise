@@ -89,7 +89,8 @@ async function handleCreateAccount(payload: PendingOAuthCreateAccountPayload) {
               tencent_captcha_randstr: payload.tencentCaptchaRandstr
           }
           : {}),
-        invitation_code: payload.invitationCode || undefined
+        invitation_code: payload.invitationCode || undefined,
+        organization_name: payload.organizationName || undefined
       }
     )
 
