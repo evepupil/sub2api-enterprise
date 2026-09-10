@@ -151,7 +151,8 @@ docs/screenshots/*
 frontend/coverage/
 aicodex
 output/
-.codegraph/
+.codegraph/*
+!.codegraph/.gitignore
 
 # Vitest / Vite cache at repo root
 .vite/
