@@ -479,6 +479,7 @@ export default {
     spendingLimit: '消费上限',
     spendingUsed: '已消费',
     spendingRemaining: '剩余额度',
+    spendingFrozen: '冻结',
     unlimited: '不限额',
     setLimit: '设置上限',
     amount: '金额',

@@ -165,6 +165,12 @@
                     "
                   >
                     {{ member.is_owner ? '-' : formatSpending(member.spending_remaining) }}
+                    <div
+                      v-if="!member.is_owner && member.spending_frozen > 0"
+                      class="text-xs text-gray-500 dark:text-dark-400"
+                    >
+                      {{ t('organization.spendingFrozen') }} {{ formatCurrency(member.spending_frozen) }}
+                    </div>
                   </td>
                   <td class="px-3 py-3">
                     <div v-if="!member.is_owner" class="flex justify-end gap-2">

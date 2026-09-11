@@ -119,6 +119,7 @@ export interface OrganizationMember {
   is_owner: boolean
   spending_limit: number | null
   spending_used: number
+  spending_frozen: number
   spending_remaining: number | null
   joined_at: string
 }

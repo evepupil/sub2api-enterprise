@@ -480,6 +480,7 @@ export default {
     spendingLimit: 'Spending limit',
     spendingUsed: 'Spent',
     spendingRemaining: 'Remaining',
+    spendingFrozen: 'On hold',
     unlimited: 'Unlimited',
     setLimit: 'Set limit',
     amount: 'Amount',
