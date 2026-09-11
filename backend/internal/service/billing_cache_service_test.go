@@ -130,3 +130,19 @@ func TestBillingCacheServiceEnqueueAfterStopReturnsFalse(t *testing.T) {
 	})
 	require.False(t, enqueued)
 }
+
+func (b *billingCacheWorkerStub) GetOrganizationMemberSpending(_ context.Context, _ int64) (float64, error) {
+	return 0, nil
+}
+
+func (b *billingCacheWorkerStub) SetOrganizationMemberSpending(_ context.Context, _ int64, _ float64) error {
+	return nil
+}
+
+func (b *billingCacheWorkerStub) IncrOrganizationMemberSpending(_ context.Context, _ int64, _ float64) error {
+	return nil
+}
+
+func (b *billingCacheWorkerStub) InvalidateOrganizationMemberSpending(_ context.Context, _ int64) error {
+	return nil
+}

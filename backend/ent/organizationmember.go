@@ -31,6 +31,8 @@ type OrganizationMember struct {
 	SpendingLimit *float64 `json:"spending_limit,omitempty"`
 	// SpendingUsed holds the value of the "spending_used" field.
 	SpendingUsed float64 `json:"spending_used,omitempty"`
+	// SpendingFrozen holds the value of the "spending_frozen" field.
+	SpendingFrozen float64 `json:"spending_frozen,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the OrganizationMemberQuery when eager-loading is set.
 	Edges        OrganizationMemberEdges `json:"edges"`
@@ -75,7 +77,7 @@ func (*OrganizationMember) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case organizationmember.FieldSpendingLimit, organizationmember.FieldSpendingUsed:
+		case organizationmember.FieldSpendingLimit, organizationmember.FieldSpendingUsed, organizationmember.FieldSpendingFrozen:
 			values[i] = new(sql.NullFloat64)
 		case organizationmember.FieldID, organizationmember.FieldOrganizationID, organizationmember.FieldUserID:
 			values[i] = new(sql.NullInt64)
@@ -138,6 +140,12 @@ func (_m *OrganizationMember) assignValues(columns []string, values []any) error
 				return fmt.Errorf("unexpected type %T for field spending_used", values[i])
 			} else if value.Valid {
 				_m.SpendingUsed = value.Float64
+			}
+		case organizationmember.FieldSpendingFrozen:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field spending_frozen", values[i])
+			} else if value.Valid {
+				_m.SpendingFrozen = value.Float64
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -204,6 +212,9 @@ func (_m *OrganizationMember) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("spending_used=")
 	builder.WriteString(fmt.Sprintf("%v", _m.SpendingUsed))
+	builder.WriteString(", ")
+	builder.WriteString("spending_frozen=")
+	builder.WriteString(fmt.Sprintf("%v", _m.SpendingFrozen))
 	builder.WriteByte(')')
 	return builder.String()
 }

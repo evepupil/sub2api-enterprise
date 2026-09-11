@@ -47,7 +47,7 @@ func TestOrganizationGroupRepositoryDefaultScope(t *testing.T) {
 	require.False(t, scope.RestrictPublicGroups, "新建组织默认不限制公开分组")
 	require.Empty(t, scope.AllowedGroupIDs, "新建组织没有任何专属分组授权")
 
-	memberScope, err := repo.GetScopeByUserID(ctx, userIDs[1])
+	memberScope, err := repo.GetMemberScopeByUserID(ctx, userIDs[1])
 	require.NoError(t, err)
 	require.NotNil(t, memberScope)
 	require.Equal(t, organization.ID, memberScope.OrganizationID)
@@ -60,7 +60,7 @@ func TestOrganizationGroupRepositoryDefaultScope(t *testing.T) {
 	require.NoError(t, err)
 	t.Cleanup(func() { _ = integrationEntClient.User.DeleteOneID(personal.ID).Exec(context.Background()) })
 
-	personalScope, err := repo.GetScopeByUserID(ctx, personal.ID)
+	personalScope, err := repo.GetMemberScopeByUserID(ctx, personal.ID)
 	require.NoError(t, err)
 	require.Nil(t, personalScope)
 }
@@ -72,7 +72,7 @@ func TestOrganizationGroupRepositorySetScopeReplaces(t *testing.T) {
 	repo := NewOrganizationGroupRepository(integrationEntClient)
 
 	require.NoError(t, repo.SetScope(ctx, organization.ID, true, groupIDs[:2]))
-	scope, err := repo.GetScopeByUserID(ctx, userIDs[1])
+	scope, err := repo.GetMemberScopeByUserID(ctx, userIDs[1])
 	require.NoError(t, err)
 	require.True(t, scope.RestrictPublicGroups)
 	require.ElementsMatch(t, groupIDs[:2], scope.AllowedGroupIDs)

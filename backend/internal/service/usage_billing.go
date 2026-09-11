@@ -168,6 +168,11 @@ type UsageBillingApplyResult struct {
 	NewBalance           *float64           // post-deduction balance (nil = no balance deduction)
 	BalanceOverdrafted   bool               // true when the sufficient-balance guard missed and debt was still recorded
 	QuotaState           *AccountQuotaState // post-increment quota state (nil = no quota increment)
+	// PayerUserID 是实际被扣余额的账号。组织普通成员的调用扣的是组织付款账号，
+	// 其余情况就是发起调用的账号本人。0 表示这次没有发生余额扣减。
+	PayerUserID int64
+	// SpendingUserID 是被累计已消费金额的组织成员；0 表示这次不涉及组织配额。
+	SpendingUserID int64
 }
 
 // BatchImageBalanceHoldCommand describes an idempotent balance hold operation.
@@ -216,6 +221,9 @@ type BatchImageBalanceHoldResult struct {
 	Applied       bool
 	NewBalance    *float64
 	FrozenBalance *float64
+	// PayerUserID 是实际被冻结或扣款的账号；SpendingUserID 是被占用额度的组织成员。
+	PayerUserID    int64
+	SpendingUserID int64
 }
 
 type UsageBillingRepository interface {

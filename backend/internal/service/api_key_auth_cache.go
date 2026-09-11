@@ -39,6 +39,10 @@ type APIKeyAuthUserSnapshot struct {
 	// OrganizationID 非 nil 表示 AllowedGroups / RestrictPublicGroups 来自所属组织，
 	// 调用前据此执行组织分组校验；个人用户恒为 nil。
 	OrganizationID *int64 `json:"organization_id,omitempty"`
+	// OrganizationPayerUserID 是组织普通成员调用时的付款账号；0 表示自己付自己的。
+	OrganizationPayerUserID int64 `json:"organization_payer_user_id,omitempty"`
+	// OrganizationSpendingLimit 是该成员的累计消费上限，nil 表示不限额。
+	OrganizationSpendingLimit *float64 `json:"organization_spending_limit,omitempty"`
 
 	// Balance notification fields (required for CheckBalanceAfterDeduction)
 	Email                      string             `json:"email"`

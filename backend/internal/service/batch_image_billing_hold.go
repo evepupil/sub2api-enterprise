@@ -70,6 +70,10 @@ func reserveBatchImageBalanceHold(ctx context.Context, repo UsageBillingReposito
 		if errors.Is(err, ErrBatchImageInsufficientBalance) {
 			return ErrBatchImageInsufficientBalance
 		}
+		// 组织成员的消费上限不够，原样抛出让用户看到是自己的额度用完了。
+		if errors.Is(err, ErrOrganizationSpendingLimitExhausted) {
+			return ErrOrganizationSpendingLimitExhausted
+		}
 		return ErrBatchImageBillingHoldFailed.WithCause(err)
 	}
 	return nil

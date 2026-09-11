@@ -113,14 +113,17 @@ type BillingCacheService struct {
 	cfg                   *config.Config
 	circuitBreaker        *billingCircuitBreaker
 	userPlatformQuotaRepo UserPlatformQuotaRepository
+	// organizationSpendingRepo 读取组织成员已占用的额度，构造后注入，可为空。
+	organizationSpendingRepo OrganizationSpendingRepository
 
-	cacheWriteChan     chan cacheWriteTask
-	cacheWriteWg       sync.WaitGroup
-	cacheWriteStopOnce sync.Once
-	cacheWriteMu       sync.RWMutex
-	stopped            atomic.Bool
-	balanceLoadSF      singleflight.Group
-	quotaLoadSF        singleflight.Group
+	cacheWriteChan         chan cacheWriteTask
+	cacheWriteWg           sync.WaitGroup
+	cacheWriteStopOnce     sync.Once
+	cacheWriteMu           sync.RWMutex
+	stopped                atomic.Bool
+	balanceLoadSF          singleflight.Group
+	quotaLoadSF            singleflight.Group
+	organizationSpendingSF singleflight.Group
 	// 丢弃日志节流计数器（减少高负载下日志噪音）
 	cacheWriteDropFullCount     uint64
 	cacheWriteDropFullLastLog   int64
@@ -754,7 +757,12 @@ func (s *BillingCacheService) CheckBillingEligibility(ctx context.Context, user 
 			return err
 		}
 	} else {
-		if err := s.checkBalanceEligibility(ctx, user.ID); err != nil {
+		// 组织普通成员花的是组织付款账号的钱，余额要按付款账号查。
+		payerUserID := BillingPayerUserID(user)
+		if err := s.checkBalanceEligibility(ctx, payerUserID); err != nil {
+			return translateOrganizationBalanceError(err, payerUserID, user.ID)
+		}
+		if err := s.checkOrganizationSpendingEligibility(ctx, user); err != nil {
 			return err
 		}
 	}

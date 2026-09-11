@@ -185,22 +185,45 @@ func applyOrganizationSpendingLimits(
 	return nil
 }
 
+// NewOrganizationSpendingRepository 暴露成员已占用额度的读取，供计费缓存回源使用。
+func NewOrganizationSpendingRepository(client *dbent.Client) service.OrganizationSpendingRepository {
+	return &organizationMemberRepository{client: client}
+}
+
+// GetMemberSpending 返回成员已消费金额加已冻结金额；不是组织成员时返回 0。
+func (r *organizationMemberRepository) GetMemberSpending(ctx context.Context, userID int64) (float64, error) {
+	entity, err := clientFromContext(ctx, r.client).OrganizationMember.Query().
+		Where(organizationmember.UserIDEQ(userID)).
+		Only(ctx)
+	if err != nil {
+		if dbent.IsNotFound(err) {
+			return 0, nil
+		}
+		return 0, err
+	}
+	return entity.SpendingUsed + entity.SpendingFrozen, nil
+}
+
 func organizationMemberEntityToService(entity *dbent.OrganizationMember, ownerUserID int64) *service.OrganizationMember {
 	if entity == nil || entity.Edges.User == nil {
 		return nil
 	}
 	user := entity.Edges.User
 	return &service.OrganizationMember{
-		UserID:        entity.UserID,
-		Email:         user.Email,
-		Username:      user.Username,
-		Status:        user.Status,
-		Role:          user.Role,
-		IsOwner:       entity.UserID == ownerUserID,
-		SpendingLimit: entity.SpendingLimit,
-		SpendingUsed:  entity.SpendingUsed,
-		JoinedAt:      entity.CreatedAt,
+		UserID:         entity.UserID,
+		Email:          user.Email,
+		Username:       user.Username,
+		Status:         user.Status,
+		Role:           user.Role,
+		IsOwner:        entity.UserID == ownerUserID,
+		SpendingLimit:  entity.SpendingLimit,
+		SpendingUsed:   entity.SpendingUsed,
+		SpendingFrozen: entity.SpendingFrozen,
+		JoinedAt:       entity.CreatedAt,
 	}
 }
 
-var _ service.OrganizationMemberRepository = (*organizationMemberRepository)(nil)
+var (
+	_ service.OrganizationMemberRepository   = (*organizationMemberRepository)(nil)
+	_ service.OrganizationSpendingRepository = (*organizationMemberRepository)(nil)
+)

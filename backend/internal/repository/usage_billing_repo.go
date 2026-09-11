@@ -179,12 +179,23 @@ func (r *usageBillingRepository) applyUsageBillingEffects(ctx context.Context, t
 	}
 
 	if cmd.BalanceCost > 0 {
-		newBalance, sufficient, err := deductUsageBillingBalance(ctx, tx, cmd.UserID, cmd.BalanceCost)
+		payerUserID, memberUserID, err := resolveUsageBillingPayer(ctx, tx, cmd.UserID)
+		if err != nil {
+			return err
+		}
+		newBalance, sufficient, err := deductUsageBillingBalance(ctx, tx, payerUserID, cmd.BalanceCost)
 		if err != nil {
 			return err
 		}
 		result.NewBalance = &newBalance
 		result.BalanceOverdrafted = !sufficient
+		result.PayerUserID = payerUserID
+		if memberUserID > 0 {
+			if err := incrementOrganizationMemberSpending(ctx, tx, memberUserID, cmd.BalanceCost, 0); err != nil {
+				return err
+			}
+			result.SpendingUserID = memberUserID
+		}
 	}
 
 	if cmd.APIKeyQuotaCost > 0 {
@@ -209,6 +220,94 @@ func (r *usageBillingRepository) applyUsageBillingEffects(ctx context.Context, t
 		result.QuotaState = quotaState
 	}
 
+	return nil
+}
+
+// resolveUsageBillingPayer 在扣费事务里确定这笔钱记在谁头上。
+//
+// 组织普通成员的调用由组织付款账号（组织创建者）出钱，同时把金额累计到这个成员的
+// 已消费金额上；组织创建者本人和个人用户都是自己付自己的。
+//
+// 放在事务里现算而不是从请求上下文带进来：付款归属和扣款必须是同一时刻的事实，
+// 避免缓存里的旧归属把钱扣到错误的账号上。
+func resolveUsageBillingPayer(ctx context.Context, tx *sql.Tx, userID int64) (payerUserID int64, memberUserID int64, err error) {
+	var ownerUserID int64
+	queryErr := tx.QueryRowContext(ctx, `
+		SELECT o.owner_user_id
+		FROM organization_members m
+		JOIN organizations o ON o.id = m.organization_id
+		WHERE m.user_id = $1
+	`, userID).Scan(&ownerUserID)
+	if errors.Is(queryErr, sql.ErrNoRows) {
+		return userID, 0, nil
+	}
+	if queryErr != nil {
+		return 0, 0, queryErr
+	}
+	if ownerUserID == userID {
+		return userID, 0, nil
+	}
+	return ownerUserID, userID, nil
+}
+
+// ensureOrganizationSpendingAllowance 在预扣之前确认成员的额度够不够。
+//
+// 行锁住成员这一行，让同一成员的并发预扣排队，避免两笔任务各自看到旧数字后
+// 一起冻结、加起来超过上限。上限留空表示不限额。
+func ensureOrganizationSpendingAllowance(ctx context.Context, tx *sql.Tx, userID int64, holdAmount float64) error {
+	if userID <= 0 || holdAmount <= 0 {
+		return nil
+	}
+	var limit sql.NullFloat64
+	var used, frozen float64
+	err := tx.QueryRowContext(ctx, `
+		SELECT spending_limit, spending_used, spending_frozen
+		FROM organization_members
+		WHERE user_id = $1
+		FOR UPDATE
+	`, userID).Scan(&limit, &used, &frozen)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	if !limit.Valid {
+		return nil
+	}
+	if used+frozen+holdAmount > limit.Float64+usageBillingAmountEpsilon {
+		return service.ErrOrganizationSpendingLimitExhausted
+	}
+	return nil
+}
+
+// usageBillingAmountEpsilon 是金额比较的容差，对齐 NUMERIC(20,8) 的最小刻度。
+const usageBillingAmountEpsilon = 0.00000001
+
+// incrementOrganizationMemberSpending 累加组织成员的已消费金额和已冻结金额。
+// 两个增量都可以为负，用于结算和释放冻结。
+func incrementOrganizationMemberSpending(ctx context.Context, tx *sql.Tx, userID int64, usedDelta, frozenDelta float64) error {
+	if userID <= 0 || (usedDelta == 0 && frozenDelta == 0) {
+		return nil
+	}
+	res, err := tx.ExecContext(ctx, `
+		UPDATE organization_members
+		SET spending_used = GREATEST(spending_used + $1, 0),
+			spending_frozen = GREATEST(spending_frozen + $2, 0),
+			updated_at = NOW()
+		WHERE user_id = $3
+	`, usedDelta, frozenDelta, userID)
+	if err != nil {
+		return err
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		// 账号在扣费途中退出了组织：钱已经按当时的归属扣掉，配额不再累计。
+		return nil
+	}
 	return nil
 }
 
@@ -276,22 +375,39 @@ func reserveUsageBillingBatchImageBalance(ctx context.Context, tx *sql.Tx, cmd *
 	if cmd.HoldAmount <= 0 {
 		return &service.BatchImageBalanceHoldResult{}, nil
 	}
+	payerUserID, memberUserID, err := resolveUsageBillingPayer(ctx, tx, cmd.UserID)
+	if err != nil {
+		return nil, err
+	}
+	// 组织成员的预扣要先过自己的消费上限，再去冻结组织付款账号的余额。
+	if err := ensureOrganizationSpendingAllowance(ctx, tx, memberUserID, cmd.HoldAmount); err != nil {
+		return nil, err
+	}
 	var balance, frozen float64
-	err := tx.QueryRowContext(ctx, `
+	err = tx.QueryRowContext(ctx, `
 		UPDATE users
 		SET balance = balance - $1,
 			frozen_balance = COALESCE(frozen_balance, 0) + $1,
 			updated_at = NOW()
 		WHERE id = $2 AND deleted_at IS NULL AND balance >= $1
 		RETURNING balance, frozen_balance
-	`, cmd.HoldAmount, cmd.UserID).Scan(&balance, &frozen)
+	`, cmd.HoldAmount, payerUserID).Scan(&balance, &frozen)
 	if err == nil {
-		return &service.BatchImageBalanceHoldResult{NewBalance: &balance, FrozenBalance: &frozen}, nil
+		// 组织成员提交的任务，同时在成员身上占住同样的额度。
+		if memberErr := incrementOrganizationMemberSpending(ctx, tx, memberUserID, 0, cmd.HoldAmount); memberErr != nil {
+			return nil, memberErr
+		}
+		return &service.BatchImageBalanceHoldResult{
+			NewBalance:     &balance,
+			FrozenBalance:  &frozen,
+			PayerUserID:    payerUserID,
+			SpendingUserID: memberUserID,
+		}, nil
 	}
 	if !errors.Is(err, sql.ErrNoRows) {
 		return nil, err
 	}
-	if exists, existsErr := userExistsForBilling(ctx, tx, cmd.UserID); existsErr != nil {
+	if exists, existsErr := userExistsForBilling(ctx, tx, payerUserID); existsErr != nil {
 		return nil, existsErr
 	} else if !exists {
 		return nil, service.ErrUserNotFound
@@ -306,8 +422,12 @@ func captureUsageBillingBatchImageBalance(ctx context.Context, tx *sql.Tx, cmd *
 	if cmd.ActualAmount-cmd.HoldAmount > 0.00000001 {
 		return nil, service.ErrBatchImageSettlementCostExceedsHold
 	}
+	payerUserID, memberUserID, err := resolveUsageBillingPayer(ctx, tx, cmd.UserID)
+	if err != nil {
+		return nil, err
+	}
 	var balance, frozen float64
-	err := tx.QueryRowContext(ctx, `
+	err = tx.QueryRowContext(ctx, `
 		UPDATE users
 		SET balance = balance
 				+ CASE WHEN $1 > $2 THEN $1 - $2 ELSE 0 END
@@ -316,14 +436,23 @@ func captureUsageBillingBatchImageBalance(ctx context.Context, tx *sql.Tx, cmd *
 			updated_at = NOW()
 		WHERE id = $3 AND deleted_at IS NULL AND COALESCE(frozen_balance, 0) >= $1
 		RETURNING balance, frozen_balance
-	`, cmd.HoldAmount, cmd.ActualAmount, cmd.UserID).Scan(&balance, &frozen)
+	`, cmd.HoldAmount, cmd.ActualAmount, payerUserID).Scan(&balance, &frozen)
 	if err == nil {
-		return &service.BatchImageBalanceHoldResult{NewBalance: &balance, FrozenBalance: &frozen}, nil
+		// 结算：释放成员这笔占用，按真实花费累计已消费金额。
+		if memberErr := incrementOrganizationMemberSpending(ctx, tx, memberUserID, cmd.ActualAmount, -cmd.HoldAmount); memberErr != nil {
+			return nil, memberErr
+		}
+		return &service.BatchImageBalanceHoldResult{
+			NewBalance:     &balance,
+			FrozenBalance:  &frozen,
+			PayerUserID:    payerUserID,
+			SpendingUserID: memberUserID,
+		}, nil
 	}
 	if !errors.Is(err, sql.ErrNoRows) {
 		return nil, err
 	}
-	if exists, existsErr := userExistsForBilling(ctx, tx, cmd.UserID); existsErr != nil {
+	if exists, existsErr := userExistsForBilling(ctx, tx, payerUserID); existsErr != nil {
 		return nil, existsErr
 	} else if !exists {
 		return nil, service.ErrUserNotFound
@@ -345,22 +474,35 @@ func releaseUsageBillingBatchImageBalance(ctx context.Context, tx *sql.Tx, cmd *
 		logger.LegacyPrintf("repository.usage_billing", "[BatchImage] release skipped, hold was never reserved: batch=%s", cmd.BatchID)
 		return &service.BatchImageBalanceHoldResult{}, nil
 	}
+	payerUserID, memberUserID, err := resolveUsageBillingPayer(ctx, tx, cmd.UserID)
+	if err != nil {
+		return nil, err
+	}
 	var balance, frozen float64
-	err := tx.QueryRowContext(ctx, `
+	err = tx.QueryRowContext(ctx, `
 		UPDATE users
 		SET balance = balance + $1,
 			frozen_balance = COALESCE(frozen_balance, 0) - $1,
 			updated_at = NOW()
 		WHERE id = $2 AND deleted_at IS NULL AND COALESCE(frozen_balance, 0) >= $1
 		RETURNING balance, frozen_balance
-	`, cmd.HoldAmount, cmd.UserID).Scan(&balance, &frozen)
+	`, cmd.HoldAmount, payerUserID).Scan(&balance, &frozen)
 	if err == nil {
-		return &service.BatchImageBalanceHoldResult{NewBalance: &balance, FrozenBalance: &frozen}, nil
+		// 取消：把成员身上的占用还回去，已消费金额不变。
+		if memberErr := incrementOrganizationMemberSpending(ctx, tx, memberUserID, 0, -cmd.HoldAmount); memberErr != nil {
+			return nil, memberErr
+		}
+		return &service.BatchImageBalanceHoldResult{
+			NewBalance:     &balance,
+			FrozenBalance:  &frozen,
+			PayerUserID:    payerUserID,
+			SpendingUserID: memberUserID,
+		}, nil
 	}
 	if !errors.Is(err, sql.ErrNoRows) {
 		return nil, err
 	}
-	if exists, existsErr := userExistsForBilling(ctx, tx, cmd.UserID); existsErr != nil {
+	if exists, existsErr := userExistsForBilling(ctx, tx, payerUserID); existsErr != nil {
 		return nil, existsErr
 	} else if !exists {
 		return nil, service.ErrUserNotFound

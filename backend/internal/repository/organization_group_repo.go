@@ -20,13 +20,14 @@ func NewOrganizationGroupRepository(client *dbent.Client) service.OrganizationGr
 	return &organizationGroupRepository{client: client}
 }
 
-func (r *organizationGroupRepository) GetScopeByUserID(
+func (r *organizationGroupRepository) GetMemberScopeByUserID(
 	ctx context.Context,
 	userID int64,
-) (*service.OrganizationGroupScope, error) {
+) (*service.OrganizationMemberScope, error) {
 	client := clientFromContext(ctx, r.client)
 	membership, err := client.OrganizationMember.Query().
 		Where(organizationmember.UserIDEQ(userID)).
+		WithOrganization().
 		Only(ctx)
 	if err != nil {
 		if dbent.IsNotFound(err) {
@@ -35,13 +36,28 @@ func (r *organizationGroupRepository) GetScopeByUserID(
 		}
 		return nil, err
 	}
-	return r.GetScopeByOrganizationID(ctx, membership.OrganizationID)
+	if membership.Edges.Organization == nil {
+		return nil, service.ErrOrganizationNotFound
+	}
+	groupIDs, err := r.listAllowedGroupIDs(ctx, membership.OrganizationID)
+	if err != nil {
+		return nil, err
+	}
+	entity := membership.Edges.Organization
+	return &service.OrganizationMemberScope{
+		OrganizationID:       entity.ID,
+		OwnerUserID:          entity.OwnerUserID,
+		IsOwner:              entity.OwnerUserID == userID,
+		RestrictPublicGroups: entity.RestrictPublicGroups,
+		AllowedGroupIDs:      groupIDs,
+		SpendingLimit:        membership.SpendingLimit,
+	}, nil
 }
 
 func (r *organizationGroupRepository) GetScopeByOrganizationID(
 	ctx context.Context,
 	organizationID int64,
-) (*service.OrganizationGroupScope, error) {
+) (*service.OrganizationMemberScope, error) {
 	client := clientFromContext(ctx, r.client)
 	entity, err := client.Organization.Query().
 		Where(organization.IDEQ(organizationID)).
@@ -56,8 +72,9 @@ func (r *organizationGroupRepository) GetScopeByOrganizationID(
 	if err != nil {
 		return nil, err
 	}
-	return &service.OrganizationGroupScope{
+	return &service.OrganizationMemberScope{
 		OrganizationID:       entity.ID,
+		OwnerUserID:          entity.OwnerUserID,
 		RestrictPublicGroups: entity.RestrictPublicGroups,
 		AllowedGroupIDs:      groupIDs,
 	}, nil

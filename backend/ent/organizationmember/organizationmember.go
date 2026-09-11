@@ -26,6 +26,8 @@ const (
 	FieldSpendingLimit = "spending_limit"
 	// FieldSpendingUsed holds the string denoting the spending_used field in the database.
 	FieldSpendingUsed = "spending_used"
+	// FieldSpendingFrozen holds the string denoting the spending_frozen field in the database.
+	FieldSpendingFrozen = "spending_frozen"
 	// EdgeOrganization holds the string denoting the organization edge name in mutations.
 	EdgeOrganization = "organization"
 	// EdgeUser holds the string denoting the user edge name in mutations.
@@ -57,6 +59,7 @@ var Columns = []string{
 	FieldUserID,
 	FieldSpendingLimit,
 	FieldSpendingUsed,
+	FieldSpendingFrozen,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -78,6 +81,8 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// DefaultSpendingUsed holds the default value on creation for the "spending_used" field.
 	DefaultSpendingUsed float64
+	// DefaultSpendingFrozen holds the default value on creation for the "spending_frozen" field.
+	DefaultSpendingFrozen float64
 )
 
 // OrderOption defines the ordering options for the OrganizationMember queries.
@@ -116,6 +121,11 @@ func BySpendingLimit(opts ...sql.OrderTermOption) OrderOption {
 // BySpendingUsed orders the results by the spending_used field.
 func BySpendingUsed(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSpendingUsed, opts...).ToFunc()
+}
+
+// BySpendingFrozen orders the results by the spending_frozen field.
+func BySpendingFrozen(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSpendingFrozen, opts...).ToFunc()
 }
 
 // ByOrganizationField orders the results by organization field.

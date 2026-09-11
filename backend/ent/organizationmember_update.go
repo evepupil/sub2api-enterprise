@@ -112,6 +112,27 @@ func (_u *OrganizationMemberUpdate) AddSpendingUsed(v float64) *OrganizationMemb
 	return _u
 }
 
+// SetSpendingFrozen sets the "spending_frozen" field.
+func (_u *OrganizationMemberUpdate) SetSpendingFrozen(v float64) *OrganizationMemberUpdate {
+	_u.mutation.ResetSpendingFrozen()
+	_u.mutation.SetSpendingFrozen(v)
+	return _u
+}
+
+// SetNillableSpendingFrozen sets the "spending_frozen" field if the given value is not nil.
+func (_u *OrganizationMemberUpdate) SetNillableSpendingFrozen(v *float64) *OrganizationMemberUpdate {
+	if v != nil {
+		_u.SetSpendingFrozen(*v)
+	}
+	return _u
+}
+
+// AddSpendingFrozen adds value to the "spending_frozen" field.
+func (_u *OrganizationMemberUpdate) AddSpendingFrozen(v float64) *OrganizationMemberUpdate {
+	_u.mutation.AddSpendingFrozen(v)
+	return _u
+}
+
 // SetOrganization sets the "organization" edge to the Organization entity.
 func (_u *OrganizationMemberUpdate) SetOrganization(v *Organization) *OrganizationMemberUpdate {
 	return _u.SetOrganizationID(v.ID)
@@ -215,6 +236,12 @@ func (_u *OrganizationMemberUpdate) sqlSave(ctx context.Context) (_node int, err
 	}
 	if value, ok := _u.mutation.AddedSpendingUsed(); ok {
 		_spec.AddField(organizationmember.FieldSpendingUsed, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.SpendingFrozen(); ok {
+		_spec.SetField(organizationmember.FieldSpendingFrozen, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedSpendingFrozen(); ok {
+		_spec.AddField(organizationmember.FieldSpendingFrozen, field.TypeFloat64, value)
 	}
 	if _u.mutation.OrganizationCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -376,6 +403,27 @@ func (_u *OrganizationMemberUpdateOne) AddSpendingUsed(v float64) *OrganizationM
 	return _u
 }
 
+// SetSpendingFrozen sets the "spending_frozen" field.
+func (_u *OrganizationMemberUpdateOne) SetSpendingFrozen(v float64) *OrganizationMemberUpdateOne {
+	_u.mutation.ResetSpendingFrozen()
+	_u.mutation.SetSpendingFrozen(v)
+	return _u
+}
+
+// SetNillableSpendingFrozen sets the "spending_frozen" field if the given value is not nil.
+func (_u *OrganizationMemberUpdateOne) SetNillableSpendingFrozen(v *float64) *OrganizationMemberUpdateOne {
+	if v != nil {
+		_u.SetSpendingFrozen(*v)
+	}
+	return _u
+}
+
+// AddSpendingFrozen adds value to the "spending_frozen" field.
+func (_u *OrganizationMemberUpdateOne) AddSpendingFrozen(v float64) *OrganizationMemberUpdateOne {
+	_u.mutation.AddSpendingFrozen(v)
+	return _u
+}
+
 // SetOrganization sets the "organization" edge to the Organization entity.
 func (_u *OrganizationMemberUpdateOne) SetOrganization(v *Organization) *OrganizationMemberUpdateOne {
 	return _u.SetOrganizationID(v.ID)
@@ -509,6 +557,12 @@ func (_u *OrganizationMemberUpdateOne) sqlSave(ctx context.Context) (_node *Orga
 	}
 	if value, ok := _u.mutation.AddedSpendingUsed(); ok {
 		_spec.AddField(organizationmember.FieldSpendingUsed, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.SpendingFrozen(); ok {
+		_spec.SetField(organizationmember.FieldSpendingFrozen, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedSpendingFrozen(); ok {
+		_spec.AddField(organizationmember.FieldSpendingFrozen, field.TypeFloat64, value)
 	}
 	if _u.mutation.OrganizationCleared() {
 		edge := &sqlgraph.EdgeSpec{

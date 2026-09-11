@@ -1350,6 +1350,10 @@ func init() {
 	organizationmemberDescSpendingUsed := organizationmemberFields[3].Descriptor()
 	// organizationmember.DefaultSpendingUsed holds the default value on creation for the spending_used field.
 	organizationmember.DefaultSpendingUsed = organizationmemberDescSpendingUsed.Default.(float64)
+	// organizationmemberDescSpendingFrozen is the schema descriptor for spending_frozen field.
+	organizationmemberDescSpendingFrozen := organizationmemberFields[4].Descriptor()
+	// organizationmember.DefaultSpendingFrozen holds the default value on creation for the spending_frozen field.
+	organizationmember.DefaultSpendingFrozen = organizationmemberDescSpendingFrozen.Default.(float64)
 	paymentauditlogFields := schema.PaymentAuditLog{}.Fields()
 	_ = paymentauditlogFields
 	// paymentauditlogDescOrderID is the schema descriptor for order_id field.

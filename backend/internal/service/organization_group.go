@@ -18,24 +18,31 @@ var ErrOrganizationGroupForbidden = infraerrors.Forbidden(
 	"this group is no longer authorized for your organization",
 )
 
-// OrganizationGroupScope 是平台授予某个组织的分组范围。
+// OrganizationMemberScope 是一个账号因为属于组织而适用的全部规则：能用哪些分组、
+// 这次调用由谁付款、自己的消费上限是多少。
 //
-// 判断规则与账号侧完全一致：
+// 分组判断规则与账号侧完全一致：
 //
 //	RestrictPublicGroups = false → 公开分组全部可用，专属分组只认 AllowedGroupIDs
 //	RestrictPublicGroups = true  → 公开分组也必须落在 AllowedGroupIDs 里
 //
 // 新建组织没有任何授权记录，落到的就是「公开分组全放、专属分组全不给」。
-type OrganizationGroupScope struct {
+//
+// 组织创建者本人付自己的钱、不受成员消费上限约束，所以 IsOwner 为 true 时
+// SpendingLimit 不参与判断。
+type OrganizationMemberScope struct {
 	OrganizationID       int64
+	OwnerUserID          int64
+	IsOwner              bool
 	RestrictPublicGroups bool
 	AllowedGroupIDs      []int64
+	SpendingLimit        *float64
 }
 
 type OrganizationGroupRepository interface {
-	// GetScopeByUserID 返回该账号所属组织的分组范围；账号不属于任何组织时返回 nil。
-	GetScopeByUserID(ctx context.Context, userID int64) (*OrganizationGroupScope, error)
-	GetScopeByOrganizationID(ctx context.Context, organizationID int64) (*OrganizationGroupScope, error)
+	// GetMemberScopeByUserID 返回该账号因所属组织而适用的规则；账号不属于任何组织时返回 nil。
+	GetMemberScopeByUserID(ctx context.Context, userID int64) (*OrganizationMemberScope, error)
+	GetScopeByOrganizationID(ctx context.Context, organizationID int64) (*OrganizationMemberScope, error)
 	// SetScope 覆盖写入组织的分组范围，开关和分组清单一起生效。
 	SetScope(ctx context.Context, organizationID int64, restrictPublicGroups bool, groupIDs []int64) error
 	ListMemberUserIDs(ctx context.Context, organizationID int64) ([]int64, error)
@@ -56,18 +63,19 @@ func NewOrganizationGroupService(repo OrganizationGroupRepository) *Organization
 	return &OrganizationGroupService{repo: repo}
 }
 
-// ApplyScopeToUser 把账号所属组织的分组范围写进这份账号数据。
+// ApplyScopeToUser 把账号所属组织的分组范围和付款归属写进这份账号数据。
 //
 // 账号属于组织时，组织的范围整体接管：账号自己的授权清单和公开分组开关不再参与判断。
+// 普通成员还会带上组织付款账号和自己的消费上限，供调用前的余额和额度判断使用。
 // 账号不属于任何组织时原样返回，个人用户行为不变。
 //
-// 注意：调用方拿到的这份账号数据只用于分组判断和鉴权快照，不能再拿去回写账号，
+// 注意：调用方拿到的这份账号数据只用于权限判断和鉴权快照，不能再拿去回写账号，
 // 否则会把组织范围写进账号自己的授权清单。
 func (s *OrganizationGroupService) ApplyScopeToUser(ctx context.Context, user *User) error {
 	if s == nil || s.repo == nil || user == nil || user.ID <= 0 {
 		return nil
 	}
-	scope, err := s.repo.GetScopeByUserID(ctx, user.ID)
+	scope, err := s.repo.GetMemberScopeByUserID(ctx, user.ID)
 	if err != nil {
 		return err
 	}
@@ -78,6 +86,14 @@ func (s *OrganizationGroupService) ApplyScopeToUser(ctx context.Context, user *U
 	user.OrganizationID = &organizationID
 	user.RestrictPublicGroups = scope.RestrictPublicGroups
 	user.AllowedGroups = append([]int64(nil), scope.AllowedGroupIDs...)
+	// 组织创建者花自己的钱，也不受成员消费上限约束。
+	if scope.IsOwner {
+		user.OrganizationPayerUserID = 0
+		user.OrganizationSpendingLimit = nil
+		return nil
+	}
+	user.OrganizationPayerUserID = scope.OwnerUserID
+	user.OrganizationSpendingLimit = scope.SpendingLimit
 	return nil
 }
 

@@ -14,7 +14,7 @@ import (
 	"github.com/dgraph-io/ristretto"
 )
 
-const apiKeyAuthSnapshotVersion = 25 // v25: user organization_id + 组织分组范围（旧快照没有组织信息，必须作废重建）
+const apiKeyAuthSnapshotVersion = 26 // v26: user 组织付款账号 + 成员消费上限（旧快照没有结算信息，必须作废重建）
 
 type apiKeyAuthCacheConfig struct {
 	l1Size        int
@@ -372,6 +372,8 @@ func (s *APIKeyService) snapshotFromAPIKey(ctx context.Context, apiKey *APIKey) 
 			Concurrency:                apiKey.User.Concurrency,
 			AllowedGroups:              apiKey.User.AllowedGroups,
 			OrganizationID:             apiKey.User.OrganizationID,
+			OrganizationPayerUserID:    apiKey.User.OrganizationPayerUserID,
+			OrganizationSpendingLimit:  apiKey.User.OrganizationSpendingLimit,
 			Email:                      apiKey.User.Email,
 			Username:                   apiKey.User.Username,
 			BalanceNotifyEnabled:       apiKey.User.BalanceNotifyEnabled,
@@ -482,6 +484,8 @@ func (s *APIKeyService) snapshotToAPIKey(key string, snapshot *APIKeyAuthSnapsho
 			Concurrency:                snapshot.User.Concurrency,
 			AllowedGroups:              snapshot.User.AllowedGroups,
 			OrganizationID:             snapshot.User.OrganizationID,
+			OrganizationPayerUserID:    snapshot.User.OrganizationPayerUserID,
+			OrganizationSpendingLimit:  snapshot.User.OrganizationSpendingLimit,
 			Email:                      snapshot.User.Email,
 			Username:                   snapshot.User.Username,
 			BalanceNotifyEnabled:       snapshot.User.BalanceNotifyEnabled,

@@ -85,6 +85,11 @@ func SpendingUsed(v float64) predicate.OrganizationMember {
 	return predicate.OrganizationMember(sql.FieldEQ(FieldSpendingUsed, v))
 }
 
+// SpendingFrozen applies equality check predicate on the "spending_frozen" field. It's identical to SpendingFrozenEQ.
+func SpendingFrozen(v float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldEQ(FieldSpendingFrozen, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.OrganizationMember {
 	return predicate.OrganizationMember(sql.FieldEQ(FieldCreatedAt, v))
@@ -293,6 +298,46 @@ func SpendingUsedLT(v float64) predicate.OrganizationMember {
 // SpendingUsedLTE applies the LTE predicate on the "spending_used" field.
 func SpendingUsedLTE(v float64) predicate.OrganizationMember {
 	return predicate.OrganizationMember(sql.FieldLTE(FieldSpendingUsed, v))
+}
+
+// SpendingFrozenEQ applies the EQ predicate on the "spending_frozen" field.
+func SpendingFrozenEQ(v float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldEQ(FieldSpendingFrozen, v))
+}
+
+// SpendingFrozenNEQ applies the NEQ predicate on the "spending_frozen" field.
+func SpendingFrozenNEQ(v float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldNEQ(FieldSpendingFrozen, v))
+}
+
+// SpendingFrozenIn applies the In predicate on the "spending_frozen" field.
+func SpendingFrozenIn(vs ...float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldIn(FieldSpendingFrozen, vs...))
+}
+
+// SpendingFrozenNotIn applies the NotIn predicate on the "spending_frozen" field.
+func SpendingFrozenNotIn(vs ...float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldNotIn(FieldSpendingFrozen, vs...))
+}
+
+// SpendingFrozenGT applies the GT predicate on the "spending_frozen" field.
+func SpendingFrozenGT(v float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldGT(FieldSpendingFrozen, v))
+}
+
+// SpendingFrozenGTE applies the GTE predicate on the "spending_frozen" field.
+func SpendingFrozenGTE(v float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldGTE(FieldSpendingFrozen, v))
+}
+
+// SpendingFrozenLT applies the LT predicate on the "spending_frozen" field.
+func SpendingFrozenLT(v float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldLT(FieldSpendingFrozen, v))
+}
+
+// SpendingFrozenLTE applies the LTE predicate on the "spending_frozen" field.
+func SpendingFrozenLTE(v float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldLTE(FieldSpendingFrozen, v))
 }
 
 // HasOrganization applies the HasEdge predicate on the "organization" edge.

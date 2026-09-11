@@ -18,10 +18,12 @@ const (
 	billingBalanceKeyPrefix   = "billing:balance:"
 	billingSubKeyPrefix       = "billing:sub:"
 	billingRateLimitKeyPrefix = "apikey:rate:"
-	subCacheInvalidateChannel = "subscription:cache:invalidate"
-	billingCacheTTL           = 5 * time.Minute
-	billingCacheJitter        = 30 * time.Second
-	rateLimitCacheTTL         = 7 * 24 * time.Hour // 7 days matches the longest window
+	// 组织成员已占用额度（已消费 + 已冻结）缓存前缀
+	billingOrgSpendingKeyPrefix = "billing:orgspend:"
+	subCacheInvalidateChannel   = "subscription:cache:invalidate"
+	billingCacheTTL             = 5 * time.Minute
+	billingCacheJitter          = 30 * time.Second
+	rateLimitCacheTTL           = 7 * 24 * time.Hour // 7 days matches the longest window
 
 	// Rate limit window durations — must match service.RateLimitWindow* constants.
 	rateLimitWindow5h = 5 * time.Hour
@@ -37,6 +39,11 @@ func jitteredTTL() time.Duration {
 	}
 	jitter := time.Duration(rand.IntN(int(billingCacheJitter)))
 	return billingCacheTTL - jitter
+}
+
+// billingOrgSpendingKey generates the Redis key for organization member spending cache.
+func billingOrgSpendingKey(userID int64) string {
+	return fmt.Sprintf("%s%d", billingOrgSpendingKeyPrefix, userID)
 }
 
 // billingBalanceKey generates the Redis key for user balance cache.
@@ -79,6 +86,21 @@ var (
 			return 0
 		end
 		local newVal = tonumber(current) - tonumber(ARGV[1])
+		redis.call('SET', KEYS[1], newVal)
+		redis.call('EXPIRE', KEYS[1], ARGV[2])
+		return 1
+	`)
+
+	// 只在 key 存在时累加：缓存未命中时凭空 INCR 会写出一个缺少历史消费的错误值。
+	incrOrgSpendingScript = redis.NewScript(`
+		local current = redis.call('GET', KEYS[1])
+		if current == false then
+			return 0
+		end
+		local newVal = tonumber(current) + tonumber(ARGV[1])
+		if newVal < 0 then
+			newVal = 0
+		end
 		redis.call('SET', KEYS[1], newVal)
 		redis.call('EXPIRE', KEYS[1], ARGV[2])
 		return 1
@@ -171,6 +193,31 @@ func (c *billingCache) DeductUserBalance(ctx context.Context, userID int64, amou
 func (c *billingCache) InvalidateUserBalance(ctx context.Context, userID int64) error {
 	key := billingBalanceKey(userID)
 	return c.rdb.Del(ctx, key).Err()
+}
+
+func (c *billingCache) GetOrganizationMemberSpending(ctx context.Context, userID int64) (float64, error) {
+	val, err := c.rdb.Get(ctx, billingOrgSpendingKey(userID)).Result()
+	if err != nil {
+		return 0, err
+	}
+	return strconv.ParseFloat(val, 64)
+}
+
+func (c *billingCache) SetOrganizationMemberSpending(ctx context.Context, userID int64, spending float64) error {
+	return c.rdb.Set(ctx, billingOrgSpendingKey(userID), spending, jitteredTTL()).Err()
+}
+
+func (c *billingCache) IncrOrganizationMemberSpending(ctx context.Context, userID int64, delta float64) error {
+	_, err := incrOrgSpendingScript.Run(ctx, c.rdb,
+		[]string{billingOrgSpendingKey(userID)}, delta, int(jitteredTTL().Seconds())).Result()
+	if err != nil && !errors.Is(err, redis.Nil) {
+		return err
+	}
+	return nil
+}
+
+func (c *billingCache) InvalidateOrganizationMemberSpending(ctx context.Context, userID int64) error {
+	return c.rdb.Del(ctx, billingOrgSpendingKey(userID)).Err()
 }
 
 func (c *billingCache) GetSubscriptionCache(ctx context.Context, userID, groupID int64) (*service.SubscriptionCacheData, error) {

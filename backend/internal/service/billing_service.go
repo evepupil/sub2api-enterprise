@@ -65,6 +65,13 @@ type BillingCache interface {
 	DeductUserBalance(ctx context.Context, userID int64, amount float64) error
 	InvalidateUserBalance(ctx context.Context, userID int64) error
 
+	// 组织成员已占用额度缓存（已消费 + 已冻结）
+	GetOrganizationMemberSpending(ctx context.Context, userID int64) (float64, error)
+	SetOrganizationMemberSpending(ctx context.Context, userID int64, spending float64) error
+	// IncrOrganizationMemberSpending 在缓存命中时累加；未命中（key 不存在）静默返回 nil。
+	IncrOrganizationMemberSpending(ctx context.Context, userID int64, delta float64) error
+	InvalidateOrganizationMemberSpending(ctx context.Context, userID int64) error
+
 	// Subscription operations
 	GetSubscriptionCache(ctx context.Context, userID, groupID int64) (*SubscriptionCacheData, error)
 	SetSubscriptionCache(ctx context.Context, userID, groupID int64, data *SubscriptionCacheData) error

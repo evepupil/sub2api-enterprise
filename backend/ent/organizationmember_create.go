@@ -92,6 +92,20 @@ func (_c *OrganizationMemberCreate) SetNillableSpendingUsed(v *float64) *Organiz
 	return _c
 }
 
+// SetSpendingFrozen sets the "spending_frozen" field.
+func (_c *OrganizationMemberCreate) SetSpendingFrozen(v float64) *OrganizationMemberCreate {
+	_c.mutation.SetSpendingFrozen(v)
+	return _c
+}
+
+// SetNillableSpendingFrozen sets the "spending_frozen" field if the given value is not nil.
+func (_c *OrganizationMemberCreate) SetNillableSpendingFrozen(v *float64) *OrganizationMemberCreate {
+	if v != nil {
+		_c.SetSpendingFrozen(*v)
+	}
+	return _c
+}
+
 // SetOrganization sets the "organization" edge to the Organization entity.
 func (_c *OrganizationMemberCreate) SetOrganization(v *Organization) *OrganizationMemberCreate {
 	return _c.SetOrganizationID(v.ID)
@@ -149,6 +163,10 @@ func (_c *OrganizationMemberCreate) defaults() {
 		v := organizationmember.DefaultSpendingUsed
 		_c.mutation.SetSpendingUsed(v)
 	}
+	if _, ok := _c.mutation.SpendingFrozen(); !ok {
+		v := organizationmember.DefaultSpendingFrozen
+		_c.mutation.SetSpendingFrozen(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -167,6 +185,9 @@ func (_c *OrganizationMemberCreate) check() error {
 	}
 	if _, ok := _c.mutation.SpendingUsed(); !ok {
 		return &ValidationError{Name: "spending_used", err: errors.New(`ent: missing required field "OrganizationMember.spending_used"`)}
+	}
+	if _, ok := _c.mutation.SpendingFrozen(); !ok {
+		return &ValidationError{Name: "spending_frozen", err: errors.New(`ent: missing required field "OrganizationMember.spending_frozen"`)}
 	}
 	if len(_c.mutation.OrganizationIDs()) == 0 {
 		return &ValidationError{Name: "organization", err: errors.New(`ent: missing required edge "OrganizationMember.organization"`)}
@@ -216,6 +237,10 @@ func (_c *OrganizationMemberCreate) createSpec() (*OrganizationMember, *sqlgraph
 	if value, ok := _c.mutation.SpendingUsed(); ok {
 		_spec.SetField(organizationmember.FieldSpendingUsed, field.TypeFloat64, value)
 		_node.SpendingUsed = value
+	}
+	if value, ok := _c.mutation.SpendingFrozen(); ok {
+		_spec.SetField(organizationmember.FieldSpendingFrozen, field.TypeFloat64, value)
+		_node.SpendingFrozen = value
 	}
 	if nodes := _c.mutation.OrganizationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -381,6 +406,24 @@ func (u *OrganizationMemberUpsert) AddSpendingUsed(v float64) *OrganizationMembe
 	return u
 }
 
+// SetSpendingFrozen sets the "spending_frozen" field.
+func (u *OrganizationMemberUpsert) SetSpendingFrozen(v float64) *OrganizationMemberUpsert {
+	u.Set(organizationmember.FieldSpendingFrozen, v)
+	return u
+}
+
+// UpdateSpendingFrozen sets the "spending_frozen" field to the value that was provided on create.
+func (u *OrganizationMemberUpsert) UpdateSpendingFrozen() *OrganizationMemberUpsert {
+	u.SetExcluded(organizationmember.FieldSpendingFrozen)
+	return u
+}
+
+// AddSpendingFrozen adds v to the "spending_frozen" field.
+func (u *OrganizationMemberUpsert) AddSpendingFrozen(v float64) *OrganizationMemberUpsert {
+	u.Add(organizationmember.FieldSpendingFrozen, v)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -514,6 +557,27 @@ func (u *OrganizationMemberUpsertOne) AddSpendingUsed(v float64) *OrganizationMe
 func (u *OrganizationMemberUpsertOne) UpdateSpendingUsed() *OrganizationMemberUpsertOne {
 	return u.Update(func(s *OrganizationMemberUpsert) {
 		s.UpdateSpendingUsed()
+	})
+}
+
+// SetSpendingFrozen sets the "spending_frozen" field.
+func (u *OrganizationMemberUpsertOne) SetSpendingFrozen(v float64) *OrganizationMemberUpsertOne {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.SetSpendingFrozen(v)
+	})
+}
+
+// AddSpendingFrozen adds v to the "spending_frozen" field.
+func (u *OrganizationMemberUpsertOne) AddSpendingFrozen(v float64) *OrganizationMemberUpsertOne {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.AddSpendingFrozen(v)
+	})
+}
+
+// UpdateSpendingFrozen sets the "spending_frozen" field to the value that was provided on create.
+func (u *OrganizationMemberUpsertOne) UpdateSpendingFrozen() *OrganizationMemberUpsertOne {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.UpdateSpendingFrozen()
 	})
 }
 
@@ -816,6 +880,27 @@ func (u *OrganizationMemberUpsertBulk) AddSpendingUsed(v float64) *OrganizationM
 func (u *OrganizationMemberUpsertBulk) UpdateSpendingUsed() *OrganizationMemberUpsertBulk {
 	return u.Update(func(s *OrganizationMemberUpsert) {
 		s.UpdateSpendingUsed()
+	})
+}
+
+// SetSpendingFrozen sets the "spending_frozen" field.
+func (u *OrganizationMemberUpsertBulk) SetSpendingFrozen(v float64) *OrganizationMemberUpsertBulk {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.SetSpendingFrozen(v)
+	})
+}
+
+// AddSpendingFrozen adds v to the "spending_frozen" field.
+func (u *OrganizationMemberUpsertBulk) AddSpendingFrozen(v float64) *OrganizationMemberUpsertBulk {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.AddSpendingFrozen(v)
+	})
+}
+
+// UpdateSpendingFrozen sets the "spending_frozen" field to the value that was provided on create.
+func (u *OrganizationMemberUpsertBulk) UpdateSpendingFrozen() *OrganizationMemberUpsertBulk {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.UpdateSpendingFrozen()
 	})
 }
 

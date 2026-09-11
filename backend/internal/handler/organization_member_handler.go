@@ -32,6 +32,7 @@ type organizationMemberResponse struct {
 	IsOwner           bool      `json:"is_owner"`
 	SpendingLimit     *float64  `json:"spending_limit"`
 	SpendingUsed      float64   `json:"spending_used"`
+	SpendingFrozen    float64   `json:"spending_frozen"`
 	SpendingRemaining *float64  `json:"spending_remaining"`
 	JoinedAt          time.Time `json:"joined_at"`
 }
@@ -160,6 +161,7 @@ func organizationMemberToResponse(member *service.OrganizationMember) *organizat
 		IsOwner:           member.IsOwner,
 		SpendingLimit:     member.SpendingLimit,
 		SpendingUsed:      member.SpendingUsed,
+		SpendingFrozen:    member.SpendingFrozen,
 		SpendingRemaining: member.SpendingRemaining(),
 		JoinedAt:          member.JoinedAt,
 	}

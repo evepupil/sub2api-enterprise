@@ -30,7 +30,13 @@ type User struct {
 	// OrganizationID 非 nil 表示这份账号数据里的分组范围来自组织，调用链据此决定
 	// 是否执行组织分组校验。个人用户恒为 nil，行为不变。
 	OrganizationID *int64
-	TokenVersion   int64 // Incremented on password change to invalidate existing tokens
+	// OrganizationPayerUserID 是组织普通成员调用时的付款账号（组织创建者）。
+	// 0 表示自己付自己的：个人用户和组织创建者本人都是这种情况。
+	OrganizationPayerUserID int64
+	// OrganizationSpendingLimit 是该成员的累计消费上限，nil 表示不限额。
+	// 只对组织普通成员有意义。
+	OrganizationSpendingLimit *float64
+	TokenVersion              int64 // Incremented on password change to invalidate existing tokens
 	// TokenVersionResolved indicates TokenVersion already contains the fingerprint-derived
 	// value expected in JWT claims and refresh-token state.
 	TokenVersionResolved bool

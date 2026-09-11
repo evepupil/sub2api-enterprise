@@ -148,11 +148,14 @@ func postUsageBilling(ctx context.Context, p *postUsageBillingParams, deps *bill
 		}
 	} else {
 		if cost.ActualCost > 0 {
-			if err := deps.userRepo.DeductBalance(billingCtx, p.User.ID, cost.ActualCost); err != nil {
-				slog.Error("deduct balance failed", "user_id", p.User.ID, "error", err)
+			// 组织普通成员扣的是组织付款账号的钱。这条降级路径只在统一扣费仓储缺席时
+			// 运行（测试或降级），成员已消费金额的累计只发生在统一扣费路径里。
+			payerUserID := BillingPayerUserID(p.User)
+			if err := deps.userRepo.DeductBalance(billingCtx, payerUserID, cost.ActualCost); err != nil {
+				slog.Error("deduct balance failed", "user_id", payerUserID, "error", err)
 			} else if deps.billingCacheService != nil {
-				if err := deps.billingCacheService.InvalidateUserBalance(billingCtx, p.User.ID); err != nil {
-					slog.Warn("invalidate balance cache after legacy deduction failed", "user_id", p.User.ID, "error", err)
+				if err := deps.billingCacheService.InvalidateUserBalance(billingCtx, payerUserID); err != nil {
+					slog.Warn("invalidate balance cache after legacy deduction failed", "user_id", payerUserID, "error", err)
 				}
 			}
 		}
@@ -428,10 +431,21 @@ func syncBalanceCacheAfterDeduction(ctx context.Context, p *postUsageBillingPara
 	if p == nil || p.Cost == nil || p.User == nil || deps == nil || deps.billingCacheService == nil {
 		return
 	}
+
+	// 组织成员的这笔消费同时累计到成员的已用额度上，下一次调用立刻看得到。
+	if result != nil && result.SpendingUserID > 0 {
+		deps.billingCacheService.IncrementOrganizationMemberSpending(result.SpendingUserID, p.Cost.ActualCost)
+	}
+
+	// 实际扣的是付款账号的余额：组织成员扣组织付款账号，其余情况扣本人。
+	payerUserID := BillingPayerUserID(p.User)
+	if result != nil && result.PayerUserID > 0 {
+		payerUserID = result.PayerUserID
+	}
 	if result != nil && result.NewBalance != nil && deps.billingCacheService.balanceBelowEligibilityThreshold(*result.NewBalance) {
-		if err := deps.billingCacheService.InvalidateUserBalance(ctx, p.User.ID); err != nil {
+		if err := deps.billingCacheService.InvalidateUserBalance(ctx, payerUserID); err != nil {
 			slog.Warn("invalidate balance cache after exhausted deduction failed",
-				"user_id", p.User.ID,
+				"user_id", payerUserID,
 				"new_balance", *result.NewBalance,
 				"balance_overdrafted", result.BalanceOverdrafted,
 				"error", err,
@@ -439,7 +453,7 @@ func syncBalanceCacheAfterDeduction(ctx context.Context, p *postUsageBillingPara
 		}
 		return
 	}
-	deps.billingCacheService.QueueDeductBalance(p.User.ID, p.Cost.ActualCost)
+	deps.billingCacheService.QueueDeductBalance(payerUserID, p.Cost.ActualCost)
 }
 
 // notifyBalanceLow sends balance low notification after deduction.
@@ -462,15 +476,44 @@ func notifyBalanceLow(p *postUsageBillingParams, deps *billingDeps, result *Usag
 	}
 
 	oldBalance := resolveOldBalance(p, result)
+	// 余额掉下来的是付款账号：组织成员的消费要通知组织付款账号本人，
+	// 通知开关和阈值也用付款账号自己的设置。
+	notifyUser := resolveBalanceNotifyUser(p, deps, result)
+	if notifyUser == nil {
+		return
+	}
 	slog.Debug("notifyBalanceLow: calling CheckBalanceAfterDeduction",
-		"user_id", p.User.ID,
+		"user_id", notifyUser.ID,
 		"old_balance", oldBalance,
 		"cost", p.Cost.ActualCost,
-		"notify_enabled", p.User.BalanceNotifyEnabled,
-		"threshold", p.User.BalanceNotifyThreshold,
+		"notify_enabled", notifyUser.BalanceNotifyEnabled,
+		"threshold", notifyUser.BalanceNotifyThreshold,
 		"result_has_new_balance", result != nil && result.NewBalance != nil,
 	)
-	deps.balanceNotifyService.CheckBalanceAfterDeduction(context.Background(), p.User, oldBalance, p.Cost.ActualCost)
+	deps.balanceNotifyService.CheckBalanceAfterDeduction(context.Background(), notifyUser, oldBalance, p.Cost.ActualCost)
+}
+
+// resolveBalanceNotifyUser 返回余额通知应该发给谁。
+// 付款账号就是调用者本人时直接复用快照；组织成员的调用要把组织付款账号读出来，
+// 读不到就放弃这次通知，避免把组织的余额情况发给成员。
+func resolveBalanceNotifyUser(p *postUsageBillingParams, deps *billingDeps, result *UsageBillingApplyResult) *User {
+	payerUserID := BillingPayerUserID(p.User)
+	if result != nil && result.PayerUserID > 0 {
+		payerUserID = result.PayerUserID
+	}
+	if payerUserID == p.User.ID {
+		return p.User
+	}
+	if deps.userRepo == nil {
+		return nil
+	}
+	payer, err := deps.userRepo.GetByID(context.Background(), payerUserID)
+	if err != nil || payer == nil {
+		slog.Warn("load organization payer for balance notification failed",
+			"payer_user_id", payerUserID, "error", err)
+		return nil
+	}
+	return payer
 }
 
 // resolveOldBalance returns the pre-deduction balance.

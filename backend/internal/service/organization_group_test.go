@@ -12,14 +12,14 @@ import (
 )
 
 type organizationGroupRepoStub struct {
-	scopeByUser map[int64]*OrganizationGroupScope
-	scopes      map[int64]*OrganizationGroupScope
+	scopeByUser map[int64]*OrganizationMemberScope
+	scopes      map[int64]*OrganizationMemberScope
 	memberIDs   map[int64][]int64
-	writes      []OrganizationGroupScope
+	writes      []OrganizationMemberScope
 	err         error
 }
 
-func (r *organizationGroupRepoStub) GetScopeByUserID(_ context.Context, userID int64) (*OrganizationGroupScope, error) {
+func (r *organizationGroupRepoStub) GetMemberScopeByUserID(_ context.Context, userID int64) (*OrganizationMemberScope, error) {
 	if r.err != nil {
 		return nil, r.err
 	}
@@ -31,7 +31,7 @@ func (r *organizationGroupRepoStub) GetScopeByUserID(_ context.Context, userID i
 	return &copyValue, nil
 }
 
-func (r *organizationGroupRepoStub) GetScopeByOrganizationID(_ context.Context, organizationID int64) (*OrganizationGroupScope, error) {
+func (r *organizationGroupRepoStub) GetScopeByOrganizationID(_ context.Context, organizationID int64) (*OrganizationMemberScope, error) {
 	scope, ok := r.scopes[organizationID]
 	if !ok {
 		return nil, ErrOrganizationNotFound
@@ -44,7 +44,7 @@ func (r *organizationGroupRepoStub) SetScope(_ context.Context, organizationID i
 	if r.err != nil {
 		return r.err
 	}
-	scope := OrganizationGroupScope{
+	scope := OrganizationMemberScope{
 		OrganizationID:       organizationID,
 		RestrictPublicGroups: restrictPublicGroups,
 		AllowedGroupIDs:      append([]int64(nil), groupIDs...),
@@ -98,7 +98,7 @@ func (r *groupRepoStub) GetByID(_ context.Context, id int64) (*Group, error) {
 }
 
 func TestApplyScopeToUserLeavesPersonalUserUntouched(t *testing.T) {
-	repo := &organizationGroupRepoStub{scopeByUser: map[int64]*OrganizationGroupScope{}}
+	repo := &organizationGroupRepoStub{scopeByUser: map[int64]*OrganizationMemberScope{}}
 	service := NewOrganizationGroupService(repo)
 
 	user := &User{ID: 7, AllowedGroups: []int64{3}, RestrictPublicGroups: true}
@@ -109,7 +109,7 @@ func TestApplyScopeToUserLeavesPersonalUserUntouched(t *testing.T) {
 }
 
 func TestApplyScopeToUserReplacesPersonalRules(t *testing.T) {
-	repo := &organizationGroupRepoStub{scopeByUser: map[int64]*OrganizationGroupScope{
+	repo := &organizationGroupRepoStub{scopeByUser: map[int64]*OrganizationMemberScope{
 		7: {OrganizationID: 5, RestrictPublicGroups: true, AllowedGroupIDs: []int64{11, 12}},
 	}}
 	service := NewOrganizationGroupService(repo)
@@ -171,8 +171,8 @@ func newAdminOrganizationFixture() (*AdminOrganizationService, *organizationGrou
 		5: {ID: 5, Name: "Acme", OwnerUserID: 1, MemberCount: 3},
 	}}
 	groups := &organizationGroupRepoStub{
-		scopeByUser: map[int64]*OrganizationGroupScope{},
-		scopes: map[int64]*OrganizationGroupScope{
+		scopeByUser: map[int64]*OrganizationMemberScope{},
+		scopes: map[int64]*OrganizationMemberScope{
 			5: {OrganizationID: 5},
 		},
 		memberIDs: map[int64][]int64{5: {1, 2, 3}},

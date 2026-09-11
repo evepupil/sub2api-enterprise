@@ -42,8 +42,13 @@ func (OrganizationMember) Fields() []ent.Field {
 			Optional().
 			Nillable().
 			SchemaType(map[string]string{dialect.Postgres: "decimal(20,8)"}),
-		// 成员累计已消费金额（USD）。本模块只读取展示，写入由组织结算模块接入。
+		// 成员累计已消费金额（USD），由组织结算在扣费事务里累加。
 		field.Float("spending_used").
+			Default(0).
+			SchemaType(map[string]string{dialect.Postgres: "decimal(20,8)"}),
+		// 成员已冻结金额（USD）：批量出图等需要预扣的业务占用的额度，
+		// 结算或取消后归零。剩余额度 = 上限 - 已消费 - 已冻结。
+		field.Float("spending_frozen").
 			Default(0).
 			SchemaType(map[string]string{dialect.Postgres: "decimal(20,8)"}),
 	}

@@ -165,3 +165,19 @@ func TestBillingCacheServiceGetUserBalance_Singleflight(t *testing.T) {
 		return cache.setBalanceCalls.Load() >= 1
 	}, time.Second, 10*time.Millisecond)
 }
+
+func (s *billingCacheMissStub) GetOrganizationMemberSpending(_ context.Context, _ int64) (float64, error) {
+	return 0, nil
+}
+
+func (s *billingCacheMissStub) SetOrganizationMemberSpending(_ context.Context, _ int64, _ float64) error {
+	return nil
+}
+
+func (s *billingCacheMissStub) IncrOrganizationMemberSpending(_ context.Context, _ int64, _ float64) error {
+	return nil
+}
+
+func (s *billingCacheMissStub) InvalidateOrganizationMemberSpending(_ context.Context, _ int64) error {
+	return nil
+}

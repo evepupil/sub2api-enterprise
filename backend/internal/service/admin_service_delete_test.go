@@ -812,3 +812,19 @@ func TestAdminService_BatchDeleteRedeemCodes_PartialFailures(t *testing.T) {
 	require.Equal(t, int64(2), deleted)
 	require.Equal(t, []int64{1, 2, 3}, repo.deletedIDs)
 }
+
+func (s *billingCacheStub) GetOrganizationMemberSpending(_ context.Context, _ int64) (float64, error) {
+	return 0, nil
+}
+
+func (s *billingCacheStub) SetOrganizationMemberSpending(_ context.Context, _ int64, _ float64) error {
+	return nil
+}
+
+func (s *billingCacheStub) IncrOrganizationMemberSpending(_ context.Context, _ int64, _ float64) error {
+	return nil
+}
+
+func (s *billingCacheStub) InvalidateOrganizationMemberSpending(_ context.Context, _ int64) error {
+	return nil
+}

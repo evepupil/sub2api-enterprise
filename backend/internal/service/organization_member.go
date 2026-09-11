@@ -52,26 +52,28 @@ var (
 // 注意这里的 0 表示禁止，与 api_keys.quota、users.rpm_limit 的「0 = 不限制」相反，
 // 与 user_platform_quotas 一致。
 //
-// SpendingUsed 是累计已消费金额，由后续的组织结算模块写入；在那之前恒为 0。
+// SpendingUsed 是累计已消费金额，SpendingFrozen 是批量出图等预扣业务占住的金额，
+// 两者都由组织结算在扣费事务里维护。
 type OrganizationMember struct {
-	UserID        int64
-	Email         string
-	Username      string
-	Status        string
-	Role          string
-	IsOwner       bool
-	SpendingLimit *float64
-	SpendingUsed  float64
-	JoinedAt      time.Time
+	UserID         int64
+	Email          string
+	Username       string
+	Status         string
+	Role           string
+	IsOwner        bool
+	SpendingLimit  *float64
+	SpendingUsed   float64
+	SpendingFrozen float64
+	JoinedAt       time.Time
 }
 
-// SpendingRemaining 返回剩余额度。不限额时返回 nil；上限低于已消费金额时返回 0，
-// 不返回负数。
+// SpendingRemaining 返回剩余额度，等于上限减已消费金额再减已冻结金额。
+// 不限额时返回 nil；算出来是负数时返回 0。
 func (m *OrganizationMember) SpendingRemaining() *float64 {
 	if m == nil || m.SpendingLimit == nil {
 		return nil
 	}
-	remaining := QuantizeUsageBillingAmount(*m.SpendingLimit - m.SpendingUsed)
+	remaining := QuantizeUsageBillingAmount(*m.SpendingLimit - m.SpendingUsed - m.SpendingFrozen)
 	if remaining < 0 {
 		remaining = 0
 	}
@@ -258,8 +260,22 @@ func (s *OrganizationMemberService) UpdateSpendingLimit(
 	}); err != nil {
 		return nil, err
 	}
+	s.invalidateSpendingCaches(ctx, targetUserID)
 	member.SpendingLimit = normalized
 	return member, nil
+}
+
+// invalidateSpendingCaches 让新的消费上限立刻生效。
+// 上限跟着鉴权快照一起缓存，不清掉的话调用前的额度判断会在一个缓存周期内还用旧上限。
+func (s *OrganizationMemberService) invalidateSpendingCaches(ctx context.Context, userIDs ...int64) {
+	if s.authCache == nil {
+		return
+	}
+	for _, userID := range userIDs {
+		if userID > 0 {
+			s.authCache.InvalidateAuthCacheByUserID(ctx, userID)
+		}
+	}
 }
 
 // SplitSpendingLimit 把一笔总额均分给选中的普通成员，作为他们各自的新上限，
@@ -298,6 +314,7 @@ func (s *OrganizationMemberService) SplitSpendingLimit(
 	if err := s.members.SetSpendingLimits(ctx, summary.ID, limits); err != nil {
 		return nil, err
 	}
+	s.invalidateSpendingCaches(ctx, userIDs...)
 	return members, nil
 }
 
