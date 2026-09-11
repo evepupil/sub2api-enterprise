@@ -36,7 +36,10 @@ type User struct {
 	// OrganizationSpendingLimit 是该成员的累计消费上限，nil 表示不限额。
 	// 只对组织普通成员有意义。
 	OrganizationSpendingLimit *float64
-	TokenVersion              int64 // Incremented on password change to invalidate existing tokens
+	// OrganizationPayerBalance 是组织付款账号的余额快照，供鉴权层的余额闸使用。
+	// 组织普通成员自己没有余额，这道闸必须看付款账号，否则每次调用都会被误拒。
+	OrganizationPayerBalance float64
+	TokenVersion             int64 // Incremented on password change to invalidate existing tokens
 	// TokenVersionResolved indicates TokenVersion already contains the fingerprint-derived
 	// value expected in JWT claims and refresh-token state.
 	TokenVersionResolved bool

@@ -44,14 +44,28 @@ func (r *organizationGroupRepository) GetMemberScopeByUserID(
 		return nil, err
 	}
 	entity := membership.Edges.Organization
-	return &service.OrganizationMemberScope{
+	scope := &service.OrganizationMemberScope{
 		OrganizationID:       entity.ID,
 		OwnerUserID:          entity.OwnerUserID,
 		IsOwner:              entity.OwnerUserID == userID,
 		RestrictPublicGroups: entity.RestrictPublicGroups,
 		AllowedGroupIDs:      groupIDs,
 		SpendingLimit:        membership.SpendingLimit,
-	}, nil
+	}
+	if !scope.IsOwner {
+		// 普通成员自己没有余额，鉴权层的余额闸要看组织付款账号。
+		owner, err := client.User.Query().
+			Where(dbuser.IDEQ(entity.OwnerUserID), dbuser.DeletedAtIsNil()).
+			Only(ctx)
+		if err != nil {
+			if dbent.IsNotFound(err) {
+				return nil, service.ErrOrganizationNotFound
+			}
+			return nil, err
+		}
+		scope.OwnerBalance = owner.Balance
+	}
+	return scope, nil
 }
 
 func (r *organizationGroupRepository) GetScopeByOrganizationID(

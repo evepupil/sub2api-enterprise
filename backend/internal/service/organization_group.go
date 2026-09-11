@@ -37,6 +37,8 @@ type OrganizationMemberScope struct {
 	RestrictPublicGroups bool
 	AllowedGroupIDs      []int64
 	SpendingLimit        *float64
+	// OwnerBalance 是组织付款账号当前的余额，供鉴权层的余额闸使用。
+	OwnerBalance float64
 }
 
 type OrganizationGroupRepository interface {
@@ -51,6 +53,9 @@ type OrganizationGroupRepository interface {
 // OrganizationGroupScopeResolver 把组织的分组范围套到账号上，供密钥服务和鉴权快照使用。
 type OrganizationGroupScopeResolver interface {
 	ApplyScopeToUser(ctx context.Context, user *User) error
+	// MemberUserIDsOfOwnedOrganization 返回该账号作为创建者所拥有组织的全部成员；
+	// 账号不是任何组织的创建者时返回空。
+	MemberUserIDsOfOwnedOrganization(ctx context.Context, ownerUserID int64) ([]int64, error)
 }
 
 // OrganizationGroupService 负责组织分组范围的读取与套用。
@@ -94,7 +99,32 @@ func (s *OrganizationGroupService) ApplyScopeToUser(ctx context.Context, user *U
 	}
 	user.OrganizationPayerUserID = scope.OwnerUserID
 	user.OrganizationSpendingLimit = scope.SpendingLimit
+	user.OrganizationPayerBalance = scope.OwnerBalance
 	return nil
+}
+
+// MemberUserIDsOfOwnedOrganization 返回该账号作为创建者所拥有组织的全部成员。
+//
+// 组织付款账号的余额、状态变化会影响每个成员的鉴权快照，所以清缓存时要带上他们。
+func (s *OrganizationGroupService) MemberUserIDsOfOwnedOrganization(ctx context.Context, ownerUserID int64) ([]int64, error) {
+	if s == nil || s.repo == nil || ownerUserID <= 0 {
+		return nil, nil
+	}
+	scope, err := s.repo.GetMemberScopeByUserID(ctx, ownerUserID)
+	if err != nil || scope == nil || !scope.IsOwner {
+		return nil, err
+	}
+	memberIDs, err := s.repo.ListMemberUserIDs(ctx, scope.OrganizationID)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]int64, 0, len(memberIDs))
+	for _, memberID := range memberIDs {
+		if memberID != ownerUserID {
+			out = append(out, memberID)
+		}
+	}
+	return out, nil
 }
 
 // applyOrganizationGroupScope 是各调用点的统一入口。

@@ -47,6 +47,24 @@ func BillingPayerUserID(user *User) int64 {
 	return user.ID
 }
 
+// AuthGateBalance 返回鉴权层余额闸应该看的余额。
+//
+// 组织普通成员自己没有余额，看的是组织付款账号；其余情况看自己的。
+func AuthGateBalance(user *User) float64 {
+	if user == nil {
+		return 0
+	}
+	if user.OrganizationPayerUserID > 0 {
+		return user.OrganizationPayerBalance
+	}
+	return user.Balance
+}
+
+// IsOrganizationMemberPayer 判断这次调用是不是由组织付款账号出钱。
+func IsOrganizationMemberPayer(user *User) bool {
+	return user != nil && user.OrganizationPayerUserID > 0
+}
+
 // GetOrganizationMemberSpending 读取成员已占用的额度（已消费 + 已冻结）。
 // 与余额一样先读缓存，未命中再回源数据库并异步建缓存。
 func (s *BillingCacheService) GetOrganizationMemberSpending(ctx context.Context, userID int64) (float64, error) {

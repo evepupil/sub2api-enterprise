@@ -129,6 +129,21 @@ func TestCheckBillingEligibilityRejectsExhaustedMember(t *testing.T) {
 	require.ErrorIs(t, err, ErrOrganizationSpendingLimitExhausted)
 }
 
+// 鉴权层的余额闸必须看付款账号：成员自己没有余额，看自己会让每次调用都被误拒。
+func TestAuthGateBalanceFollowsPayer(t *testing.T) {
+	require.Zero(t, AuthGateBalance(nil))
+
+	personal := &User{ID: 9, Balance: 3}
+	require.InDelta(t, 3, AuthGateBalance(personal), 0)
+	require.False(t, IsOrganizationMemberPayer(personal))
+
+	member := newOrganizationMemberUser(nil)
+	member.Balance = 0
+	member.OrganizationPayerBalance = 42
+	require.InDelta(t, 42, AuthGateBalance(member), 0)
+	require.True(t, IsOrganizationMemberPayer(member))
+}
+
 func TestTranslateOrganizationBalanceError(t *testing.T) {
 	require.NoError(t, translateOrganizationBalanceError(nil, 1, 2))
 	require.ErrorIs(t,

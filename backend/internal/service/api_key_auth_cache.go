@@ -43,6 +43,8 @@ type APIKeyAuthUserSnapshot struct {
 	OrganizationPayerUserID int64 `json:"organization_payer_user_id,omitempty"`
 	// OrganizationSpendingLimit 是该成员的累计消费上限，nil 表示不限额。
 	OrganizationSpendingLimit *float64 `json:"organization_spending_limit,omitempty"`
+	// OrganizationPayerBalance 是组织付款账号的余额快照，鉴权层据此判断有没有钱。
+	OrganizationPayerBalance float64 `json:"organization_payer_balance,omitempty"`
 
 	// Balance notification fields (required for CheckBalanceAfterDeduction)
 	Email                      string             `json:"email"`

@@ -131,6 +131,31 @@ func TestApplyScopeToUserFailsClosed(t *testing.T) {
 	require.Nil(t, user.OrganizationID)
 }
 
+// 组织付款账号的余额变化要连带清掉全体成员的鉴权缓存。
+func TestMemberUserIDsOfOwnedOrganization(t *testing.T) {
+	repo := &organizationGroupRepoStub{
+		scopeByUser: map[int64]*OrganizationMemberScope{
+			1: {OrganizationID: 5, OwnerUserID: 1, IsOwner: true},
+			2: {OrganizationID: 5, OwnerUserID: 1},
+		},
+		memberIDs: map[int64][]int64{5: {1, 2, 3}},
+	}
+	service := NewOrganizationGroupService(repo)
+	ctx := context.Background()
+
+	members, err := service.MemberUserIDsOfOwnedOrganization(ctx, 1)
+	require.NoError(t, err)
+	require.Equal(t, []int64{2, 3}, members, "创建者本人单独清，不重复列出")
+
+	members, err = service.MemberUserIDsOfOwnedOrganization(ctx, 2)
+	require.NoError(t, err)
+	require.Empty(t, members, "普通成员的余额变化不影响别人")
+
+	members, err = service.MemberUserIDsOfOwnedOrganization(ctx, 99)
+	require.NoError(t, err)
+	require.Empty(t, members, "个人用户没有组织")
+}
+
 func TestCheckOrganizationGroupAccess(t *testing.T) {
 	organizationID := int64(5)
 	publicGroup := &Group{ID: 11, IsExclusive: false}

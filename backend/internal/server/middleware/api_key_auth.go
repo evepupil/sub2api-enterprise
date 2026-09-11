@@ -259,8 +259,15 @@ func apiKeyAuthWithSubscription(apiKeyService *service.APIKeyService, subscripti
 					return
 				}
 			} else {
-				// 非订阅模式 或 订阅模式但 subscriptionService 未注入：回退到余额检查
-				if apiKeyBalanceBelowAuthThreshold(apiKey.User.Balance, cfg) {
+				// 非订阅模式 或 订阅模式但 subscriptionService 未注入：回退到余额检查。
+				// 组织普通成员花的是组织付款账号的钱，这里必须看付款账号的余额，
+				// 否则成员自己余额为 0 会让每次调用都被误拒。
+				if apiKeyBalanceBelowAuthThreshold(service.AuthGateBalance(apiKey.User), cfg) {
+					if service.IsOrganizationMemberPayer(apiKey.User) {
+						AbortWithError(c, 403, "ORGANIZATION_BALANCE_INSUFFICIENT",
+							"Organization balance is insufficient, contact your organization admin")
+						return
+					}
 					AbortWithError(c, 403, "INSUFFICIENT_BALANCE", "Insufficient account balance")
 					return
 				}
@@ -419,7 +426,7 @@ func abortIfAPIKeyGroupNotAllowed(c *gin.Context, apiKey *service.APIKey) bool {
 	}
 	service.MarkOpsClientBusinessLimited(c, service.OpsClientBusinessLimitedReasonAPIKeyGroupUnavailable)
 	MarkIngressRejected(c, IngressRejectGroupNotAllowed)
-	AbortWithError(c, 403, "GROUP_NOT_ALLOWED", "API Key 所属专属分组不再允许当前用户使用")
+	AbortWithError(c, 403, "GROUP_NOT_ALLOWED", "API Key 所属分组不再允许当前用户使用")
 	return true
 }
 
