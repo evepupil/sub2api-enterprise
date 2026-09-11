@@ -548,6 +548,18 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/admin/organizations',
+    name: 'AdminOrganizations',
+    component: () => import('@/views/admin/OrganizationsView.vue'),
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: true,
+      title: 'Organization Management',
+      titleKey: 'admin.organizations.title',
+      descriptionKey: 'admin.organizations.description'
+    }
+  },
+  {
     path: '/admin/announcements',
     name: 'AdminAnnouncements',
     component: () => import('@/views/admin/AnnouncementsView.vue'),

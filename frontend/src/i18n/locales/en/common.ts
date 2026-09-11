@@ -177,6 +177,7 @@ export default {
     profile: 'Profile',
     users: 'Users',
     organization: 'Organization',
+    organizations: 'Organizations',
     groups: 'Groups',
     channels: 'Channels',
     availableChannels: 'Available Channels',

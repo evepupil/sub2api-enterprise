@@ -123,6 +123,21 @@ export interface OrganizationMember {
   joined_at: string
 }
 
+// 平台「组织管理」页看到的组织。
+// restrict_public_groups 为 false 时公开分组全部可用，allowed_group_ids 只约束专属分组；
+// 打开后公开分组也必须出现在 allowed_group_ids 里。
+export interface AdminOrganization {
+  id: number
+  name: string
+  owner_user_id: number
+  owner_email: string
+  owner_username: string
+  member_count: number
+  restrict_public_groups: boolean
+  allowed_group_ids: number[]
+  created_at: string
+}
+
 export interface OrganizationInvitation {
   id: number
   code: string

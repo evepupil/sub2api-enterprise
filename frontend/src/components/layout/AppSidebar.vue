@@ -376,6 +376,21 @@ const UsersIcon = {
     )
 }
 
+const OrganizationIcon = {
+  render: () =>
+    h(
+      'svg',
+      { fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '1.5' },
+      [
+        h('path', {
+          'stroke-linecap': 'round',
+          'stroke-linejoin': 'round',
+          d: 'M3.75 21h16.5M4.5 3h9a.75.75 0 01.75.75V21h-10.5V3.75A.75.75 0 014.5 3zm9.75 6.75h4.5a.75.75 0 01.75.75V21h-5.25V9.75zM6.75 6h3m-3 3h3m-3 3h3m-3 3h3'
+        })
+      ]
+    )
+}
+
 const FolderIcon = {
   render: () =>
     h(
@@ -766,6 +781,7 @@ const adminNavItems = computed((): NavItem[] => {
     { path: '/admin/dashboard', label: t('nav.dashboard'), icon: DashboardIcon },
     { path: '/admin/ops', label: t('nav.ops'), icon: ChartIcon, featureFlag: flagOpsMonitoring },
     { path: '/admin/users', label: t('nav.users'), icon: UsersIcon, hideInSimpleMode: true },
+    { path: '/admin/organizations', label: t('nav.organizations'), icon: OrganizationIcon, hideInSimpleMode: true },
     { path: '/admin/groups', label: t('nav.groups'), icon: FolderIcon },
     {
       path: '/admin/channels',
