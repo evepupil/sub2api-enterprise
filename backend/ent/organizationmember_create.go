@@ -64,6 +64,34 @@ func (_c *OrganizationMemberCreate) SetUserID(v int64) *OrganizationMemberCreate
 	return _c
 }
 
+// SetSpendingLimit sets the "spending_limit" field.
+func (_c *OrganizationMemberCreate) SetSpendingLimit(v float64) *OrganizationMemberCreate {
+	_c.mutation.SetSpendingLimit(v)
+	return _c
+}
+
+// SetNillableSpendingLimit sets the "spending_limit" field if the given value is not nil.
+func (_c *OrganizationMemberCreate) SetNillableSpendingLimit(v *float64) *OrganizationMemberCreate {
+	if v != nil {
+		_c.SetSpendingLimit(*v)
+	}
+	return _c
+}
+
+// SetSpendingUsed sets the "spending_used" field.
+func (_c *OrganizationMemberCreate) SetSpendingUsed(v float64) *OrganizationMemberCreate {
+	_c.mutation.SetSpendingUsed(v)
+	return _c
+}
+
+// SetNillableSpendingUsed sets the "spending_used" field if the given value is not nil.
+func (_c *OrganizationMemberCreate) SetNillableSpendingUsed(v *float64) *OrganizationMemberCreate {
+	if v != nil {
+		_c.SetSpendingUsed(*v)
+	}
+	return _c
+}
+
 // SetOrganization sets the "organization" edge to the Organization entity.
 func (_c *OrganizationMemberCreate) SetOrganization(v *Organization) *OrganizationMemberCreate {
 	return _c.SetOrganizationID(v.ID)
@@ -117,6 +145,10 @@ func (_c *OrganizationMemberCreate) defaults() {
 		v := organizationmember.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := _c.mutation.SpendingUsed(); !ok {
+		v := organizationmember.DefaultSpendingUsed
+		_c.mutation.SetSpendingUsed(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -132,6 +164,9 @@ func (_c *OrganizationMemberCreate) check() error {
 	}
 	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "OrganizationMember.user_id"`)}
+	}
+	if _, ok := _c.mutation.SpendingUsed(); !ok {
+		return &ValidationError{Name: "spending_used", err: errors.New(`ent: missing required field "OrganizationMember.spending_used"`)}
 	}
 	if len(_c.mutation.OrganizationIDs()) == 0 {
 		return &ValidationError{Name: "organization", err: errors.New(`ent: missing required edge "OrganizationMember.organization"`)}
@@ -173,6 +208,14 @@ func (_c *OrganizationMemberCreate) createSpec() (*OrganizationMember, *sqlgraph
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(organizationmember.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
+	}
+	if value, ok := _c.mutation.SpendingLimit(); ok {
+		_spec.SetField(organizationmember.FieldSpendingLimit, field.TypeFloat64, value)
+		_node.SpendingLimit = &value
+	}
+	if value, ok := _c.mutation.SpendingUsed(); ok {
+		_spec.SetField(organizationmember.FieldSpendingUsed, field.TypeFloat64, value)
+		_node.SpendingUsed = value
 	}
 	if nodes := _c.mutation.OrganizationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -296,6 +339,48 @@ func (u *OrganizationMemberUpsert) UpdateUserID() *OrganizationMemberUpsert {
 	return u
 }
 
+// SetSpendingLimit sets the "spending_limit" field.
+func (u *OrganizationMemberUpsert) SetSpendingLimit(v float64) *OrganizationMemberUpsert {
+	u.Set(organizationmember.FieldSpendingLimit, v)
+	return u
+}
+
+// UpdateSpendingLimit sets the "spending_limit" field to the value that was provided on create.
+func (u *OrganizationMemberUpsert) UpdateSpendingLimit() *OrganizationMemberUpsert {
+	u.SetExcluded(organizationmember.FieldSpendingLimit)
+	return u
+}
+
+// AddSpendingLimit adds v to the "spending_limit" field.
+func (u *OrganizationMemberUpsert) AddSpendingLimit(v float64) *OrganizationMemberUpsert {
+	u.Add(organizationmember.FieldSpendingLimit, v)
+	return u
+}
+
+// ClearSpendingLimit clears the value of the "spending_limit" field.
+func (u *OrganizationMemberUpsert) ClearSpendingLimit() *OrganizationMemberUpsert {
+	u.SetNull(organizationmember.FieldSpendingLimit)
+	return u
+}
+
+// SetSpendingUsed sets the "spending_used" field.
+func (u *OrganizationMemberUpsert) SetSpendingUsed(v float64) *OrganizationMemberUpsert {
+	u.Set(organizationmember.FieldSpendingUsed, v)
+	return u
+}
+
+// UpdateSpendingUsed sets the "spending_used" field to the value that was provided on create.
+func (u *OrganizationMemberUpsert) UpdateSpendingUsed() *OrganizationMemberUpsert {
+	u.SetExcluded(organizationmember.FieldSpendingUsed)
+	return u
+}
+
+// AddSpendingUsed adds v to the "spending_used" field.
+func (u *OrganizationMemberUpsert) AddSpendingUsed(v float64) *OrganizationMemberUpsert {
+	u.Add(organizationmember.FieldSpendingUsed, v)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -380,6 +465,55 @@ func (u *OrganizationMemberUpsertOne) SetUserID(v int64) *OrganizationMemberUpse
 func (u *OrganizationMemberUpsertOne) UpdateUserID() *OrganizationMemberUpsertOne {
 	return u.Update(func(s *OrganizationMemberUpsert) {
 		s.UpdateUserID()
+	})
+}
+
+// SetSpendingLimit sets the "spending_limit" field.
+func (u *OrganizationMemberUpsertOne) SetSpendingLimit(v float64) *OrganizationMemberUpsertOne {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.SetSpendingLimit(v)
+	})
+}
+
+// AddSpendingLimit adds v to the "spending_limit" field.
+func (u *OrganizationMemberUpsertOne) AddSpendingLimit(v float64) *OrganizationMemberUpsertOne {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.AddSpendingLimit(v)
+	})
+}
+
+// UpdateSpendingLimit sets the "spending_limit" field to the value that was provided on create.
+func (u *OrganizationMemberUpsertOne) UpdateSpendingLimit() *OrganizationMemberUpsertOne {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.UpdateSpendingLimit()
+	})
+}
+
+// ClearSpendingLimit clears the value of the "spending_limit" field.
+func (u *OrganizationMemberUpsertOne) ClearSpendingLimit() *OrganizationMemberUpsertOne {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.ClearSpendingLimit()
+	})
+}
+
+// SetSpendingUsed sets the "spending_used" field.
+func (u *OrganizationMemberUpsertOne) SetSpendingUsed(v float64) *OrganizationMemberUpsertOne {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.SetSpendingUsed(v)
+	})
+}
+
+// AddSpendingUsed adds v to the "spending_used" field.
+func (u *OrganizationMemberUpsertOne) AddSpendingUsed(v float64) *OrganizationMemberUpsertOne {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.AddSpendingUsed(v)
+	})
+}
+
+// UpdateSpendingUsed sets the "spending_used" field to the value that was provided on create.
+func (u *OrganizationMemberUpsertOne) UpdateSpendingUsed() *OrganizationMemberUpsertOne {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.UpdateSpendingUsed()
 	})
 }
 
@@ -633,6 +767,55 @@ func (u *OrganizationMemberUpsertBulk) SetUserID(v int64) *OrganizationMemberUps
 func (u *OrganizationMemberUpsertBulk) UpdateUserID() *OrganizationMemberUpsertBulk {
 	return u.Update(func(s *OrganizationMemberUpsert) {
 		s.UpdateUserID()
+	})
+}
+
+// SetSpendingLimit sets the "spending_limit" field.
+func (u *OrganizationMemberUpsertBulk) SetSpendingLimit(v float64) *OrganizationMemberUpsertBulk {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.SetSpendingLimit(v)
+	})
+}
+
+// AddSpendingLimit adds v to the "spending_limit" field.
+func (u *OrganizationMemberUpsertBulk) AddSpendingLimit(v float64) *OrganizationMemberUpsertBulk {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.AddSpendingLimit(v)
+	})
+}
+
+// UpdateSpendingLimit sets the "spending_limit" field to the value that was provided on create.
+func (u *OrganizationMemberUpsertBulk) UpdateSpendingLimit() *OrganizationMemberUpsertBulk {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.UpdateSpendingLimit()
+	})
+}
+
+// ClearSpendingLimit clears the value of the "spending_limit" field.
+func (u *OrganizationMemberUpsertBulk) ClearSpendingLimit() *OrganizationMemberUpsertBulk {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.ClearSpendingLimit()
+	})
+}
+
+// SetSpendingUsed sets the "spending_used" field.
+func (u *OrganizationMemberUpsertBulk) SetSpendingUsed(v float64) *OrganizationMemberUpsertBulk {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.SetSpendingUsed(v)
+	})
+}
+
+// AddSpendingUsed adds v to the "spending_used" field.
+func (u *OrganizationMemberUpsertBulk) AddSpendingUsed(v float64) *OrganizationMemberUpsertBulk {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.AddSpendingUsed(v)
+	})
+}
+
+// UpdateSpendingUsed sets the "spending_used" field to the value that was provided on create.
+func (u *OrganizationMemberUpsertBulk) UpdateSpendingUsed() *OrganizationMemberUpsertBulk {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.UpdateSpendingUsed()
 	})
 }
 

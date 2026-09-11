@@ -72,12 +72,7 @@ func RegisterUserRoutes(
 			}
 		}
 
-		organization := authenticated.Group("/organization")
-		{
-			organization.GET("", h.Organization.GetCurrent)
-			organization.GET("/invitations", h.Organization.ListInvitations)
-			organization.POST("/invitations", h.Organization.CreateInvitation)
-		}
+		registerOrganizationRoutes(authenticated, h)
 
 		// API Key管理
 		keys := authenticated.Group("/keys")

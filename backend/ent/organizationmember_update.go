@@ -64,6 +64,54 @@ func (_u *OrganizationMemberUpdate) SetNillableUserID(v *int64) *OrganizationMem
 	return _u
 }
 
+// SetSpendingLimit sets the "spending_limit" field.
+func (_u *OrganizationMemberUpdate) SetSpendingLimit(v float64) *OrganizationMemberUpdate {
+	_u.mutation.ResetSpendingLimit()
+	_u.mutation.SetSpendingLimit(v)
+	return _u
+}
+
+// SetNillableSpendingLimit sets the "spending_limit" field if the given value is not nil.
+func (_u *OrganizationMemberUpdate) SetNillableSpendingLimit(v *float64) *OrganizationMemberUpdate {
+	if v != nil {
+		_u.SetSpendingLimit(*v)
+	}
+	return _u
+}
+
+// AddSpendingLimit adds value to the "spending_limit" field.
+func (_u *OrganizationMemberUpdate) AddSpendingLimit(v float64) *OrganizationMemberUpdate {
+	_u.mutation.AddSpendingLimit(v)
+	return _u
+}
+
+// ClearSpendingLimit clears the value of the "spending_limit" field.
+func (_u *OrganizationMemberUpdate) ClearSpendingLimit() *OrganizationMemberUpdate {
+	_u.mutation.ClearSpendingLimit()
+	return _u
+}
+
+// SetSpendingUsed sets the "spending_used" field.
+func (_u *OrganizationMemberUpdate) SetSpendingUsed(v float64) *OrganizationMemberUpdate {
+	_u.mutation.ResetSpendingUsed()
+	_u.mutation.SetSpendingUsed(v)
+	return _u
+}
+
+// SetNillableSpendingUsed sets the "spending_used" field if the given value is not nil.
+func (_u *OrganizationMemberUpdate) SetNillableSpendingUsed(v *float64) *OrganizationMemberUpdate {
+	if v != nil {
+		_u.SetSpendingUsed(*v)
+	}
+	return _u
+}
+
+// AddSpendingUsed adds value to the "spending_used" field.
+func (_u *OrganizationMemberUpdate) AddSpendingUsed(v float64) *OrganizationMemberUpdate {
+	_u.mutation.AddSpendingUsed(v)
+	return _u
+}
+
 // SetOrganization sets the "organization" edge to the Organization entity.
 func (_u *OrganizationMemberUpdate) SetOrganization(v *Organization) *OrganizationMemberUpdate {
 	return _u.SetOrganizationID(v.ID)
@@ -152,6 +200,21 @@ func (_u *OrganizationMemberUpdate) sqlSave(ctx context.Context) (_node int, err
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(organizationmember.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.SpendingLimit(); ok {
+		_spec.SetField(organizationmember.FieldSpendingLimit, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedSpendingLimit(); ok {
+		_spec.AddField(organizationmember.FieldSpendingLimit, field.TypeFloat64, value)
+	}
+	if _u.mutation.SpendingLimitCleared() {
+		_spec.ClearField(organizationmember.FieldSpendingLimit, field.TypeFloat64)
+	}
+	if value, ok := _u.mutation.SpendingUsed(); ok {
+		_spec.SetField(organizationmember.FieldSpendingUsed, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedSpendingUsed(); ok {
+		_spec.AddField(organizationmember.FieldSpendingUsed, field.TypeFloat64, value)
 	}
 	if _u.mutation.OrganizationCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -262,6 +325,54 @@ func (_u *OrganizationMemberUpdateOne) SetNillableUserID(v *int64) *Organization
 	if v != nil {
 		_u.SetUserID(*v)
 	}
+	return _u
+}
+
+// SetSpendingLimit sets the "spending_limit" field.
+func (_u *OrganizationMemberUpdateOne) SetSpendingLimit(v float64) *OrganizationMemberUpdateOne {
+	_u.mutation.ResetSpendingLimit()
+	_u.mutation.SetSpendingLimit(v)
+	return _u
+}
+
+// SetNillableSpendingLimit sets the "spending_limit" field if the given value is not nil.
+func (_u *OrganizationMemberUpdateOne) SetNillableSpendingLimit(v *float64) *OrganizationMemberUpdateOne {
+	if v != nil {
+		_u.SetSpendingLimit(*v)
+	}
+	return _u
+}
+
+// AddSpendingLimit adds value to the "spending_limit" field.
+func (_u *OrganizationMemberUpdateOne) AddSpendingLimit(v float64) *OrganizationMemberUpdateOne {
+	_u.mutation.AddSpendingLimit(v)
+	return _u
+}
+
+// ClearSpendingLimit clears the value of the "spending_limit" field.
+func (_u *OrganizationMemberUpdateOne) ClearSpendingLimit() *OrganizationMemberUpdateOne {
+	_u.mutation.ClearSpendingLimit()
+	return _u
+}
+
+// SetSpendingUsed sets the "spending_used" field.
+func (_u *OrganizationMemberUpdateOne) SetSpendingUsed(v float64) *OrganizationMemberUpdateOne {
+	_u.mutation.ResetSpendingUsed()
+	_u.mutation.SetSpendingUsed(v)
+	return _u
+}
+
+// SetNillableSpendingUsed sets the "spending_used" field if the given value is not nil.
+func (_u *OrganizationMemberUpdateOne) SetNillableSpendingUsed(v *float64) *OrganizationMemberUpdateOne {
+	if v != nil {
+		_u.SetSpendingUsed(*v)
+	}
+	return _u
+}
+
+// AddSpendingUsed adds value to the "spending_used" field.
+func (_u *OrganizationMemberUpdateOne) AddSpendingUsed(v float64) *OrganizationMemberUpdateOne {
+	_u.mutation.AddSpendingUsed(v)
 	return _u
 }
 
@@ -383,6 +494,21 @@ func (_u *OrganizationMemberUpdateOne) sqlSave(ctx context.Context) (_node *Orga
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(organizationmember.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.SpendingLimit(); ok {
+		_spec.SetField(organizationmember.FieldSpendingLimit, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedSpendingLimit(); ok {
+		_spec.AddField(organizationmember.FieldSpendingLimit, field.TypeFloat64, value)
+	}
+	if _u.mutation.SpendingLimitCleared() {
+		_spec.ClearField(organizationmember.FieldSpendingLimit, field.TypeFloat64)
+	}
+	if value, ok := _u.mutation.SpendingUsed(); ok {
+		_spec.SetField(organizationmember.FieldSpendingUsed, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedSpendingUsed(); ok {
+		_spec.AddField(organizationmember.FieldSpendingUsed, field.TypeFloat64, value)
 	}
 	if _u.mutation.OrganizationCleared() {
 		edge := &sqlgraph.EdgeSpec{

@@ -75,6 +75,16 @@ func UserID(v int64) predicate.OrganizationMember {
 	return predicate.OrganizationMember(sql.FieldEQ(FieldUserID, v))
 }
 
+// SpendingLimit applies equality check predicate on the "spending_limit" field. It's identical to SpendingLimitEQ.
+func SpendingLimit(v float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldEQ(FieldSpendingLimit, v))
+}
+
+// SpendingUsed applies equality check predicate on the "spending_used" field. It's identical to SpendingUsedEQ.
+func SpendingUsed(v float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldEQ(FieldSpendingUsed, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.OrganizationMember {
 	return predicate.OrganizationMember(sql.FieldEQ(FieldCreatedAt, v))
@@ -193,6 +203,96 @@ func UserIDIn(vs ...int64) predicate.OrganizationMember {
 // UserIDNotIn applies the NotIn predicate on the "user_id" field.
 func UserIDNotIn(vs ...int64) predicate.OrganizationMember {
 	return predicate.OrganizationMember(sql.FieldNotIn(FieldUserID, vs...))
+}
+
+// SpendingLimitEQ applies the EQ predicate on the "spending_limit" field.
+func SpendingLimitEQ(v float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldEQ(FieldSpendingLimit, v))
+}
+
+// SpendingLimitNEQ applies the NEQ predicate on the "spending_limit" field.
+func SpendingLimitNEQ(v float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldNEQ(FieldSpendingLimit, v))
+}
+
+// SpendingLimitIn applies the In predicate on the "spending_limit" field.
+func SpendingLimitIn(vs ...float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldIn(FieldSpendingLimit, vs...))
+}
+
+// SpendingLimitNotIn applies the NotIn predicate on the "spending_limit" field.
+func SpendingLimitNotIn(vs ...float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldNotIn(FieldSpendingLimit, vs...))
+}
+
+// SpendingLimitGT applies the GT predicate on the "spending_limit" field.
+func SpendingLimitGT(v float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldGT(FieldSpendingLimit, v))
+}
+
+// SpendingLimitGTE applies the GTE predicate on the "spending_limit" field.
+func SpendingLimitGTE(v float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldGTE(FieldSpendingLimit, v))
+}
+
+// SpendingLimitLT applies the LT predicate on the "spending_limit" field.
+func SpendingLimitLT(v float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldLT(FieldSpendingLimit, v))
+}
+
+// SpendingLimitLTE applies the LTE predicate on the "spending_limit" field.
+func SpendingLimitLTE(v float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldLTE(FieldSpendingLimit, v))
+}
+
+// SpendingLimitIsNil applies the IsNil predicate on the "spending_limit" field.
+func SpendingLimitIsNil() predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldIsNull(FieldSpendingLimit))
+}
+
+// SpendingLimitNotNil applies the NotNil predicate on the "spending_limit" field.
+func SpendingLimitNotNil() predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldNotNull(FieldSpendingLimit))
+}
+
+// SpendingUsedEQ applies the EQ predicate on the "spending_used" field.
+func SpendingUsedEQ(v float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldEQ(FieldSpendingUsed, v))
+}
+
+// SpendingUsedNEQ applies the NEQ predicate on the "spending_used" field.
+func SpendingUsedNEQ(v float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldNEQ(FieldSpendingUsed, v))
+}
+
+// SpendingUsedIn applies the In predicate on the "spending_used" field.
+func SpendingUsedIn(vs ...float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldIn(FieldSpendingUsed, vs...))
+}
+
+// SpendingUsedNotIn applies the NotIn predicate on the "spending_used" field.
+func SpendingUsedNotIn(vs ...float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldNotIn(FieldSpendingUsed, vs...))
+}
+
+// SpendingUsedGT applies the GT predicate on the "spending_used" field.
+func SpendingUsedGT(v float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldGT(FieldSpendingUsed, v))
+}
+
+// SpendingUsedGTE applies the GTE predicate on the "spending_used" field.
+func SpendingUsedGTE(v float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldGTE(FieldSpendingUsed, v))
+}
+
+// SpendingUsedLT applies the LT predicate on the "spending_used" field.
+func SpendingUsedLT(v float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldLT(FieldSpendingUsed, v))
+}
+
+// SpendingUsedLTE applies the LTE predicate on the "spending_used" field.
+func SpendingUsedLTE(v float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldLTE(FieldSpendingUsed, v))
 }
 
 // HasOrganization applies the HasEdge predicate on the "organization" edge.

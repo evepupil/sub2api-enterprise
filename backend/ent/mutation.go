@@ -30294,6 +30294,10 @@ type OrganizationMemberMutation struct {
 	id                  *int64
 	created_at          *time.Time
 	updated_at          *time.Time
+	spending_limit      *float64
+	addspending_limit   *float64
+	spending_used       *float64
+	addspending_used    *float64
 	clearedFields       map[string]struct{}
 	organization        *int64
 	clearedorganization bool
@@ -30546,6 +30550,132 @@ func (m *OrganizationMemberMutation) ResetUserID() {
 	m.user = nil
 }
 
+// SetSpendingLimit sets the "spending_limit" field.
+func (m *OrganizationMemberMutation) SetSpendingLimit(f float64) {
+	m.spending_limit = &f
+	m.addspending_limit = nil
+}
+
+// SpendingLimit returns the value of the "spending_limit" field in the mutation.
+func (m *OrganizationMemberMutation) SpendingLimit() (r float64, exists bool) {
+	v := m.spending_limit
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSpendingLimit returns the old "spending_limit" field's value of the OrganizationMember entity.
+// If the OrganizationMember object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrganizationMemberMutation) OldSpendingLimit(ctx context.Context) (v *float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSpendingLimit is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSpendingLimit requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSpendingLimit: %w", err)
+	}
+	return oldValue.SpendingLimit, nil
+}
+
+// AddSpendingLimit adds f to the "spending_limit" field.
+func (m *OrganizationMemberMutation) AddSpendingLimit(f float64) {
+	if m.addspending_limit != nil {
+		*m.addspending_limit += f
+	} else {
+		m.addspending_limit = &f
+	}
+}
+
+// AddedSpendingLimit returns the value that was added to the "spending_limit" field in this mutation.
+func (m *OrganizationMemberMutation) AddedSpendingLimit() (r float64, exists bool) {
+	v := m.addspending_limit
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearSpendingLimit clears the value of the "spending_limit" field.
+func (m *OrganizationMemberMutation) ClearSpendingLimit() {
+	m.spending_limit = nil
+	m.addspending_limit = nil
+	m.clearedFields[organizationmember.FieldSpendingLimit] = struct{}{}
+}
+
+// SpendingLimitCleared returns if the "spending_limit" field was cleared in this mutation.
+func (m *OrganizationMemberMutation) SpendingLimitCleared() bool {
+	_, ok := m.clearedFields[organizationmember.FieldSpendingLimit]
+	return ok
+}
+
+// ResetSpendingLimit resets all changes to the "spending_limit" field.
+func (m *OrganizationMemberMutation) ResetSpendingLimit() {
+	m.spending_limit = nil
+	m.addspending_limit = nil
+	delete(m.clearedFields, organizationmember.FieldSpendingLimit)
+}
+
+// SetSpendingUsed sets the "spending_used" field.
+func (m *OrganizationMemberMutation) SetSpendingUsed(f float64) {
+	m.spending_used = &f
+	m.addspending_used = nil
+}
+
+// SpendingUsed returns the value of the "spending_used" field in the mutation.
+func (m *OrganizationMemberMutation) SpendingUsed() (r float64, exists bool) {
+	v := m.spending_used
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSpendingUsed returns the old "spending_used" field's value of the OrganizationMember entity.
+// If the OrganizationMember object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrganizationMemberMutation) OldSpendingUsed(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSpendingUsed is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSpendingUsed requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSpendingUsed: %w", err)
+	}
+	return oldValue.SpendingUsed, nil
+}
+
+// AddSpendingUsed adds f to the "spending_used" field.
+func (m *OrganizationMemberMutation) AddSpendingUsed(f float64) {
+	if m.addspending_used != nil {
+		*m.addspending_used += f
+	} else {
+		m.addspending_used = &f
+	}
+}
+
+// AddedSpendingUsed returns the value that was added to the "spending_used" field in this mutation.
+func (m *OrganizationMemberMutation) AddedSpendingUsed() (r float64, exists bool) {
+	v := m.addspending_used
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSpendingUsed resets all changes to the "spending_used" field.
+func (m *OrganizationMemberMutation) ResetSpendingUsed() {
+	m.spending_used = nil
+	m.addspending_used = nil
+}
+
 // ClearOrganization clears the "organization" edge to the Organization entity.
 func (m *OrganizationMemberMutation) ClearOrganization() {
 	m.clearedorganization = true
@@ -30634,7 +30764,7 @@ func (m *OrganizationMemberMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *OrganizationMemberMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 6)
 	if m.created_at != nil {
 		fields = append(fields, organizationmember.FieldCreatedAt)
 	}
@@ -30646,6 +30776,12 @@ func (m *OrganizationMemberMutation) Fields() []string {
 	}
 	if m.user != nil {
 		fields = append(fields, organizationmember.FieldUserID)
+	}
+	if m.spending_limit != nil {
+		fields = append(fields, organizationmember.FieldSpendingLimit)
+	}
+	if m.spending_used != nil {
+		fields = append(fields, organizationmember.FieldSpendingUsed)
 	}
 	return fields
 }
@@ -30663,6 +30799,10 @@ func (m *OrganizationMemberMutation) Field(name string) (ent.Value, bool) {
 		return m.OrganizationID()
 	case organizationmember.FieldUserID:
 		return m.UserID()
+	case organizationmember.FieldSpendingLimit:
+		return m.SpendingLimit()
+	case organizationmember.FieldSpendingUsed:
+		return m.SpendingUsed()
 	}
 	return nil, false
 }
@@ -30680,6 +30820,10 @@ func (m *OrganizationMemberMutation) OldField(ctx context.Context, name string) 
 		return m.OldOrganizationID(ctx)
 	case organizationmember.FieldUserID:
 		return m.OldUserID(ctx)
+	case organizationmember.FieldSpendingLimit:
+		return m.OldSpendingLimit(ctx)
+	case organizationmember.FieldSpendingUsed:
+		return m.OldSpendingUsed(ctx)
 	}
 	return nil, fmt.Errorf("unknown OrganizationMember field %s", name)
 }
@@ -30717,6 +30861,20 @@ func (m *OrganizationMemberMutation) SetField(name string, value ent.Value) erro
 		}
 		m.SetUserID(v)
 		return nil
+	case organizationmember.FieldSpendingLimit:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSpendingLimit(v)
+		return nil
+	case organizationmember.FieldSpendingUsed:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSpendingUsed(v)
+		return nil
 	}
 	return fmt.Errorf("unknown OrganizationMember field %s", name)
 }
@@ -30725,6 +30883,12 @@ func (m *OrganizationMemberMutation) SetField(name string, value ent.Value) erro
 // this mutation.
 func (m *OrganizationMemberMutation) AddedFields() []string {
 	var fields []string
+	if m.addspending_limit != nil {
+		fields = append(fields, organizationmember.FieldSpendingLimit)
+	}
+	if m.addspending_used != nil {
+		fields = append(fields, organizationmember.FieldSpendingUsed)
+	}
 	return fields
 }
 
@@ -30733,6 +30897,10 @@ func (m *OrganizationMemberMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *OrganizationMemberMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
+	case organizationmember.FieldSpendingLimit:
+		return m.AddedSpendingLimit()
+	case organizationmember.FieldSpendingUsed:
+		return m.AddedSpendingUsed()
 	}
 	return nil, false
 }
@@ -30742,6 +30910,20 @@ func (m *OrganizationMemberMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *OrganizationMemberMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case organizationmember.FieldSpendingLimit:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSpendingLimit(v)
+		return nil
+	case organizationmember.FieldSpendingUsed:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSpendingUsed(v)
+		return nil
 	}
 	return fmt.Errorf("unknown OrganizationMember numeric field %s", name)
 }
@@ -30749,7 +30931,11 @@ func (m *OrganizationMemberMutation) AddField(name string, value ent.Value) erro
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *OrganizationMemberMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(organizationmember.FieldSpendingLimit) {
+		fields = append(fields, organizationmember.FieldSpendingLimit)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -30762,6 +30948,11 @@ func (m *OrganizationMemberMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *OrganizationMemberMutation) ClearField(name string) error {
+	switch name {
+	case organizationmember.FieldSpendingLimit:
+		m.ClearSpendingLimit()
+		return nil
+	}
 	return fmt.Errorf("unknown OrganizationMember nullable field %s", name)
 }
 
@@ -30780,6 +30971,12 @@ func (m *OrganizationMemberMutation) ResetField(name string) error {
 		return nil
 	case organizationmember.FieldUserID:
 		m.ResetUserID()
+		return nil
+	case organizationmember.FieldSpendingLimit:
+		m.ResetSpendingLimit()
+		return nil
+	case organizationmember.FieldSpendingUsed:
+		m.ResetSpendingUsed()
 		return nil
 	}
 	return fmt.Errorf("unknown OrganizationMember field %s", name)

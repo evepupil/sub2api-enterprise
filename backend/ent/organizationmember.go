@@ -27,6 +27,10 @@ type OrganizationMember struct {
 	OrganizationID int64 `json:"organization_id,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID int64 `json:"user_id,omitempty"`
+	// SpendingLimit holds the value of the "spending_limit" field.
+	SpendingLimit *float64 `json:"spending_limit,omitempty"`
+	// SpendingUsed holds the value of the "spending_used" field.
+	SpendingUsed float64 `json:"spending_used,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the OrganizationMemberQuery when eager-loading is set.
 	Edges        OrganizationMemberEdges `json:"edges"`
@@ -71,6 +75,8 @@ func (*OrganizationMember) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case organizationmember.FieldSpendingLimit, organizationmember.FieldSpendingUsed:
+			values[i] = new(sql.NullFloat64)
 		case organizationmember.FieldID, organizationmember.FieldOrganizationID, organizationmember.FieldUserID:
 			values[i] = new(sql.NullInt64)
 		case organizationmember.FieldCreatedAt, organizationmember.FieldUpdatedAt:
@@ -119,6 +125,19 @@ func (_m *OrganizationMember) assignValues(columns []string, values []any) error
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
 				_m.UserID = value.Int64
+			}
+		case organizationmember.FieldSpendingLimit:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field spending_limit", values[i])
+			} else if value.Valid {
+				_m.SpendingLimit = new(float64)
+				*_m.SpendingLimit = value.Float64
+			}
+		case organizationmember.FieldSpendingUsed:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field spending_used", values[i])
+			} else if value.Valid {
+				_m.SpendingUsed = value.Float64
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -177,6 +196,14 @@ func (_m *OrganizationMember) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
+	builder.WriteString(", ")
+	if v := _m.SpendingLimit; v != nil {
+		builder.WriteString("spending_limit=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("spending_used=")
+	builder.WriteString(fmt.Sprintf("%v", _m.SpendingUsed))
 	builder.WriteByte(')')
 	return builder.String()
 }
