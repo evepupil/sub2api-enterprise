@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/Wei-Shaw/sub2api/ent/group"
 	"github.com/Wei-Shaw/sub2api/ent/organization"
 	"github.com/Wei-Shaw/sub2api/ent/organizationmember"
 	"github.com/Wei-Shaw/sub2api/ent/redeemcode"
@@ -65,6 +66,20 @@ func (_c *OrganizationCreate) SetOwnerUserID(v int64) *OrganizationCreate {
 	return _c
 }
 
+// SetRestrictPublicGroups sets the "restrict_public_groups" field.
+func (_c *OrganizationCreate) SetRestrictPublicGroups(v bool) *OrganizationCreate {
+	_c.mutation.SetRestrictPublicGroups(v)
+	return _c
+}
+
+// SetNillableRestrictPublicGroups sets the "restrict_public_groups" field if the given value is not nil.
+func (_c *OrganizationCreate) SetNillableRestrictPublicGroups(v *bool) *OrganizationCreate {
+	if v != nil {
+		_c.SetRestrictPublicGroups(*v)
+	}
+	return _c
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_c *OrganizationCreate) SetOwnerID(id int64) *OrganizationCreate {
 	_c.mutation.SetOwnerID(id)
@@ -104,6 +119,21 @@ func (_c *OrganizationCreate) AddInvitations(v ...*RedeemCode) *OrganizationCrea
 		ids[i] = v[i].ID
 	}
 	return _c.AddInvitationIDs(ids...)
+}
+
+// AddAllowedGroupIDs adds the "allowed_groups" edge to the Group entity by IDs.
+func (_c *OrganizationCreate) AddAllowedGroupIDs(ids ...int64) *OrganizationCreate {
+	_c.mutation.AddAllowedGroupIDs(ids...)
+	return _c
+}
+
+// AddAllowedGroups adds the "allowed_groups" edges to the Group entity.
+func (_c *OrganizationCreate) AddAllowedGroups(v ...*Group) *OrganizationCreate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddAllowedGroupIDs(ids...)
 }
 
 // Mutation returns the OrganizationMutation object of the builder.
@@ -149,6 +179,10 @@ func (_c *OrganizationCreate) defaults() {
 		v := organization.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := _c.mutation.RestrictPublicGroups(); !ok {
+		v := organization.DefaultRestrictPublicGroups
+		_c.mutation.SetRestrictPublicGroups(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -169,6 +203,9 @@ func (_c *OrganizationCreate) check() error {
 	}
 	if _, ok := _c.mutation.OwnerUserID(); !ok {
 		return &ValidationError{Name: "owner_user_id", err: errors.New(`ent: missing required field "Organization.owner_user_id"`)}
+	}
+	if _, ok := _c.mutation.RestrictPublicGroups(); !ok {
+		return &ValidationError{Name: "restrict_public_groups", err: errors.New(`ent: missing required field "Organization.restrict_public_groups"`)}
 	}
 	if len(_c.mutation.OwnerIDs()) == 0 {
 		return &ValidationError{Name: "owner", err: errors.New(`ent: missing required edge "Organization.owner"`)}
@@ -211,6 +248,10 @@ func (_c *OrganizationCreate) createSpec() (*Organization, *sqlgraph.CreateSpec)
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(organization.FieldName, field.TypeString, value)
 		_node.Name = value
+	}
+	if value, ok := _c.mutation.RestrictPublicGroups(); ok {
+		_spec.SetField(organization.FieldRestrictPublicGroups, field.TypeBool, value)
+		_node.RestrictPublicGroups = value
 	}
 	if nodes := _c.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -259,6 +300,26 @@ func (_c *OrganizationCreate) createSpec() (*Organization, *sqlgraph.CreateSpec)
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.AllowedGroupsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   organization.AllowedGroupsTable,
+			Columns: organization.AllowedGroupsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		createE := &OrganizationAllowedGroupCreate{config: _c.config, mutation: newOrganizationAllowedGroupMutation(_c.config, OpCreate)}
+		createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -349,6 +410,18 @@ func (u *OrganizationUpsert) UpdateOwnerUserID() *OrganizationUpsert {
 	return u
 }
 
+// SetRestrictPublicGroups sets the "restrict_public_groups" field.
+func (u *OrganizationUpsert) SetRestrictPublicGroups(v bool) *OrganizationUpsert {
+	u.Set(organization.FieldRestrictPublicGroups, v)
+	return u
+}
+
+// UpdateRestrictPublicGroups sets the "restrict_public_groups" field to the value that was provided on create.
+func (u *OrganizationUpsert) UpdateRestrictPublicGroups() *OrganizationUpsert {
+	u.SetExcluded(organization.FieldRestrictPublicGroups)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -433,6 +506,20 @@ func (u *OrganizationUpsertOne) SetOwnerUserID(v int64) *OrganizationUpsertOne {
 func (u *OrganizationUpsertOne) UpdateOwnerUserID() *OrganizationUpsertOne {
 	return u.Update(func(s *OrganizationUpsert) {
 		s.UpdateOwnerUserID()
+	})
+}
+
+// SetRestrictPublicGroups sets the "restrict_public_groups" field.
+func (u *OrganizationUpsertOne) SetRestrictPublicGroups(v bool) *OrganizationUpsertOne {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.SetRestrictPublicGroups(v)
+	})
+}
+
+// UpdateRestrictPublicGroups sets the "restrict_public_groups" field to the value that was provided on create.
+func (u *OrganizationUpsertOne) UpdateRestrictPublicGroups() *OrganizationUpsertOne {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.UpdateRestrictPublicGroups()
 	})
 }
 
@@ -686,6 +773,20 @@ func (u *OrganizationUpsertBulk) SetOwnerUserID(v int64) *OrganizationUpsertBulk
 func (u *OrganizationUpsertBulk) UpdateOwnerUserID() *OrganizationUpsertBulk {
 	return u.Update(func(s *OrganizationUpsert) {
 		s.UpdateOwnerUserID()
+	})
+}
+
+// SetRestrictPublicGroups sets the "restrict_public_groups" field.
+func (u *OrganizationUpsertBulk) SetRestrictPublicGroups(v bool) *OrganizationUpsertBulk {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.SetRestrictPublicGroups(v)
+	})
+}
+
+// UpdateRestrictPublicGroups sets the "restrict_public_groups" field to the value that was provided on create.
+func (u *OrganizationUpsertBulk) UpdateRestrictPublicGroups() *OrganizationUpsertBulk {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.UpdateRestrictPublicGroups()
 	})
 }
 

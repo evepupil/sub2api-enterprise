@@ -35,6 +35,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/idempotencyrecord"
 	"github.com/Wei-Shaw/sub2api/ent/identityadoptiondecision"
 	"github.com/Wei-Shaw/sub2api/ent/organization"
+	"github.com/Wei-Shaw/sub2api/ent/organizationallowedgroup"
 	"github.com/Wei-Shaw/sub2api/ent/organizationmember"
 	"github.com/Wei-Shaw/sub2api/ent/paymentauditlog"
 	"github.com/Wei-Shaw/sub2api/ent/paymentorder"
@@ -105,6 +106,8 @@ type Client struct {
 	IdentityAdoptionDecision *IdentityAdoptionDecisionClient
 	// Organization is the client for interacting with the Organization builders.
 	Organization *OrganizationClient
+	// OrganizationAllowedGroup is the client for interacting with the OrganizationAllowedGroup builders.
+	OrganizationAllowedGroup *OrganizationAllowedGroupClient
 	// OrganizationMember is the client for interacting with the OrganizationMember builders.
 	OrganizationMember *OrganizationMemberClient
 	// PaymentAuditLog is the client for interacting with the PaymentAuditLog builders.
@@ -178,6 +181,7 @@ func (c *Client) init() {
 	c.IdempotencyRecord = NewIdempotencyRecordClient(c.config)
 	c.IdentityAdoptionDecision = NewIdentityAdoptionDecisionClient(c.config)
 	c.Organization = NewOrganizationClient(c.config)
+	c.OrganizationAllowedGroup = NewOrganizationAllowedGroupClient(c.config)
 	c.OrganizationMember = NewOrganizationMemberClient(c.config)
 	c.PaymentAuditLog = NewPaymentAuditLogClient(c.config)
 	c.PaymentOrder = NewPaymentOrderClient(c.config)
@@ -311,6 +315,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		IdempotencyRecord:             NewIdempotencyRecordClient(cfg),
 		IdentityAdoptionDecision:      NewIdentityAdoptionDecisionClient(cfg),
 		Organization:                  NewOrganizationClient(cfg),
+		OrganizationAllowedGroup:      NewOrganizationAllowedGroupClient(cfg),
 		OrganizationMember:            NewOrganizationMemberClient(cfg),
 		PaymentAuditLog:               NewPaymentAuditLogClient(cfg),
 		PaymentOrder:                  NewPaymentOrderClient(cfg),
@@ -371,6 +376,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		IdempotencyRecord:             NewIdempotencyRecordClient(cfg),
 		IdentityAdoptionDecision:      NewIdentityAdoptionDecisionClient(cfg),
 		Organization:                  NewOrganizationClient(cfg),
+		OrganizationAllowedGroup:      NewOrganizationAllowedGroupClient(cfg),
 		OrganizationMember:            NewOrganizationMemberClient(cfg),
 		PaymentAuditLog:               NewPaymentAuditLogClient(cfg),
 		PaymentOrder:                  NewPaymentOrderClient(cfg),
@@ -426,13 +432,13 @@ func (c *Client) Use(hooks ...Hook) {
 		c.BatchImageJob, c.ChannelMonitor, c.ChannelMonitorDailyRollup,
 		c.ChannelMonitorHistory, c.ChannelMonitorRequestTemplate,
 		c.CompositeModelRoute, c.ErrorPassthroughRule, c.Group, c.IdempotencyRecord,
-		c.IdentityAdoptionDecision, c.Organization, c.OrganizationMember,
-		c.PaymentAuditLog, c.PaymentOrder, c.PaymentProviderInstance,
-		c.PendingAuthSession, c.PromoCode, c.PromoCodeUsage, c.Proxy, c.RedeemCode,
-		c.SecuritySecret, c.Setting, c.SubscriptionPlan, c.TLSFingerprintProfile,
-		c.UsageCleanupTask, c.UsageLog, c.User, c.UserAllowedGroup,
-		c.UserAttributeDefinition, c.UserAttributeValue, c.UserPlatformQuota,
-		c.UserSubscription,
+		c.IdentityAdoptionDecision, c.Organization, c.OrganizationAllowedGroup,
+		c.OrganizationMember, c.PaymentAuditLog, c.PaymentOrder,
+		c.PaymentProviderInstance, c.PendingAuthSession, c.PromoCode, c.PromoCodeUsage,
+		c.Proxy, c.RedeemCode, c.SecuritySecret, c.Setting, c.SubscriptionPlan,
+		c.TLSFingerprintProfile, c.UsageCleanupTask, c.UsageLog, c.User,
+		c.UserAllowedGroup, c.UserAttributeDefinition, c.UserAttributeValue,
+		c.UserPlatformQuota, c.UserSubscription,
 	} {
 		n.Use(hooks...)
 	}
@@ -447,13 +453,13 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.BatchImageJob, c.ChannelMonitor, c.ChannelMonitorDailyRollup,
 		c.ChannelMonitorHistory, c.ChannelMonitorRequestTemplate,
 		c.CompositeModelRoute, c.ErrorPassthroughRule, c.Group, c.IdempotencyRecord,
-		c.IdentityAdoptionDecision, c.Organization, c.OrganizationMember,
-		c.PaymentAuditLog, c.PaymentOrder, c.PaymentProviderInstance,
-		c.PendingAuthSession, c.PromoCode, c.PromoCodeUsage, c.Proxy, c.RedeemCode,
-		c.SecuritySecret, c.Setting, c.SubscriptionPlan, c.TLSFingerprintProfile,
-		c.UsageCleanupTask, c.UsageLog, c.User, c.UserAllowedGroup,
-		c.UserAttributeDefinition, c.UserAttributeValue, c.UserPlatformQuota,
-		c.UserSubscription,
+		c.IdentityAdoptionDecision, c.Organization, c.OrganizationAllowedGroup,
+		c.OrganizationMember, c.PaymentAuditLog, c.PaymentOrder,
+		c.PaymentProviderInstance, c.PendingAuthSession, c.PromoCode, c.PromoCodeUsage,
+		c.Proxy, c.RedeemCode, c.SecuritySecret, c.Setting, c.SubscriptionPlan,
+		c.TLSFingerprintProfile, c.UsageCleanupTask, c.UsageLog, c.User,
+		c.UserAllowedGroup, c.UserAttributeDefinition, c.UserAttributeValue,
+		c.UserPlatformQuota, c.UserSubscription,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -502,6 +508,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.IdentityAdoptionDecision.mutate(ctx, m)
 	case *OrganizationMutation:
 		return c.Organization.mutate(ctx, m)
+	case *OrganizationAllowedGroupMutation:
+		return c.OrganizationAllowedGroup.mutate(ctx, m)
 	case *OrganizationMemberMutation:
 		return c.OrganizationMember.mutate(ctx, m)
 	case *PaymentAuditLogMutation:
@@ -3238,6 +3246,22 @@ func (c *GroupClient) QueryAllowedUsers(_m *Group) *UserQuery {
 	return query
 }
 
+// QueryAllowedOrganizations queries the allowed_organizations edge of a Group.
+func (c *GroupClient) QueryAllowedOrganizations(_m *Group) *OrganizationQuery {
+	query := (&OrganizationClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(group.Table, group.FieldID, id),
+			sqlgraph.To(organization.Table, organization.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, group.AllowedOrganizationsTable, group.AllowedOrganizationsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryAccountGroups queries the account_groups edge of a Group.
 func (c *GroupClient) QueryAccountGroups(_m *Group) *AccountGroupQuery {
 	query := (&AccountGroupClient{config: c.config}).Query()
@@ -3263,6 +3287,22 @@ func (c *GroupClient) QueryUserAllowedGroups(_m *Group) *UserAllowedGroupQuery {
 			sqlgraph.From(group.Table, group.FieldID, id),
 			sqlgraph.To(userallowedgroup.Table, userallowedgroup.GroupColumn),
 			sqlgraph.Edge(sqlgraph.O2M, true, group.UserAllowedGroupsTable, group.UserAllowedGroupsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryOrganizationAllowedGroups queries the organization_allowed_groups edge of a Group.
+func (c *GroupClient) QueryOrganizationAllowedGroups(_m *Group) *OrganizationAllowedGroupQuery {
+	query := (&OrganizationAllowedGroupClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(group.Table, group.FieldID, id),
+			sqlgraph.To(organizationallowedgroup.Table, organizationallowedgroup.GroupColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, group.OrganizationAllowedGroupsTable, group.OrganizationAllowedGroupsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -3751,6 +3791,38 @@ func (c *OrganizationClient) QueryInvitations(_m *Organization) *RedeemCodeQuery
 	return query
 }
 
+// QueryAllowedGroups queries the allowed_groups edge of a Organization.
+func (c *OrganizationClient) QueryAllowedGroups(_m *Organization) *GroupQuery {
+	query := (&GroupClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(organization.Table, organization.FieldID, id),
+			sqlgraph.To(group.Table, group.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, organization.AllowedGroupsTable, organization.AllowedGroupsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryOrganizationAllowedGroups queries the organization_allowed_groups edge of a Organization.
+func (c *OrganizationClient) QueryOrganizationAllowedGroups(_m *Organization) *OrganizationAllowedGroupQuery {
+	query := (&OrganizationAllowedGroupClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(organization.Table, organization.FieldID, id),
+			sqlgraph.To(organizationallowedgroup.Table, organizationallowedgroup.OrganizationColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, organization.OrganizationAllowedGroupsTable, organization.OrganizationAllowedGroupsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *OrganizationClient) Hooks() []Hook {
 	return c.hooks.Organization
@@ -3773,6 +3845,122 @@ func (c *OrganizationClient) mutate(ctx context.Context, m *OrganizationMutation
 		return (&OrganizationDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Organization mutation op: %q", m.Op())
+	}
+}
+
+// OrganizationAllowedGroupClient is a client for the OrganizationAllowedGroup schema.
+type OrganizationAllowedGroupClient struct {
+	config
+}
+
+// NewOrganizationAllowedGroupClient returns a client for the OrganizationAllowedGroup from the given config.
+func NewOrganizationAllowedGroupClient(c config) *OrganizationAllowedGroupClient {
+	return &OrganizationAllowedGroupClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `organizationallowedgroup.Hooks(f(g(h())))`.
+func (c *OrganizationAllowedGroupClient) Use(hooks ...Hook) {
+	c.hooks.OrganizationAllowedGroup = append(c.hooks.OrganizationAllowedGroup, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `organizationallowedgroup.Intercept(f(g(h())))`.
+func (c *OrganizationAllowedGroupClient) Intercept(interceptors ...Interceptor) {
+	c.inters.OrganizationAllowedGroup = append(c.inters.OrganizationAllowedGroup, interceptors...)
+}
+
+// Create returns a builder for creating a OrganizationAllowedGroup entity.
+func (c *OrganizationAllowedGroupClient) Create() *OrganizationAllowedGroupCreate {
+	mutation := newOrganizationAllowedGroupMutation(c.config, OpCreate)
+	return &OrganizationAllowedGroupCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of OrganizationAllowedGroup entities.
+func (c *OrganizationAllowedGroupClient) CreateBulk(builders ...*OrganizationAllowedGroupCreate) *OrganizationAllowedGroupCreateBulk {
+	return &OrganizationAllowedGroupCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *OrganizationAllowedGroupClient) MapCreateBulk(slice any, setFunc func(*OrganizationAllowedGroupCreate, int)) *OrganizationAllowedGroupCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &OrganizationAllowedGroupCreateBulk{err: fmt.Errorf("calling to OrganizationAllowedGroupClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*OrganizationAllowedGroupCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &OrganizationAllowedGroupCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for OrganizationAllowedGroup.
+func (c *OrganizationAllowedGroupClient) Update() *OrganizationAllowedGroupUpdate {
+	mutation := newOrganizationAllowedGroupMutation(c.config, OpUpdate)
+	return &OrganizationAllowedGroupUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *OrganizationAllowedGroupClient) UpdateOne(_m *OrganizationAllowedGroup) *OrganizationAllowedGroupUpdateOne {
+	mutation := newOrganizationAllowedGroupMutation(c.config, OpUpdateOne)
+	mutation.organization = &_m.OrganizationID
+	mutation.group = &_m.GroupID
+	return &OrganizationAllowedGroupUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for OrganizationAllowedGroup.
+func (c *OrganizationAllowedGroupClient) Delete() *OrganizationAllowedGroupDelete {
+	mutation := newOrganizationAllowedGroupMutation(c.config, OpDelete)
+	return &OrganizationAllowedGroupDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Query returns a query builder for OrganizationAllowedGroup.
+func (c *OrganizationAllowedGroupClient) Query() *OrganizationAllowedGroupQuery {
+	return &OrganizationAllowedGroupQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeOrganizationAllowedGroup},
+		inters: c.Interceptors(),
+	}
+}
+
+// QueryOrganization queries the organization edge of a OrganizationAllowedGroup.
+func (c *OrganizationAllowedGroupClient) QueryOrganization(_m *OrganizationAllowedGroup) *OrganizationQuery {
+	return c.Query().
+		Where(organizationallowedgroup.OrganizationID(_m.OrganizationID), organizationallowedgroup.GroupID(_m.GroupID)).
+		QueryOrganization()
+}
+
+// QueryGroup queries the group edge of a OrganizationAllowedGroup.
+func (c *OrganizationAllowedGroupClient) QueryGroup(_m *OrganizationAllowedGroup) *GroupQuery {
+	return c.Query().
+		Where(organizationallowedgroup.OrganizationID(_m.OrganizationID), organizationallowedgroup.GroupID(_m.GroupID)).
+		QueryGroup()
+}
+
+// Hooks returns the client hooks.
+func (c *OrganizationAllowedGroupClient) Hooks() []Hook {
+	return c.hooks.OrganizationAllowedGroup
+}
+
+// Interceptors returns the client interceptors.
+func (c *OrganizationAllowedGroupClient) Interceptors() []Interceptor {
+	return c.inters.OrganizationAllowedGroup
+}
+
+func (c *OrganizationAllowedGroupClient) mutate(ctx context.Context, m *OrganizationAllowedGroupMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&OrganizationAllowedGroupCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&OrganizationAllowedGroupUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&OrganizationAllowedGroupUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&OrganizationAllowedGroupDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown OrganizationAllowedGroup mutation op: %q", m.Op())
 	}
 }
 
@@ -7258,9 +7446,9 @@ type (
 		ChannelMonitor, ChannelMonitorDailyRollup, ChannelMonitorHistory,
 		ChannelMonitorRequestTemplate, CompositeModelRoute, ErrorPassthroughRule,
 		Group, IdempotencyRecord, IdentityAdoptionDecision, Organization,
-		OrganizationMember, PaymentAuditLog, PaymentOrder, PaymentProviderInstance,
-		PendingAuthSession, PromoCode, PromoCodeUsage, Proxy, RedeemCode,
-		SecuritySecret, Setting, SubscriptionPlan, TLSFingerprintProfile,
+		OrganizationAllowedGroup, OrganizationMember, PaymentAuditLog, PaymentOrder,
+		PaymentProviderInstance, PendingAuthSession, PromoCode, PromoCodeUsage, Proxy,
+		RedeemCode, SecuritySecret, Setting, SubscriptionPlan, TLSFingerprintProfile,
 		UsageCleanupTask, UsageLog, User, UserAllowedGroup, UserAttributeDefinition,
 		UserAttributeValue, UserPlatformQuota, UserSubscription []ent.Hook
 	}
@@ -7270,9 +7458,9 @@ type (
 		ChannelMonitor, ChannelMonitorDailyRollup, ChannelMonitorHistory,
 		ChannelMonitorRequestTemplate, CompositeModelRoute, ErrorPassthroughRule,
 		Group, IdempotencyRecord, IdentityAdoptionDecision, Organization,
-		OrganizationMember, PaymentAuditLog, PaymentOrder, PaymentProviderInstance,
-		PendingAuthSession, PromoCode, PromoCodeUsage, Proxy, RedeemCode,
-		SecuritySecret, Setting, SubscriptionPlan, TLSFingerprintProfile,
+		OrganizationAllowedGroup, OrganizationMember, PaymentAuditLog, PaymentOrder,
+		PaymentProviderInstance, PendingAuthSession, PromoCode, PromoCodeUsage, Proxy,
+		RedeemCode, SecuritySecret, Setting, SubscriptionPlan, TLSFingerprintProfile,
 		UsageCleanupTask, UsageLog, User, UserAllowedGroup, UserAttributeDefinition,
 		UserAttributeValue, UserPlatformQuota, UserSubscription []ent.Interceptor
 	}

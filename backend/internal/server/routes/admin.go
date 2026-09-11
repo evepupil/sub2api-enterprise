@@ -39,6 +39,7 @@ func RegisterAdminRoutes(
 
 		// 用户管理
 		registerUserManagementRoutes(admin, h)
+		registerAdminOrganizationRoutes(admin, h)
 
 		// 分组管理
 		registerGroupRoutes(admin, h)

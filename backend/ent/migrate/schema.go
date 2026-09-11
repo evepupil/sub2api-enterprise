@@ -1103,6 +1103,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
 		{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
 		{Name: "name", Type: field.TypeString, Size: 100},
+		{Name: "restrict_public_groups", Type: field.TypeBool, Default: false},
 		{Name: "owner_user_id", Type: field.TypeInt64, Unique: true},
 	}
 	// OrganizationsTable holds the schema information for the "organizations" table.
@@ -1113,7 +1114,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "organizations_users_owned_organization",
-				Columns:    []*schema.Column{OrganizationsColumns[4]},
+				Columns:    []*schema.Column{OrganizationsColumns[5]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -1123,6 +1124,39 @@ var (
 				Name:    "organization_created_at",
 				Unique:  false,
 				Columns: []*schema.Column{OrganizationsColumns[1]},
+			},
+		},
+	}
+	// OrganizationAllowedGroupsColumns holds the columns for the "organization_allowed_groups" table.
+	OrganizationAllowedGroupsColumns = []*schema.Column{
+		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "organization_id", Type: field.TypeInt64},
+		{Name: "group_id", Type: field.TypeInt64},
+	}
+	// OrganizationAllowedGroupsTable holds the schema information for the "organization_allowed_groups" table.
+	OrganizationAllowedGroupsTable = &schema.Table{
+		Name:       "organization_allowed_groups",
+		Columns:    OrganizationAllowedGroupsColumns,
+		PrimaryKey: []*schema.Column{OrganizationAllowedGroupsColumns[1], OrganizationAllowedGroupsColumns[2]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "organization_allowed_groups_organizations_organization",
+				Columns:    []*schema.Column{OrganizationAllowedGroupsColumns[1]},
+				RefColumns: []*schema.Column{OrganizationsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "organization_allowed_groups_groups_group",
+				Columns:    []*schema.Column{OrganizationAllowedGroupsColumns[2]},
+				RefColumns: []*schema.Column{GroupsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "organizationallowedgroup_group_id",
+				Unique:  false,
+				Columns: []*schema.Column{OrganizationAllowedGroupsColumns[2]},
 			},
 		},
 	}
@@ -2186,6 +2220,7 @@ var (
 		IdempotencyRecordsTable,
 		IdentityAdoptionDecisionsTable,
 		OrganizationsTable,
+		OrganizationAllowedGroupsTable,
 		OrganizationMembersTable,
 		PaymentAuditLogsTable,
 		PaymentOrdersTable,
@@ -2287,6 +2322,11 @@ func init() {
 	OrganizationsTable.ForeignKeys[0].RefTable = UsersTable
 	OrganizationsTable.Annotation = &entsql.Annotation{
 		Table: "organizations",
+	}
+	OrganizationAllowedGroupsTable.ForeignKeys[0].RefTable = OrganizationsTable
+	OrganizationAllowedGroupsTable.ForeignKeys[1].RefTable = GroupsTable
+	OrganizationAllowedGroupsTable.Annotation = &entsql.Annotation{
+		Table: "organization_allowed_groups",
 	}
 	OrganizationMembersTable.ForeignKeys[0].RefTable = OrganizationsTable
 	OrganizationMembersTable.ForeignKeys[1].RefTable = UsersTable

@@ -13,7 +13,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/Wei-Shaw/sub2api/ent/group"
 	"github.com/Wei-Shaw/sub2api/ent/organization"
+	"github.com/Wei-Shaw/sub2api/ent/organizationallowedgroup"
 	"github.com/Wei-Shaw/sub2api/ent/organizationmember"
 	"github.com/Wei-Shaw/sub2api/ent/predicate"
 	"github.com/Wei-Shaw/sub2api/ent/redeemcode"
@@ -23,14 +25,16 @@ import (
 // OrganizationQuery is the builder for querying Organization entities.
 type OrganizationQuery struct {
 	config
-	ctx             *QueryContext
-	order           []organization.OrderOption
-	inters          []Interceptor
-	predicates      []predicate.Organization
-	withOwner       *UserQuery
-	withMembers     *OrganizationMemberQuery
-	withInvitations *RedeemCodeQuery
-	modifiers       []func(*sql.Selector)
+	ctx                           *QueryContext
+	order                         []organization.OrderOption
+	inters                        []Interceptor
+	predicates                    []predicate.Organization
+	withOwner                     *UserQuery
+	withMembers                   *OrganizationMemberQuery
+	withInvitations               *RedeemCodeQuery
+	withAllowedGroups             *GroupQuery
+	withOrganizationAllowedGroups *OrganizationAllowedGroupQuery
+	modifiers                     []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -126,6 +130,50 @@ func (_q *OrganizationQuery) QueryInvitations() *RedeemCodeQuery {
 			sqlgraph.From(organization.Table, organization.FieldID, selector),
 			sqlgraph.To(redeemcode.Table, redeemcode.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, organization.InvitationsTable, organization.InvitationsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryAllowedGroups chains the current query on the "allowed_groups" edge.
+func (_q *OrganizationQuery) QueryAllowedGroups() *GroupQuery {
+	query := (&GroupClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(organization.Table, organization.FieldID, selector),
+			sqlgraph.To(group.Table, group.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, organization.AllowedGroupsTable, organization.AllowedGroupsPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryOrganizationAllowedGroups chains the current query on the "organization_allowed_groups" edge.
+func (_q *OrganizationQuery) QueryOrganizationAllowedGroups() *OrganizationAllowedGroupQuery {
+	query := (&OrganizationAllowedGroupClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(organization.Table, organization.FieldID, selector),
+			sqlgraph.To(organizationallowedgroup.Table, organizationallowedgroup.OrganizationColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, organization.OrganizationAllowedGroupsTable, organization.OrganizationAllowedGroupsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -320,14 +368,16 @@ func (_q *OrganizationQuery) Clone() *OrganizationQuery {
 		return nil
 	}
 	return &OrganizationQuery{
-		config:          _q.config,
-		ctx:             _q.ctx.Clone(),
-		order:           append([]organization.OrderOption{}, _q.order...),
-		inters:          append([]Interceptor{}, _q.inters...),
-		predicates:      append([]predicate.Organization{}, _q.predicates...),
-		withOwner:       _q.withOwner.Clone(),
-		withMembers:     _q.withMembers.Clone(),
-		withInvitations: _q.withInvitations.Clone(),
+		config:                        _q.config,
+		ctx:                           _q.ctx.Clone(),
+		order:                         append([]organization.OrderOption{}, _q.order...),
+		inters:                        append([]Interceptor{}, _q.inters...),
+		predicates:                    append([]predicate.Organization{}, _q.predicates...),
+		withOwner:                     _q.withOwner.Clone(),
+		withMembers:                   _q.withMembers.Clone(),
+		withInvitations:               _q.withInvitations.Clone(),
+		withAllowedGroups:             _q.withAllowedGroups.Clone(),
+		withOrganizationAllowedGroups: _q.withOrganizationAllowedGroups.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -364,6 +414,28 @@ func (_q *OrganizationQuery) WithInvitations(opts ...func(*RedeemCodeQuery)) *Or
 		opt(query)
 	}
 	_q.withInvitations = query
+	return _q
+}
+
+// WithAllowedGroups tells the query-builder to eager-load the nodes that are connected to
+// the "allowed_groups" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *OrganizationQuery) WithAllowedGroups(opts ...func(*GroupQuery)) *OrganizationQuery {
+	query := (&GroupClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withAllowedGroups = query
+	return _q
+}
+
+// WithOrganizationAllowedGroups tells the query-builder to eager-load the nodes that are connected to
+// the "organization_allowed_groups" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *OrganizationQuery) WithOrganizationAllowedGroups(opts ...func(*OrganizationAllowedGroupQuery)) *OrganizationQuery {
+	query := (&OrganizationAllowedGroupClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withOrganizationAllowedGroups = query
 	return _q
 }
 
@@ -445,10 +517,12 @@ func (_q *OrganizationQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	var (
 		nodes       = []*Organization{}
 		_spec       = _q.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [5]bool{
 			_q.withOwner != nil,
 			_q.withMembers != nil,
 			_q.withInvitations != nil,
+			_q.withAllowedGroups != nil,
+			_q.withOrganizationAllowedGroups != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -489,6 +563,22 @@ func (_q *OrganizationQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 		if err := _q.loadInvitations(ctx, query, nodes,
 			func(n *Organization) { n.Edges.Invitations = []*RedeemCode{} },
 			func(n *Organization, e *RedeemCode) { n.Edges.Invitations = append(n.Edges.Invitations, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withAllowedGroups; query != nil {
+		if err := _q.loadAllowedGroups(ctx, query, nodes,
+			func(n *Organization) { n.Edges.AllowedGroups = []*Group{} },
+			func(n *Organization, e *Group) { n.Edges.AllowedGroups = append(n.Edges.AllowedGroups, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withOrganizationAllowedGroups; query != nil {
+		if err := _q.loadOrganizationAllowedGroups(ctx, query, nodes,
+			func(n *Organization) { n.Edges.OrganizationAllowedGroups = []*OrganizationAllowedGroup{} },
+			func(n *Organization, e *OrganizationAllowedGroup) {
+				n.Edges.OrganizationAllowedGroups = append(n.Edges.OrganizationAllowedGroups, e)
+			}); err != nil {
 			return nil, err
 		}
 	}
@@ -582,6 +672,97 @@ func (_q *OrganizationQuery) loadInvitations(ctx context.Context, query *RedeemC
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "organization_id" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *OrganizationQuery) loadAllowedGroups(ctx context.Context, query *GroupQuery, nodes []*Organization, init func(*Organization), assign func(*Organization, *Group)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int64]*Organization)
+	nids := make(map[int64]map[*Organization]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(organization.AllowedGroupsTable)
+		s.Join(joinT).On(s.C(group.FieldID), joinT.C(organization.AllowedGroupsPrimaryKey[1]))
+		s.Where(sql.InValues(joinT.C(organization.AllowedGroupsPrimaryKey[0]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(organization.AllowedGroupsPrimaryKey[0]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := values[0].(*sql.NullInt64).Int64
+				inValue := values[1].(*sql.NullInt64).Int64
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Organization]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*Group](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "allowed_groups" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
+}
+func (_q *OrganizationQuery) loadOrganizationAllowedGroups(ctx context.Context, query *OrganizationAllowedGroupQuery, nodes []*Organization, init func(*Organization), assign func(*Organization, *OrganizationAllowedGroup)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int64]*Organization)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(organizationallowedgroup.FieldOrganizationID)
+	}
+	query.Where(predicate.OrganizationAllowedGroup(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(organization.OrganizationAllowedGroupsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.OrganizationID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "organization_id" returned %v for node %v`, fk, n)
 		}
 		assign(node, n)
 	}

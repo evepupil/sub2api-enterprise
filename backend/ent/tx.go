@@ -54,6 +54,8 @@ type Tx struct {
 	IdentityAdoptionDecision *IdentityAdoptionDecisionClient
 	// Organization is the client for interacting with the Organization builders.
 	Organization *OrganizationClient
+	// OrganizationAllowedGroup is the client for interacting with the OrganizationAllowedGroup builders.
+	OrganizationAllowedGroup *OrganizationAllowedGroupClient
 	// OrganizationMember is the client for interacting with the OrganizationMember builders.
 	OrganizationMember *OrganizationMemberClient
 	// PaymentAuditLog is the client for interacting with the PaymentAuditLog builders.
@@ -247,6 +249,7 @@ func (tx *Tx) init() {
 	tx.IdempotencyRecord = NewIdempotencyRecordClient(tx.config)
 	tx.IdentityAdoptionDecision = NewIdentityAdoptionDecisionClient(tx.config)
 	tx.Organization = NewOrganizationClient(tx.config)
+	tx.OrganizationAllowedGroup = NewOrganizationAllowedGroupClient(tx.config)
 	tx.OrganizationMember = NewOrganizationMemberClient(tx.config)
 	tx.PaymentAuditLog = NewPaymentAuditLogClient(tx.config)
 	tx.PaymentOrder = NewPaymentOrderClient(tx.config)

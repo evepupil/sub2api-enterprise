@@ -75,6 +75,11 @@ func OwnerUserID(v int64) predicate.Organization {
 	return predicate.Organization(sql.FieldEQ(FieldOwnerUserID, v))
 }
 
+// RestrictPublicGroups applies equality check predicate on the "restrict_public_groups" field. It's identical to RestrictPublicGroupsEQ.
+func RestrictPublicGroups(v bool) predicate.Organization {
+	return predicate.Organization(sql.FieldEQ(FieldRestrictPublicGroups, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Organization {
 	return predicate.Organization(sql.FieldEQ(FieldCreatedAt, v))
@@ -240,6 +245,16 @@ func OwnerUserIDNotIn(vs ...int64) predicate.Organization {
 	return predicate.Organization(sql.FieldNotIn(FieldOwnerUserID, vs...))
 }
 
+// RestrictPublicGroupsEQ applies the EQ predicate on the "restrict_public_groups" field.
+func RestrictPublicGroupsEQ(v bool) predicate.Organization {
+	return predicate.Organization(sql.FieldEQ(FieldRestrictPublicGroups, v))
+}
+
+// RestrictPublicGroupsNEQ applies the NEQ predicate on the "restrict_public_groups" field.
+func RestrictPublicGroupsNEQ(v bool) predicate.Organization {
+	return predicate.Organization(sql.FieldNEQ(FieldRestrictPublicGroups, v))
+}
+
 // HasOwner applies the HasEdge predicate on the "owner" edge.
 func HasOwner() predicate.Organization {
 	return predicate.Organization(func(s *sql.Selector) {
@@ -301,6 +316,52 @@ func HasInvitations() predicate.Organization {
 func HasInvitationsWith(preds ...predicate.RedeemCode) predicate.Organization {
 	return predicate.Organization(func(s *sql.Selector) {
 		step := newInvitationsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasAllowedGroups applies the HasEdge predicate on the "allowed_groups" edge.
+func HasAllowedGroups() predicate.Organization {
+	return predicate.Organization(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, AllowedGroupsTable, AllowedGroupsPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasAllowedGroupsWith applies the HasEdge predicate on the "allowed_groups" edge with a given conditions (other predicates).
+func HasAllowedGroupsWith(preds ...predicate.Group) predicate.Organization {
+	return predicate.Organization(func(s *sql.Selector) {
+		step := newAllowedGroupsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasOrganizationAllowedGroups applies the HasEdge predicate on the "organization_allowed_groups" edge.
+func HasOrganizationAllowedGroups() predicate.Organization {
+	return predicate.Organization(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, OrganizationAllowedGroupsTable, OrganizationAllowedGroupsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasOrganizationAllowedGroupsWith applies the HasEdge predicate on the "organization_allowed_groups" edge with a given conditions (other predicates).
+func HasOrganizationAllowedGroupsWith(preds ...predicate.OrganizationAllowedGroup) predicate.Organization {
+	return predicate.Organization(func(s *sql.Selector) {
+		step := newOrganizationAllowedGroupsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

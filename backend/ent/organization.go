@@ -26,6 +26,8 @@ type Organization struct {
 	Name string `json:"name,omitempty"`
 	// OwnerUserID holds the value of the "owner_user_id" field.
 	OwnerUserID int64 `json:"owner_user_id,omitempty"`
+	// RestrictPublicGroups holds the value of the "restrict_public_groups" field.
+	RestrictPublicGroups bool `json:"restrict_public_groups,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the OrganizationQuery when eager-loading is set.
 	Edges        OrganizationEdges `json:"edges"`
@@ -40,9 +42,13 @@ type OrganizationEdges struct {
 	Members []*OrganizationMember `json:"members,omitempty"`
 	// Invitations holds the value of the invitations edge.
 	Invitations []*RedeemCode `json:"invitations,omitempty"`
+	// AllowedGroups holds the value of the allowed_groups edge.
+	AllowedGroups []*Group `json:"allowed_groups,omitempty"`
+	// OrganizationAllowedGroups holds the value of the organization_allowed_groups edge.
+	OrganizationAllowedGroups []*OrganizationAllowedGroup `json:"organization_allowed_groups,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [5]bool
 }
 
 // OwnerOrErr returns the Owner value or an error if the edge
@@ -74,11 +80,31 @@ func (e OrganizationEdges) InvitationsOrErr() ([]*RedeemCode, error) {
 	return nil, &NotLoadedError{edge: "invitations"}
 }
 
+// AllowedGroupsOrErr returns the AllowedGroups value or an error if the edge
+// was not loaded in eager-loading.
+func (e OrganizationEdges) AllowedGroupsOrErr() ([]*Group, error) {
+	if e.loadedTypes[3] {
+		return e.AllowedGroups, nil
+	}
+	return nil, &NotLoadedError{edge: "allowed_groups"}
+}
+
+// OrganizationAllowedGroupsOrErr returns the OrganizationAllowedGroups value or an error if the edge
+// was not loaded in eager-loading.
+func (e OrganizationEdges) OrganizationAllowedGroupsOrErr() ([]*OrganizationAllowedGroup, error) {
+	if e.loadedTypes[4] {
+		return e.OrganizationAllowedGroups, nil
+	}
+	return nil, &NotLoadedError{edge: "organization_allowed_groups"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Organization) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case organization.FieldRestrictPublicGroups:
+			values[i] = new(sql.NullBool)
 		case organization.FieldID, organization.FieldOwnerUserID:
 			values[i] = new(sql.NullInt64)
 		case organization.FieldName:
@@ -130,6 +156,12 @@ func (_m *Organization) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.OwnerUserID = value.Int64
 			}
+		case organization.FieldRestrictPublicGroups:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field restrict_public_groups", values[i])
+			} else if value.Valid {
+				_m.RestrictPublicGroups = value.Bool
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -156,6 +188,16 @@ func (_m *Organization) QueryMembers() *OrganizationMemberQuery {
 // QueryInvitations queries the "invitations" edge of the Organization entity.
 func (_m *Organization) QueryInvitations() *RedeemCodeQuery {
 	return NewOrganizationClient(_m.config).QueryInvitations(_m)
+}
+
+// QueryAllowedGroups queries the "allowed_groups" edge of the Organization entity.
+func (_m *Organization) QueryAllowedGroups() *GroupQuery {
+	return NewOrganizationClient(_m.config).QueryAllowedGroups(_m)
+}
+
+// QueryOrganizationAllowedGroups queries the "organization_allowed_groups" edge of the Organization entity.
+func (_m *Organization) QueryOrganizationAllowedGroups() *OrganizationAllowedGroupQuery {
+	return NewOrganizationClient(_m.config).QueryOrganizationAllowedGroups(_m)
 }
 
 // Update returns a builder for updating this Organization.
@@ -192,6 +234,9 @@ func (_m *Organization) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("owner_user_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.OwnerUserID))
+	builder.WriteString(", ")
+	builder.WriteString("restrict_public_groups=")
+	builder.WriteString(fmt.Sprintf("%v", _m.RestrictPublicGroups))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -813,9 +813,11 @@ func ProvideAPIKeyService(
 	cfg *config.Config,
 	billingCacheService *BillingCacheService,
 	concurrencyService *ConcurrencyService,
+	organizationGroupService *OrganizationGroupService,
 ) *APIKeyService {
 	svc := NewAPIKeyService(apiKeyRepo, userRepo, groupRepo, userSubRepo, userGroupRateRepo, cache, cfg)
 	svc.SetRateLimitCacheInvalidator(billingCacheService)
+	svc.SetOrganizationGroupResolver(organizationGroupService)
 	svc.SetConcurrencyService(concurrencyService)
 	return svc
 }
@@ -836,6 +838,8 @@ var ProviderSet = wire.NewSet(
 	NewRedeemService,
 	NewOrganizationService,
 	NewOrganizationMemberService,
+	NewOrganizationGroupService,
+	NewAdminOrganizationService,
 	NewPromoService,
 	NewUsageService,
 	NewDashboardService,

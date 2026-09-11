@@ -16,6 +16,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/account"
 	"github.com/Wei-Shaw/sub2api/ent/apikey"
 	"github.com/Wei-Shaw/sub2api/ent/group"
+	"github.com/Wei-Shaw/sub2api/ent/organization"
 	"github.com/Wei-Shaw/sub2api/ent/predicate"
 	"github.com/Wei-Shaw/sub2api/ent/redeemcode"
 	"github.com/Wei-Shaw/sub2api/ent/usagelog"
@@ -1308,6 +1309,21 @@ func (_u *GroupUpdate) AddAllowedUsers(v ...*User) *GroupUpdate {
 	return _u.AddAllowedUserIDs(ids...)
 }
 
+// AddAllowedOrganizationIDs adds the "allowed_organizations" edge to the Organization entity by IDs.
+func (_u *GroupUpdate) AddAllowedOrganizationIDs(ids ...int64) *GroupUpdate {
+	_u.mutation.AddAllowedOrganizationIDs(ids...)
+	return _u
+}
+
+// AddAllowedOrganizations adds the "allowed_organizations" edges to the Organization entity.
+func (_u *GroupUpdate) AddAllowedOrganizations(v ...*Organization) *GroupUpdate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddAllowedOrganizationIDs(ids...)
+}
+
 // Mutation returns the GroupMutation object of the builder.
 func (_u *GroupUpdate) Mutation() *GroupMutation {
 	return _u.mutation
@@ -1437,6 +1453,27 @@ func (_u *GroupUpdate) RemoveAllowedUsers(v ...*User) *GroupUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveAllowedUserIDs(ids...)
+}
+
+// ClearAllowedOrganizations clears all "allowed_organizations" edges to the Organization entity.
+func (_u *GroupUpdate) ClearAllowedOrganizations() *GroupUpdate {
+	_u.mutation.ClearAllowedOrganizations()
+	return _u
+}
+
+// RemoveAllowedOrganizationIDs removes the "allowed_organizations" edge to Organization entities by IDs.
+func (_u *GroupUpdate) RemoveAllowedOrganizationIDs(ids ...int64) *GroupUpdate {
+	_u.mutation.RemoveAllowedOrganizationIDs(ids...)
+	return _u
+}
+
+// RemoveAllowedOrganizations removes "allowed_organizations" edges to Organization entities.
+func (_u *GroupUpdate) RemoveAllowedOrganizations(v ...*Organization) *GroupUpdate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveAllowedOrganizationIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -2206,6 +2243,63 @@ func (_u *GroupUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		createE := &UserAllowedGroupCreate{config: _u.config, mutation: newUserAllowedGroupMutation(_u.config, OpCreate)}
+		createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.AllowedOrganizationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   group.AllowedOrganizationsTable,
+			Columns: group.AllowedOrganizationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(organization.FieldID, field.TypeInt64),
+			},
+		}
+		createE := &OrganizationAllowedGroupCreate{config: _u.config, mutation: newOrganizationAllowedGroupMutation(_u.config, OpCreate)}
+		createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedAllowedOrganizationsIDs(); len(nodes) > 0 && !_u.mutation.AllowedOrganizationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   group.AllowedOrganizationsTable,
+			Columns: group.AllowedOrganizationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(organization.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		createE := &OrganizationAllowedGroupCreate{config: _u.config, mutation: newOrganizationAllowedGroupMutation(_u.config, OpCreate)}
+		createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.AllowedOrganizationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   group.AllowedOrganizationsTable,
+			Columns: group.AllowedOrganizationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(organization.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		createE := &OrganizationAllowedGroupCreate{config: _u.config, mutation: newOrganizationAllowedGroupMutation(_u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
@@ -3502,6 +3596,21 @@ func (_u *GroupUpdateOne) AddAllowedUsers(v ...*User) *GroupUpdateOne {
 	return _u.AddAllowedUserIDs(ids...)
 }
 
+// AddAllowedOrganizationIDs adds the "allowed_organizations" edge to the Organization entity by IDs.
+func (_u *GroupUpdateOne) AddAllowedOrganizationIDs(ids ...int64) *GroupUpdateOne {
+	_u.mutation.AddAllowedOrganizationIDs(ids...)
+	return _u
+}
+
+// AddAllowedOrganizations adds the "allowed_organizations" edges to the Organization entity.
+func (_u *GroupUpdateOne) AddAllowedOrganizations(v ...*Organization) *GroupUpdateOne {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddAllowedOrganizationIDs(ids...)
+}
+
 // Mutation returns the GroupMutation object of the builder.
 func (_u *GroupUpdateOne) Mutation() *GroupMutation {
 	return _u.mutation
@@ -3631,6 +3740,27 @@ func (_u *GroupUpdateOne) RemoveAllowedUsers(v ...*User) *GroupUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveAllowedUserIDs(ids...)
+}
+
+// ClearAllowedOrganizations clears all "allowed_organizations" edges to the Organization entity.
+func (_u *GroupUpdateOne) ClearAllowedOrganizations() *GroupUpdateOne {
+	_u.mutation.ClearAllowedOrganizations()
+	return _u
+}
+
+// RemoveAllowedOrganizationIDs removes the "allowed_organizations" edge to Organization entities by IDs.
+func (_u *GroupUpdateOne) RemoveAllowedOrganizationIDs(ids ...int64) *GroupUpdateOne {
+	_u.mutation.RemoveAllowedOrganizationIDs(ids...)
+	return _u
+}
+
+// RemoveAllowedOrganizations removes "allowed_organizations" edges to Organization entities.
+func (_u *GroupUpdateOne) RemoveAllowedOrganizations(v ...*Organization) *GroupUpdateOne {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveAllowedOrganizationIDs(ids...)
 }
 
 // Where appends a list predicates to the GroupUpdate builder.
@@ -4430,6 +4560,63 @@ func (_u *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error)
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		createE := &UserAllowedGroupCreate{config: _u.config, mutation: newUserAllowedGroupMutation(_u.config, OpCreate)}
+		createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.AllowedOrganizationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   group.AllowedOrganizationsTable,
+			Columns: group.AllowedOrganizationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(organization.FieldID, field.TypeInt64),
+			},
+		}
+		createE := &OrganizationAllowedGroupCreate{config: _u.config, mutation: newOrganizationAllowedGroupMutation(_u.config, OpCreate)}
+		createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedAllowedOrganizationsIDs(); len(nodes) > 0 && !_u.mutation.AllowedOrganizationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   group.AllowedOrganizationsTable,
+			Columns: group.AllowedOrganizationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(organization.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		createE := &OrganizationAllowedGroupCreate{config: _u.config, mutation: newOrganizationAllowedGroupMutation(_u.config, OpCreate)}
+		createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.AllowedOrganizationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   group.AllowedOrganizationsTable,
+			Columns: group.AllowedOrganizationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(organization.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		createE := &OrganizationAllowedGroupCreate{config: _u.config, mutation: newOrganizationAllowedGroupMutation(_u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields

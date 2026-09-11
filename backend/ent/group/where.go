@@ -2788,6 +2788,29 @@ func HasAllowedUsersWith(preds ...predicate.User) predicate.Group {
 	})
 }
 
+// HasAllowedOrganizations applies the HasEdge predicate on the "allowed_organizations" edge.
+func HasAllowedOrganizations() predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, AllowedOrganizationsTable, AllowedOrganizationsPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasAllowedOrganizationsWith applies the HasEdge predicate on the "allowed_organizations" edge with a given conditions (other predicates).
+func HasAllowedOrganizationsWith(preds ...predicate.Organization) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		step := newAllowedOrganizationsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasAccountGroups applies the HasEdge predicate on the "account_groups" edge.
 func HasAccountGroups() predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
@@ -2826,6 +2849,29 @@ func HasUserAllowedGroups() predicate.Group {
 func HasUserAllowedGroupsWith(preds ...predicate.UserAllowedGroup) predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
 		step := newUserAllowedGroupsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasOrganizationAllowedGroups applies the HasEdge predicate on the "organization_allowed_groups" edge.
+func HasOrganizationAllowedGroups() predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, OrganizationAllowedGroupsTable, OrganizationAllowedGroupsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasOrganizationAllowedGroupsWith applies the HasEdge predicate on the "organization_allowed_groups" edge with a given conditions (other predicates).
+func HasOrganizationAllowedGroupsWith(preds ...predicate.OrganizationAllowedGroup) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		step := newOrganizationAllowedGroupsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

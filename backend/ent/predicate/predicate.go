@@ -66,6 +66,9 @@ type IdentityAdoptionDecision func(*sql.Selector)
 // Organization is the predicate function for organization builders.
 type Organization func(*sql.Selector)
 
+// OrganizationAllowedGroup is the predicate function for organizationallowedgroup builders.
+type OrganizationAllowedGroup func(*sql.Selector)
+
 // OrganizationMember is the predicate function for organizationmember builders.
 type OrganizationMember func(*sql.Selector)
 

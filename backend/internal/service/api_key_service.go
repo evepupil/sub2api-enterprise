@@ -289,7 +289,8 @@ type APIKeyService struct {
 	userSubRepo               UserSubscriptionRepository
 	userGroupRateRepo         UserGroupRateRepository
 	cache                     APIKeyCache
-	rateLimitCacheInvalid     RateLimitCacheInvalidator // optional: invalidate Redis rate limit cache
+	rateLimitCacheInvalid     RateLimitCacheInvalidator      // optional: invalidate Redis rate limit cache
+	organizationGroups        OrganizationGroupScopeResolver // optional: 组织成员的分组范围
 	concurrencyService        *ConcurrencyService
 	cfg                       *config.Config
 	authCacheL1               *ristretto.Cache
@@ -357,6 +358,18 @@ func NewAPIKeyService(
 	svc.authLookupSlots = make(chan struct{}, lookupConcurrency)
 	svc.invalidAuthAbuse = newInvalidAuthAbuseLimiter(cfg)
 	return svc
+}
+
+// SetOrganizationGroupResolver 注入组织分组范围解析器。组织成员的分组判断改用
+// 组织范围，个人用户保持原有规则。与其他可选依赖一样在构造后注入，避免循环依赖。
+func (s *APIKeyService) SetOrganizationGroupResolver(resolver OrganizationGroupScopeResolver) {
+	s.organizationGroups = resolver
+}
+
+// applyOrganizationScope 把组织的分组范围套到这份账号数据上。
+// 读取失败时直接报错，不回退到账号自己的规则，避免比组织范围更宽松。
+func (s *APIKeyService) applyOrganizationScope(ctx context.Context, user *User) error {
+	return applyOrganizationGroupScope(ctx, s.organizationGroups, user)
 }
 
 // SetRateLimitCacheInvalidator sets the optional rate limit cache invalidator.
@@ -466,6 +479,9 @@ func (s *APIKeyService) Create(ctx context.Context, userID int64, req CreateAPIK
 	user, err := s.userRepo.GetByID(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("get user: %w", err)
+	}
+	if err := s.applyOrganizationScope(ctx, user); err != nil {
+		return nil, err
 	}
 
 	// 验证 IP 白名单格式
@@ -803,6 +819,9 @@ func (s *APIKeyService) Update(ctx context.Context, id int64, userID int64, req 
 		if err != nil {
 			return nil, fmt.Errorf("get user: %w", err)
 		}
+		if err := s.applyOrganizationScope(ctx, user); err != nil {
+			return nil, err
+		}
 
 		group, err := s.groupRepo.GetByID(ctx, *req.GroupID)
 		if err != nil {
@@ -958,6 +977,10 @@ func (s *APIKeyService) ValidateKey(ctx context.Context, key string) (*APIKey, *
 	if err != nil {
 		return nil, nil, fmt.Errorf("get user: %w", err)
 	}
+	// 未走缓存的兜底鉴权路径同样要带上组织范围，否则调用前的分组校验会漏判。
+	if err := s.applyOrganizationScope(ctx, user); err != nil {
+		return nil, nil, err
+	}
 
 	// 检查用户状态
 	if !user.IsActive() {
@@ -1023,6 +1046,9 @@ func (s *APIKeyService) GetAvailableGroups(ctx context.Context, userID int64) ([
 	if err != nil {
 		return nil, fmt.Errorf("get user: %w", err)
 	}
+	if err := s.applyOrganizationScope(ctx, user); err != nil {
+		return nil, err
+	}
 
 	// 获取所有活跃分组
 	allGroups, err := s.groupRepo.ListActive(ctx)
@@ -1080,6 +1106,9 @@ func (s *APIKeyService) GetUserGroupVisibility(ctx context.Context, userID int64
 	user, err := s.userRepo.GetByID(ctx, userID)
 	if err != nil {
 		return nil, false, fmt.Errorf("get user: %w", err)
+	}
+	if err := s.applyOrganizationScope(ctx, user); err != nil {
+		return nil, false, err
 	}
 	allowed := make(map[int64]struct{}, len(user.AllowedGroups))
 	for _, id := range user.AllowedGroups {

@@ -27,7 +27,10 @@ type User struct {
 	// ones listed in AllowedGroups. False keeps the default, where every public
 	// group is bindable.
 	RestrictPublicGroups bool
-	TokenVersion         int64 // Incremented on password change to invalidate existing tokens
+	// OrganizationID 非 nil 表示这份账号数据里的分组范围来自组织，调用链据此决定
+	// 是否执行组织分组校验。个人用户恒为 nil，行为不变。
+	OrganizationID *int64
+	TokenVersion   int64 // Incremented on password change to invalidate existing tokens
 	// TokenVersionResolved indicates TokenVersion already contains the fingerprint-derived
 	// value expected in JWT claims and refresh-token state.
 	TokenVersionResolved bool

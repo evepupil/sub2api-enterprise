@@ -14,7 +14,7 @@ import (
 	"github.com/dgraph-io/ristretto"
 )
 
-const apiKeyAuthSnapshotVersion = 24 // v24: group model_allowlist field (renamed from models_list_config, enforcing semantics)
+const apiKeyAuthSnapshotVersion = 25 // v25: user organization_id + 组织分组范围（旧快照没有组织信息，必须作废重建）
 
 type apiKeyAuthCacheConfig struct {
 	l1Size        int
@@ -296,7 +296,8 @@ func (s *APIKeyService) lookupAPIKeyForAuth(ctx context.Context, key string) (*A
 		return nil, ErrAPIKeyNotFound
 	}
 	if s.authLookupSlots == nil {
-		return s.apiKeyRepo.GetByKeyForAuth(ctx, key)
+		apiKey, err := s.apiKeyRepo.GetByKeyForAuth(ctx, key)
+		return s.withOrganizationScope(ctx, apiKey, err)
 	}
 	s.authLookupTotal.Add(1)
 	select {
@@ -312,7 +313,20 @@ func (s *APIKeyService) lookupAPIKeyForAuth(ctx context.Context, key string) (*A
 		s.authLookupRejected.Add(1)
 		return nil, ErrAPIKeyAuthOverloaded
 	}
-	return s.apiKeyRepo.GetByKeyForAuth(ctx, key)
+	apiKey, err := s.apiKeyRepo.GetByKeyForAuth(ctx, key)
+	return s.withOrganizationScope(ctx, apiKey, err)
+}
+
+// withOrganizationScope 在鉴权快照构建之前，把组织成员的分组范围写进账号数据，
+// 让快照缓存的就是组织范围，调用前的分组校验不用再查库。
+func (s *APIKeyService) withOrganizationScope(ctx context.Context, apiKey *APIKey, err error) (*APIKey, error) {
+	if err != nil || apiKey == nil || apiKey.User == nil {
+		return apiKey, err
+	}
+	if scopeErr := s.applyOrganizationScope(ctx, apiKey.User); scopeErr != nil {
+		return nil, scopeErr
+	}
+	return apiKey, nil
 }
 
 func (s *APIKeyService) applyAuthCacheEntry(key string, entry *APIKeyAuthCacheEntry) (*APIKey, bool, error) {
@@ -357,6 +371,7 @@ func (s *APIKeyService) snapshotFromAPIKey(ctx context.Context, apiKey *APIKey) 
 			Balance:                    apiKey.User.Balance,
 			Concurrency:                apiKey.User.Concurrency,
 			AllowedGroups:              apiKey.User.AllowedGroups,
+			OrganizationID:             apiKey.User.OrganizationID,
 			Email:                      apiKey.User.Email,
 			Username:                   apiKey.User.Username,
 			BalanceNotifyEnabled:       apiKey.User.BalanceNotifyEnabled,
@@ -466,6 +481,7 @@ func (s *APIKeyService) snapshotToAPIKey(key string, snapshot *APIKeyAuthSnapsho
 			Balance:                    snapshot.User.Balance,
 			Concurrency:                snapshot.User.Concurrency,
 			AllowedGroups:              snapshot.User.AllowedGroups,
+			OrganizationID:             snapshot.User.OrganizationID,
 			Email:                      snapshot.User.Email,
 			Username:                   snapshot.User.Username,
 			BalanceNotifyEnabled:       snapshot.User.BalanceNotifyEnabled,

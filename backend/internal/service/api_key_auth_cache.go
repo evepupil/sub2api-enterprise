@@ -36,6 +36,9 @@ type APIKeyAuthUserSnapshot struct {
 	Balance       float64 `json:"balance"`
 	Concurrency   int     `json:"concurrency"`
 	AllowedGroups []int64 `json:"allowed_groups,omitempty"`
+	// OrganizationID 非 nil 表示 AllowedGroups / RestrictPublicGroups 来自所属组织，
+	// 调用前据此执行组织分组校验；个人用户恒为 nil。
+	OrganizationID *int64 `json:"organization_id,omitempty"`
 
 	// Balance notification fields (required for CheckBalanceAfterDeduction)
 	Email                      string             `json:"email"`

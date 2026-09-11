@@ -25,6 +25,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/idempotencyrecord"
 	"github.com/Wei-Shaw/sub2api/ent/identityadoptiondecision"
 	"github.com/Wei-Shaw/sub2api/ent/organization"
+	"github.com/Wei-Shaw/sub2api/ent/organizationallowedgroup"
 	"github.com/Wei-Shaw/sub2api/ent/organizationmember"
 	"github.com/Wei-Shaw/sub2api/ent/paymentauditlog"
 	"github.com/Wei-Shaw/sub2api/ent/paymentorder"
@@ -1320,6 +1321,16 @@ func init() {
 			return nil
 		}
 	}()
+	// organizationDescRestrictPublicGroups is the schema descriptor for restrict_public_groups field.
+	organizationDescRestrictPublicGroups := organizationFields[2].Descriptor()
+	// organization.DefaultRestrictPublicGroups holds the default value on creation for the restrict_public_groups field.
+	organization.DefaultRestrictPublicGroups = organizationDescRestrictPublicGroups.Default.(bool)
+	organizationallowedgroupFields := schema.OrganizationAllowedGroup{}.Fields()
+	_ = organizationallowedgroupFields
+	// organizationallowedgroupDescCreatedAt is the schema descriptor for created_at field.
+	organizationallowedgroupDescCreatedAt := organizationallowedgroupFields[2].Descriptor()
+	// organizationallowedgroup.DefaultCreatedAt holds the default value on creation for the created_at field.
+	organizationallowedgroup.DefaultCreatedAt = organizationallowedgroupDescCreatedAt.Default.(func() time.Time)
 	organizationmemberMixin := schema.OrganizationMember{}.Mixin()
 	organizationmemberMixinFields0 := organizationmemberMixin[0].Fields()
 	_ = organizationmemberMixinFields0

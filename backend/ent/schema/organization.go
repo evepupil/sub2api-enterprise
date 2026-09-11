@@ -32,6 +32,11 @@ func (Organization) Fields() []ent.Field {
 			MaxLen(100).
 			NotEmpty(),
 		field.Int64("owner_user_id"),
+
+		// 打开后连公开分组也必须落在 organization_allowed_groups 中，
+		// 语义与 users.restrict_public_groups 一致。
+		field.Bool("restrict_public_groups").
+			Default(false),
 	}
 }
 
@@ -44,6 +49,8 @@ func (Organization) Edges() []ent.Edge {
 			Unique(),
 		edge.To("members", OrganizationMember.Type),
 		edge.To("invitations", RedeemCode.Type),
+		edge.To("allowed_groups", Group.Type).
+			Through("organization_allowed_groups", OrganizationAllowedGroup.Type),
 	}
 }
 

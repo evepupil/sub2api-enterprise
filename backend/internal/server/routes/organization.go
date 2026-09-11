@@ -23,3 +23,15 @@ func registerOrganizationRoutes(authenticated *gin.RouterGroup, h *handler.Handl
 		organization.POST("/members/spending-limit-split", h.OrganizationMember.SplitSpendingLimit)
 	}
 }
+
+// registerAdminOrganizationRoutes 注册平台侧组织管理路由。
+//
+// 这组接口只对平台管理员开放，组织管理员和普通成员走 /organization 下的自助接口。
+func registerAdminOrganizationRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
+	organizations := admin.Group("/organizations")
+	{
+		organizations.GET("", h.Admin.Organization.List)
+		organizations.GET("/:id", h.Admin.Organization.Get)
+		organizations.PUT("/:id/groups", h.Admin.Organization.UpdateGroups)
+	}
+}

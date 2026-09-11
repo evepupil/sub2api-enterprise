@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/Wei-Shaw/sub2api/internal/handler"
+	adminhandler "github.com/Wei-Shaw/sub2api/internal/handler/admin"
 
 	"github.com/gin-gonic/gin"
 )
@@ -35,6 +36,33 @@ func TestOrganizationRoutesRegistered(t *testing.T) {
 		http.MethodPut + " /api/v1/organization/members/:user_id/status",
 		http.MethodPut + " /api/v1/organization/members/:user_id/spending-limit",
 		http.MethodPost + " /api/v1/organization/members/spending-limit-split",
+	}
+	for _, route := range expected {
+		if !registered[route] {
+			t.Fatalf("route %q is not registered", route)
+		}
+	}
+}
+
+// 平台侧组织管理只对管理员开放，这里确认三条路由都注册在 /admin 下。
+func TestAdminOrganizationRoutesRegistered(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	router := gin.New()
+	handlers := &handler.Handlers{
+		Admin: &handler.AdminHandlers{Organization: &adminhandler.OrganizationHandler{}},
+	}
+
+	registerAdminOrganizationRoutes(router.Group("/api/v1/admin"), handlers)
+
+	registered := map[string]bool{}
+	for _, route := range router.Routes() {
+		registered[fmt.Sprintf("%s %s", route.Method, route.Path)] = true
+	}
+
+	expected := []string{
+		http.MethodGet + " /api/v1/admin/organizations",
+		http.MethodGet + " /api/v1/admin/organizations/:id",
+		http.MethodPut + " /api/v1/admin/organizations/:id/groups",
 	}
 	for _, route := range expected {
 		if !registered[route] {

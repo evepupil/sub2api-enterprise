@@ -22,12 +22,18 @@ const (
 	FieldName = "name"
 	// FieldOwnerUserID holds the string denoting the owner_user_id field in the database.
 	FieldOwnerUserID = "owner_user_id"
+	// FieldRestrictPublicGroups holds the string denoting the restrict_public_groups field in the database.
+	FieldRestrictPublicGroups = "restrict_public_groups"
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
 	EdgeOwner = "owner"
 	// EdgeMembers holds the string denoting the members edge name in mutations.
 	EdgeMembers = "members"
 	// EdgeInvitations holds the string denoting the invitations edge name in mutations.
 	EdgeInvitations = "invitations"
+	// EdgeAllowedGroups holds the string denoting the allowed_groups edge name in mutations.
+	EdgeAllowedGroups = "allowed_groups"
+	// EdgeOrganizationAllowedGroups holds the string denoting the organization_allowed_groups edge name in mutations.
+	EdgeOrganizationAllowedGroups = "organization_allowed_groups"
 	// Table holds the table name of the organization in the database.
 	Table = "organizations"
 	// OwnerTable is the table that holds the owner relation/edge.
@@ -51,6 +57,18 @@ const (
 	InvitationsInverseTable = "redeem_codes"
 	// InvitationsColumn is the table column denoting the invitations relation/edge.
 	InvitationsColumn = "organization_id"
+	// AllowedGroupsTable is the table that holds the allowed_groups relation/edge. The primary key declared below.
+	AllowedGroupsTable = "organization_allowed_groups"
+	// AllowedGroupsInverseTable is the table name for the Group entity.
+	// It exists in this package in order to avoid circular dependency with the "group" package.
+	AllowedGroupsInverseTable = "groups"
+	// OrganizationAllowedGroupsTable is the table that holds the organization_allowed_groups relation/edge.
+	OrganizationAllowedGroupsTable = "organization_allowed_groups"
+	// OrganizationAllowedGroupsInverseTable is the table name for the OrganizationAllowedGroup entity.
+	// It exists in this package in order to avoid circular dependency with the "organizationallowedgroup" package.
+	OrganizationAllowedGroupsInverseTable = "organization_allowed_groups"
+	// OrganizationAllowedGroupsColumn is the table column denoting the organization_allowed_groups relation/edge.
+	OrganizationAllowedGroupsColumn = "organization_id"
 )
 
 // Columns holds all SQL columns for organization fields.
@@ -60,7 +78,14 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldName,
 	FieldOwnerUserID,
+	FieldRestrictPublicGroups,
 }
+
+var (
+	// AllowedGroupsPrimaryKey and AllowedGroupsColumn2 are the table columns denoting the
+	// primary key for the allowed_groups relation (M2M).
+	AllowedGroupsPrimaryKey = []string{"organization_id", "group_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -81,6 +106,8 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
+	// DefaultRestrictPublicGroups holds the default value on creation for the "restrict_public_groups" field.
+	DefaultRestrictPublicGroups bool
 )
 
 // OrderOption defines the ordering options for the Organization queries.
@@ -109,6 +136,11 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 // ByOwnerUserID orders the results by the owner_user_id field.
 func ByOwnerUserID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOwnerUserID, opts...).ToFunc()
+}
+
+// ByRestrictPublicGroups orders the results by the restrict_public_groups field.
+func ByRestrictPublicGroups(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRestrictPublicGroups, opts...).ToFunc()
 }
 
 // ByOwnerField orders the results by owner field.
@@ -145,6 +177,34 @@ func ByInvitations(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newInvitationsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByAllowedGroupsCount orders the results by allowed_groups count.
+func ByAllowedGroupsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newAllowedGroupsStep(), opts...)
+	}
+}
+
+// ByAllowedGroups orders the results by allowed_groups terms.
+func ByAllowedGroups(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newAllowedGroupsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByOrganizationAllowedGroupsCount orders the results by organization_allowed_groups count.
+func ByOrganizationAllowedGroupsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newOrganizationAllowedGroupsStep(), opts...)
+	}
+}
+
+// ByOrganizationAllowedGroups orders the results by organization_allowed_groups terms.
+func ByOrganizationAllowedGroups(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newOrganizationAllowedGroupsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newOwnerStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -164,5 +224,19 @@ func newInvitationsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(InvitationsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, InvitationsTable, InvitationsColumn),
+	)
+}
+func newAllowedGroupsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(AllowedGroupsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, AllowedGroupsTable, AllowedGroupsPrimaryKey...),
+	)
+}
+func newOrganizationAllowedGroupsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(OrganizationAllowedGroupsInverseTable, OrganizationAllowedGroupsColumn),
+		sqlgraph.Edge(sqlgraph.O2M, true, OrganizationAllowedGroupsTable, OrganizationAllowedGroupsColumn),
 	)
 }
