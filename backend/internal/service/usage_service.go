@@ -393,6 +393,22 @@ func (s *UsageService) GetGroupStatsWithFilters(ctx context.Context, startTime, 
 	return stats, nil
 }
 
+// GetMemberStatsWithFilters 返回组织成员分布。仓储没有实现该能力时返回空结果。
+func (s *UsageService) GetMemberStatsWithFilters(ctx context.Context, startTime, endTime time.Time, filters usagestats.UsageLogFilters) ([]usagestats.MemberStat, error) {
+	type memberStatsRepo interface {
+		GetMemberStatsWithUsageFilters(ctx context.Context, startTime, endTime time.Time, filters usagestats.UsageLogFilters) ([]usagestats.MemberStat, error)
+	}
+	filterRepo, ok := s.usageRepo.(memberStatsRepo)
+	if !ok {
+		return []usagestats.MemberStat{}, nil
+	}
+	stats, err := filterRepo.GetMemberStatsWithUsageFilters(ctx, startTime, endTime, filters)
+	if err != nil {
+		return nil, fmt.Errorf("get member stats with filters: %w", err)
+	}
+	return stats, nil
+}
+
 // GetAPIKeyModelStats returns per-model usage stats for a specific API Key.
 func (s *UsageService) GetAPIKeyModelStats(ctx context.Context, apiKeyID int64, startTime, endTime time.Time) ([]usagestats.ModelStat, error) {
 	stats, err := s.usageRepo.GetModelStatsWithFilters(ctx, startTime, endTime, 0, apiKeyID, 0, 0, nil, nil, nil)

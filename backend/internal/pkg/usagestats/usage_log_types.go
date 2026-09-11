@@ -134,6 +134,18 @@ type GroupStat struct {
 	AccountCost float64 `json:"account_cost"` // 账号成本
 }
 
+// MemberStat 是组织成员分布的一行：某个成员在统计区间内的用量。
+// 口径与其他分布统计一致，按用量记录所属账号聚合。
+type MemberStat struct {
+	UserID      int64   `json:"user_id"`
+	Email       string  `json:"email"`
+	Username    string  `json:"username"`
+	Requests    int64   `json:"requests"`
+	TotalTokens int64   `json:"total_tokens"`
+	Cost        float64 `json:"cost"`
+	ActualCost  float64 `json:"actual_cost"`
+}
+
 // UserUsageTrendPoint represents user usage trend data point
 type UserUsageTrendPoint struct {
 	Date       string  `json:"date"`
@@ -269,7 +281,10 @@ type PlatformDashboardStats struct {
 
 // UsageLogFilters represents filters for usage log queries
 type UsageLogFilters struct {
-	UserID    int64
+	UserID int64
+	// UserIDs 把查询限定在一组账号上，用于组织管理员查看本组织全体成员的用量。
+	// 非空时与 UserID 同时生效；服务端只在确认调用者是组织创建者后才填充。
+	UserIDs   []int64
 	APIKeyID  int64
 	AccountID int64
 	GroupID   int64

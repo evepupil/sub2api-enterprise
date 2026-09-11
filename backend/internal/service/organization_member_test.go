@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"sort"
 	"testing"
 	"time"
 
@@ -70,6 +71,18 @@ func (r *organizationMemberRepoStub) SetSpendingLimits(
 	}
 	r.writes = append(r.writes, limits)
 	return nil
+}
+
+func (r *organizationMemberRepoStub) ListUserIDs(_ context.Context, organizationID int64) ([]int64, error) {
+	if organizationID != r.organizationID {
+		return nil, ErrOrganizationNotFound
+	}
+	out := make([]int64, 0, len(r.members))
+	for userID := range r.members {
+		out = append(out, userID)
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i] < out[j] })
+	return out, nil
 }
 
 type organizationMemberUserRepoStub struct {
@@ -189,6 +202,23 @@ func newOrganizationMemberFixture(t *testing.T) *organizationMemberFixture {
 		users:     users,
 		authCache: authCache,
 	}
+}
+
+func TestOrganizationMemberServiceMemberUserIDs(t *testing.T) {
+	fixture := newOrganizationMemberFixture(t)
+	ctx := context.Background()
+
+	memberIDs, err := fixture.service.MemberUserIDs(ctx, testOrganizationOwnerID)
+	require.NoError(t, err)
+	require.Equal(t, []int64{
+		testOrganizationOwnerID,
+		testOrganizationMemberID,
+		testOrganizationOtherID,
+		testOrganizationAdminID,
+	}, memberIDs, "组织范围包含组织管理员本人")
+
+	_, err = fixture.service.MemberUserIDs(ctx, testOrganizationMemberID)
+	require.ErrorIs(t, err, ErrOrganizationOwnerRequired, "普通成员拿不到全组织范围")
 }
 
 func TestOrganizationMemberServiceRejectsNonOwner(t *testing.T) {

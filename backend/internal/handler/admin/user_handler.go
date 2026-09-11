@@ -144,6 +144,12 @@ func (h *UserHandler) List(c *gin.Context) {
 			filters.APIKeyGroupID = id
 		}
 	}
+	// 从平台「组织管理」跳转过来时只看这个组织的成员。
+	if raw := strings.TrimSpace(c.Query("organization_id")); raw != "" {
+		if id, parseErr := strconv.ParseInt(raw, 10, 64); parseErr == nil && id > 0 {
+			filters.OrganizationID = id
+		}
+	}
 	sortBy := c.DefaultQuery("sort_by", "created_at")
 	sortOrder := c.DefaultQuery("sort_order", "desc")
 	if raw, ok := c.GetQuery("include_subscriptions"); ok {

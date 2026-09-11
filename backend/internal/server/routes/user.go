@@ -106,6 +106,8 @@ func RegisterUserRoutes(
 			usage.GET("/errors/:id", h.Usage.GetErrorDetail)
 			usage.GET("/:id", h.Usage.GetByID)
 			usage.GET("/stats", h.Usage.Stats)
+			// 组织成员分布：只有组织创建者能调用，范围由服务端按登录身份确定。
+			usage.GET("/organization/members", h.Usage.OrganizationMembers)
 			// User dashboard endpoints
 			usage.GET("/dashboard/stats", h.Usage.DashboardStats)
 			usage.GET("/dashboard/trend", h.Usage.DashboardTrend)

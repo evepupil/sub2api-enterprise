@@ -663,6 +663,10 @@ func (r *usageLogRepository) GetStatsWithFilters(ctx context.Context, filters Us
 		conditions = append(conditions, fmt.Sprintf("user_id = $%d", len(args)+1))
 		args = append(args, filters.UserID)
 	}
+	if len(filters.UserIDs) > 0 {
+		conditions = append(conditions, fmt.Sprintf("user_id = ANY($%d)", len(args)+1))
+		args = append(args, pq.Array(filters.UserIDs))
+	}
 	if filters.APIKeyID > 0 {
 		conditions = append(conditions, fmt.Sprintf("api_key_id = $%d", len(args)+1))
 		args = append(args, filters.APIKeyID)

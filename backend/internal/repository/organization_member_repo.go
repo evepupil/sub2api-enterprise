@@ -185,6 +185,22 @@ func applyOrganizationSpendingLimits(
 	return nil
 }
 
+// ListUserIDs 返回组织全部成员的账号标识，含组织创建者本人。
+// 停用的成员同样在内，他们的历史用量仍然算组织的。
+func (r *organizationMemberRepository) ListUserIDs(ctx context.Context, organizationID int64) ([]int64, error) {
+	rows, err := clientFromContext(ctx, r.client).OrganizationMember.Query().
+		Where(organizationmember.OrganizationIDEQ(organizationID)).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	userIDs := make([]int64, 0, len(rows))
+	for _, row := range rows {
+		userIDs = append(userIDs, row.UserID)
+	}
+	return userIDs, nil
+}
+
 // NewOrganizationSpendingRepository 暴露成员已占用额度的读取，供计费缓存回源使用。
 func NewOrganizationSpendingRepository(client *dbent.Client) service.OrganizationSpendingRepository {
 	return &organizationMemberRepository{client: client}

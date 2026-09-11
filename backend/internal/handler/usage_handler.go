@@ -46,10 +46,11 @@ type userGroupStat struct {
 
 // UsageHandler handles usage-related requests
 type UsageHandler struct {
-	usageService   *service.UsageService
-	apiKeyService  *service.APIKeyService
-	opsService     *service.OpsService
-	settingService *service.SettingService
+	usageService              *service.UsageService
+	apiKeyService             *service.APIKeyService
+	opsService                *service.OpsService
+	settingService            *service.SettingService
+	organizationMemberService *service.OrganizationMemberService
 }
 
 // NewUsageHandler creates a new UsageHandler
@@ -67,11 +68,63 @@ func NewUsageHandler(
 	}
 }
 
+// SetOrganizationMemberService 注入组织成员服务，用于把用量查询限定到本组织。
+// 构造后注入，避免循环依赖。
+func (h *UsageHandler) SetOrganizationMemberService(svc *service.OrganizationMemberService) {
+	h.organizationMemberService = svc
+}
+
+// usageScopeOrganization 是查询范围参数的取值：只有组织创建者能用。
+const usageScopeOrganization = "organization"
+
+// resolveOrganizationScope 在请求要求组织范围时，把范围换成本组织全体成员。
+//
+// 成员集合由服务端按登录身份查出来，请求里带的任何账号标识都不参与；
+// 调用者不是组织创建者时直接拒绝。
+func (h *UsageHandler) resolveOrganizationScope(c *gin.Context, actorUserID int64) ([]int64, bool) {
+	if strings.TrimSpace(c.Query("scope")) != usageScopeOrganization {
+		return nil, true
+	}
+	if h.organizationMemberService == nil {
+		response.Forbidden(c, "Organization usage is not available")
+		return nil, false
+	}
+	memberIDs, err := h.organizationMemberService.MemberUserIDs(c.Request.Context(), actorUserID)
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return nil, false
+	}
+	return memberIDs, true
+}
+
 func (h *UsageHandler) parseUserUsageFilters(c *gin.Context, requireRange bool) (*userUsageFilters, bool) {
 	subject, ok := middleware2.GetAuthSubjectFromContext(c)
 	if !ok {
 		response.Unauthorized(c, "User not authenticated")
 		return nil, false
+	}
+
+	organizationMemberIDs, ok := h.resolveOrganizationScope(c, subject.UserID)
+	if !ok {
+		return nil, false
+	}
+	// 组织范围下可以再按单个成员筛选，成员必须在本组织内。
+	scopedUserID := subject.UserID
+	if len(organizationMemberIDs) > 0 {
+		scopedUserID = 0
+		if memberIDStr := strings.TrimSpace(c.Query("member_user_id")); memberIDStr != "" {
+			memberID, err := strconv.ParseInt(memberIDStr, 10, 64)
+			if err != nil {
+				response.BadRequest(c, "Invalid member_user_id")
+				return nil, false
+			}
+			if !containsUserID(organizationMemberIDs, memberID) {
+				response.Forbidden(c, "Not authorized to access this member's usage records")
+				return nil, false
+			}
+			scopedUserID = memberID
+			organizationMemberIDs = nil
+		}
 	}
 
 	var apiKeyID int64
@@ -90,7 +143,7 @@ func (h *UsageHandler) parseUserUsageFilters(c *gin.Context, requireRange bool) 
 			response.ErrorFrom(c, err)
 			return nil, false
 		}
-		if apiKey.UserID != subject.UserID {
+		if !usageActorOwnsAPIKey(apiKey.UserID, subject.UserID, scopedUserID, organizationMemberIDs) {
 			response.Forbidden(c, "Not authorized to access this API key's usage records")
 			return nil, false
 		}
@@ -205,7 +258,8 @@ func (h *UsageHandler) parseUserUsageFilters(c *gin.Context, requireRange bool) 
 
 	return &userUsageFilters{
 		Filters: usagestats.UsageLogFilters{
-			UserID:             subject.UserID,
+			UserID:             scopedUserID,
+			UserIDs:            organizationMemberIDs,
 			APIKeyID:           apiKeyID,
 			GroupID:            groupID,
 			Model:              strings.TrimSpace(c.Query("model")),
@@ -221,6 +275,27 @@ func (h *UsageHandler) parseUserUsageFilters(c *gin.Context, requireRange bool) 
 		StartTime: derefTime(startPtr),
 		EndTime:   derefTime(endPtr),
 	}, true
+}
+
+func containsUserID(userIDs []int64, target int64) bool {
+	for _, userID := range userIDs {
+		if userID == target {
+			return true
+		}
+	}
+	return false
+}
+
+// usageActorOwnsAPIKey 判断这把密钥的用量能不能给当前调用者看：
+// 自己的密钥永远可以；组织范围下，本组织成员的密钥也可以。
+func usageActorOwnsAPIKey(keyUserID, actorUserID, scopedUserID int64, organizationMemberIDs []int64) bool {
+	if keyUserID == actorUserID {
+		return true
+	}
+	if len(organizationMemberIDs) > 0 {
+		return containsUserID(organizationMemberIDs, keyUserID)
+	}
+	return scopedUserID > 0 && keyUserID == scopedUserID
 }
 
 func derefTime(value *time.Time) time.Time {
@@ -394,13 +469,58 @@ func (h *UsageHandler) GetByID(c *gin.Context) {
 		return
 	}
 
-	// 验证所有权
+	// 验证所有权：自己的记录随便看；组织范围下，本组织成员的记录也能看。
 	if record.UserID != subject.UserID {
-		response.Forbidden(c, "Not authorized to access this record")
-		return
+		memberIDs, ok := h.resolveOrganizationScope(c, subject.UserID)
+		if !ok {
+			return
+		}
+		if !containsUserID(memberIDs, record.UserID) {
+			response.Forbidden(c, "Not authorized to access this record")
+			return
+		}
 	}
 
 	response.Success(c, dto.UsageLogFromService(record))
+}
+
+// OrganizationMembers 返回组织成员分布，只有组织创建者能调用。
+// GET /api/v1/usage/organization/members
+func (h *UsageHandler) OrganizationMembers(c *gin.Context) {
+	subject, ok := middleware2.GetAuthSubjectFromContext(c)
+	if !ok {
+		response.Unauthorized(c, "User not authenticated")
+		return
+	}
+	if h.organizationMemberService == nil {
+		response.Forbidden(c, "Organization usage is not available")
+		return
+	}
+	memberIDs, err := h.organizationMemberService.MemberUserIDs(c.Request.Context(), subject.UserID)
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+
+	parsed, ok := h.parseUserUsageFilters(c, true)
+	if !ok {
+		return
+	}
+	// 成员分布固定按全组织统计，单个成员的筛选不影响这块分布。
+	filters := parsed.Filters
+	filters.UserID = 0
+	filters.UserIDs = memberIDs
+
+	stats, err := h.usageService.GetMemberStatsWithFilters(c.Request.Context(), parsed.StartTime, parsed.EndTime, filters)
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+	response.Success(c, gin.H{
+		"start_date": parsed.StartTime.Format("2006-01-02"),
+		"end_date":   parsed.EndTime.Add(-24 * time.Hour).Format("2006-01-02"),
+		"members":    stats,
+	})
 }
 
 // Stats handles getting usage statistics

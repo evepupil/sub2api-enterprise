@@ -103,6 +103,8 @@ type OrganizationMemberRepository interface {
 	Get(ctx context.Context, organizationID int64, userID int64) (*OrganizationMember, error)
 	// SetSpendingLimits 在同一个事务里写入多个成员的上限，全部成功或全部不生效。
 	SetSpendingLimits(ctx context.Context, organizationID int64, limits []OrganizationMemberSpendingLimit) error
+	// ListUserIDs 返回组织全部成员的账号标识，含组织创建者本人。
+	ListUserIDs(ctx context.Context, organizationID int64) ([]int64, error)
 }
 
 // OrganizationMemberService 提供组织管理员对本组织成员的查看、启停和消费上限管理。
@@ -187,6 +189,16 @@ func (s *OrganizationMemberService) List(
 		return nil, nil, ErrOrganizationMemberStatusInvalid
 	}
 	return s.members.List(ctx, summary.ID, params, filters)
+}
+
+// MemberUserIDs 返回调用者所属组织的全部成员账号，供组织用量查询限定范围。
+// 调用者必须是组织创建者，返回结果包含他自己。
+func (s *OrganizationMemberService) MemberUserIDs(ctx context.Context, actorUserID int64) ([]int64, error) {
+	summary, err := s.requireOwnedOrganization(ctx, actorUserID)
+	if err != nil {
+		return nil, err
+	}
+	return s.members.ListUserIDs(ctx, summary.ID)
 }
 
 // UpdateStatus 启用或停用一个普通成员。只改账号状态，成员关系、消费上限、
