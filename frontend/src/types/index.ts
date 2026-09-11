@@ -109,6 +109,20 @@ export interface OrganizationSummary {
   created_at: string
 }
 
+// spending_limit 为 null 表示不限额，0 表示完全不能消费。
+// spending_remaining 在不限额时同样为 null。
+export interface OrganizationMember {
+  user_id: number
+  email: string
+  username: string
+  status: 'active' | 'disabled'
+  is_owner: boolean
+  spending_limit: number | null
+  spending_used: number
+  spending_remaining: number | null
+  joined_at: string
+}
+
 export interface OrganizationInvitation {
   id: number
   code: string
