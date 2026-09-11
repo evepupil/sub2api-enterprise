@@ -38,6 +38,15 @@ vi.mock('@/api/admin', () => ({
   }
 }))
 
+// 用户管理页会读路由上的组织筛选，这里给一个没有筛选的空路由。
+vi.mock('vue-router', async () => {
+  const actual = await vi.importActual<typeof import('vue-router')>('vue-router')
+  return {
+    ...actual,
+    useRoute: () => ({ query: {} }),
+  }
+})
+
 vi.mock('@/stores/app', () => ({
   useAppStore: () => ({
     showError: vi.fn(),

@@ -10,6 +10,7 @@ export default {
     groupScope: 'Group scope',
     createdAt: 'Created',
     configureGroups: 'Configure groups',
+    viewMembers: 'View members',
     restrictPublicGroups: 'Only the selected groups are usable',
     exclusive: 'Exclusive',
     scopeOpen: 'All public groups plus {count} granted',

@@ -15,7 +15,8 @@ import type {
   UsageRequestType,
   UserErrorRequest,
   UserErrorRequestDetail,
-  UserErrorListParams
+  UserErrorListParams,
+  OrganizationMemberUsageResponse
 } from '@/types'
 
 // ==================== Dashboard Types ====================
@@ -242,6 +243,20 @@ export async function getByDateRange(
 }
 
 /**
+ * 获取组织成员分布（只有组织管理员能调用）
+ */
+export async function getOrganizationMemberUsage(
+  params: UsageQueryParams,
+  config: { signal?: AbortSignal } = {}
+): Promise<OrganizationMemberUsageResponse> {
+  const { data } = await apiClient.get<OrganizationMemberUsageResponse>('/usage/organization/members', {
+    ...config,
+    params
+  })
+  return data
+}
+
+/**
  * Get detailed usage log by ID
  * @param id - Usage log ID
  * @returns Usage log details
@@ -384,6 +399,8 @@ export const usageAPI = {
   getMyApiKeyDailyUsage,
   getDashboardSnapshotV2,
   getDashboardApiKeysUsage,
+  // 组织用量
+  getOrganizationMemberUsage,
   // Error requests
   listMyErrorRequests,
   getMyErrorDetail

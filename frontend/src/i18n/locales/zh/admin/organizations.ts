@@ -10,6 +10,7 @@ export default {
     groupScope: '分组范围',
     createdAt: '创建时间',
     configureGroups: '配置分组',
+    viewMembers: '查看成员',
     restrictPublicGroups: '只能使用勾选的分组',
     exclusive: '专属',
     scopeOpen: '公开分组全部可用，另授权 {count} 个',

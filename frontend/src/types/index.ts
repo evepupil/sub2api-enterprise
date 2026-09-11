@@ -2208,6 +2208,27 @@ export interface UsageQueryParams {
   timezone?: string
   sort_by?: string
   sort_order?: 'asc' | 'desc'
+  // scope 传 'organization' 时查全组织用量，只有组织管理员能用。
+  scope?: string
+  // 组织范围下再按单个成员筛选。
+  member_user_id?: number
+}
+
+// 组织成员分布的一行。
+export interface OrganizationMemberUsageStat {
+  user_id: number
+  email: string
+  username: string
+  requests: number
+  total_tokens: number
+  cost: number
+  actual_cost: number
+}
+
+export interface OrganizationMemberUsageResponse {
+  start_date: string
+  end_date: string
+  members: OrganizationMemberUsageStat[]
 }
 
 // ==================== Account Usage Statistics ====================

@@ -294,6 +294,15 @@ export default {
 
   // Usage
   usage: {
+    scope: 'Scope',
+    scopeSelf: 'Just me',
+    scopeOrganization: 'Whole organization',
+    member: 'Member',
+    allMembers: 'All members',
+    memberDistribution: 'Member distribution',
+    memberRequests: 'Requests',
+    memberTokens: 'Tokens',
+    memberCost: 'Actual cost',
     title: 'Usage Records',
     description: 'View and analyze your API usage history',
     costDetails: 'Cost Breakdown',

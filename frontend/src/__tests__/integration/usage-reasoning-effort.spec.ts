@@ -119,6 +119,16 @@ vi.mock('@/api/admin/ops', () => ({
   listErrorLogs,
 }))
 
+vi.mock('@/api/organization', () => ({
+  default: {
+    listOrganizationMembers: vi.fn(async () => ({ items: [], total: 0, page: 1, page_size: 20, pages: 0 })),
+  },
+}))
+
+vi.mock('@/stores/auth', () => ({
+  useAuthStore: () => ({ user: { id: 1, organization: null } }),
+}))
+
 vi.mock('@/stores/app', () => ({
   useAppStore: () => ({
     showError: vi.fn(),

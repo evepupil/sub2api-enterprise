@@ -61,10 +61,18 @@
                 <td class="px-4 py-3 text-gray-700 dark:text-gray-300">
                   {{ formatDateTime(organization.created_at) }}
                 </td>
-                <td class="px-4 py-3 text-right">
-                  <button type="button" class="btn btn-secondary btn-sm" @click="openScopeDialog(organization)">
-                    {{ t('admin.organizations.configureGroups') }}
-                  </button>
+                <td class="px-4 py-3">
+                  <div class="flex justify-end gap-2">
+                    <RouterLink
+                      class="btn btn-secondary btn-sm"
+                      :to="{ path: '/admin/users', query: { organization_id: organization.id } }"
+                    >
+                      {{ t('admin.organizations.viewMembers') }}
+                    </RouterLink>
+                    <button type="button" class="btn btn-secondary btn-sm" @click="openScopeDialog(organization)">
+                      {{ t('admin.organizations.configureGroups') }}
+                    </button>
+                  </div>
                 </td>
               </tr>
             </tbody>
@@ -136,6 +144,7 @@
 
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
+import { RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import BaseDialog from '@/components/common/BaseDialog.vue'

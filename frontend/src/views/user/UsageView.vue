@@ -14,6 +14,18 @@
                 @change="onDateRangeChange"
               />
             </div>
+            <div v-if="isOrganizationOwner" class="flex items-center gap-2">
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('usage.scope') }}:</span>
+              <div class="w-32">
+                <Select v-model="usageScope" :options="scopeOptions" @change="onScopeChange" />
+              </div>
+            </div>
+            <div v-if="isOrganizationOwner && usageScope === 'organization'" class="flex items-center gap-2">
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('usage.member') }}:</span>
+              <div class="w-56">
+                <Select v-model="memberUserId" :options="memberOptions" searchable @change="onMemberChange" />
+              </div>
+            </div>
             <div class="ml-auto flex items-center gap-2">
               <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('admin.dashboard.granularity') }}:</span>
               <div class="w-28">
@@ -63,6 +75,50 @@
             :end-date="endDate"
           />
           <TokenUsageTrend :trend-data="trendData" :loading="chartsLoading" />
+        </div>
+
+        <div v-if="isOrganizationOwner && usageScope === 'organization'" class="card p-6">
+          <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ t('usage.memberDistribution') }}</h3>
+          <div v-if="memberUsageLoading" class="flex justify-center py-10">
+            <div class="h-6 w-6 animate-spin rounded-full border-2 border-primary-500 border-t-transparent"></div>
+          </div>
+          <div
+            v-else-if="memberUsage.length === 0"
+            class="py-10 text-center text-sm text-gray-500 dark:text-dark-400"
+          >
+            {{ t('usage.noRecords') }}
+          </div>
+          <div v-else class="mt-4 overflow-x-auto">
+            <table class="w-full min-w-[560px] text-left text-sm">
+              <thead>
+                <tr class="border-b border-gray-200 text-gray-500 dark:border-dark-700 dark:text-dark-400">
+                  <th class="px-3 py-2 font-medium">{{ t('common.email') }}</th>
+                  <th class="px-3 py-2 text-right font-medium">{{ t('usage.memberRequests') }}</th>
+                  <th class="px-3 py-2 text-right font-medium">{{ t('usage.memberTokens') }}</th>
+                  <th class="px-3 py-2 text-right font-medium">{{ t('usage.memberCost') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="row in memberUsage"
+                  :key="row.user_id"
+                  class="border-b border-gray-100 last:border-b-0 dark:border-dark-800"
+                >
+                  <td class="px-3 py-2.5">
+                    <div class="text-gray-900 dark:text-white">{{ row.email }}</div>
+                    <div v-if="row.username" class="text-xs text-gray-500 dark:text-dark-400">
+                      {{ row.username }}
+                    </div>
+                  </td>
+                  <td class="px-3 py-2.5 text-right text-gray-700 dark:text-gray-300">{{ row.requests }}</td>
+                  <td class="px-3 py-2.5 text-right text-gray-700 dark:text-gray-300">{{ row.total_tokens }}</td>
+                  <td class="px-3 py-2.5 text-right text-gray-900 dark:text-white">
+                    {{ formatCurrency(row.actual_cost) }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -222,7 +278,9 @@
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores/app'
+import { useAuthStore } from '@/stores/auth'
 import { keysAPI, usageAPI, userGroupsAPI } from '@/api'
+import organizationAPI from '@/api/organization'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import Pagination from '@/components/common/Pagination.vue'
 import Select, { type SelectOption } from '@/components/common/Select.vue'
@@ -236,7 +294,7 @@ import TokenUsageTrend from '@/components/charts/TokenUsageTrend.vue'
 import Icon from '@/components/icons/Icon.vue'
 import UserErrorRequestsTable from '@/components/user/UserErrorRequestsTable.vue'
 import { getPersistedPageSize } from '@/composables/usePersistedPageSize'
-import { formatReasoningEffort } from '@/utils/format'
+import { formatCurrency, formatReasoningEffort } from '@/utils/format'
 import { getBillingModeLabel, getDisplayBillingMode as resolveDisplayBillingMode } from '@/utils/billingMode'
 import { resolveUsageRequestType, requestTypeToLegacyStream } from '@/utils/usageRequestType'
 import type {
@@ -252,10 +310,12 @@ import type {
   UserErrorRequest,
 } from '@/types'
 import type { Column } from '@/components/common/types'
+import type { OrganizationMember, OrganizationMemberUsageStat } from '@/types'
 import { COMMON_ERROR_STATUS_CODES } from '@/utils/errorBadges'
 
 const { t } = useI18n()
 const appStore = useAppStore()
+const authStore = useAuthStore()
 
 type DistributionMetric = 'tokens' | 'actual_cost'
 type EndpointSource = 'inbound' | 'upstream' | 'path'
@@ -350,6 +410,27 @@ const startDate = ref(defaultRange.start)
 const endDate = ref(defaultRange.end)
 const granularity = ref<'day' | 'hour'>(getGranularityForRange(startDate.value, endDate.value))
 
+// 组织管理员可以把查询范围从「我自己」切到「全组织」，普通成员看不到这个开关。
+const isOrganizationOwner = computed(() => authStore.user?.organization?.is_owner === true)
+const usageScope = ref<'self' | 'organization'>('self')
+const memberUserId = ref<number | null>(null)
+const organizationMembers = ref<OrganizationMember[]>([])
+const memberUsage = ref<OrganizationMemberUsageStat[]>([])
+const memberUsageLoading = ref(false)
+
+const scopeOptions = computed<SelectOption[]>(() => [
+  { value: 'self', label: t('usage.scopeSelf') },
+  { value: 'organization', label: t('usage.scopeOrganization') },
+])
+
+const memberOptions = computed<SelectOption[]>(() => [
+  { value: null, label: t('usage.allMembers') },
+  ...organizationMembers.value.map((member) => ({
+    value: member.user_id,
+    label: member.username ? `${member.email} (${member.username})` : member.email,
+  })),
+])
+
 const modelDistributionMetric = ref<DistributionMetric>('tokens')
 const groupDistributionMetric = ref<DistributionMetric>('tokens')
 const endpointDistributionMetric = ref<DistributionMetric>('tokens')
@@ -429,6 +510,9 @@ const normalizedFilters = computed<UsageQueryParams>(() => {
     start_date: startDate.value,
     end_date: endDate.value,
     stream: legacyStream === null ? undefined : legacyStream,
+    scope: usageScope.value === 'organization' ? 'organization' : undefined,
+    member_user_id:
+      usageScope.value === 'organization' && memberUserId.value ? memberUserId.value : undefined,
   }
 })
 
@@ -546,11 +630,51 @@ const applyFilters = () => {
   resetErrorRows()
 }
 
+const loadOrganizationMembers = async () => {
+  if (organizationMembers.value.length > 0) return
+  try {
+    const result = await organizationAPI.listOrganizationMembers({ page: 1, page_size: 200 })
+    organizationMembers.value = result.items || []
+  } catch (error) {
+    console.error('Failed to load organization members:', error)
+  }
+}
+
+const loadMemberUsage = async () => {
+  if (usageScope.value !== 'organization') {
+    memberUsage.value = []
+    return
+  }
+  memberUsageLoading.value = true
+  try {
+    const response = await usageAPI.getOrganizationMemberUsage(normalizedFilters.value)
+    memberUsage.value = response.members || []
+  } catch (error) {
+    console.error('Failed to load organization member usage:', error)
+    memberUsage.value = []
+  } finally {
+    memberUsageLoading.value = false
+  }
+}
+
+const onScopeChange = () => {
+  memberUserId.value = null
+  pagination.page = 1
+  if (usageScope.value === 'organization') void loadOrganizationMembers()
+  refreshData()
+}
+
+const onMemberChange = () => {
+  pagination.page = 1
+  refreshData()
+}
+
 const refreshData = () => {
   void loadLogs()
   void loadStats()
   void loadModelStats()
   void loadChartData()
+  void loadMemberUsage()
   if (activeTab.value === 'errors') void loadErrors()
 }
 

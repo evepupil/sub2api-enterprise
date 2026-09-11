@@ -299,6 +299,15 @@ export default {
 
   // Usage
   usage: {
+    scope: '范围',
+    scopeSelf: '我自己',
+    scopeOrganization: '全组织',
+    member: '成员',
+    allMembers: '全部成员',
+    memberDistribution: '成员分布',
+    memberRequests: '请求数',
+    memberTokens: 'Token',
+    memberCost: '实际费用',
     title: '使用记录',
     description: '查看和分析您的 API 使用历史',
     costDetails: '费用明细',

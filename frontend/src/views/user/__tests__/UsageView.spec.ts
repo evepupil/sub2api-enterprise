@@ -89,6 +89,17 @@ vi.mock('@/api', () => ({
   },
 }))
 
+vi.mock('@/api/organization', () => ({
+  default: {
+    listOrganizationMembers: vi.fn(async () => ({ items: [], total: 0, page: 1, page_size: 20, pages: 0 })),
+  },
+}))
+
+// 个人用户视角：没有组织身份，页面不显示范围切换。
+vi.mock('@/stores/auth', () => ({
+  useAuthStore: () => ({ user: { id: 1, organization: null } }),
+}))
+
 vi.mock('@/stores/app', () => ({
   useAppStore: () => ({
     showError, showWarning, showSuccess, showInfo,
