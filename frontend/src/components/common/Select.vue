@@ -39,7 +39,7 @@
       <span class="select-icon">
         <Icon
           name="chevronDown"
-          size="md"
+          size="sm"
           :class="['transition-transform duration-200', isOpen && 'rotate-180']"
         />
       </span>
@@ -98,7 +98,7 @@
                   size="sm"
                   class="flex-shrink-0 text-gray-400"
                 />
-                <span class="select-option-label" :class="option._creatable && 'italic text-gray-500 dark:text-dark-300'">{{ getOptionLabel(option) }}</span>
+                <span class="select-option-label" :class="option._creatable && 'italic text-content-muted'">{{ getOptionLabel(option) }}</span>
                 <Icon
                   v-if="isSelected(option)"
                   name="check"
@@ -504,20 +504,17 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+/* 触发器和输入框同款，不然筛选条一排控件高度对不齐 */
 .select-trigger {
-  @apply flex w-full items-center justify-between gap-2;
-  @apply rounded-xl px-4 py-2.5 text-sm;
-  @apply bg-white dark:bg-dark-800;
-  @apply border border-gray-200 dark:border-dark-600;
-  @apply text-gray-900 dark:text-gray-100;
-  @apply transition-all duration-200;
-  @apply focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30;
-  @apply hover:border-gray-300 dark:hover:border-dark-500;
-  @apply cursor-pointer;
+  @apply flex h-[34px] w-full items-center justify-between gap-2;
+  @apply cursor-pointer rounded-lg px-3 text-sm;
+  @apply border border-line-strong bg-surface-raised text-content-strong;
+  @apply transition-colors duration-150;
+  @apply focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-500/40;
 }
 
 .select-trigger-open {
-  @apply border-primary-500 ring-2 ring-primary-500/30;
+  @apply border-primary-600 ring-1 ring-primary-500/40;
 }
 
 .select-trigger-error {
@@ -525,7 +522,7 @@ onUnmounted(() => {
 }
 
 .select-trigger-disabled {
-  @apply cursor-not-allowed bg-gray-100 opacity-60 dark:bg-dark-900;
+  @apply cursor-not-allowed bg-surface-sunken text-content-subtle;
 }
 
 .select-value {
@@ -533,37 +530,30 @@ onUnmounted(() => {
 }
 
 .select-icon {
-  @apply flex-shrink-0 text-gray-400 dark:text-dark-400;
+  @apply flex-shrink-0 text-content-subtle;
 }
 
 .select-clear {
   @apply flex flex-shrink-0 cursor-pointer items-center justify-center;
-  @apply rounded text-gray-400 transition-colors;
-  @apply hover:text-gray-600 dark:hover:text-gray-200;
+  @apply rounded text-content-subtle transition-colors;
+  @apply hover:text-content-strong;
 }
 </style>
 
 <style>
 .select-dropdown-portal {
-  @apply w-max min-w-[200px];
-  @apply bg-white dark:bg-dark-800;
-  @apply rounded-xl;
-  @apply border border-gray-200 dark:border-dark-700;
-  @apply shadow-lg shadow-black/10 dark:shadow-black/30;
-  @apply overflow-hidden;
+  @apply w-max min-w-[200px] overflow-hidden;
+  @apply rounded-xl border border-line-subtle bg-surface-raised shadow-pop;
   pointer-events: auto !important;
 }
 
 .select-dropdown-portal .select-search {
-  @apply flex items-center gap-2 px-3 py-2;
-  @apply border-b border-gray-100 dark:border-dark-700;
+  @apply flex items-center gap-2 border-b border-line-subtle px-3 py-2;
 }
 
 .select-dropdown-portal .select-search-input {
-  @apply flex-1 bg-transparent text-sm;
-  @apply text-gray-900 dark:text-gray-100;
-  @apply placeholder:text-gray-400 dark:placeholder:text-dark-400;
-  @apply focus:outline-none;
+  @apply flex-1 bg-transparent text-sm text-content-strong;
+  @apply placeholder:text-content-subtle focus:outline-none;
 }
 
 .select-dropdown-portal .select-options {
@@ -571,21 +561,18 @@ onUnmounted(() => {
 }
 
 .select-dropdown-portal .select-option {
-  @apply flex items-center justify-between gap-2;
-  @apply px-4 py-2.5 text-sm;
-  @apply text-gray-700 dark:text-gray-300;
-  @apply cursor-pointer transition-colors duration-150;
-  @apply hover:bg-gray-50 dark:hover:bg-dark-700;
+  @apply flex cursor-pointer items-center justify-between gap-2;
+  @apply px-3 py-2 text-sm text-content;
+  @apply transition-colors duration-150 hover:bg-surface-sunken;
   pointer-events: auto !important;
 }
 
 .select-dropdown-portal .select-option-selected {
-  @apply bg-primary-50 dark:bg-primary-900/20;
-  @apply text-primary-700 dark:text-primary-300;
+  @apply bg-primary-50 text-primary-700 dark:bg-primary-500/15 dark:text-primary-300;
 }
 
 .select-dropdown-portal .select-option-focused {
-  @apply bg-gray-100 dark:bg-dark-700;
+  @apply bg-surface-sunken;
 }
 
 .select-dropdown-portal .select-option-disabled {
@@ -593,14 +580,12 @@ onUnmounted(() => {
 }
 
 .select-dropdown-portal .select-option-group {
-  @apply cursor-default select-none;
-  @apply bg-gray-50 dark:bg-dark-900;
-  @apply text-[11px] font-bold uppercase tracking-wider;
-  @apply text-gray-500 dark:text-gray-400;
+  @apply cursor-default select-none bg-surface-sunken;
+  @apply text-xs font-medium text-content-muted;
 }
 
 .select-dropdown-portal .select-option-group:hover {
-  @apply bg-gray-50 dark:bg-dark-900;
+  @apply bg-surface-sunken;
 }
 
 .select-dropdown-portal .select-option-label {
@@ -608,8 +593,7 @@ onUnmounted(() => {
 }
 
 .select-dropdown-portal .select-empty {
-  @apply px-4 py-8 text-center text-sm;
-  @apply text-gray-500 dark:text-dark-400;
+  @apply px-3 py-6 text-center text-sm text-content-muted;
 }
 
 .select-dropdown-enter-active,

@@ -1,14 +1,12 @@
 <template>
   <div class="empty-state">
     <!-- Icon -->
-    <div
-      class="mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-gray-100 dark:bg-dark-800"
-    >
+    <div class="flex items-center justify-center">
       <slot name="icon">
-        <component v-if="icon" :is="icon" class="empty-state-icon h-10 w-10" aria-hidden="true" />
+        <component v-if="icon" :is="icon" class="empty-state-icon" aria-hidden="true" />
         <svg
           v-else
-          class="empty-state-icon h-10 w-10"
+          class="empty-state-icon"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -34,7 +32,7 @@
     </p>
 
     <!-- Action -->
-    <div v-if="actionText || $slots.action" class="mt-6">
+    <div v-if="actionText || $slots.action" class="mt-4">
       <slot name="action">
         <component
           :is="actionTo ? 'RouterLink' : 'button'"
@@ -43,7 +41,7 @@
           @click="!actionTo && $emit('action')"
           class="btn btn-primary"
         >
-          <Icon v-if="actionIcon" name="plus" size="md" class="mr-2" />
+          <Icon v-if="actionIcon" name="plus" size="sm" />
           {{ actionText }}
         </component>
       </slot>

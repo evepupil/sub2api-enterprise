@@ -1,23 +1,21 @@
 <template>
-  <div
-    class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 dark:border-dark-700 dark:bg-dark-800 sm:px-6"
-  >
+  <div class="flex items-center justify-between border-t border-line-subtle px-4 py-2.5">
     <div class="flex flex-1 items-center justify-between sm:hidden">
       <!-- Mobile pagination -->
       <button
         @click="goToPage(page - 1)"
         :disabled="page === 1"
-        class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-dark-600 dark:bg-dark-700 dark:text-gray-200 dark:hover:bg-dark-600"
+        class="btn btn-secondary btn-sm"
       >
         {{ t('pagination.previous') }}
       </button>
-      <span class="text-sm text-gray-700 dark:text-gray-300">
+      <span class="text-sm text-content-muted">
         {{ t('pagination.pageOf', { page, total: totalPages }) }}
       </span>
       <button
         @click="goToPage(page + 1)"
         :disabled="page === totalPages"
-        class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-dark-600 dark:bg-dark-700 dark:text-gray-200 dark:hover:bg-dark-600"
+        class="btn btn-secondary btn-sm ml-3"
       >
         {{ t('pagination.next') }}
       </button>
@@ -26,21 +24,19 @@
     <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
       <!-- Desktop pagination info -->
       <div class="flex items-center space-x-4">
-        <p class="text-sm text-gray-700 dark:text-gray-300">
+        <p class="text-xs text-content-muted">
           {{ t('pagination.showing') }}
-          <span class="font-medium">{{ fromItem }}</span>
+          <span class="font-medium text-content-strong">{{ fromItem }}</span>
           {{ t('pagination.to') }}
-          <span class="font-medium">{{ toItem }}</span>
+          <span class="font-medium text-content-strong">{{ toItem }}</span>
           {{ t('pagination.of') }}
-          <span class="font-medium">{{ total }}</span>
+          <span class="font-medium text-content-strong">{{ total }}</span>
           {{ t('pagination.results') }}
         </p>
 
         <!-- Page size selector -->
         <div v-if="showPageSizeSelector" class="flex items-center space-x-2">
-          <span class="text-sm text-gray-700 dark:text-gray-300"
-            >{{ t('pagination.perPage') }}:</span
-          >
+          <span class="text-xs text-content-muted">{{ t('pagination.perPage') }}:</span>
           <div class="page-size-select w-20">
             <Select
               :model-value="pageSize"
@@ -51,7 +47,7 @@
         </div>
 
         <div v-if="showJump" class="flex items-center space-x-2">
-          <span class="text-sm text-gray-700 dark:text-gray-300">{{ t('pagination.jumpTo') }}</span>
+          <span class="text-xs text-content-muted">{{ t('pagination.jumpTo') }}</span>
           <input
             v-model="jumpPage"
             type="number"
@@ -68,18 +64,15 @@
       </div>
 
       <!-- Desktop pagination buttons -->
-      <nav
-        class="relative z-0 inline-flex -space-x-px rounded-md shadow-sm"
-        aria-label="Pagination"
-      >
+      <nav class="relative z-0 inline-flex -space-x-px" aria-label="Pagination">
         <!-- Previous button -->
         <button
           @click="goToPage(page - 1)"
           :disabled="page === 1"
-          class="relative inline-flex items-center rounded-l-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-dark-600 dark:bg-dark-700 dark:text-gray-400 dark:hover:bg-dark-600"
+          class="relative inline-flex h-7 items-center rounded-l-lg border border-line-strong bg-surface-raised px-2 text-content-muted transition-colors hover:bg-surface-sunken hover:text-content-strong disabled:cursor-not-allowed disabled:opacity-45"
           :aria-label="t('pagination.previous')"
         >
-          <Icon name="chevronLeft" size="md" />
+          <Icon name="chevronLeft" size="sm" />
         </button>
 
         <!-- Page numbers -->
@@ -89,10 +82,10 @@
           @click="typeof pageNum === 'number' && goToPage(pageNum)"
           :disabled="typeof pageNum !== 'number'"
           :class="[
-            'relative inline-flex items-center border px-4 py-2 text-sm font-medium',
+            'relative inline-flex h-7 min-w-[28px] items-center justify-center border px-2 text-sm font-medium transition-colors',
             pageNum === page
-              ? 'z-10 border-primary-500 bg-primary-50 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400'
-              : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-dark-600 dark:bg-dark-700 dark:text-gray-300 dark:hover:bg-dark-600',
+              ? 'z-10 border-primary-600 bg-primary-600 text-white'
+              : 'border-line-strong bg-surface-raised text-content hover:bg-surface-sunken',
             typeof pageNum !== 'number' && 'cursor-default'
           ]"
           :aria-label="
@@ -107,10 +100,10 @@
         <button
           @click="goToPage(page + 1)"
           :disabled="page === totalPages"
-          class="relative inline-flex items-center rounded-r-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-dark-600 dark:bg-dark-700 dark:text-gray-400 dark:hover:bg-dark-600"
+          class="relative inline-flex h-7 items-center rounded-r-lg border border-line-strong bg-surface-raised px-2 text-content-muted transition-colors hover:bg-surface-sunken hover:text-content-strong disabled:cursor-not-allowed disabled:opacity-45"
           :aria-label="t('pagination.next')"
         >
-          <Icon name="chevronRight" size="md" />
+          <Icon name="chevronRight" size="sm" />
         </button>
       </nav>
     </div>

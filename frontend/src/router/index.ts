@@ -560,6 +560,17 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
+    // 设计规范示范页。不进导航，改样式时自己开链接看。
+    path: '/admin/design',
+    name: 'AdminDesignSystem',
+    component: () => import('@/views/admin/DesignSystemView.vue'),
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: true,
+      title: 'Design System'
+    }
+  },
+  {
     path: '/admin/announcements',
     name: 'AdminAnnouncements',
     component: () => import('@/views/admin/AnnouncementsView.vue'),
