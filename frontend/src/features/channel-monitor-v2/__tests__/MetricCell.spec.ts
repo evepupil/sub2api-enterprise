@@ -30,7 +30,8 @@ describe('MetricCell', () => {
       },
     })
     expect(wrapper.find('strong').classes().join(' ')).not.toMatch(/red/)
-    expect(wrapper.find('strong').classes().join(' ')).toMatch(/gray|dark/)
+    // 中性色可能写成 gray/dark，也可能走语义色 content-*，都算没上红
+    expect(wrapper.find('strong').classes().join(' ')).toMatch(/gray|dark|content/)
   })
 
   it('maps warning and critical health states to distinct colors', () => {

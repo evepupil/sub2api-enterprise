@@ -3,17 +3,17 @@
     <div class="space-y-6 pb-12">
       <!-- Ops-style elevated shell: title toolbar + filters (mirrors OpsDashboardHeader) -->
       <section
-        class="card sticky top-0 z-20 !rounded-3xl !border-0 p-0 shadow-sm ring-1 ring-gray-900/5 backdrop-blur-sm dark:!bg-dark-800 dark:ring-dark-700 supports-[backdrop-filter]:bg-white/95 dark:supports-[backdrop-filter]:bg-dark-800/95"
+        class="card sticky top-0 z-20 !rounded-xl !border-0 p-0 dark:!bg-dark-800 dark:ring-dark-700 supports-[backdrop-filter]:bg-white/95 dark:supports-[backdrop-filter]:bg-dark-800/95"
       >
         <header class="page-header mb-0 flex flex-wrap items-start justify-between gap-4 border-b border-gray-100 px-5 py-4 dark:border-dark-700 sm:px-6">
           <div class="min-w-0">
-            <h1 class="page-title flex items-center gap-2 text-xl font-black text-gray-900 dark:text-white">
+            <h1 class="page-title flex items-center gap-2 text-xl font-black text-content-strong">
               <span class="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-blue-50 text-blue-500 dark:bg-blue-900/30 dark:text-blue-400">
                 <Icon name="chart" size="sm" />
               </span>
               {{ t('channelMonitorV2.title') }}
             </h1>
-            <div class="page-description mt-1.5 flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+            <div class="page-description mt-1.5 flex flex-wrap items-center gap-2 text-xs text-content-muted">
               <span class="relative flex h-2 w-2 shrink-0">
                 <span
                   class="relative inline-flex h-2 w-2 rounded-full"
@@ -243,7 +243,7 @@
         <div
           v-for="i in (showThroughput ? 5 : 4)"
           :key="i"
-          class="h-24 animate-pulse rounded-2xl bg-gray-50 dark:bg-dark-900/30"
+          class="h-24 animate-pulse rounded-2xl bg-surface-sunken/30"
         />
       </section>
 
@@ -263,13 +263,13 @@
         />
         <div
           v-else-if="loading"
-          class="card flex min-h-[320px] items-center justify-center !rounded-3xl !border-0 text-sm text-gray-400 shadow-sm ring-1 ring-gray-900/5 dark:ring-dark-700"
+          class="card flex min-h-[320px] items-center justify-center !rounded-xl !border-0 text-sm text-gray-400 dark:ring-dark-700"
         >
           <span class="animate-pulse">{{ t('common.loading') }}</span>
         </div>
       </div>
 
-      <section class="card flex min-h-0 flex-col overflow-hidden !rounded-3xl !border-0 shadow-sm ring-1 ring-gray-900/5 dark:!bg-dark-800 dark:ring-dark-700">
+      <section class="card flex min-h-0 flex-col overflow-hidden !rounded-xl !border-0 dark:!bg-dark-800 dark:ring-dark-700">
         <div class="border-b border-gray-100 px-5 pt-4 dark:border-dark-700 sm:px-6">
           <nav class="tabs w-full max-w-md sm:w-auto" role="tablist" :aria-label="t('channelMonitorV2.tabs.aria')">
             <button
@@ -310,8 +310,8 @@
                     <div class="flex items-center gap-2">
                       <span :class="statusDot(row.health)" aria-hidden="true"></span>
                       <div>
-                        <span class="block text-xs text-gray-500 dark:text-dark-400">{{ row.platform }}</span>
-                        <strong class="font-semibold text-gray-900 dark:text-white">
+                        <span class="block text-xs text-content-muted">{{ row.platform }}</span>
+                        <strong class="font-semibold text-content-strong">
                           {{ row.model === '__other__' ? t('channelMonitorV2.otherModels') : row.model }}
                         </strong>
                       </div>
@@ -345,11 +345,11 @@
                 class="grid w-full grid-cols-[minmax(100px,200px)_1fr_auto_auto] items-center gap-3 text-left"
                 @click="toggleError(row.category)"
               >
-                <span class="flex min-w-0 items-center gap-1.5 truncate text-gray-700 dark:text-gray-200">
+                <span class="flex min-w-0 items-center gap-1.5 truncate text-content">
                   <span class="truncate">{{ errorLabel(row.category) }}</span>
                   <span v-if="row.ignored" class="badge badge-gray shrink-0 !px-1.5 !py-0 text-[10px]">{{ t('channelMonitorV2.ignored') }}</span>
                 </span>
-                <span class="h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-dark-700">
+                <span class="h-2 overflow-hidden rounded-full bg-surface-sunken">
                   <i
                     class="block h-full rounded-full"
                     :class="row.ignored ? 'bg-gray-400 dark:bg-gray-500' : 'bg-gradient-to-r from-red-400 to-red-500'"
@@ -409,7 +409,7 @@
                   <td>
                     <strong
                       class="font-semibold"
-                      :class="row.is_self ? 'text-primary-700 dark:text-primary-300' : 'text-gray-900 dark:text-white'"
+                      :class="row.is_self ? 'text-primary-700 dark:text-primary-300' : 'text-content-strong'"
                     >
                       {{ row.display_label }}
                       <span

@@ -1,10 +1,10 @@
 <template>
   <div class="card">
     <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
-      <h2 class="text-lg font-medium text-gray-900 dark:text-white">
+      <h2 class="text-lg font-medium text-content-strong">
         {{ t('profile.totp.title') }}
       </h2>
-      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+      <p class="mt-1 text-sm text-content-muted">
         {{ t('profile.totp.description') }}
       </p>
     </div>
@@ -22,10 +22,10 @@
           </svg>
         </div>
         <div>
-          <p class="font-medium text-gray-700 dark:text-gray-300">
+          <p class="font-medium text-content">
             {{ t('profile.totp.featureDisabled') }}
           </p>
-          <p class="text-sm text-gray-500 dark:text-gray-400">
+          <p class="text-sm text-content-muted">
             {{ t('profile.totp.featureDisabledHint') }}
           </p>
         </div>
@@ -40,10 +40,10 @@
             </svg>
           </div>
           <div>
-            <p class="font-medium text-gray-900 dark:text-white">
+            <p class="font-medium text-content-strong">
               {{ t('profile.totp.enabled') }}
             </p>
-            <p v-if="status.enabled_at" class="text-sm text-gray-500 dark:text-gray-400">
+            <p v-if="status.enabled_at" class="text-sm text-content-muted">
               {{ t('profile.totp.enabledAt') }}: {{ formatDate(status.enabled_at) }}
             </p>
           </div>
@@ -66,10 +66,10 @@
             </svg>
           </div>
           <div>
-            <p class="font-medium text-gray-700 dark:text-gray-300">
+            <p class="font-medium text-content">
               {{ t('profile.totp.notEnabled') }}
             </p>
-            <p class="text-sm text-gray-500 dark:text-gray-400">
+            <p class="text-sm text-content-muted">
               {{ t('profile.totp.notEnabledHint') }}
             </p>
           </div>

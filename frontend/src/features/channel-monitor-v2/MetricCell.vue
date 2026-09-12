@@ -1,6 +1,6 @@
 <template>
   <div
-    class="stat-card !min-h-[6.5rem] !rounded-3xl !border-0 !p-4 shadow-sm ring-1 ring-gray-900/5 dark:!bg-dark-800 dark:ring-dark-700"
+    class="stat-card !min-h-[6.5rem] !rounded-xl !border-0 !p-4 dark:!bg-dark-800 dark:ring-dark-700"
     :title="title || undefined"
   >
     <div
@@ -17,7 +17,7 @@
       >{{ value }}</strong>
       <div
         v-if="detailParts.length > 1"
-        class="mt-1.5 flex flex-wrap gap-x-2 gap-y-0.5 text-[11px] leading-snug text-gray-400 dark:text-dark-400"
+        class="mt-1.5 flex flex-wrap gap-x-2 gap-y-0.5 text-[11px] leading-snug text-content-subtle"
       >
         <span
           v-for="(part, index) in detailParts"
@@ -27,7 +27,7 @@
       </div>
       <small
         v-else-if="detail"
-        class="mt-1.5 block text-[11px] leading-snug text-gray-400 dark:text-dark-400"
+        class="mt-1.5 block text-[11px] leading-snug text-content-subtle"
       >{{ detail }}</small>
     </div>
   </div>
@@ -64,11 +64,11 @@ const missingValue = computed(() => {
 const resolvedState = computed(() => (missingValue.value ? undefined : props.state))
 
 const stateClass = computed(() => {
-  if (!resolvedState.value) return missingValue.value ? 'text-gray-500 dark:text-dark-400' : 'text-gray-900 dark:text-white'
+  if (!resolvedState.value) return missingValue.value ? 'text-content-muted' : 'text-content-strong'
   if (resolvedState.value === 'healthy') return 'text-emerald-600 dark:text-emerald-400'
   if (resolvedState.value === 'warning') return 'text-amber-600 dark:text-amber-400'
   if (resolvedState.value === 'critical') return 'text-red-600 dark:text-red-400'
-  return 'text-gray-500 dark:text-dark-400'
+  return 'text-content-muted'
 })
 
 const dotClass = computed(() => {

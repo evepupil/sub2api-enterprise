@@ -3,7 +3,7 @@
     <div class="space-y-6">
       <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div class="min-w-0">
-          <h1 class="truncate text-xl font-semibold text-gray-900 dark:text-white">
+          <h1 class="truncate text-xl font-semibold text-content-strong">
             {{ organization?.name || t('organization.title') }}
           </h1>
           <span
@@ -59,7 +59,7 @@
           <div
             class="flex flex-col gap-3 border-b border-gray-200 px-5 py-4 dark:border-dark-700 lg:flex-row lg:items-center lg:justify-between"
           >
-            <h2 class="text-base font-semibold text-gray-900 dark:text-white">
+            <h2 class="text-base font-semibold text-content-strong">
               {{ t('organization.members') }}
             </h2>
 
@@ -90,7 +90,7 @@
 
           <div
             v-else-if="members.length === 0"
-            class="px-5 py-12 text-center text-sm text-gray-500 dark:text-dark-400"
+            class="px-5 py-12 text-center text-sm text-content-muted"
           >
             {{ t('organization.memberEmpty') }}
           </div>
@@ -132,8 +132,8 @@
                     />
                   </td>
                   <td class="px-3 py-3">
-                    <div class="font-medium text-gray-900 dark:text-white">{{ member.email }}</div>
-                    <div v-if="member.username" class="text-xs text-gray-500 dark:text-dark-400">
+                    <div class="font-medium text-content-strong">{{ member.email }}</div>
+                    <div v-if="member.username" class="text-xs text-content-muted">
                       {{ member.username }}
                     </div>
                   </td>
@@ -156,10 +156,10 @@
                       {{ member.status === 'active' ? t('common.enabled') : t('common.disabled') }}
                     </span>
                   </td>
-                  <td class="px-3 py-3 text-right text-gray-900 dark:text-white">
+                  <td class="px-3 py-3 text-right text-content-strong">
                     {{ member.is_owner ? '-' : formatSpending(member.spending_limit) }}
                   </td>
-                  <td class="px-3 py-3 text-right text-gray-700 dark:text-gray-300">
+                  <td class="px-3 py-3 text-right text-content">
                     {{ member.is_owner ? '-' : formatCurrency(member.spending_used) }}
                   </td>
                   <td
@@ -167,13 +167,13 @@
                     :class="
                       isExhausted(member)
                         ? 'font-medium text-amber-600 dark:text-amber-400'
-                        : 'text-gray-700 dark:text-gray-300'
+                        : 'text-content'
                     "
                   >
                     {{ member.is_owner ? '-' : formatSpending(member.spending_remaining) }}
                     <div
                       v-if="!member.is_owner && member.spending_frozen > 0"
-                      class="text-xs text-gray-500 dark:text-dark-400"
+                      class="text-xs text-content-muted"
                     >
                       {{ t('organization.spendingFrozen') }} {{ formatCurrency(member.spending_frozen) }}
                     </div>
@@ -210,29 +210,29 @@
 
         <section class="card overflow-hidden">
           <div class="border-b border-gray-200 px-5 py-4 dark:border-dark-700">
-            <h2 class="text-base font-semibold text-gray-900 dark:text-white">
+            <h2 class="text-base font-semibold text-content-strong">
               {{ t('organization.invitations') }}
             </h2>
           </div>
 
           <div
             v-if="invitations.length === 0"
-            class="px-5 py-12 text-center text-sm text-gray-500 dark:text-dark-400"
+            class="px-5 py-12 text-center text-sm text-content-muted"
           >
             {{ t('organization.invitationEmpty') }}
           </div>
 
-          <ul v-else class="divide-y divide-gray-100 dark:divide-dark-800">
+          <ul v-else class="divide-y divide-line-subtle">
             <li
               v-for="invitation in invitations"
               :key="invitation.id"
               class="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center"
             >
               <div class="min-w-0 flex-1">
-                <code class="block break-all text-sm font-semibold text-gray-900 dark:text-white">
+                <code class="block break-all text-sm font-semibold text-content-strong">
                   {{ invitation.code }}
                 </code>
-                <div class="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-dark-400">
+                <div class="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-content-muted">
                   <span>{{ t('organization.createdAt') }}: {{ formatDateTime(invitation.created_at) }}</span>
                   <span>
                     {{ t('organization.expiresAt') }}:
@@ -279,8 +279,8 @@
       @close="closeLimitDialog"
     >
       <div class="space-y-4">
-        <p class="text-sm text-gray-700 dark:text-gray-300">{{ limitDialog.email }}</p>
-        <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+        <p class="text-sm text-content">{{ limitDialog.email }}</p>
+        <label class="flex items-center gap-2 text-sm text-content">
           <input
             type="checkbox"
             class="h-4 w-4 cursor-pointer rounded border-gray-300 text-primary-600 focus:ring-primary-500"
@@ -325,8 +325,8 @@
             :key="item.userId"
             class="flex items-center justify-between gap-3 py-2"
           >
-            <span class="min-w-0 truncate text-gray-700 dark:text-gray-300">{{ item.email }}</span>
-            <span class="shrink-0 font-medium text-gray-900 dark:text-white">{{ formatCurrency(item.amount) }}</span>
+            <span class="min-w-0 truncate text-content">{{ item.email }}</span>
+            <span class="shrink-0 font-medium text-content-strong">{{ formatCurrency(item.amount) }}</span>
           </li>
         </ul>
         <p v-if="splitDialog.error" class="text-sm text-red-600 dark:text-red-400">{{ splitDialog.error }}</p>

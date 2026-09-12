@@ -18,10 +18,10 @@
           <div class="h-6 w-16 rounded-full bg-gray-200 dark:bg-dark-700"></div>
         </div>
         <div class="mt-5 grid grid-cols-2 gap-2">
-          <div class="h-16 rounded-xl bg-gray-100 dark:bg-dark-900/40"></div>
-          <div class="h-16 rounded-xl bg-gray-100 dark:bg-dark-900/40"></div>
+          <div class="h-16 rounded-xl bg-surface-sunken/40"></div>
+          <div class="h-16 rounded-xl bg-surface-sunken/40"></div>
         </div>
-        <div class="mt-6 h-5 w-full rounded bg-gray-100 dark:bg-dark-900/40"></div>
+        <div class="mt-6 h-5 w-full rounded bg-surface-sunken/40"></div>
       </div>
     </div>
 

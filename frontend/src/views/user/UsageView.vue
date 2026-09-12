@@ -7,7 +7,7 @@
         <div class="card p-4">
           <div class="flex flex-wrap items-center gap-4">
             <div class="flex items-center gap-2">
-              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('admin.dashboard.timeRange') }}:</span>
+              <span class="text-sm font-medium text-content">{{ t('admin.dashboard.timeRange') }}:</span>
               <DateRangePicker
                 v-model:start-date="startDate"
                 v-model:end-date="endDate"
@@ -15,13 +15,13 @@
               />
             </div>
             <div v-if="isOrganizationOwner" class="flex items-center gap-2">
-              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('usage.member') }}:</span>
+              <span class="text-sm font-medium text-content">{{ t('usage.member') }}:</span>
               <div class="w-56">
                 <Select v-model="memberUserId" :options="memberOptions" searchable @change="onMemberChange" />
               </div>
             </div>
             <div class="ml-auto flex items-center gap-2">
-              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('admin.dashboard.granularity') }}:</span>
+              <span class="text-sm font-medium text-content">{{ t('admin.dashboard.granularity') }}:</span>
               <div class="w-28">
                 <Select v-model="granularity" :options="granularityOptions" @change="loadChartData" />
               </div>
@@ -80,7 +80,7 @@
         </div>
       </div>
 
-      <div class="card p-6">
+      <div class="card p-5">
         <div class="flex flex-wrap items-end justify-between gap-4">
           <div v-if="activeTab === 'errors'" class="flex flex-1 flex-wrap items-end gap-4">
             <div class="w-full sm:w-auto sm:min-w-[220px]">
@@ -181,7 +181,7 @@
         </div>
       </div>
 
-      <div v-if="errorViewEnabled" class="flex gap-2 border-b border-gray-200 dark:border-dark-700">
+      <div v-if="errorViewEnabled" class="flex gap-2 border-b border-line-subtle">
         <button class="tab" :class="{ 'tab-active': activeTab === 'usage' }" @click="activeTab = 'usage'">
           {{ t('usage.tabs.usage') }}
         </button>

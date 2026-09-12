@@ -1,6 +1,11 @@
 /**
- * Structure contracts: channel-monitor-v2 + studio shells must use project
- * design-system utility classes rather than isolated flat RGB skins.
+ * Structure contracts: channel-monitor-v2 + studio shells must go through the
+ * project's design-system classes instead of growing their own skin.
+ *
+ * These assert structure only — which shared classes a shell relies on, how it
+ * scrolls, what order the regions come in. Appearance itself (radius, ring,
+ * elevation) is deliberately not asserted: it belongs to the design baseline in
+ * docs/模块设计/界面设计规范.md and changes there must not break tests.
  */
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
@@ -28,9 +33,6 @@ describe('channel-monitor-v2 design system structure', () => {
     expect(src).toContain('clearFilters')
     expect(src).toContain('healthModeOptions')
     expect(src).toContain("'cache'")
-    // Ops elevation: rounded-3xl + ring surfaces
-    expect(src).toContain('rounded-3xl')
-    expect(src).toContain('ring-1 ring-gray-900/5')
     // Overview-first KPI strip before primary viz
     expect(src.indexOf('summaryAria')).toBeLessThan(src.indexOf('MonitorTrendChart'))
     // No page-level fixed min-width that forces viewport horizontal scroll
@@ -54,8 +56,6 @@ describe('channel-monitor-v2 design system structure', () => {
     expect(src).toMatch(/max-h-\[min\(42vh/)
     expect(src).toContain('overflow-auto')
     expect(src).toContain('pulse-tooltip')
-    expect(src).toContain('rounded-3xl')
-    expect(src).toContain('ring-1 ring-gray-900/5')
     expect(src).not.toContain('modal-overlay')
     expect(src).not.toContain('modal-content')
   })
@@ -65,21 +65,17 @@ describe('channel-monitor-v2 design system structure', () => {
     expect(src).toContain('stat-card')
     expect(src).toContain('stat-label')
     expect(src).toContain('stat-value')
-    expect(src).toContain('rounded-3xl')
   })
 
   it('MonitorTrendChart uses Ops chart shell tokens', () => {
     const src = read('features/channel-monitor-v2/MonitorTrendChart.vue')
     expect(src).toContain('class="card')
-    expect(src).toContain('rounded-3xl')
-    expect(src).toContain('ring-1 ring-gray-900/5')
     expect(src).toContain('EmptyState')
     expect(src).toContain('min-h-[360px]')
   })
 
-  it('FilterMultiSelect uses rounded-xl input chrome and dropdown utility', () => {
+  it('FilterMultiSelect goes through the dropdown utility', () => {
     const src = read('features/channel-monitor-v2/FilterMultiSelect.vue')
-    expect(src).toContain('rounded-xl')
     expect(src).toContain('dropdown')
     expect(src).toContain('dropdown-item')
   })
