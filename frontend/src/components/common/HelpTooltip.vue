@@ -112,7 +112,7 @@ onBeforeUnmount(() => {
     <!-- Trigger Icon -->
     <slot name="trigger">
       <svg
-        class="h-4 w-4 cursor-help text-gray-400 transition-colors hover:text-primary-600 dark:text-gray-500 dark:hover:text-primary-400"
+        class="h-3.5 w-3.5 cursor-help text-content-subtle transition-colors hover:text-primary-600 dark:hover:text-primary-400"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -134,7 +134,7 @@ onBeforeUnmount(() => {
         v-show="show"
         role="tooltip"
         :class="[
-          'fixed z-[99999] -translate-x-1/2 -translate-y-full rounded-lg bg-gray-900 p-3 text-xs leading-relaxed text-white shadow-xl ring-1 ring-white/10 selection:bg-primary-200 selection:text-gray-900 before:absolute before:inset-x-0 before:top-full before:h-3 dark:bg-gray-800 dark:selection:bg-primary-200 dark:selection:text-gray-900',
+          'fixed z-[99999] -translate-x-1/2 -translate-y-full rounded-lg bg-gray-900 px-2.5 py-2 text-xs leading-relaxed text-white shadow-pop selection:bg-primary-200 selection:text-gray-900 before:absolute before:inset-x-0 before:top-full before:h-3 dark:bg-gray-800',
           props.widthClass,
         ]"
         :style="{ top: `calc(${tooltipStyle.top} - 8px)`, left: tooltipStyle.left }"
@@ -143,7 +143,7 @@ onBeforeUnmount(() => {
         <button
           v-if="props.trigger === 'click'"
           type="button"
-          class="absolute right-1.5 top-1.5 rounded p-1 text-gray-300 transition-colors hover:bg-white/10 hover:text-white"
+          class="absolute right-1 top-1 rounded p-0.5 text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
           aria-label="Close"
           @click.stop="closeTooltip"
         >

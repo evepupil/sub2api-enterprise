@@ -29,10 +29,10 @@ const props = withDefaults(defineProps<Props>(), {
 
 const sizeClasses = computed(() => {
   const sizes: Record<SpinnerSize, string> = {
-    sm: 'w-4 h-4 border-2',
-    md: 'w-8 h-8 border-2',
-    lg: 'w-12 h-12 border-[3px]',
-    xl: 'w-16 h-16 border-4'
+    sm: 'w-3.5 h-3.5 border-2',
+    md: 'w-5 h-5 border-2',
+    lg: 'w-8 h-8 border-2',
+    xl: 'w-12 h-12 border-[3px]'
   }
   return sizes[props.size]
 })
@@ -40,9 +40,9 @@ const sizeClasses = computed(() => {
 const colorClass = computed(() => {
   const colors: Record<SpinnerColor, string> = {
     primary: 'text-primary-500',
-    secondary: 'text-gray-500 dark:text-dark-400',
+    secondary: 'text-content-muted',
     white: 'text-white',
-    gray: 'text-gray-400 dark:text-dark-500'
+    gray: 'text-content-subtle'
   }
   return colors[props.color]
 })
