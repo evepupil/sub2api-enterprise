@@ -40,7 +40,7 @@
           :style="popoverStyle"
         >
           <div class="mb-2 flex items-center justify-between">
-            <span class="text-xs font-medium text-gray-500 dark:text-gray-400">
+            <span class="text-xs font-medium text-content-muted">
               {{ t('admin.accounts.groupCountTotal', { count: groups.length }) }}
             </span>
             <button
@@ -74,7 +74,7 @@
       @click="showPopover = false"
     />
   </div>
-  <span v-else class="text-sm text-gray-400 dark:text-dark-500">-</span>
+  <span v-else class="text-sm text-content-subtle">-</span>
 </template>
 
 <script setup lang="ts">

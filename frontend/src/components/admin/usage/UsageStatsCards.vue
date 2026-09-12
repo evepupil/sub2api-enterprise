@@ -38,7 +38,7 @@
             <span
               class="pointer-events-none absolute left-1/2 top-full z-30 mt-2 hidden w-56 -translate-x-1/2 rounded-lg border border-gray-200 bg-white p-3 text-left text-xs text-gray-700 shadow-lg group-hover:block group-focus:block dark:border-dark-600 dark:bg-dark-800 dark:text-dark-200"
             >
-              <span class="mb-2 block font-medium text-gray-900 dark:text-white">
+              <span class="mb-2 block font-medium text-content-strong">
                 {{ cacheDetailLabel() }}
               </span>
               <span class="flex items-center justify-between gap-3">

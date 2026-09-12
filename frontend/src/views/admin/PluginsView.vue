@@ -5,14 +5,14 @@
         class="flex flex-col gap-4 border-b border-gray-200 pb-5 dark:border-dark-700 sm:flex-row sm:items-end sm:justify-between"
       >
         <div class="min-w-0">
-          <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+          <h2 class="text-lg font-semibold text-content-strong">
             {{ t("admin.plugins.title") }}
           </h2>
-          <p class="mt-1 max-w-3xl text-sm text-gray-500 dark:text-gray-400">
+          <p class="mt-1 max-w-3xl text-sm text-content-muted">
             {{ t("admin.plugins.description") }}
           </p>
           <div
-            class="mt-3 flex flex-wrap gap-2 text-xs text-gray-600 dark:text-gray-300"
+            class="mt-3 flex flex-wrap gap-2 text-xs text-content-muted"
           >
             <span class="rounded bg-gray-100 px-2 py-1 dark:bg-dark-700">{{
               t("admin.plugins.onlyOpenAI")
@@ -53,7 +53,7 @@
         </div>
       </section>
 
-      <p class="text-xs text-gray-500 dark:text-gray-400">
+      <p class="text-xs text-content-muted">
         {{ t("admin.plugins.uploadHint") }}
       </p>
 
@@ -76,10 +76,10 @@
         class="flex min-h-56 flex-col items-center justify-center border border-dashed border-gray-300 px-6 text-center dark:border-dark-600"
       >
         <Icon name="cube" size="xl" class="text-gray-400" />
-        <p class="mt-3 font-medium text-gray-800 dark:text-gray-200">
+        <p class="mt-3 font-medium text-content">
           {{ t("admin.plugins.empty") }}
         </p>
-        <p class="mt-1 max-w-lg text-sm text-gray-500 dark:text-gray-400">
+        <p class="mt-1 max-w-lg text-sm text-content-muted">
           {{ t("admin.plugins.emptyHint") }}
         </p>
       </div>
@@ -88,7 +88,7 @@
         <article
           v-for="plugin in plugins"
           :key="plugin.id"
-          class="card overflow-hidden border border-gray-200 dark:border-dark-700"
+          class="card overflow-hidden border border-line-subtle"
         >
           <div
             class="flex flex-wrap items-start justify-between gap-3 border-b border-gray-100 p-5 dark:border-dark-700"
@@ -96,7 +96,7 @@
             <div class="min-w-0">
               <div class="flex flex-wrap items-center gap-2">
                 <h3
-                  class="truncate text-base font-semibold text-gray-900 dark:text-white"
+                  class="truncate text-base font-semibold text-content-strong"
                 >
                   {{ plugin.name }}
                 </h3>
@@ -116,7 +116,7 @@
               </p>
               <p
                 v-if="plugin.description"
-                class="mt-2 text-sm text-gray-600 dark:text-gray-300"
+                class="mt-2 text-sm text-content-muted"
               >
                 {{ plugin.description }}
               </p>
@@ -143,7 +143,7 @@
                 >
                   {{ t(`admin.plugins.${plugin.compatibility.status}`) }}
                 </span>
-                <span class="text-xs text-gray-500 dark:text-gray-400">{{
+                <span class="text-xs text-content-muted">{{
                   plugin.compatibility.message
                 }}</span>
               </div>
@@ -153,19 +153,19 @@
                 <dt class="text-gray-500">
                   {{ t("admin.plugins.currentVersion") }}
                 </dt>
-                <dd class="font-mono text-gray-800 dark:text-gray-200">
+                <dd class="font-mono text-content">
                   {{ plugin.compatibility.current_sub2api_version }}
                 </dd>
                 <dt class="text-gray-500">
                   {{ t("admin.plugins.requiredVersion") }}
                 </dt>
-                <dd class="font-mono text-gray-800 dark:text-gray-200">
+                <dd class="font-mono text-content">
                   {{ plugin.compatibility.required_sub2api_version }}
                 </dd>
                 <dt class="text-gray-500">
                   {{ t("admin.plugins.recommendedVersion") }}
                 </dt>
-                <dd class="font-mono text-gray-800 dark:text-gray-200">
+                <dd class="font-mono text-content">
                   {{ plugin.compatibility.recommended_sub2api_version || "-" }}
                 </dd>
               </dl>
@@ -213,7 +213,7 @@
 
             <div class="md:col-span-2">
               <label
-                class="flex items-center justify-between gap-4 text-xs font-medium text-gray-600 dark:text-gray-300"
+                class="flex items-center justify-between gap-4 text-xs font-medium text-content-muted"
               >
                 <span>{{ t("admin.plugins.rollout") }}</span>
                 <span class="w-11 text-right font-mono"
@@ -293,7 +293,7 @@
         @close="closeConfiguration"
       >
         <div
-          class="relative min-h-[520px] overflow-hidden bg-gray-50 dark:bg-dark-900"
+          class="relative min-h-[520px] overflow-hidden bg-surface-sunken"
           :style="{ height: `${iframeHeight}px` }"
         >
           <div
@@ -307,7 +307,7 @@
             class="absolute inset-0 z-20 flex flex-col items-center justify-center p-8 text-center"
           >
             <Icon name="exclamationTriangle" size="xl" class="text-amber-500" />
-            <p class="mt-3 font-medium text-gray-800 dark:text-gray-200">
+            <p class="mt-3 font-medium text-content">
               {{ t("admin.plugins.uiUnavailable") }}
             </p>
             <p class="mt-1 max-w-xl text-sm text-gray-500">{{ uiError }}</p>
@@ -318,7 +318,7 @@
             :src="uiSession.url"
             sandbox="allow-scripts"
             referrerpolicy="no-referrer"
-            class="h-full w-full border-0 bg-white dark:bg-dark-900"
+            class="h-full w-full border-0 bg-surface-raised"
             :title="
               t('admin.plugins.configTitle', { name: configPlugin?.name || '' })
             "

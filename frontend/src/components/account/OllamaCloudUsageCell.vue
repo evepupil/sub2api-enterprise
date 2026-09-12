@@ -46,7 +46,7 @@
       </button>
     </div>
   </div>
-  <span v-else class="text-sm text-gray-400 dark:text-dark-500">-</span>
+  <span v-else class="text-sm text-content-subtle">-</span>
 </template>
 
 <script setup lang="ts">

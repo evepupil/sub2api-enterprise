@@ -2,10 +2,10 @@
   <div class="border-t border-gray-200 pt-4 mt-4 dark:border-dark-400">
     <div class="mb-3 flex items-start justify-between gap-3">
       <div class="min-w-0 flex-1">
-        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label class="text-sm font-medium text-content">
           {{ t("admin.groups.codexModelsManifest.title") }}
         </label>
-        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+        <p class="mt-1 text-xs text-content-muted">
           {{ t("admin.groups.codexModelsManifest.hint") }}
         </p>
       </div>
@@ -20,7 +20,7 @@
     <div v-if="config.enabled">
       <p
         v-if="config.enabled"
-        class="mb-2 text-xs text-gray-500 dark:text-gray-400"
+        class="mb-2 text-xs text-content-muted"
       >
         {{ t("admin.groups.codexModelsManifest.enabledHint") }}
       </p>
@@ -79,7 +79,7 @@
             v-for="account in searchResults"
             :key="account.id"
             type="button"
-            class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-dark-700"
+            class="w-full px-3 py-2 text-left text-sm hover:bg-surface-sunken"
             :class="{
               'opacity-50': config.account_ids.includes(account.id),
             }"
@@ -95,10 +95,10 @@
       <!-- 回退子开关 -->
       <div class="mt-3 flex items-start justify-between gap-3">
         <div class="min-w-0 flex-1">
-          <label class="text-sm text-gray-700 dark:text-gray-300">
+          <label class="text-sm text-content">
             {{ t("admin.groups.codexModelsManifest.fallback") }}
           </label>
-          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+          <p class="mt-1 text-xs text-content-muted">
             {{ t("admin.groups.codexModelsManifest.fallbackHint") }}
           </p>
         </div>
@@ -119,7 +119,7 @@
         {{ t("admin.groups.codexModelsManifest.selectAtLeastOne") }}
       </p>
     </div>
-    <p v-else class="text-xs text-gray-500 dark:text-gray-400">
+    <p v-else class="text-xs text-content-muted">
       {{ t("admin.groups.codexModelsManifest.disabledHint") }}
     </p>
   </div>

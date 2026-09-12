@@ -5,7 +5,7 @@
         <div
           class="flex flex-col gap-3 border-b border-gray-200 px-5 py-4 dark:border-dark-700 sm:flex-row sm:items-center sm:justify-between"
         >
-          <h1 class="text-lg font-semibold text-gray-900 dark:text-white">
+          <h1 class="text-lg font-semibold text-content-strong">
             {{ t('admin.organizations.title') }}
           </h1>
           <SearchInput
@@ -22,7 +22,7 @@
 
         <div
           v-else-if="organizations.length === 0"
-          class="px-5 py-16 text-center text-sm text-gray-500 dark:text-dark-400"
+          class="px-5 py-16 text-center text-sm text-content-muted"
         >
           {{ t('admin.organizations.empty') }}
         </div>
@@ -46,17 +46,17 @@
                 :key="organization.id"
                 class="border-b border-gray-100 last:border-b-0 dark:border-dark-800"
               >
-                <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">{{ organization.name }}</td>
-                <td class="px-4 py-3">
-                  <div class="text-gray-900 dark:text-white">{{ organization.owner_email }}</div>
-                  <div v-if="organization.owner_username" class="text-xs text-gray-500 dark:text-dark-400">
+                <td class="px-3 py-2 font-medium text-content-strong">{{ organization.name }}</td>
+                <td class="px-3 py-2">
+                  <div class="text-content-strong">{{ organization.owner_email }}</div>
+                  <div v-if="organization.owner_username" class="text-xs text-content-muted">
                     {{ organization.owner_username }}
                   </div>
                 </td>
-                <td class="px-4 py-3 text-right text-gray-700 dark:text-gray-300">
+                <td class="px-3 py-2 text-right text-content">
                   {{ organization.member_count }}
                 </td>
-                <td class="px-4 py-3">
+                <td class="px-3 py-2">
                   <span
                     class="rounded-full px-2.5 py-1 text-xs font-medium"
                     :class="
@@ -68,13 +68,13 @@
                     {{ organization.status === 'active' ? t('common.enabled') : t('common.disabled') }}
                   </span>
                 </td>
-                <td class="px-4 py-3 text-gray-700 dark:text-gray-300">
+                <td class="px-3 py-2 text-content">
                   {{ describeScope(organization) }}
                 </td>
-                <td class="px-4 py-3 text-gray-700 dark:text-gray-300">
+                <td class="px-3 py-2 text-content">
                   {{ formatDateTime(organization.created_at) }}
                 </td>
-                <td class="px-4 py-3">
+                <td class="px-3 py-2">
                   <div class="flex justify-end gap-2">
                     <RouterLink
                       class="btn btn-secondary btn-sm"
@@ -117,9 +117,9 @@
       @close="closeScopeDialog"
     >
       <div class="space-y-4">
-        <p class="text-sm font-medium text-gray-900 dark:text-white">{{ scopeDialog.name }}</p>
+        <p class="text-sm font-medium text-content-strong">{{ scopeDialog.name }}</p>
 
-        <label class="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
+        <label class="flex items-start gap-2 text-sm text-content">
           <input
             v-model="scopeDialog.restrictPublicGroups"
             type="checkbox"
@@ -133,14 +133,14 @@
         </div>
         <ul v-else class="max-h-72 space-y-1 overflow-y-auto">
           <li v-for="group in groups" :key="group.id">
-            <label class="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-gray-50 dark:hover:bg-dark-800">
+            <label class="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-surface-sunken">
               <input
                 type="checkbox"
                 class="h-4 w-4 cursor-pointer rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                 :checked="scopeDialog.allowedGroupIds.includes(group.id)"
                 @change="toggleGroup(group.id)"
               />
-              <span class="text-gray-900 dark:text-white">{{ group.name }}</span>
+              <span class="text-content-strong">{{ group.name }}</span>
               <span
                 v-if="group.is_exclusive"
                 class="rounded-full bg-amber-50 px-2 py-0.5 text-xs text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"

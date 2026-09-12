@@ -3,9 +3,9 @@
   <div>
     <!-- Toolbar -->
     <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 px-4 py-3 dark:border-dark-700/50 sm:px-6">
-      <p class="text-xs text-gray-400 dark:text-gray-500">{{ t('admin.usage.tokenRanking.subtitle') }}</p>
+      <p class="text-xs text-content-subtle">{{ t('admin.usage.tokenRanking.subtitle') }}</p>
       <div class="flex items-center gap-3">
-        <span v-if="!loading && items.length > 0" class="text-xs text-gray-400 dark:text-gray-500">
+        <span v-if="!loading && items.length > 0" class="text-xs text-content-subtle">
           {{ t('admin.usage.tokenRanking.userCount', { count: items.length }) }}
         </span>
         <div class="w-28">
@@ -16,18 +16,18 @@
 
     <!-- Table -->
     <div class="overflow-x-auto">
-      <table class="w-full min-w-max divide-y divide-gray-200 dark:divide-dark-700">
-        <thead class="bg-gray-50 dark:bg-dark-800">
+      <table class="w-full min-w-max divide-y divide-line-subtle">
+        <thead class="bg-surface-sunken">
           <tr>
-            <th class="w-16 px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-dark-400 sm:px-6">#</th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-dark-400">
+            <th class="w-16 px-3 py-2 text-left text-xs font-medium text-content-muted sm:px-6">#</th>
+            <th class="px-3 py-2 text-left text-xs font-medium text-content-muted">
               {{ t('admin.usage.tokenRanking.columns.user') }}
             </th>
             <th
               v-for="col in sortableColumns"
               :key="col.key"
-              class="cursor-pointer select-none whitespace-nowrap px-4 py-3 text-right text-xs font-medium uppercase tracking-wider transition-colors hover:bg-gray-100 dark:hover:bg-dark-700"
-              :class="sortBy === col.key ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-dark-400'"
+              class="cursor-pointer select-none whitespace-nowrap px-3 py-2 text-right text-xs font-medium transition-colors hover:bg-surface-sunken"
+              :class="sortBy === col.key ? 'text-primary-600 dark:text-primary-400' : 'text-content-muted'"
               @click="setSort(col.key)"
             >
               {{ t(col.label) }}
@@ -50,11 +50,11 @@
             v-for="(item, index) in items"
             v-else
             :key="item.user_id"
-            class="cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-dark-700/40"
+            class="cursor-pointer transition-colors hover:bg-surface-sunken/40"
             :title="t('admin.usage.tokenRanking.rowHint')"
             @click="$emit('select-user', item.user_id, item.email)"
           >
-            <td class="px-4 py-3 sm:px-6">
+            <td class="px-3 py-2 sm:px-6">
               <span
                 v-if="index < 3"
                 class="inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold"
@@ -62,16 +62,16 @@
               >{{ index + 1 }}</span>
               <span v-else class="inline-block w-6 text-center text-sm tabular-nums text-gray-400">{{ index + 1 }}</span>
             </td>
-            <td class="max-w-[260px] truncate px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200" :title="item.email">
+            <td class="max-w-[260px] truncate px-3 py-2 text-sm font-medium text-content" :title="item.email">
               {{ item.email || `User #${item.user_id}` }}
-              <span class="ml-1 font-normal text-gray-400 dark:text-gray-500">#{{ item.user_id }}</span>
+              <span class="ml-1 font-normal text-content-subtle">#{{ item.user_id }}</span>
             </td>
-            <td class="whitespace-nowrap px-4 py-3 text-right text-sm tabular-nums text-gray-500 dark:text-gray-400">{{ item.requests.toLocaleString() }}</td>
-            <td class="whitespace-nowrap px-4 py-3 text-right text-sm tabular-nums text-gray-500 dark:text-gray-400">{{ fmtTokens(item.input_tokens) }}</td>
-            <td class="whitespace-nowrap px-4 py-3 text-right text-sm tabular-nums text-gray-500 dark:text-gray-400">{{ fmtTokens(item.output_tokens) }}</td>
-            <td class="whitespace-nowrap px-4 py-3 text-right text-sm tabular-nums text-gray-500 dark:text-gray-400">{{ fmtTokens(item.cache_tokens) }}</td>
-            <td class="whitespace-nowrap px-4 py-3 text-right text-sm font-medium tabular-nums text-gray-900 dark:text-gray-100">{{ fmtTokens(item.total_tokens) }}</td>
-            <td class="whitespace-nowrap px-4 py-3 text-right text-sm font-medium tabular-nums text-green-600 dark:text-green-400">${{ fmtCost(item.actual_cost) }}</td>
+            <td class="whitespace-nowrap px-3 py-2 text-right text-sm tabular-nums text-content-muted">{{ item.requests.toLocaleString() }}</td>
+            <td class="whitespace-nowrap px-3 py-2 text-right text-sm tabular-nums text-content-muted">{{ fmtTokens(item.input_tokens) }}</td>
+            <td class="whitespace-nowrap px-3 py-2 text-right text-sm tabular-nums text-content-muted">{{ fmtTokens(item.output_tokens) }}</td>
+            <td class="whitespace-nowrap px-3 py-2 text-right text-sm tabular-nums text-content-muted">{{ fmtTokens(item.cache_tokens) }}</td>
+            <td class="whitespace-nowrap px-3 py-2 text-right text-sm font-medium tabular-nums text-content-strong">{{ fmtTokens(item.total_tokens) }}</td>
+            <td class="whitespace-nowrap px-3 py-2 text-right text-sm font-medium tabular-nums text-green-600 dark:text-green-400">${{ fmtCost(item.actual_cost) }}</td>
           </tr>
         </tbody>
       </table>

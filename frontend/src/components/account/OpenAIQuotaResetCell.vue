@@ -77,7 +77,7 @@
           {{ autoResetState.trigger_window }}
         </span>
       </span>
-      <span v-if="autoResetState.checked_at" class="text-gray-500 dark:text-gray-400">
+      <span v-if="autoResetState.checked_at" class="text-content-muted">
         {{ formatResetCreditExpiry(autoResetState.checked_at, 'short') }}
       </span>
       <span

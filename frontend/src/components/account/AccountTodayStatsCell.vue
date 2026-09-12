@@ -16,33 +16,33 @@
     <div v-else-if="props.stats" class="space-y-0.5 text-xs">
       <!-- Requests -->
       <div class="flex items-center gap-1">
-        <span class="text-gray-500 dark:text-gray-400"
+        <span class="text-content-muted"
           >{{ t('admin.accounts.stats.requests') }}:</span
         >
-        <span class="font-medium text-gray-700 dark:text-gray-300">{{
+        <span class="font-medium text-content">{{
           formatNumber(props.stats.requests)
         }}</span>
       </div>
       <!-- Tokens -->
       <div class="flex items-center gap-1">
-        <span class="text-gray-500 dark:text-gray-400"
+        <span class="text-content-muted"
           >{{ t('admin.accounts.stats.tokens') }}:</span
         >
-        <span class="font-medium text-gray-700 dark:text-gray-300">{{
+        <span class="font-medium text-content">{{
           formatTokens(props.stats.tokens)
         }}</span>
       </div>
       <!-- Cost (Account) -->
       <div class="flex items-center gap-1">
-        <span class="text-gray-500 dark:text-gray-400">{{ t('usage.accountBilled') }}:</span>
+        <span class="text-content-muted">{{ t('usage.accountBilled') }}:</span>
         <span class="font-medium text-emerald-600 dark:text-emerald-400">{{
           formatCurrency(props.stats.cost)
         }}</span>
       </div>
       <!-- Cost (User/API Key) -->
       <div v-if="props.stats.user_cost != null" class="flex items-center gap-1">
-        <span class="text-gray-500 dark:text-gray-400">{{ t('usage.userBilled') }}:</span>
-        <span class="font-medium text-gray-700 dark:text-gray-300">{{
+        <span class="text-content-muted">{{ t('usage.userBilled') }}:</span>
+        <span class="font-medium text-content">{{
           formatCurrency(props.stats.user_cost)
         }}</span>
       </div>

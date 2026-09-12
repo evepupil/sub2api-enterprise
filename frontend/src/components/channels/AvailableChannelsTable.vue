@@ -8,11 +8,11 @@
     >
       <thead>
         <tr class="border-b border-gray-100 bg-gray-50/50 text-xs font-medium uppercase tracking-wide text-gray-500 dark:border-dark-700 dark:bg-dark-800/50 dark:text-gray-400">
-          <th class="w-[180px] px-4 py-3 text-center">{{ columns.name }}</th>
-          <th class="w-[200px] px-4 py-3 text-left">{{ columns.description }}</th>
-          <th class="w-[140px] px-4 py-3 text-left">{{ columns.platform }}</th>
-          <th class="px-4 py-3 text-left">{{ columns.groups }}</th>
-          <th class="px-4 py-3 text-left">{{ columns.supportedModels }}</th>
+          <th class="w-[180px] px-3 py-2 text-center">{{ columns.name }}</th>
+          <th class="w-[200px] px-3 py-2 text-left">{{ columns.description }}</th>
+          <th class="w-[140px] px-3 py-2 text-left">{{ columns.platform }}</th>
+          <th class="px-3 py-2 text-left">{{ columns.groups }}</th>
+          <th class="px-3 py-2 text-left">{{ columns.supportedModels }}</th>
         </tr>
       </thead>
       <tbody v-if="loading">
@@ -26,7 +26,7 @@
         <tr>
           <td colspan="5" class="py-12 text-center">
             <Icon name="inbox" size="xl" class="mx-auto mb-3 h-12 w-12 text-gray-400" />
-            <p class="text-sm text-gray-500 dark:text-gray-400">{{ emptyLabel }}</p>
+            <p class="text-sm text-content-muted">{{ emptyLabel }}</p>
           </td>
         </tr>
       </tbody>
@@ -48,7 +48,7 @@
           <td
             v-if="secIdx === 0"
             :rowspan="channel.platforms.length"
-            class="px-4 py-3 text-center align-middle font-medium text-gray-900 dark:text-white"
+            class="px-3 py-2 text-center align-middle font-medium text-content-strong"
           >
             {{ channel.name }}
           </td>
@@ -57,14 +57,14 @@
           <td
             v-if="secIdx === 0"
             :rowspan="channel.platforms.length"
-            class="px-4 py-3 align-middle text-xs text-gray-500 dark:text-gray-400"
+            class="px-3 py-2 align-middle text-xs text-content-muted"
           >
             <template v-if="channel.description">{{ channel.description }}</template>
             <span v-else class="text-gray-400">-</span>
           </td>
 
           <!-- 平台徽章 -->
-          <td class="align-top px-4 py-3">
+          <td class="align-top px-3 py-2">
             <span
               :class="[
                 'inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[11px] font-medium uppercase',
@@ -77,7 +77,7 @@
           </td>
 
           <!-- 分组：专属分组在前（紫色 shield 行），公开分组在后（灰色 globe 行）。 -->
-          <td class="align-top px-4 py-3">
+          <td class="align-top px-3 py-2">
             <div class="flex flex-col gap-1.5">
               <div
                 v-if="exclusiveGroups(section).length > 0"
@@ -118,7 +118,7 @@
                 class="flex flex-wrap items-center gap-1.5"
               >
                 <span
-                  class="inline-flex items-center gap-0.5 text-[10px] font-medium uppercase text-gray-500 dark:text-gray-400"
+                  class="inline-flex items-center gap-0.5 text-[10px] font-medium uppercase text-content-muted"
                   :title="t('availableChannels.publicTooltip')"
                 >
                   <Icon name="globe" size="xs" class="h-3 w-3" />
@@ -152,7 +152,7 @@
           </td>
 
           <!-- 支持模型 -->
-          <td class="align-top px-4 py-3">
+          <td class="align-top px-3 py-2">
             <div class="flex flex-wrap gap-1">
               <SupportedModelChip
                 v-for="m in section.supported_models"
@@ -178,7 +178,7 @@
       </div>
       <div v-else-if="rows.length === 0" data-testid="mobile-empty" class="py-12 text-center">
         <Icon name="inbox" size="xl" class="mx-auto mb-3 h-12 w-12 text-gray-400" />
-        <p class="text-sm text-gray-500 dark:text-gray-400">{{ emptyLabel }}</p>
+        <p class="text-sm text-content-muted">{{ emptyLabel }}</p>
       </div>
       <section
         v-else
@@ -187,15 +187,15 @@
         class="border-b-2 border-gray-200 px-4 py-4 last:border-b-0 dark:border-dark-600"
       >
         <header class="mb-3 min-w-0">
-          <h3 class="break-words text-sm font-semibold text-gray-900 dark:text-white">
+          <h3 class="break-words text-sm font-semibold text-content-strong">
             {{ channel.name }}
           </h3>
-          <p class="mt-1 break-words text-xs leading-5 text-gray-500 dark:text-gray-400">
+          <p class="mt-1 break-words text-xs leading-5 text-content-muted">
             {{ channel.description || '-' }}
           </p>
         </header>
 
-        <div class="divide-y divide-gray-100 dark:divide-dark-700/60">
+        <div class="divide-y divide-line-subtle/60">
           <div
             v-for="section in channel.platforms"
             :key="`mobile-${channel.name}-${section.platform}`"
@@ -213,7 +213,7 @@
 
             <dl class="mt-3 space-y-3">
               <div class="min-w-0">
-                <dt class="mb-1.5 text-[11px] font-medium text-gray-500 dark:text-gray-400">
+                <dt class="mb-1.5 text-[11px] font-medium text-content-muted">
                   {{ columns.groups }}
                 </dt>
                 <dd class="flex min-w-0 flex-col gap-2">
@@ -257,7 +257,7 @@
                     class="flex min-w-0 flex-wrap items-center gap-1.5"
                   >
                     <span
-                      class="inline-flex items-center gap-0.5 text-[10px] font-medium uppercase text-gray-500 dark:text-gray-400"
+                      class="inline-flex items-center gap-0.5 text-[10px] font-medium uppercase text-content-muted"
                       :title="t('availableChannels.publicTooltip')"
                     >
                       <Icon name="globe" size="xs" class="h-3 w-3" />
@@ -292,7 +292,7 @@
               </div>
 
               <div class="min-w-0">
-                <dt class="mb-1.5 text-[11px] font-medium text-gray-500 dark:text-gray-400">
+                <dt class="mb-1.5 text-[11px] font-medium text-content-muted">
                   {{ columns.supportedModels }}
                 </dt>
                 <dd class="flex min-w-0 flex-wrap gap-1">

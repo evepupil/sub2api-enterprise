@@ -1,21 +1,21 @@
 <template>
   <div class="card p-4">
-    <h3 class="mb-4 text-sm font-semibold text-gray-900 dark:text-white">
+    <h3 class="mb-4 text-sm font-semibold text-content-strong">
       {{ t('payment.admin.topUsers') }}
     </h3>
     <div
       v-if="!hasUsers(props.users)"
-      class="flex h-32 items-center justify-center text-sm text-gray-500 dark:text-gray-400"
+      class="flex h-32 items-center justify-center text-sm text-content-muted"
     >
       {{ t('payment.admin.noData') }}
     </div>
     <div v-else class="space-y-2">
       <div v-for="[currency, currencyUsers] in sortedUsers(props.users)" :key="currency" class="space-y-2">
-        <p class="text-xs font-semibold text-gray-500 dark:text-gray-400">{{ currency }}</p>
+        <p class="text-xs font-semibold text-content-muted">{{ currency }}</p>
         <div
           v-for="(user, idx) in currencyUsers"
           :key="user.user_id"
-          class="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-gray-50 dark:hover:bg-dark-700"
+          class="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-surface-sunken"
         >
           <div class="flex items-center gap-3">
             <span
@@ -26,9 +26,9 @@
             >
               {{ idx + 1 }}
             </span>
-            <span class="text-sm text-gray-700 dark:text-gray-300">{{ user.email }}</span>
+            <span class="text-sm text-content">{{ user.email }}</span>
           </div>
-          <span class="text-sm font-medium text-gray-900 dark:text-white">
+          <span class="text-sm font-medium text-content-strong">
             {{ formatMoney(currency, user.amount) }}
           </span>
         </div>

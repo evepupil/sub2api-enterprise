@@ -2,7 +2,7 @@
   <section class="mt-3 border-t border-gray-200 pt-3 dark:border-dark-600">
     <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
       <div class="min-w-0 flex-1 sm:max-w-2xl">
-        <label class="block text-xs font-medium text-gray-500 dark:text-gray-400">
+        <label class="block text-xs font-medium text-content-muted">
           {{ t('admin.channels.form.timePricing') }}
         </label>
         <div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">

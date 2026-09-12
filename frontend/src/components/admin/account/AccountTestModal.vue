@@ -18,8 +18,8 @@
             <Icon name="play" size="md" class="text-white" :stroke-width="2" />
           </div>
           <div>
-            <div class="font-semibold text-gray-900 dark:text-gray-100">{{ account.name }}</div>
-            <div class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+            <div class="font-semibold text-content-strong">{{ account.name }}</div>
+            <div class="flex items-center gap-1.5 text-xs text-content-muted">
               <span
                 class="rounded bg-gray-200 px-1.5 py-0.5 text-[10px] font-medium uppercase dark:bg-dark-500"
               >
@@ -43,7 +43,7 @@
 
       <!-- Grok: mode first, then optional model / mode params -->
       <div v-if="isGrokAccount" class="space-y-1.5">
-        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label class="text-sm font-medium text-content">
           {{ t('admin.accounts.grok.testMode') }}
         </label>
         <Select
@@ -51,13 +51,13 @@
           :options="grokTestModeOptions"
           :disabled="status === 'connecting'"
         />
-        <p class="text-xs text-gray-500 dark:text-gray-400">
+        <p class="text-xs text-content-muted">
           {{ t('admin.accounts.grok.testModeHint') }}
         </p>
       </div>
 
       <div v-if="showModelSelect" class="space-y-1.5">
-        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label class="text-sm font-medium text-content">
           {{ t('admin.accounts.selectTestModel') }}
         </label>
         <Select
@@ -71,7 +71,7 @@
       </div>
 
       <div v-if="isOpenAIAccount" class="space-y-1.5">
-        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label class="text-sm font-medium text-content">
           {{ t('admin.accounts.openai.testMode') }}
         </label>
         <Select
@@ -93,14 +93,14 @@
       </div>
       <p
         v-else-if="isGrokAccount && promptInputHint"
-        class="text-xs text-gray-500 dark:text-gray-400"
+        class="text-xs text-content-muted"
       >
         {{ promptInputHint }}
       </p>
 
       <!-- Optional media uploads for real generation / transcription -->
       <div v-if="supportsImageUpload" class="space-y-1.5">
-        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label class="text-sm font-medium text-content">
           {{ imageUploadLabel }}
         </label>
         <div class="flex items-center gap-3">
@@ -112,7 +112,7 @@
           >
             {{ t('admin.accounts.grok.chooseImageFile') }}
           </button>
-          <span class="min-w-0 truncate text-xs text-gray-500 dark:text-gray-400">
+          <span class="min-w-0 truncate text-xs text-content-muted">
             {{
               uploadImageName
                 ? t('common.selectedFile', { name: uploadImageName })
@@ -128,18 +128,18 @@
             @change="onImageFileChange"
           />
         </div>
-        <p class="text-xs text-gray-500 dark:text-gray-400">{{ imageUploadHint }}</p>
+        <p class="text-xs text-content-muted">{{ imageUploadHint }}</p>
         <div v-if="uploadImagePreview" class="overflow-hidden rounded-lg border border-gray-200 dark:border-dark-500">
           <img
             :src="uploadImagePreview"
             :alt="t('admin.accounts.grok.uploadPreviewAlt')"
-            class="max-h-40 w-full object-contain bg-gray-50 dark:bg-dark-700"
+            class="max-h-40 w-full object-contain bg-surface-sunken"
           />
         </div>
       </div>
 
       <div v-if="supportsAudioUpload" class="space-y-1.5">
-        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label class="text-sm font-medium text-content">
           {{ t('admin.accounts.grok.audioUploadLabel') }}
         </label>
         <div class="flex items-center gap-3">
@@ -151,7 +151,7 @@
           >
             {{ t('admin.accounts.grok.chooseAudioFile') }}
           </button>
-          <span class="min-w-0 truncate text-xs text-gray-500 dark:text-gray-400">
+          <span class="min-w-0 truncate text-xs text-content-muted">
             {{
               uploadAudioName
                 ? t('common.selectedFile', { name: uploadAudioName })
@@ -167,7 +167,7 @@
             @change="onAudioFileChange"
           />
         </div>
-        <p class="text-xs text-gray-500 dark:text-gray-400">{{ t('admin.accounts.grok.audioUploadHint') }}</p>
+        <p class="text-xs text-content-muted">{{ t('admin.accounts.grok.audioUploadHint') }}</p>
       </div>
 
       <!-- Terminal Output -->
@@ -225,7 +225,7 @@
       </div>
 
       <div v-if="generatedImages.length > 0" class="space-y-2">
-        <div class="text-xs font-medium text-gray-600 dark:text-gray-300">
+        <div class="text-xs font-medium text-content-muted">
           {{ t('admin.accounts.imagePreview') }}
         </div>
         <div class="flex flex-wrap justify-center gap-3">
@@ -251,7 +251,7 @@
       </div>
 
       <div v-if="generatedAudios.length > 0" class="space-y-2">
-        <div class="text-xs font-medium text-gray-600 dark:text-gray-300">
+        <div class="text-xs font-medium text-content-muted">
           {{ t('admin.accounts.audioPreview') }}
         </div>
         <div
@@ -260,12 +260,12 @@
           class="rounded-xl border border-gray-200 bg-white p-3 dark:border-dark-500 dark:bg-dark-700"
         >
           <audio :src="audio.url" controls class="w-full" :type="audio.mimeType" />
-          <div class="mt-1 text-xs text-gray-500 dark:text-gray-300">{{ audio.mimeType || 'audio/*' }}</div>
+          <div class="mt-1 text-xs text-content-muted">{{ audio.mimeType || 'audio/*' }}</div>
         </div>
       </div>
 
       <div v-if="generatedVideos.length > 0" class="space-y-2">
-        <div class="text-xs font-medium text-gray-600 dark:text-gray-300">
+        <div class="text-xs font-medium text-content-muted">
           {{ t('admin.accounts.videoPreview') }}
         </div>
         <div
@@ -304,7 +304,7 @@
       </Teleport>
 
       <!-- Test Info -->
-      <div class="flex items-center justify-between px-1 text-xs text-gray-500 dark:text-gray-400">
+      <div class="flex items-center justify-between px-1 text-xs text-content-muted">
         <div class="flex items-center gap-3">
           <span class="flex items-center gap-1">
             <Icon name="grid" size="sm" :stroke-width="2" />

@@ -39,7 +39,7 @@
         {{ t('admin.accounts.headerOverride.importJsonCancel') }}
       </button>
     </div>
-    <p class="text-xs text-gray-500 dark:text-gray-400">
+    <p class="text-xs text-content-muted">
       {{ t('admin.accounts.headerOverride.importJsonHint') }}
     </p>
   </div>

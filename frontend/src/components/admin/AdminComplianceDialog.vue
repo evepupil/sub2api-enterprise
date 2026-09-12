@@ -27,10 +27,10 @@
 
         <aside class="space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm dark:border-dark-700 dark:bg-dark-900/60">
           <div>
-            <p class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-dark-400">
+            <p class="text-xs font-medium uppercase tracking-wide text-content-muted">
               {{ t('adminCompliance.version') }}
             </p>
-            <p class="mt-1 break-all font-mono text-gray-900 dark:text-white">
+            <p class="mt-1 break-all font-mono text-content-strong">
               {{ complianceStore.status?.version || 'v2026.06.10' }}
             </p>
           </div>
@@ -43,14 +43,14 @@
             <Icon name="externalLink" size="sm" />
             {{ t('adminCompliance.openDocument') }}
           </a>
-          <p class="leading-6 text-gray-600 dark:text-dark-300">
+          <p class="leading-6 text-content-muted">
             {{ t('adminCompliance.documentSource') }}
           </p>
         </aside>
       </div>
 
       <div class="space-y-3">
-        <label for="admin-compliance-phrase" class="block text-sm font-semibold text-gray-900 dark:text-white">
+        <label for="admin-compliance-phrase" class="block text-sm font-semibold text-content-strong">
           {{ t('adminCompliance.inputLabel') }}
         </label>
         <div class="rounded-lg bg-gray-100 px-3 py-2 font-mono text-sm text-gray-900 dark:bg-dark-800 dark:text-dark-100">
@@ -67,7 +67,7 @@
         />
       </div>
 
-      <p class="text-xs leading-5 text-gray-500 dark:text-dark-400">
+      <p class="text-xs leading-5 text-content-muted">
         {{ t('adminCompliance.legalNote') }}
       </p>
     </div>
@@ -195,16 +195,16 @@ async function logout(): Promise<void> {
 }
 
 .legal-document-content :deep(h2) {
-  @apply mb-3 mt-6 text-xl font-semibold text-gray-900 dark:text-white;
+  @apply mb-3 mt-6 text-xl font-semibold text-content-strong;
 }
 
 .legal-document-content :deep(p) {
-  @apply mb-4 text-sm text-gray-700 dark:text-dark-200;
+  @apply mb-4 text-sm text-content;
 }
 
 .legal-document-content :deep(ul),
 .legal-document-content :deep(ol) {
-  @apply mb-4 pl-6 text-sm text-gray-700 dark:text-dark-200;
+  @apply mb-4 pl-6 text-sm text-content;
 }
 
 .legal-document-content :deep(ul) {

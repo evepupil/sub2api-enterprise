@@ -178,7 +178,7 @@ function downloadChart() {
       data-testid="throughput-chart-header"
       class="mb-4 flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
     >
-      <h3 class="flex min-w-0 items-center gap-2 text-sm font-bold text-gray-900 dark:text-white">
+      <h3 class="flex min-w-0 items-center gap-2 text-sm font-bold text-content-strong">
         <svg class="h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
         </svg>
@@ -187,7 +187,7 @@ function downloadChart() {
       </h3>
       <div
         data-testid="throughput-chart-toolbar"
-        class="flex w-full min-w-0 flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400 sm:w-auto sm:justify-end"
+        class="flex w-full min-w-0 flex-wrap items-center gap-2 text-xs text-content-muted sm:w-auto sm:justify-end"
       >
         <span class="flex shrink-0 items-center gap-1"><span class="h-2 w-2 rounded-full bg-blue-500"></span>QPS</span>
         <span class="flex shrink-0 items-center gap-1"><span class="h-2 w-2 rounded-full bg-green-500"></span>{{ t('admin.ops.tpsK') }}</span>
@@ -233,7 +233,7 @@ function downloadChart() {
         @click="emit('selectGroup', g.group_id)"
       >
         <span class="max-w-[180px] truncate">{{ g.group_name || `#${g.group_id}` }}</span>
-        <span class="text-gray-400 dark:text-gray-500">{{ formatNumber(g.request_count) }}</span>
+        <span class="text-content-subtle">{{ formatNumber(g.request_count) }}</span>
       </button>
     </div>
 
@@ -246,7 +246,7 @@ function downloadChart() {
         @click="emit('selectPlatform', p.platform)"
       >
         <span class="uppercase">{{ p.platform }}</span>
-        <span class="text-gray-400 dark:text-gray-500">{{ formatNumber(p.request_count) }}</span>
+        <span class="text-content-subtle">{{ formatNumber(p.request_count) }}</span>
       </button>
     </div>
 

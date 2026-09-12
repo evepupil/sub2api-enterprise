@@ -32,7 +32,7 @@
           {{ t('modelPlaza.badges.subscription') }}
         </span>
       </div>
-      <p v-if="group.description" class="mt-2 text-sm text-gray-500 dark:text-dark-400">
+      <p v-if="group.description" class="mt-2 text-sm text-content-muted">
         {{ group.description }}
       </p>
       <p
@@ -44,7 +44,7 @@
       </p>
       <p
         v-if="longContextNote"
-        class="mt-1.5 flex items-center gap-1 text-xs text-gray-500 dark:text-dark-400"
+        class="mt-1.5 flex items-center gap-1 text-xs text-content-muted"
       >
         <Icon name="infoCircle" size="xs" class="h-3 w-3" />
         {{ longContextNote }}
@@ -64,7 +64,7 @@
         :peak-window="peakWindow"
         :peak-rate-multiplier="group.peak_rate_multiplier"
       />
-      <p v-else class="px-5 py-4 text-center text-sm text-gray-400 dark:text-dark-500">
+      <p v-else class="px-5 py-4 text-center text-sm text-content-subtle">
         {{ t('modelPlaza.detail.noModels') }}
       </p>
     </div>
