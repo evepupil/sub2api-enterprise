@@ -14,16 +14,15 @@
           </span>
         </div>
 
-        <button
-          v-if="organization?.is_owner"
-          type="button"
-          class="btn btn-primary shrink-0"
-          :disabled="creating"
-          @click="createInvitation"
-        >
-          <Icon :name="creating ? 'refresh' : 'plus'" size="sm" :class="{ 'animate-spin': creating }" />
-          <span>{{ creating ? t('organization.creatingInvitation') : t('organization.createInvitation') }}</span>
-        </button>
+        <div v-if="organization?.is_owner" class="flex shrink-0 items-center gap-2">
+          <div class="w-36">
+            <Select v-model="invitationValidity" :options="validityOptions" />
+          </div>
+          <button type="button" class="btn btn-primary" :disabled="creating" @click="createInvitation">
+            <Icon :name="creating ? 'refresh' : 'plus'" size="sm" :class="{ 'animate-spin': creating }" />
+            <span>{{ creating ? t('organization.creatingInvitation') : t('organization.createInvitation') }}</span>
+          </button>
+        </div>
       </div>
 
       <div v-if="loading" class="flex justify-center py-16" aria-live="polite">
@@ -235,17 +234,29 @@
                 </div>
               </div>
 
-              <div class="flex shrink-0 items-center gap-2">
+              <div class="flex shrink-0 flex-wrap items-center gap-2">
                 <span :class="statusClass(invitation)" class="rounded-full px-2.5 py-1 text-xs font-medium">
                   {{ t(`organization.status.${effectiveStatus(invitation)}`) }}
                 </span>
+                <button type="button" class="btn btn-secondary btn-sm" @click="copyInvitation(invitation.code)">
+                  {{ t('organization.copyCode') }}
+                </button>
                 <button
                   type="button"
-                  class="btn btn-secondary btn-sm h-9 w-9 p-0"
-                  :title="t('common.copy')"
-                  @click="copyInvitation(invitation.code)"
+                  class="btn btn-secondary btn-sm"
+                  :title="inviteLink(invitation.code)"
+                  @click="copyInviteLink(invitation.code)"
                 >
-                  <Icon name="copy" size="sm" />
+                  {{ t('organization.copyLink') }}
+                </button>
+                <button
+                  v-if="effectiveStatus(invitation) === 'unused'"
+                  type="button"
+                  class="btn btn-secondary btn-sm"
+                  :disabled="disablingId === invitation.id"
+                  @click="disableInvitation(invitation)"
+                >
+                  {{ t('organization.disableInvitation') }}
                 </button>
               </div>
             </li>
@@ -333,7 +344,7 @@ import Icon from '@/components/icons/Icon.vue'
 import BaseDialog from '@/components/common/BaseDialog.vue'
 import Pagination from '@/components/common/Pagination.vue'
 import SearchInput from '@/components/common/SearchInput.vue'
-import Select from '@/components/common/Select.vue'
+import Select, { type SelectOption } from '@/components/common/Select.vue'
 import organizationAPI from '@/api/organization'
 import type { OrganizationInvitation, OrganizationMember, OrganizationSummary } from '@/types'
 import { useAppStore } from '@/stores/app'
@@ -350,6 +361,15 @@ const organization = ref<OrganizationSummary | null>(null)
 const invitations = ref<OrganizationInvitation[]>([])
 const loading = ref(true)
 const creating = ref(false)
+const disablingId = ref<number | null>(null)
+// 邀请码限时可重复使用，创建时选有效期；长期有效就不带过期时间。
+const invitationValidity = ref<number>(7)
+const validityOptions = computed<SelectOption[]>(() => [
+  { value: 1, label: t('organization.validity1Day') },
+  { value: 7, label: t('organization.validity7Days') },
+  { value: 30, label: t('organization.validity30Days') },
+  { value: 0, label: t('organization.validityForever') },
+])
 const loadError = ref('')
 
 const members = ref<OrganizationMember[]>([])
@@ -599,11 +619,35 @@ async function submitSplit(): Promise<void> {
   }
 }
 
+function inviteLink(code: string): string {
+  const base = typeof window === 'undefined' ? '' : window.location.origin
+  return `${base}/register?invitation_code=${encodeURIComponent(code)}`
+}
+
+async function copyInviteLink(code: string): Promise<void> {
+  await copyToClipboard(inviteLink(code), t('organization.linkCopied'))
+}
+
+async function disableInvitation(invitation: OrganizationInvitation): Promise<void> {
+  disablingId.value = invitation.id
+  try {
+    await organizationAPI.disableOrganizationInvitation(invitation.id)
+    invitation.status = 'disabled'
+  } catch (error) {
+    appStore.showError(extractApiErrorMessage(error, t('organization.disableFailed')))
+  } finally {
+    disablingId.value = null
+  }
+}
+
 async function createInvitation(): Promise<void> {
   if (creating.value) return
   creating.value = true
   try {
-    const invitation = await organizationAPI.createOrganizationInvitation()
+    const days = invitationValidity.value
+    const expiresAt =
+      days > 0 ? new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString() : undefined
+    const invitation = await organizationAPI.createOrganizationInvitation(expiresAt)
     invitations.value = [invitation, ...invitations.value]
   } catch (error) {
     appStore.showError(extractApiErrorMessage(error, t('organization.createFailed')))

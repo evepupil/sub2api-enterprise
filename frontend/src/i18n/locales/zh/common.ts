@@ -459,6 +459,15 @@ export default {
   },
 
   organization: {
+    copyCode: '复制邀请码',
+    copyLink: '复制邀请链接',
+    linkCopied: '邀请链接已复制',
+    disableInvitation: '停用',
+    disableFailed: '停用失败',
+    validity1Day: '1 天内有效',
+    validity7Days: '7 天内有效',
+    validity30Days: '30 天内有效',
+    validityForever: '长期有效',
     title: '组织',
     owner: '组织管理员',
     invitations: '组织邀请码',
@@ -491,7 +500,7 @@ export default {
     memberLoadFailed: '加载成员失败',
     memberUpdateFailed: '操作失败',
     status: {
-      unused: '未使用',
+      unused: '有效',
       used: '已使用',
       disabled: '已停用',
       expired: '已过期'

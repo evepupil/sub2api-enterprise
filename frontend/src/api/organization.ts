@@ -23,6 +23,10 @@ export async function createOrganizationInvitation(expiresAt?: string): Promise<
   return data
 }
 
+export async function disableOrganizationInvitation(id: number): Promise<void> {
+  await apiClient.delete(`/organization/invitations/${id}`)
+}
+
 export async function listOrganizationMembers(params: {
   page: number
   page_size: number
@@ -81,6 +85,7 @@ export default {
   getCurrentOrganization,
   listOrganizationInvitations,
   createOrganizationInvitation,
+  disableOrganizationInvitation,
   listOrganizationMembers,
   updateOrganizationMemberStatus,
   updateOrganizationMemberSpendingLimit,

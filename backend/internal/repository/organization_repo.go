@@ -111,6 +111,25 @@ func (r *organizationRepository) ListInvitations(ctx context.Context, organizati
 	return redeemCodeEntitiesToService(entities), nil
 }
 
+// DisableInvitation 把本组织的邀请码置为停用，作废后有效期内也不能再用。
+func (r *organizationRepository) DisableInvitation(ctx context.Context, organizationID int64, invitationID int64) error {
+	affected, err := clientFromContext(ctx, r.client).RedeemCode.Update().
+		Where(
+			redeemcode.IDEQ(invitationID),
+			redeemcode.OrganizationIDEQ(organizationID),
+			redeemcode.TypeEQ(service.RedeemTypeInvitation),
+		).
+		SetStatus(service.StatusDisabled).
+		Save(ctx)
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return service.ErrInvitationCodeInvalid
+	}
+	return nil
+}
+
 func organizationEntityToService(entity *dbent.Organization) *service.Organization {
 	if entity == nil {
 		return nil

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/Wei-Shaw/sub2api/internal/handler/dto"
@@ -78,6 +79,25 @@ func (h *OrganizationHandler) ListInvitations(c *gin.Context) {
 		items = append(items, organizationInvitationFromService(&invitations[i]))
 	}
 	response.Success(c, items)
+}
+
+// DisableInvitation 作废一个组织邀请码。
+// DELETE /api/v1/organization/invitations/:id
+func (h *OrganizationHandler) DisableInvitation(c *gin.Context) {
+	userID, ok := organizationUserID(c)
+	if !ok {
+		return
+	}
+	invitationID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil || invitationID <= 0 {
+		response.BadRequest(c, "Invalid invitation id")
+		return
+	}
+	if err := h.service.DisableInvitation(c.Request.Context(), userID, invitationID); err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+	response.Success(c, gin.H{"id": invitationID, "status": service.StatusDisabled})
 }
 
 func organizationUserID(c *gin.Context) (int64, bool) {

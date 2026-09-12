@@ -83,6 +83,17 @@ func (r *organizationRepoStub) ListInvitations(_ context.Context, organizationID
 	return result, nil
 }
 
+func (r *organizationRepoStub) DisableInvitation(_ context.Context, organizationID int64, invitationID int64) error {
+	for i := range r.invitations {
+		invitation := &r.invitations[i]
+		if invitation.ID == invitationID && invitation.OrganizationID != nil && *invitation.OrganizationID == organizationID {
+			invitation.Status = StatusDisabled
+			return nil
+		}
+	}
+	return ErrInvitationCodeInvalid
+}
+
 type organizationRedeemRepoStub struct {
 	RedeemCodeRepository
 	codes  map[string]*RedeemCode
@@ -102,6 +113,16 @@ func newOrganizationRedeemRepoStub(codes ...*RedeemCode) *organizationRedeemRepo
 		repo.codes[copyValue.Code] = &copyValue
 	}
 	return repo
+}
+
+func (r *organizationRedeemRepoStub) GetByID(_ context.Context, id int64) (*RedeemCode, error) {
+	for _, code := range r.codes {
+		if code.ID == id {
+			copyValue := *code
+			return &copyValue, nil
+		}
+	}
+	return nil, ErrRedeemCodeNotFound
 }
 
 func (r *organizationRedeemRepoStub) GetByCode(_ context.Context, code string) (*RedeemCode, error) {
@@ -257,9 +278,69 @@ func TestOrganizationServiceCompleteJoinRegistration(t *testing.T) {
 	membership, err := organizationRepo.GetMembershipByUserID(ctx, 101)
 	require.NoError(t, err)
 	require.Equal(t, organization.ID, membership.OrganizationID)
-	claimed, err := redeemRepo.GetByCode(ctx, "ORG")
+
+	// 组织邀请码是限时可重复使用的：有效期内不消耗，后面的人还能用同一个码进来。
+	reused, err := redeemRepo.GetByCode(ctx, "ORG")
+	require.NoError(t, err)
+	require.Equal(t, StatusUnused, reused.Status)
+	require.True(t, reused.CanUse())
+
+	secondIntent, err := service.ResolveRegistrationIntent(ctx, "", "ORG", false)
+	require.NoError(t, err)
+	secondSummary, err := service.CompleteRegistration(ctx, 102, secondIntent)
+	require.NoError(t, err)
+	require.Equal(t, organization.ID, secondSummary.ID)
+	require.False(t, secondSummary.IsOwner)
+}
+
+// 平台邀请码仍然是一次性的，不受组织邀请码改动影响。
+func TestPlatformInvitationStaysSingleUse(t *testing.T) {
+	ctx := context.Background()
+	organizationRepo := newOrganizationRepoStub()
+	redeemRepo := newOrganizationRedeemRepoStub(
+		&RedeemCode{ID: 31, Code: "PLAT", Type: RedeemTypeInvitation, Status: StatusUnused},
+	)
+	service := NewOrganizationService(organizationRepo, redeemRepo)
+
+	intent, err := service.ResolveRegistrationIntent(ctx, "", "PLAT", true)
+	require.NoError(t, err)
+	_, err = service.CompleteRegistration(ctx, 201, intent)
+	require.NoError(t, err)
+
+	claimed, err := redeemRepo.GetByCode(ctx, "PLAT")
 	require.NoError(t, err)
 	require.Equal(t, StatusUsed, claimed.Status)
+}
+
+// 邀请码泄露时要能立刻作废，作废后有效期内也用不了。
+func TestOrganizationInvitationCanBeDisabled(t *testing.T) {
+	ctx := context.Background()
+	organizationRepo := newOrganizationRepoStub()
+	organization := &Organization{Name: "Acme", OwnerUserID: 100}
+	require.NoError(t, organizationRepo.Create(ctx, organization))
+	organizationID := organization.ID
+	invitation := RedeemCode{
+		ID:             41,
+		Code:           "ORG-DISABLE",
+		Type:           RedeemTypeInvitation,
+		Status:         StatusUnused,
+		OrganizationID: &organizationID,
+	}
+	organizationRepo.invitations = append(organizationRepo.invitations, invitation)
+	redeemRepo := newOrganizationRedeemRepoStub(&invitation)
+	require.NoError(t, organizationRepo.CreateMember(ctx, &OrganizationMembership{
+		OrganizationID: organization.ID,
+		UserID:         100,
+	}))
+	service := NewOrganizationService(organizationRepo, redeemRepo)
+
+	require.ErrorIs(t, service.DisableInvitation(ctx, 101, invitation.ID), ErrOrganizationOwnerRequired,
+		"不是组织创建者不能作废邀请码")
+	require.NoError(t, service.DisableInvitation(ctx, 100, invitation.ID))
+
+	invitations, err := organizationRepo.ListInvitations(ctx, organization.ID, 10)
+	require.NoError(t, err)
+	require.Equal(t, StatusDisabled, invitations[0].Status)
 }
 
 func TestOrganizationServiceCreateInvitationRequiresOwner(t *testing.T) {

@@ -329,7 +329,9 @@ func (h *UsageHandler) List(c *gin.Context) {
 
 	out := make([]dto.UsageLog, 0, len(records))
 	for i := range records {
-		out = append(out, *dto.UsageLogFromService(&records[i]))
+		converted := dto.UsageLogFromService(&records[i])
+		trimUsageLogUser(converted)
+		out = append(out, *converted)
 	}
 	response.Paginated(c, out, result.Total, page, pageSize)
 }
@@ -481,7 +483,24 @@ func (h *UsageHandler) GetByID(c *gin.Context) {
 		}
 	}
 
-	response.Success(c, dto.UsageLogFromService(record))
+	converted := dto.UsageLogFromService(record)
+	trimUsageLogUser(converted)
+	response.Success(c, converted)
+}
+
+// trimUsageLogUser 只保留追溯这条记录属于谁所需的信息。
+//
+// 组织管理员能看到全组织的记录，账号资料里的余额、通知设置等与追溯无关，
+// 不应该经由用量接口暴露给组织管理员。
+func trimUsageLogUser(log *dto.UsageLog) {
+	if log == nil || log.User == nil {
+		return
+	}
+	log.User = &dto.User{
+		ID:       log.User.ID,
+		Email:    log.User.Email,
+		Username: log.User.Username,
+	}
 }
 
 // OrganizationMembers 返回组织成员分布，只有组织创建者能调用。

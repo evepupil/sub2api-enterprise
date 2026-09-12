@@ -15,12 +15,6 @@
               />
             </div>
             <div v-if="isOrganizationOwner" class="flex items-center gap-2">
-              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('usage.scope') }}:</span>
-              <div class="w-32">
-                <Select v-model="usageScope" :options="scopeOptions" @change="onScopeChange" />
-              </div>
-            </div>
-            <div v-if="isOrganizationOwner && usageScope === 'organization'" class="flex items-center gap-2">
               <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('usage.member') }}:</span>
               <div class="w-56">
                 <Select v-model="memberUserId" :options="memberOptions" searchable @change="onMemberChange" />
@@ -77,48 +71,12 @@
           <TokenUsageTrend :trend-data="trendData" :loading="chartsLoading" />
         </div>
 
-        <div v-if="isOrganizationOwner && usageScope === 'organization'" class="card p-6">
-          <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ t('usage.memberDistribution') }}</h3>
-          <div v-if="memberUsageLoading" class="flex justify-center py-10">
-            <div class="h-6 w-6 animate-spin rounded-full border-2 border-primary-500 border-t-transparent"></div>
-          </div>
-          <div
-            v-else-if="memberUsage.length === 0"
-            class="py-10 text-center text-sm text-gray-500 dark:text-dark-400"
-          >
-            {{ t('usage.noRecords') }}
-          </div>
-          <div v-else class="mt-4 overflow-x-auto">
-            <table class="w-full min-w-[560px] text-left text-sm">
-              <thead>
-                <tr class="border-b border-gray-200 text-gray-500 dark:border-dark-700 dark:text-dark-400">
-                  <th class="px-3 py-2 font-medium">{{ t('common.email') }}</th>
-                  <th class="px-3 py-2 text-right font-medium">{{ t('usage.memberRequests') }}</th>
-                  <th class="px-3 py-2 text-right font-medium">{{ t('usage.memberTokens') }}</th>
-                  <th class="px-3 py-2 text-right font-medium">{{ t('usage.memberCost') }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="row in memberUsage"
-                  :key="row.user_id"
-                  class="border-b border-gray-100 last:border-b-0 dark:border-dark-800"
-                >
-                  <td class="px-3 py-2.5">
-                    <div class="text-gray-900 dark:text-white">{{ row.email }}</div>
-                    <div v-if="row.username" class="text-xs text-gray-500 dark:text-dark-400">
-                      {{ row.username }}
-                    </div>
-                  </td>
-                  <td class="px-3 py-2.5 text-right text-gray-700 dark:text-gray-300">{{ row.requests }}</td>
-                  <td class="px-3 py-2.5 text-right text-gray-700 dark:text-gray-300">{{ row.total_tokens }}</td>
-                  <td class="px-3 py-2.5 text-right text-gray-900 dark:text-white">
-                    {{ formatCurrency(row.actual_cost) }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+        <div v-if="isOrganizationOwner" class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <MemberDistributionChart
+            v-model:metric="memberDistributionMetric"
+            :members="memberUsage"
+            :loading="memberUsageLoading"
+          />
         </div>
       </div>
 
@@ -240,6 +198,7 @@
           :server-side-sort="true"
           :show-account-billing="false"
           :show-upstream-endpoint="false"
+          :user-clickable="false"
           default-sort-key="created_at"
           default-sort-order="desc"
           @sort="handleSort"
@@ -291,10 +250,11 @@ import ModelDistributionChart from '@/components/charts/ModelDistributionChart.v
 import GroupDistributionChart from '@/components/charts/GroupDistributionChart.vue'
 import EndpointDistributionChart from '@/components/charts/EndpointDistributionChart.vue'
 import TokenUsageTrend from '@/components/charts/TokenUsageTrend.vue'
+import MemberDistributionChart from '@/components/charts/MemberDistributionChart.vue'
 import Icon from '@/components/icons/Icon.vue'
 import UserErrorRequestsTable from '@/components/user/UserErrorRequestsTable.vue'
 import { getPersistedPageSize } from '@/composables/usePersistedPageSize'
-import { formatCurrency, formatReasoningEffort } from '@/utils/format'
+import { formatReasoningEffort } from '@/utils/format'
 import { getBillingModeLabel, getDisplayBillingMode as resolveDisplayBillingMode } from '@/utils/billingMode'
 import { resolveUsageRequestType, requestTypeToLegacyStream } from '@/utils/usageRequestType'
 import type {
@@ -410,18 +370,14 @@ const startDate = ref(defaultRange.start)
 const endDate = ref(defaultRange.end)
 const granularity = ref<'day' | 'hour'>(getGranularityForRange(startDate.value, endDate.value))
 
-// 组织管理员可以把查询范围从「我自己」切到「全组织」，普通成员看不到这个开关。
+// 组织管理员默认就看全组织，想只看某个人（包括自己）用下面的成员筛选。
+// 普通成员和个人用户没有这些入口，页面和以前一样只看自己。
 const isOrganizationOwner = computed(() => authStore.user?.organization?.is_owner === true)
-const usageScope = ref<'self' | 'organization'>('self')
 const memberUserId = ref<number | null>(null)
 const organizationMembers = ref<OrganizationMember[]>([])
 const memberUsage = ref<OrganizationMemberUsageStat[]>([])
 const memberUsageLoading = ref(false)
-
-const scopeOptions = computed<SelectOption[]>(() => [
-  { value: 'self', label: t('usage.scopeSelf') },
-  { value: 'organization', label: t('usage.scopeOrganization') },
-])
+const memberDistributionMetric = ref<DistributionMetric>('tokens')
 
 const memberOptions = computed<SelectOption[]>(() => [
   { value: null, label: t('usage.allMembers') },
@@ -510,9 +466,8 @@ const normalizedFilters = computed<UsageQueryParams>(() => {
     start_date: startDate.value,
     end_date: endDate.value,
     stream: legacyStream === null ? undefined : legacyStream,
-    scope: usageScope.value === 'organization' ? 'organization' : undefined,
-    member_user_id:
-      usageScope.value === 'organization' && memberUserId.value ? memberUserId.value : undefined,
+    scope: isOrganizationOwner.value ? 'organization' : undefined,
+    member_user_id: isOrganizationOwner.value && memberUserId.value ? memberUserId.value : undefined,
   }
 })
 
@@ -641,7 +596,7 @@ const loadOrganizationMembers = async () => {
 }
 
 const loadMemberUsage = async () => {
-  if (usageScope.value !== 'organization') {
+  if (!isOrganizationOwner.value) {
     memberUsage.value = []
     return
   }
@@ -655,13 +610,6 @@ const loadMemberUsage = async () => {
   } finally {
     memberUsageLoading.value = false
   }
-}
-
-const onScopeChange = () => {
-  memberUserId.value = null
-  pagination.page = 1
-  if (usageScope.value === 'organization') void loadOrganizationMembers()
-  refreshData()
 }
 
 const onMemberChange = () => {
@@ -834,6 +782,8 @@ const DEFAULT_HIDDEN_COLUMNS = ['user_agent']
 const HIDDEN_COLUMNS_KEY = 'user-usage-hidden-columns'
 
 const allColumns = computed<Column[]>(() => [
+  // 组织管理员看的是全组织记录，得知道每条记录是谁产生的；个人视角下这一列全是自己，不显示。
+  ...(isOrganizationOwner.value ? [{ key: 'user', label: t('usage.member'), sortable: false }] : []),
   { key: 'api_key', label: t('usage.apiKeyFilter'), sortable: false },
   { key: 'model', label: t('usage.model'), sortable: true },
   { key: 'reasoning_effort', label: t('usage.reasoningEffort'), sortable: false },
@@ -1022,6 +972,7 @@ onMounted(() => {
   loadSavedErrColumns()
   document.addEventListener('click', handleColumnClickOutside)
   void loadFilterOptions()
+  if (isOrganizationOwner.value) void loadOrganizationMembers()
   refreshData()
 })
 

@@ -460,6 +460,15 @@ export default {
   },
 
   organization: {
+    copyCode: 'Copy code',
+    copyLink: 'Copy invite link',
+    linkCopied: 'Invite link copied',
+    disableInvitation: 'Revoke',
+    disableFailed: 'Failed to revoke',
+    validity1Day: 'Valid for 1 day',
+    validity7Days: 'Valid for 7 days',
+    validity30Days: 'Valid for 30 days',
+    validityForever: 'No expiration',
     title: 'Organization',
     owner: 'Organization owner',
     invitations: 'Organization invitations',
@@ -492,7 +501,7 @@ export default {
     memberLoadFailed: 'Failed to load members',
     memberUpdateFailed: 'Action failed',
     status: {
-      unused: 'Unused',
+      unused: 'Active',
       used: 'Used',
       disabled: 'Disabled',
       expired: 'Expired'

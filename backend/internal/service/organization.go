@@ -81,6 +81,8 @@ type OrganizationRepository interface {
 	GetByID(ctx context.Context, id int64) (*Organization, error)
 	GetMembershipByUserID(ctx context.Context, userID int64) (*OrganizationMembership, error)
 	ListInvitations(ctx context.Context, organizationID int64, limit int) ([]RedeemCode, error)
+	// DisableInvitation 把组织自己的邀请码置为停用。
+	DisableInvitation(ctx context.Context, organizationID int64, invitationID int64) error
 }
 
 type OrganizationService struct {
@@ -211,7 +213,9 @@ func (s *OrganizationService) CompleteRegistration(
 		return nil, fmt.Errorf("unknown organization registration kind %q", intent.Kind)
 	}
 
-	if intent.Invitation != nil {
+	// 组织邀请码是限时可重复使用的，有效期内不消耗，多个人可以用同一个码进来；
+	// 平台邀请码仍然一次性占用。
+	if intent.Invitation != nil && intent.Invitation.OrganizationID == nil {
 		if err := s.redeemRepo.Use(ctx, intent.Invitation.ID, userID); err != nil {
 			return nil, ErrInvitationCodeInvalid
 		}
@@ -294,6 +298,31 @@ func (s *OrganizationService) CreateInvitation(ctx context.Context, ownerUserID 
 		return nil, fmt.Errorf("create organization invitation: %w", err)
 	}
 	return invitation, nil
+}
+
+// DisableInvitation 作废一个组织邀请码。
+//
+// 限时可重复使用的码在有效期内对所有人开放，泄露后需要能立刻作废，所以提供这个入口。
+func (s *OrganizationService) DisableInvitation(ctx context.Context, ownerUserID int64, invitationID int64) error {
+	if s == nil || s.repo == nil || s.redeemRepo == nil {
+		return ErrServiceUnavailable
+	}
+	summary, err := s.GetSummaryByUserID(ctx, ownerUserID)
+	if err != nil {
+		return err
+	}
+	if summary == nil || !summary.IsOwner {
+		return ErrOrganizationOwnerRequired
+	}
+	invitation, err := s.redeemRepo.GetByID(ctx, invitationID)
+	if err != nil || invitation == nil {
+		return ErrInvitationCodeInvalid
+	}
+	// 只能作废本组织的邀请码，客户端传别人的标识一律拒绝。
+	if invitation.OrganizationID == nil || *invitation.OrganizationID != summary.ID {
+		return ErrInvitationCodeInvalid
+	}
+	return s.repo.DisableInvitation(ctx, summary.ID, invitationID)
 }
 
 func (s *OrganizationService) ListInvitations(ctx context.Context, ownerUserID int64) ([]RedeemCode, error) {

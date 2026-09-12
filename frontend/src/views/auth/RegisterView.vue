@@ -556,6 +556,16 @@ watch(validationToastMessage, (value, previousValue) => {
   }
 })
 
+// 邀请链接把邀请码写在地址里，打开即自动填好并校验，不用手抄。
+function syncInvitationCodeFromQuery(): string {
+  const raw = route.query.invitation_code ?? route.query.invite
+  const code = (Array.isArray(raw) ? raw[0] : raw)?.toString().trim() ?? ''
+  if (code && !formData.invitation_code) {
+    formData.invitation_code = code
+  }
+  return code
+}
+
 function syncAffiliateReferralCode(): string {
   const code = resolveAffiliateReferralCode(route.query.aff, route.query.aff_code)
   if (code) {
@@ -608,6 +618,11 @@ onMounted(async () => {
       }
     }
     syncAffiliateReferralCode()
+
+    const invitationParam = syncInvitationCodeFromQuery()
+    if (invitationParam) {
+      await validateInvitationCodeDebounced(invitationParam)
+    }
   } catch (error) {
     console.error('Failed to load public settings:', error)
     loginAgreementEnabled.value = false

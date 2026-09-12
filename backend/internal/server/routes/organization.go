@@ -16,6 +16,7 @@ func registerOrganizationRoutes(authenticated *gin.RouterGroup, h *handler.Handl
 		organization.GET("", h.Organization.GetCurrent)
 		organization.GET("/invitations", h.Organization.ListInvitations)
 		organization.POST("/invitations", h.Organization.CreateInvitation)
+		organization.DELETE("/invitations/:id", h.Organization.DisableInvitation)
 
 		organization.GET("/members", h.OrganizationMember.List)
 		organization.PUT("/members/:user_id/status", h.OrganizationMember.UpdateStatus)
