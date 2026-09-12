@@ -34,6 +34,7 @@
                 <th class="px-4 py-2 font-medium">{{ t('admin.organizations.name') }}</th>
                 <th class="px-4 py-2 font-medium">{{ t('admin.organizations.owner') }}</th>
                 <th class="px-4 py-2 text-right font-medium">{{ t('admin.organizations.memberCount') }}</th>
+                <th class="px-4 py-2 font-medium">{{ t('common.status') }}</th>
                 <th class="px-4 py-2 font-medium">{{ t('admin.organizations.groupScope') }}</th>
                 <th class="px-4 py-2 font-medium">{{ t('admin.organizations.createdAt') }}</th>
                 <th class="px-4 py-2 text-right font-medium">{{ t('common.actions') }}</th>
@@ -55,6 +56,18 @@
                 <td class="px-4 py-3 text-right text-gray-700 dark:text-gray-300">
                   {{ organization.member_count }}
                 </td>
+                <td class="px-4 py-3">
+                  <span
+                    class="rounded-full px-2.5 py-1 text-xs font-medium"
+                    :class="
+                      organization.status === 'active'
+                        ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                        : 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
+                    "
+                  >
+                    {{ organization.status === 'active' ? t('common.enabled') : t('common.disabled') }}
+                  </span>
+                </td>
                 <td class="px-4 py-3 text-gray-700 dark:text-gray-300">
                   {{ describeScope(organization) }}
                 </td>
@@ -71,6 +84,14 @@
                     </RouterLink>
                     <button type="button" class="btn btn-secondary btn-sm" @click="openScopeDialog(organization)">
                       {{ t('admin.organizations.configureGroups') }}
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-secondary btn-sm"
+                      :disabled="statusUpdatingId === organization.id"
+                      @click="toggleStatus(organization)"
+                    >
+                      {{ organization.status === 'active' ? t('admin.organizations.disable') : t('admin.organizations.enable') }}
                     </button>
                   </div>
                 </td>
@@ -166,6 +187,7 @@ const pageSize = ref(20)
 const search = ref('')
 const loading = ref(true)
 
+const statusUpdatingId = ref<number | null>(null)
 const groups = ref<Group[]>([])
 const groupsLoading = ref(false)
 
@@ -229,6 +251,25 @@ function handlePageSizeChange(value: number): void {
   pageSize.value = value
   page.value = 1
   void loadOrganizations()
+}
+
+// 停用只作用在组织这一层：成员账号状态不动，恢复后原本被单独停用的成员仍然是停用的。
+async function toggleStatus(organization: AdminOrganization): Promise<void> {
+  statusUpdatingId.value = organization.id
+  try {
+    const updated = await adminAPI.organizations.updateStatus(
+      organization.id,
+      organization.status === 'active' ? 'disabled' : 'active'
+    )
+    const index = organizations.value.findIndex((item) => item.id === updated.id)
+    if (index >= 0) {
+      organizations.value.splice(index, 1, updated)
+    }
+  } catch (error) {
+    appStore.showError(extractApiErrorMessage(error, t('admin.organizations.statusFailed')))
+  } finally {
+    statusUpdatingId.value = null
+  }
 }
 
 function openScopeDialog(organization: AdminOrganization): void {

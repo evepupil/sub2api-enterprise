@@ -42,8 +42,18 @@ export async function updateGroups(
   return data
 }
 
+// 停用后该组织全体成员（含组织管理员）的调用都会被拒，成员账号状态不受影响。
+export async function updateStatus(
+  id: number,
+  status: 'active' | 'disabled'
+): Promise<AdminOrganization> {
+  const { data } = await apiClient.put<AdminOrganization>(`/admin/organizations/${id}/status`, { status })
+  return data
+}
+
 export default {
   list,
   get,
-  updateGroups
+  updateGroups,
+  updateStatus
 }

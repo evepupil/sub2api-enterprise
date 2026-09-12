@@ -12,11 +12,12 @@ import (
 )
 
 type organizationGroupRepoStub struct {
-	scopeByUser map[int64]*OrganizationMemberScope
-	scopes      map[int64]*OrganizationMemberScope
-	memberIDs   map[int64][]int64
-	writes      []OrganizationMemberScope
-	err         error
+	scopeByUser  map[int64]*OrganizationMemberScope
+	scopes       map[int64]*OrganizationMemberScope
+	memberIDs    map[int64][]int64
+	writes       []OrganizationMemberScope
+	statusWrites []string
+	err          error
 }
 
 func (r *organizationGroupRepoStub) GetMemberScopeByUserID(_ context.Context, userID int64) (*OrganizationMemberScope, error) {
@@ -56,6 +57,16 @@ func (r *organizationGroupRepoStub) SetScope(_ context.Context, organizationID i
 
 func (r *organizationGroupRepoStub) ListMemberUserIDs(_ context.Context, organizationID int64) ([]int64, error) {
 	return r.memberIDs[organizationID], nil
+}
+
+func (r *organizationGroupRepoStub) SetStatus(_ context.Context, organizationID int64, status string) error {
+	scope, ok := r.scopes[organizationID]
+	if !ok {
+		return ErrOrganizationNotFound
+	}
+	scope.Disabled = status == StatusDisabled
+	r.statusWrites = append(r.statusWrites, status)
+	return nil
 }
 
 type adminOrganizationRepoStub struct {
@@ -120,6 +131,7 @@ func TestApplyScopeToUserReplacesPersonalRules(t *testing.T) {
 	require.EqualValues(t, 5, *user.OrganizationID)
 	require.True(t, user.RestrictPublicGroups)
 	require.Equal(t, []int64{11, 12}, user.AllowedGroups)
+	require.False(t, user.OrganizationDisabled)
 }
 
 func TestApplyScopeToUserFailsClosed(t *testing.T) {
@@ -154,6 +166,48 @@ func TestMemberUserIDsOfOwnedOrganization(t *testing.T) {
 	members, err = service.MemberUserIDsOfOwnedOrganization(ctx, 99)
 	require.NoError(t, err)
 	require.Empty(t, members, "个人用户没有组织")
+}
+
+// 组织停用是整体停服：普通成员和组织创建者都拒，个人用户不受影响。
+func TestCheckOrganizationEnabled(t *testing.T) {
+	organizationID := int64(5)
+
+	require.NoError(t, checkOrganizationEnabled(nil))
+	require.NoError(t, checkOrganizationEnabled(&User{ID: 9}), "个人用户不进入组织判断")
+	require.NoError(t, checkOrganizationEnabled(&User{ID: 2, OrganizationID: &organizationID}))
+
+	member := &User{ID: 2, OrganizationID: &organizationID, OrganizationDisabled: true}
+	require.ErrorIs(t, checkOrganizationEnabled(member), ErrOrganizationDisabled)
+
+	owner := &User{ID: 1, OrganizationID: &organizationID, OrganizationDisabled: true}
+	require.ErrorIs(t, checkOrganizationEnabled(owner), ErrOrganizationDisabled, "组织创建者本人也停")
+}
+
+// 组织停用属于权限，简易运行模式下同样拦截。
+func TestCheckBillingEligibilityRejectsDisabledOrganization(t *testing.T) {
+	billing := &BillingCacheService{cfg: &config.Config{RunMode: config.RunModeSimple}}
+	organizationID := int64(5)
+	member := &User{ID: 2, OrganizationID: &organizationID, OrganizationDisabled: true}
+
+	err := billing.CheckBillingEligibility(context.Background(), member, nil, &Group{ID: 11}, nil, "")
+	require.ErrorIs(t, err, ErrOrganizationDisabled)
+}
+
+func TestAdminOrganizationUpdateStatus(t *testing.T) {
+	service, groups, authCache := newAdminOrganizationFixture()
+	ctx := context.Background()
+
+	_, err := service.UpdateStatus(ctx, 5, "paused")
+	require.ErrorIs(t, err, ErrOrganizationStatusInvalid)
+	require.Empty(t, groups.statusWrites)
+
+	_, err = service.UpdateStatus(ctx, 404, StatusDisabled)
+	require.ErrorIs(t, err, ErrOrganizationNotFound)
+
+	_, err = service.UpdateStatus(ctx, 5, StatusDisabled)
+	require.NoError(t, err)
+	require.Equal(t, []string{StatusDisabled}, groups.statusWrites)
+	require.Equal(t, []int64{1, 2, 3}, authCache.invalidatedUserIDs, "停用后立刻清掉全体成员的鉴权缓存")
 }
 
 func TestCheckOrganizationGroupAccess(t *testing.T) {

@@ -138,6 +138,7 @@ func organizationEntityToService(entity *dbent.Organization) *service.Organizati
 		ID:          entity.ID,
 		Name:        entity.Name,
 		OwnerUserID: entity.OwnerUserID,
+		Status:      entity.Status,
 		CreatedAt:   entity.CreatedAt,
 		UpdatedAt:   entity.UpdatedAt,
 	}

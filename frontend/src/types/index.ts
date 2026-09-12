@@ -106,6 +106,7 @@ export interface OrganizationSummary {
   id: number
   name: string
   is_owner: boolean
+  status: 'active' | 'disabled'
   created_at: string
 }
 
@@ -134,6 +135,8 @@ export interface AdminOrganization {
   owner_email: string
   owner_username: string
   member_count: number
+  // status 为 disabled 时整个组织停止服务，全体成员的调用都会被拒。
+  status: 'active' | 'disabled'
   restrict_public_groups: boolean
   allowed_group_ids: number[]
   created_at: string

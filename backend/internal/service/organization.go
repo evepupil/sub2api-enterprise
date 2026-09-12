@@ -48,8 +48,14 @@ type Organization struct {
 	ID          int64
 	Name        string
 	OwnerUserID int64
+	Status      string
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
+}
+
+// IsDisabled 表示整个组织已停止服务。
+func (o *Organization) IsDisabled() bool {
+	return o != nil && o.Status == StatusDisabled
 }
 
 type OrganizationMembership struct {
@@ -65,6 +71,7 @@ type OrganizationSummary struct {
 	ID        int64
 	Name      string
 	IsOwner   bool
+	Status    string
 	CreatedAt time.Time
 }
 
@@ -134,6 +141,10 @@ func (s *OrganizationService) ResolveRegistrationIntent(
 				return nil, ErrInvitationCodeInvalid
 			}
 			return nil, err
+		}
+		// 组织被停用期间不能再拉新人进来：进来也调不通，还会堆出一批没用的账号。
+		if organization.IsDisabled() {
+			return nil, ErrOrganizationDisabled
 		}
 		return &OrganizationRegistrationIntent{
 			Kind:         OrganizationRegistrationJoin,
@@ -228,6 +239,7 @@ func (s *OrganizationService) CompleteRegistration(
 		ID:        organization.ID,
 		Name:      organization.Name,
 		IsOwner:   organization.OwnerUserID == userID,
+		Status:    organization.Status,
 		CreatedAt: organization.CreatedAt,
 	}, nil
 }
@@ -251,6 +263,7 @@ func (s *OrganizationService) GetSummaryByUserID(ctx context.Context, userID int
 		ID:        organization.ID,
 		Name:      organization.Name,
 		IsOwner:   organization.OwnerUserID == userID,
+		Status:    organization.Status,
 		CreatedAt: organization.CreatedAt,
 	}, nil
 }

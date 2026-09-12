@@ -234,6 +234,14 @@ func apiKeyAuthWithSubscription(apiKeyService *service.APIKeyService, subscripti
 				return
 			}
 
+			// 组织被平台停用时整体停服：全体成员（含组织创建者）一律拒绝，
+			// 与成员账号自身的状态互相独立。
+			if apiKey.User != nil && apiKey.User.OrganizationDisabled {
+				AbortWithError(c, 403, "ORGANIZATION_DISABLED",
+					"Your organization has been suspended, contact the platform administrator")
+				return
+			}
+
 			// 订阅模式：验证订阅限额
 			if subscription != nil {
 				needsMaintenance, validateErr := subscriptionService.ValidateAndCheckLimits(subscription, apiKey.Group)

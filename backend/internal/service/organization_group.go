@@ -12,6 +12,18 @@ var ErrOrganizationGroupInvalid = infraerrors.BadRequest(
 	"one or more groups do not exist",
 )
 
+// ErrOrganizationStatusInvalid 表示组织状态取值非法。
+var ErrOrganizationStatusInvalid = infraerrors.BadRequest(
+	"ORGANIZATION_STATUS_INVALID",
+	"organization status must be active or disabled",
+)
+
+// ErrOrganizationDisabled 表示所属组织已被平台停用。
+var ErrOrganizationDisabled = infraerrors.Forbidden(
+	"ORGANIZATION_DISABLED",
+	"your organization has been suspended, contact the platform administrator",
+)
+
 // ErrOrganizationGroupForbidden 用于调用前的拦截：密钥绑定的分组已经不在组织范围内。
 var ErrOrganizationGroupForbidden = infraerrors.Forbidden(
 	"ORGANIZATION_GROUP_FORBIDDEN",
@@ -39,6 +51,8 @@ type OrganizationMemberScope struct {
 	SpendingLimit        *float64
 	// OwnerBalance 是组织付款账号当前的余额，供鉴权层的余额闸使用。
 	OwnerBalance float64
+	// Disabled 为 true 表示整个组织已被平台停用，全体成员的调用都要拒绝。
+	Disabled bool
 }
 
 type OrganizationGroupRepository interface {
@@ -48,6 +62,8 @@ type OrganizationGroupRepository interface {
 	// SetScope 覆盖写入组织的分组范围，开关和分组清单一起生效。
 	SetScope(ctx context.Context, organizationID int64, restrictPublicGroups bool, groupIDs []int64) error
 	ListMemberUserIDs(ctx context.Context, organizationID int64) ([]int64, error)
+	// SetStatus 启用或停用整个组织。
+	SetStatus(ctx context.Context, organizationID int64, status string) error
 }
 
 // OrganizationGroupScopeResolver 把组织的分组范围套到账号上，供密钥服务和鉴权快照使用。
@@ -89,6 +105,7 @@ func (s *OrganizationGroupService) ApplyScopeToUser(ctx context.Context, user *U
 	}
 	organizationID := scope.OrganizationID
 	user.OrganizationID = &organizationID
+	user.OrganizationDisabled = scope.Disabled
 	user.RestrictPublicGroups = scope.RestrictPublicGroups
 	user.AllowedGroups = append([]int64(nil), scope.AllowedGroupIDs...)
 	// 组织创建者花自己的钱，也不受成员消费上限约束。
@@ -136,6 +153,15 @@ func applyOrganizationGroupScope(ctx context.Context, resolver OrganizationGroup
 		return nil
 	}
 	return resolver.ApplyScopeToUser(ctx, user)
+}
+
+// checkOrganizationEnabled 在调用前确认所属组织没有被平台停用。
+// 组织停用是整体停服，组织创建者本人的调用同样拒绝；个人用户不进入这条分支。
+func checkOrganizationEnabled(user *User) error {
+	if user == nil || user.OrganizationID == nil || !user.OrganizationDisabled {
+		return nil
+	}
+	return ErrOrganizationDisabled
 }
 
 // checkOrganizationGroupAccess 在调用前重新确认这次用的分组仍在组织范围内。

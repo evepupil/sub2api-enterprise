@@ -459,6 +459,7 @@ export default {
   },
 
   organization: {
+    suspended: '组织已被平台停用，成员的调用暂时无法进行，请联系平台管理员。',
     copyCode: '复制邀请码',
     copyLink: '复制邀请链接',
     linkCopied: '邀请链接已复制',

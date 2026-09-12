@@ -460,6 +460,7 @@ export default {
   },
 
   organization: {
+    suspended: 'This organization is suspended by the platform; member requests are rejected until it is resumed.',
     copyCode: 'Copy code',
     copyLink: 'Copy invite link',
     linkCopied: 'Invite link copied',

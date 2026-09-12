@@ -28,6 +28,8 @@ type Organization struct {
 	OwnerUserID int64 `json:"owner_user_id,omitempty"`
 	// RestrictPublicGroups holds the value of the "restrict_public_groups" field.
 	RestrictPublicGroups bool `json:"restrict_public_groups,omitempty"`
+	// Status holds the value of the "status" field.
+	Status string `json:"status,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the OrganizationQuery when eager-loading is set.
 	Edges        OrganizationEdges `json:"edges"`
@@ -107,7 +109,7 @@ func (*Organization) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case organization.FieldID, organization.FieldOwnerUserID:
 			values[i] = new(sql.NullInt64)
-		case organization.FieldName:
+		case organization.FieldName, organization.FieldStatus:
 			values[i] = new(sql.NullString)
 		case organization.FieldCreatedAt, organization.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -161,6 +163,12 @@ func (_m *Organization) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field restrict_public_groups", values[i])
 			} else if value.Valid {
 				_m.RestrictPublicGroups = value.Bool
+			}
+		case organization.FieldStatus:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field status", values[i])
+			} else if value.Valid {
+				_m.Status = value.String
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -237,6 +245,9 @@ func (_m *Organization) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("restrict_public_groups=")
 	builder.WriteString(fmt.Sprintf("%v", _m.RestrictPublicGroups))
+	builder.WriteString(", ")
+	builder.WriteString("status=")
+	builder.WriteString(_m.Status)
 	builder.WriteByte(')')
 	return builder.String()
 }

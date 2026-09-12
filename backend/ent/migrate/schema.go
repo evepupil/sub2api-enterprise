@@ -1104,6 +1104,7 @@ var (
 		{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
 		{Name: "name", Type: field.TypeString, Size: 100},
 		{Name: "restrict_public_groups", Type: field.TypeBool, Default: false},
+		{Name: "status", Type: field.TypeString, Size: 20, Default: "active"},
 		{Name: "owner_user_id", Type: field.TypeInt64, Unique: true},
 	}
 	// OrganizationsTable holds the schema information for the "organizations" table.
@@ -1114,7 +1115,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "organizations_users_owned_organization",
-				Columns:    []*schema.Column{OrganizationsColumns[5]},
+				Columns:    []*schema.Column{OrganizationsColumns[6]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},

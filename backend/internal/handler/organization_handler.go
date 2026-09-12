@@ -117,6 +117,7 @@ func organizationSummaryDTO(summary *service.OrganizationSummary) *dto.Organizat
 		ID:        summary.ID,
 		Name:      summary.Name,
 		IsOwner:   summary.IsOwner,
+		Status:    summary.Status,
 		CreatedAt: summary.CreatedAt,
 	}
 }

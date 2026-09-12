@@ -29655,6 +29655,7 @@ type OrganizationMutation struct {
 	updated_at             *time.Time
 	name                   *string
 	restrict_public_groups *bool
+	status                 *string
 	clearedFields          map[string]struct{}
 	owner                  *int64
 	clearedowner           bool
@@ -29950,6 +29951,42 @@ func (m *OrganizationMutation) ResetRestrictPublicGroups() {
 	m.restrict_public_groups = nil
 }
 
+// SetStatus sets the "status" field.
+func (m *OrganizationMutation) SetStatus(s string) {
+	m.status = &s
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *OrganizationMutation) Status() (r string, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the Organization entity.
+// If the Organization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrganizationMutation) OldStatus(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *OrganizationMutation) ResetStatus() {
+	m.status = nil
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by id.
 func (m *OrganizationMutation) SetOwnerID(id int64) {
 	m.owner = &id
@@ -30186,7 +30223,7 @@ func (m *OrganizationMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *OrganizationMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.created_at != nil {
 		fields = append(fields, organization.FieldCreatedAt)
 	}
@@ -30201,6 +30238,9 @@ func (m *OrganizationMutation) Fields() []string {
 	}
 	if m.restrict_public_groups != nil {
 		fields = append(fields, organization.FieldRestrictPublicGroups)
+	}
+	if m.status != nil {
+		fields = append(fields, organization.FieldStatus)
 	}
 	return fields
 }
@@ -30220,6 +30260,8 @@ func (m *OrganizationMutation) Field(name string) (ent.Value, bool) {
 		return m.OwnerUserID()
 	case organization.FieldRestrictPublicGroups:
 		return m.RestrictPublicGroups()
+	case organization.FieldStatus:
+		return m.Status()
 	}
 	return nil, false
 }
@@ -30239,6 +30281,8 @@ func (m *OrganizationMutation) OldField(ctx context.Context, name string) (ent.V
 		return m.OldOwnerUserID(ctx)
 	case organization.FieldRestrictPublicGroups:
 		return m.OldRestrictPublicGroups(ctx)
+	case organization.FieldStatus:
+		return m.OldStatus(ctx)
 	}
 	return nil, fmt.Errorf("unknown Organization field %s", name)
 }
@@ -30282,6 +30326,13 @@ func (m *OrganizationMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetRestrictPublicGroups(v)
+		return nil
+	case organization.FieldStatus:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Organization field %s", name)
@@ -30349,6 +30400,9 @@ func (m *OrganizationMutation) ResetField(name string) error {
 		return nil
 	case organization.FieldRestrictPublicGroups:
 		m.ResetRestrictPublicGroups()
+		return nil
+	case organization.FieldStatus:
+		m.ResetStatus()
 		return nil
 	}
 	return fmt.Errorf("unknown Organization field %s", name)

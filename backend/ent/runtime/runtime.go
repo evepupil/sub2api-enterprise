@@ -1325,6 +1325,12 @@ func init() {
 	organizationDescRestrictPublicGroups := organizationFields[2].Descriptor()
 	// organization.DefaultRestrictPublicGroups holds the default value on creation for the restrict_public_groups field.
 	organization.DefaultRestrictPublicGroups = organizationDescRestrictPublicGroups.Default.(bool)
+	// organizationDescStatus is the schema descriptor for status field.
+	organizationDescStatus := organizationFields[3].Descriptor()
+	// organization.DefaultStatus holds the default value on creation for the status field.
+	organization.DefaultStatus = organizationDescStatus.Default.(string)
+	// organization.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	organization.StatusValidator = organizationDescStatus.Validators[0].(func(string) error)
 	organizationallowedgroupFields := schema.OrganizationAllowedGroup{}.Fields()
 	_ = organizationallowedgroupFields
 	// organizationallowedgroupDescCreatedAt is the schema descriptor for created_at field.

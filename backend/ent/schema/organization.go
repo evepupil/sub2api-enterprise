@@ -2,6 +2,7 @@ package schema
 
 import (
 	"github.com/Wei-Shaw/sub2api/ent/schema/mixins"
+	"github.com/Wei-Shaw/sub2api/internal/domain"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
@@ -37,6 +38,13 @@ func (Organization) Fields() []ent.Field {
 		// 语义与 users.restrict_public_groups 一致。
 		field.Bool("restrict_public_groups").
 			Default(false),
+
+		// 组织状态：disabled 表示整个组织停止服务，全体成员（含创建者）的调用一律拒绝。
+		// 这一层独立于账号自身的状态，停用组织不会改写成员账号，恢复后原本被单独
+		// 停用的成员仍然是停用的。
+		field.String("status").
+			MaxLen(20).
+			Default(domain.StatusActive),
 	}
 }
 

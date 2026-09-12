@@ -24,6 +24,8 @@ const (
 	FieldOwnerUserID = "owner_user_id"
 	// FieldRestrictPublicGroups holds the string denoting the restrict_public_groups field in the database.
 	FieldRestrictPublicGroups = "restrict_public_groups"
+	// FieldStatus holds the string denoting the status field in the database.
+	FieldStatus = "status"
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
 	EdgeOwner = "owner"
 	// EdgeMembers holds the string denoting the members edge name in mutations.
@@ -79,6 +81,7 @@ var Columns = []string{
 	FieldName,
 	FieldOwnerUserID,
 	FieldRestrictPublicGroups,
+	FieldStatus,
 }
 
 var (
@@ -108,6 +111,10 @@ var (
 	NameValidator func(string) error
 	// DefaultRestrictPublicGroups holds the default value on creation for the "restrict_public_groups" field.
 	DefaultRestrictPublicGroups bool
+	// DefaultStatus holds the default value on creation for the "status" field.
+	DefaultStatus string
+	// StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	StatusValidator func(string) error
 )
 
 // OrderOption defines the ordering options for the Organization queries.
@@ -141,6 +148,11 @@ func ByOwnerUserID(opts ...sql.OrderTermOption) OrderOption {
 // ByRestrictPublicGroups orders the results by the restrict_public_groups field.
 func ByRestrictPublicGroups(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRestrictPublicGroups, opts...).ToFunc()
+}
+
+// ByStatus orders the results by the status field.
+func ByStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStatus, opts...).ToFunc()
 }
 
 // ByOwnerField orders the results by owner field.

@@ -736,7 +736,11 @@ func (s *BillingCacheService) IncrementUserPlatformQuotaUsage(userID int64, plat
 // 订阅模式：检查缓存用量未超过限额（Group限额从参数传入）
 // platform 为请求的目标平台（如 "anthropic"），传空串 "" 时跳过 user × platform quota 检查。
 func (s *BillingCacheService) CheckBillingEligibility(ctx context.Context, user *User, apiKey *APIKey, group *Group, subscription *UserSubscription, platform string) error {
-	// 组织分组授权属于权限而非计费规则，所有运行模式都要执行，因此放在简易模式跳过之前。
+	// 组织停用和分组授权都属于权限而非计费规则，所有运行模式都要执行，
+	// 因此放在简易模式跳过之前。
+	if err := checkOrganizationEnabled(user); err != nil {
+		return err
+	}
 	if err := checkOrganizationGroupAccess(user, group); err != nil {
 		return err
 	}

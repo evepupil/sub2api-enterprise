@@ -80,6 +80,20 @@ func (_c *OrganizationCreate) SetNillableRestrictPublicGroups(v *bool) *Organiza
 	return _c
 }
 
+// SetStatus sets the "status" field.
+func (_c *OrganizationCreate) SetStatus(v string) *OrganizationCreate {
+	_c.mutation.SetStatus(v)
+	return _c
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_c *OrganizationCreate) SetNillableStatus(v *string) *OrganizationCreate {
+	if v != nil {
+		_c.SetStatus(*v)
+	}
+	return _c
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_c *OrganizationCreate) SetOwnerID(id int64) *OrganizationCreate {
 	_c.mutation.SetOwnerID(id)
@@ -183,6 +197,10 @@ func (_c *OrganizationCreate) defaults() {
 		v := organization.DefaultRestrictPublicGroups
 		_c.mutation.SetRestrictPublicGroups(v)
 	}
+	if _, ok := _c.mutation.Status(); !ok {
+		v := organization.DefaultStatus
+		_c.mutation.SetStatus(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -206,6 +224,14 @@ func (_c *OrganizationCreate) check() error {
 	}
 	if _, ok := _c.mutation.RestrictPublicGroups(); !ok {
 		return &ValidationError{Name: "restrict_public_groups", err: errors.New(`ent: missing required field "Organization.restrict_public_groups"`)}
+	}
+	if _, ok := _c.mutation.Status(); !ok {
+		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "Organization.status"`)}
+	}
+	if v, ok := _c.mutation.Status(); ok {
+		if err := organization.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Organization.status": %w`, err)}
+		}
 	}
 	if len(_c.mutation.OwnerIDs()) == 0 {
 		return &ValidationError{Name: "owner", err: errors.New(`ent: missing required edge "Organization.owner"`)}
@@ -252,6 +278,10 @@ func (_c *OrganizationCreate) createSpec() (*Organization, *sqlgraph.CreateSpec)
 	if value, ok := _c.mutation.RestrictPublicGroups(); ok {
 		_spec.SetField(organization.FieldRestrictPublicGroups, field.TypeBool, value)
 		_node.RestrictPublicGroups = value
+	}
+	if value, ok := _c.mutation.Status(); ok {
+		_spec.SetField(organization.FieldStatus, field.TypeString, value)
+		_node.Status = value
 	}
 	if nodes := _c.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -422,6 +452,18 @@ func (u *OrganizationUpsert) UpdateRestrictPublicGroups() *OrganizationUpsert {
 	return u
 }
 
+// SetStatus sets the "status" field.
+func (u *OrganizationUpsert) SetStatus(v string) *OrganizationUpsert {
+	u.Set(organization.FieldStatus, v)
+	return u
+}
+
+// UpdateStatus sets the "status" field to the value that was provided on create.
+func (u *OrganizationUpsert) UpdateStatus() *OrganizationUpsert {
+	u.SetExcluded(organization.FieldStatus)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -520,6 +562,20 @@ func (u *OrganizationUpsertOne) SetRestrictPublicGroups(v bool) *OrganizationUps
 func (u *OrganizationUpsertOne) UpdateRestrictPublicGroups() *OrganizationUpsertOne {
 	return u.Update(func(s *OrganizationUpsert) {
 		s.UpdateRestrictPublicGroups()
+	})
+}
+
+// SetStatus sets the "status" field.
+func (u *OrganizationUpsertOne) SetStatus(v string) *OrganizationUpsertOne {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.SetStatus(v)
+	})
+}
+
+// UpdateStatus sets the "status" field to the value that was provided on create.
+func (u *OrganizationUpsertOne) UpdateStatus() *OrganizationUpsertOne {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.UpdateStatus()
 	})
 }
 
@@ -787,6 +843,20 @@ func (u *OrganizationUpsertBulk) SetRestrictPublicGroups(v bool) *OrganizationUp
 func (u *OrganizationUpsertBulk) UpdateRestrictPublicGroups() *OrganizationUpsertBulk {
 	return u.Update(func(s *OrganizationUpsert) {
 		s.UpdateRestrictPublicGroups()
+	})
+}
+
+// SetStatus sets the "status" field.
+func (u *OrganizationUpsertBulk) SetStatus(v string) *OrganizationUpsertBulk {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.SetStatus(v)
+	})
+}
+
+// UpdateStatus sets the "status" field to the value that was provided on create.
+func (u *OrganizationUpsertBulk) UpdateStatus() *OrganizationUpsertBulk {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.UpdateStatus()
 	})
 }
 

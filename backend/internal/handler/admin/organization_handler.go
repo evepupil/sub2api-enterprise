@@ -30,9 +30,14 @@ type organizationResponse struct {
 	OwnerEmail           string    `json:"owner_email"`
 	OwnerUsername        string    `json:"owner_username"`
 	MemberCount          int       `json:"member_count"`
+	Status               string    `json:"status"`
 	RestrictPublicGroups bool      `json:"restrict_public_groups"`
 	AllowedGroupIDs      []int64   `json:"allowed_group_ids"`
 	CreatedAt            time.Time `json:"created_at"`
+}
+
+type updateOrganizationStatusRequest struct {
+	Status string `json:"status"`
 }
 
 type updateOrganizationGroupsRequest struct {
@@ -109,6 +114,26 @@ func (h *OrganizationHandler) UpdateGroups(c *gin.Context) {
 	response.Success(c, organizationToResponse(organization))
 }
 
+// UpdateStatus 启用或停用整个组织。
+// PUT /api/v1/admin/organizations/:id/status
+func (h *OrganizationHandler) UpdateStatus(c *gin.Context) {
+	organizationID, ok := organizationIDParam(c)
+	if !ok {
+		return
+	}
+	var req updateOrganizationStatusRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "Invalid request: "+err.Error())
+		return
+	}
+	organization, err := h.service.UpdateStatus(c.Request.Context(), organizationID, req.Status)
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+	response.Success(c, organizationToResponse(organization))
+}
+
 func organizationIDParam(c *gin.Context) (int64, bool) {
 	organizationID, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil || organizationID <= 0 {
@@ -133,6 +158,7 @@ func organizationToResponse(organization *service.AdminOrganization) organizatio
 		OwnerEmail:           organization.OwnerEmail,
 		OwnerUsername:        organization.OwnerUsername,
 		MemberCount:          organization.MemberCount,
+		Status:               organization.Status,
 		RestrictPublicGroups: organization.RestrictPublicGroups,
 		AllowedGroupIDs:      allowedGroupIDs,
 		CreatedAt:            organization.CreatedAt,

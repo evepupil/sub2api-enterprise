@@ -34,5 +34,6 @@ func registerAdminOrganizationRoutes(admin *gin.RouterGroup, h *handler.Handlers
 		organizations.GET("", h.Admin.Organization.List)
 		organizations.GET("/:id", h.Admin.Organization.Get)
 		organizations.PUT("/:id/groups", h.Admin.Organization.UpdateGroups)
+		organizations.PUT("/:id/status", h.Admin.Organization.UpdateStatus)
 	}
 }

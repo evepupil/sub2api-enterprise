@@ -17,6 +17,7 @@ type AdminOrganization struct {
 	OwnerEmail           string
 	OwnerUsername        string
 	MemberCount          int
+	Status               string
 	RestrictPublicGroups bool
 	AllowedGroupIDs      []int64
 	CreatedAt            time.Time
@@ -108,6 +109,35 @@ func (s *AdminOrganizationService) UpdateGroups(
 	}
 	s.invalidateMembers(ctx, organizationID)
 
+	return s.organizations.Get(ctx, organizationID)
+}
+
+// UpdateStatus 启用或停用整个组织。
+//
+// 只改组织这一层，成员账号的状态一个字不动：恢复组织后，原本被单独停用的成员
+// 仍然是停用的。改完立刻清掉全体成员的鉴权缓存，停用当场生效。
+func (s *AdminOrganizationService) UpdateStatus(
+	ctx context.Context,
+	organizationID int64,
+	status string,
+) (*AdminOrganization, error) {
+	if s == nil || s.organizations == nil || s.groups == nil {
+		return nil, ErrServiceUnavailable
+	}
+	if organizationID <= 0 {
+		return nil, ErrOrganizationNotFound
+	}
+	status = strings.TrimSpace(status)
+	if status != StatusActive && status != StatusDisabled {
+		return nil, ErrOrganizationStatusInvalid
+	}
+	if _, err := s.organizations.Get(ctx, organizationID); err != nil {
+		return nil, err
+	}
+	if err := s.groups.SetStatus(ctx, organizationID, status); err != nil {
+		return nil, err
+	}
+	s.invalidateMembers(ctx, organizationID)
 	return s.organizations.Get(ctx, organizationID)
 }
 

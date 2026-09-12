@@ -13,6 +13,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/organizationallowedgroup"
 	"github.com/Wei-Shaw/sub2api/internal/pkg/pagination"
 	"github.com/Wei-Shaw/sub2api/internal/service"
+	"github.com/lib/pq"
 	"github.com/stretchr/testify/require"
 )
 
@@ -126,4 +127,35 @@ func TestAdminOrganizationRepositoryListAndGet(t *testing.T) {
 
 	_, err = repo.Get(ctx, 0)
 	require.True(t, errors.Is(err, service.ErrOrganizationNotFound))
+}
+
+// 组织停用只作用在组织这一层，成员账号状态不受影响。
+func TestOrganizationStatusSuspendsScopeOnly(t *testing.T) {
+	ctx := context.Background()
+	organization, userIDs := seedOrganizationWithMembers(t, ctx, 1)
+	repo := NewOrganizationGroupRepository(integrationEntClient)
+
+	scope, err := repo.GetMemberScopeByUserID(ctx, userIDs[1])
+	require.NoError(t, err)
+	require.False(t, scope.Disabled, "新建组织默认是启用的")
+
+	require.NoError(t, repo.SetStatus(ctx, organization.ID, service.StatusDisabled))
+	for _, userID := range userIDs {
+		scope, err := repo.GetMemberScopeByUserID(ctx, userID)
+		require.NoError(t, err)
+		require.True(t, scope.Disabled, "组织创建者和普通成员都停")
+	}
+
+	var activeAccounts int
+	require.NoError(t, integrationDB.QueryRowContext(ctx,
+		"SELECT count(*) FROM users WHERE id = ANY($1) AND status = 'active'", pq.Array(userIDs),
+	).Scan(&activeAccounts))
+	require.Equal(t, len(userIDs), activeAccounts, "停用组织不改写任何成员账号")
+
+	require.NoError(t, repo.SetStatus(ctx, organization.ID, service.StatusActive))
+	scope, err = repo.GetMemberScopeByUserID(ctx, userIDs[1])
+	require.NoError(t, err)
+	require.False(t, scope.Disabled)
+
+	require.True(t, errors.Is(repo.SetStatus(ctx, 0, service.StatusDisabled), service.ErrOrganizationNotFound))
 }

@@ -40,9 +40,11 @@ type User struct {
 }
 
 type OrganizationSummary struct {
-	ID        int64     `json:"id"`
-	Name      string    `json:"name"`
-	IsOwner   bool      `json:"is_owner"`
+	ID      int64  `json:"id"`
+	Name    string `json:"name"`
+	IsOwner bool   `json:"is_owner"`
+	// Status 为 disabled 时整个组织已被平台停用，页面据此提示成员。
+	Status    string    `json:"status"`
 	CreatedAt time.Time `json:"created_at"`
 }
 

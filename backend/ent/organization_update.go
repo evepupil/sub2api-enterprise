@@ -80,6 +80,20 @@ func (_u *OrganizationUpdate) SetNillableRestrictPublicGroups(v *bool) *Organiza
 	return _u
 }
 
+// SetStatus sets the "status" field.
+func (_u *OrganizationUpdate) SetStatus(v string) *OrganizationUpdate {
+	_u.mutation.SetStatus(v)
+	return _u
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_u *OrganizationUpdate) SetNillableStatus(v *string) *OrganizationUpdate {
+	if v != nil {
+		_u.SetStatus(*v)
+	}
+	return _u
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *OrganizationUpdate) SetOwnerID(id int64) *OrganizationUpdate {
 	_u.mutation.SetOwnerID(id)
@@ -253,6 +267,11 @@ func (_u *OrganizationUpdate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Organization.name": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Status(); ok {
+		if err := organization.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Organization.status": %w`, err)}
+		}
+	}
 	if _u.mutation.OwnerCleared() && len(_u.mutation.OwnerIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Organization.owner"`)
 	}
@@ -279,6 +298,9 @@ func (_u *OrganizationUpdate) sqlSave(ctx context.Context) (_node int, err error
 	}
 	if value, ok := _u.mutation.RestrictPublicGroups(); ok {
 		_spec.SetField(organization.FieldRestrictPublicGroups, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.Status(); ok {
+		_spec.SetField(organization.FieldStatus, field.TypeString, value)
 	}
 	if _u.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -524,6 +546,20 @@ func (_u *OrganizationUpdateOne) SetNillableRestrictPublicGroups(v *bool) *Organ
 	return _u
 }
 
+// SetStatus sets the "status" field.
+func (_u *OrganizationUpdateOne) SetStatus(v string) *OrganizationUpdateOne {
+	_u.mutation.SetStatus(v)
+	return _u
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_u *OrganizationUpdateOne) SetNillableStatus(v *string) *OrganizationUpdateOne {
+	if v != nil {
+		_u.SetStatus(*v)
+	}
+	return _u
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *OrganizationUpdateOne) SetOwnerID(id int64) *OrganizationUpdateOne {
 	_u.mutation.SetOwnerID(id)
@@ -710,6 +746,11 @@ func (_u *OrganizationUpdateOne) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Organization.name": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Status(); ok {
+		if err := organization.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Organization.status": %w`, err)}
+		}
+	}
 	if _u.mutation.OwnerCleared() && len(_u.mutation.OwnerIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Organization.owner"`)
 	}
@@ -753,6 +794,9 @@ func (_u *OrganizationUpdateOne) sqlSave(ctx context.Context) (_node *Organizati
 	}
 	if value, ok := _u.mutation.RestrictPublicGroups(); ok {
 		_spec.SetField(organization.FieldRestrictPublicGroups, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.Status(); ok {
+		_spec.SetField(organization.FieldStatus, field.TypeString, value)
 	}
 	if _u.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{

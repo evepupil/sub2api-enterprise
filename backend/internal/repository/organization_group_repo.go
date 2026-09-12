@@ -51,6 +51,7 @@ func (r *organizationGroupRepository) GetMemberScopeByUserID(
 		RestrictPublicGroups: entity.RestrictPublicGroups,
 		AllowedGroupIDs:      groupIDs,
 		SpendingLimit:        membership.SpendingLimit,
+		Disabled:             entity.Status == service.StatusDisabled,
 	}
 	if !scope.IsOwner {
 		// 普通成员自己没有余额，鉴权层的余额闸要看组织付款账号。
@@ -166,6 +167,21 @@ func applyOrganizationGroupScope(
 	}
 	_, err = client.OrganizationAllowedGroup.CreateBulk(builders...).Save(ctx)
 	return err
+}
+
+// SetStatus 启用或停用整个组织。
+func (r *organizationGroupRepository) SetStatus(ctx context.Context, organizationID int64, status string) error {
+	affected, err := clientFromContext(ctx, r.client).Organization.Update().
+		Where(organization.IDEQ(organizationID)).
+		SetStatus(status).
+		Save(ctx)
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return service.ErrOrganizationNotFound
+	}
+	return nil
 }
 
 func (r *organizationGroupRepository) ListMemberUserIDs(ctx context.Context, organizationID int64) ([]int64, error) {
@@ -323,6 +339,7 @@ func adminOrganizationFromEntity(
 	result := &service.AdminOrganization{
 		ID:                   entity.ID,
 		Name:                 entity.Name,
+		Status:               entity.Status,
 		OwnerUserID:          entity.OwnerUserID,
 		MemberCount:          memberCount,
 		RestrictPublicGroups: entity.RestrictPublicGroups,
