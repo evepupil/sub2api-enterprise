@@ -16,55 +16,100 @@ export default {
     register: 'Sign up',
 
     hero: {
-      title: 'AI model access for teams',
+      eyebrow: 'AI model access for teams',
+      title: 'Every call has someone’s name on it',
       description:
-        'One key reaches every connected model service. Budgets and permissions follow your organisation, and every call traces back to a person.',
+        'Your team shares one set of model services. Who called, how much they used and what it cost lands on a member and a key, while budgets and permissions come down from the organisation.',
       start: 'Get started'
     },
 
+    ledger: {
+      title: 'Call log',
+      caption: 'Call log sample: each row is one call, with member, group, usage and cost',
+      disclaimer: 'Sample data, shown to illustrate the level of detail recorded',
+      total: 'Shown here',
+      col: {
+        time: 'Time',
+        member: 'Member',
+        group: 'Group',
+        tokens: 'Tokens',
+        latency: 'Latency',
+        cost: 'Cost'
+      },
+      group: {
+        default: 'Default',
+        enterprise: 'Enterprise',
+        image: 'Image'
+      }
+    },
+
     capabilities: {
-      title: 'Platform',
       unified: {
-        title: 'One endpoint',
-        desc: 'Speaks the OpenAI and Anthropic request formats, so existing code only changes its base URL.'
+        label: 'Endpoint',
+        title: 'One base URL',
+        desc: 'Speaks the OpenAI and Anthropic request formats, so existing code only changes where it points.'
       },
       routing: {
-        title: 'Automatic routing',
-        desc: 'A model can sit behind several upstream accounts; traffic moves between them on its own when one fails.'
+        label: 'Routing',
+        title: 'Fails over',
+        desc: 'A model can sit behind several upstream accounts. Traffic moves off a failing one on its own.'
       },
       metering: {
-        title: 'Metered billing',
-        desc: 'Every call settles against real usage. Balance and limits update as it happens, and calls stop when they run out.'
+        label: 'Billing',
+        title: 'Metered',
+        desc: 'Each call settles against real usage. Balance and limits update as it happens, and calls stop when they run out.'
       },
       records: {
-        title: 'Full history',
-        desc: 'Time, model, latency, usage and cost are kept per call, searchable by member and date range.'
+        label: 'History',
+        title: 'Kept per call',
+        desc: 'Time, group, latency, usage and cost are stored per call, searchable by member and date range.'
       }
     },
 
     governance: {
-      title: 'Organisation control',
+      eyebrow: 'Organisation control',
+      title: 'Budgets and access come from the organisation',
       isolation: {
         title: 'Isolated by organisation',
         desc: 'Members see only their own organisation. Keys and usage stay invisible to everyone else.'
       },
       quota: {
         title: 'Per-member budgets',
-        desc: 'Set a spending cap per member, or split a total evenly across several. One member running out stops only that member.'
+        desc: 'Set a cap per member, or split a total evenly across several. One member running out stops only that member.'
       },
       scope: {
         title: 'Scoped model access',
-        desc: 'Decide which model groups an organisation may use; members can only pick from what was granted.'
+        desc: 'The platform decides which model groups an organisation may use; members can only pick from what was granted.'
       },
       suspend: {
         title: 'Suspend a whole organisation',
-        desc: 'One switch stops every call from an organisation. Member accounts keep their own status, so resuming never re-enables someone you had disabled.'
+        desc: 'One switch stops every call from an organisation. Member accounts keep their own status, so resuming never re-enables someone you had disabled on purpose.'
       }
     },
 
+    scope: {
+      caption: 'Budget sample: members hold their own caps under the organisation total',
+      org: 'Organisation',
+      pool: 'Organisation balance',
+      granted: 'Granted groups',
+      denied: 'Not granted',
+      stopped: 'Budget spent, calls stopped'
+    },
+
     integration: {
-      title: 'Integration',
-      description: 'Point the base URL at the platform. Nothing else changes.'
+      eyebrow: 'Integration',
+      title: 'Change one URL',
+      description:
+        'Point the base URL at the platform and swap the auth header for a platform key. Nothing else changes, and the response body stays as it was.',
+      request: 'Request',
+      returned: 'Recorded alongside the call',
+      fields: {
+        organization: { name: 'organization', note: 'Owning organisation' },
+        member: { name: 'member', note: 'Member who made the call' },
+        group: { name: 'group', note: 'Model group it resolved to' },
+        usage: { name: 'usage', note: 'Input, output and cached tokens' },
+        cost: { name: 'cost', note: 'What this call cost' }
+      }
     },
 
     personal: {

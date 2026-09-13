@@ -16,59 +16,104 @@ export default {
     register: '注册',
 
     hero: {
-      title: '企业级 AI 模型接入',
-      description: '一套密钥接入多家模型服务。按组织分配额度和权限，每一次调用都能追溯到人。',
+      eyebrow: '企业 AI 模型接入',
+      title: '每一次调用，都记在某个人名下',
+      description:
+        '团队共用一套模型服务。谁调的、用了多少、花了多少钱，逐条落到成员和密钥上，额度和权限按组织下发。',
       start: '开始接入'
     },
 
+    ledger: {
+      title: '调用流水',
+      caption: '调用流水示意：每一行是一次调用，含成员、分组、用量和费用',
+      disclaimer: '示意数据，用于说明记录的粒度',
+      total: '本页合计',
+      col: {
+        time: '时间',
+        member: '成员',
+        group: '分组',
+        tokens: 'Tokens',
+        latency: '耗时',
+        cost: '费用'
+      },
+      group: {
+        default: '默认分组',
+        enterprise: '企业专属',
+        image: '图像生成'
+      }
+    },
+
     capabilities: {
-      title: '平台能力',
       unified: {
-        title: '统一接入',
-        desc: '兼容 OpenAI 与 Anthropic 的接口规范，现有代码改一个请求地址就能切过来。'
+        label: '接口',
+        title: '一个地址',
+        desc: '兼容 OpenAI 与 Anthropic 的请求格式，现有代码改一个地址就能切过来。'
       },
       routing: {
-        title: '自动调度',
-        desc: '同一个模型下挂多个上游账号，自动分配和切换，单个账号出问题不影响调用。'
+        label: '调度',
+        title: '自动换线',
+        desc: '同一个模型下挂多个上游账号，出问题自动切走，调用方无感。'
       },
       metering: {
-        title: '按量计费',
-        desc: '每次调用按实际用量结算，余额和额度实时扣减，用尽即停。'
+        label: '计费',
+        title: '按量结算',
+        desc: '每次调用按实际用量扣减，余额和额度实时更新，用尽即停。'
       },
       records: {
+        label: '记录',
         title: '逐条留存',
-        desc: '时间、模型、耗时、用量和费用逐条记录，可按成员和时间范围检索。'
+        desc: '时间、分组、耗时、用量、费用逐条落库，按成员和时间范围可查。'
       }
     },
 
     governance: {
-      title: '组织治理',
+      eyebrow: '组织治理',
+      title: '钱和权限，按组织下发',
       isolation: {
         title: '组织隔离',
         desc: '成员只看得到本组织的数据，密钥和用量互不可见。'
       },
       quota: {
         title: '成员额度',
-        desc: '给每个成员设消费上限，支持按总额批量均分。一个人用尽只停他一个。'
+        desc: '给每个成员设消费上限，也可以按总额批量均分。一个人用尽只停他一个，不影响同事。'
       },
       scope: {
         title: '分组授权',
-        desc: '控制每个组织可用的模型分组范围，成员建密钥时只能选授权范围内的。'
+        desc: '平台决定一个组织能用哪些模型分组，成员建密钥时只能从授权范围里选。'
       },
       suspend: {
         title: '整组停用',
-        desc: '一个开关停掉整个组织的调用，成员账号状态不受影响，恢复时不会误放行。'
+        desc: '一个开关停掉整个组织的调用。成员账号保留各自状态，恢复时不会把你单独停过的人一起放回来。'
       }
     },
 
+    scope: {
+      caption: '组织额度示意：组织总额之下，每个成员各有上限',
+      org: '组织',
+      pool: '组织余额',
+      granted: '已授权分组',
+      denied: '未授权',
+      stopped: '额度用尽，已停止调用'
+    },
+
     integration: {
-      title: '接入方式',
-      description: '把请求地址指向平台，其余不动。'
+      eyebrow: '接入',
+      title: '改一个地址',
+      description: '把请求地址指向平台，鉴权头换成平台密钥，其余不动。返回体保持原样。',
+      request: '请求',
+      returned: '这次调用同时被记下',
+      fields: {
+        organization: { name: 'organization', note: '归属组织' },
+        member: { name: 'member', note: '发起调用的成员' },
+        group: { name: 'group', note: '命中的模型分组' },
+        usage: { name: 'usage', note: '输入、输出与缓存 token' },
+        cost: { name: 'cost', note: '本次实际费用' }
+      }
     },
 
     personal: {
       title: '个人也能用',
-      description: '不需要组织。注册后直接创建密钥开始调用，同样按量计费。'
+      description: '不需要组织。注册后直接建密钥开始调用，同样按量计费。'
     },
 
     footer: {
