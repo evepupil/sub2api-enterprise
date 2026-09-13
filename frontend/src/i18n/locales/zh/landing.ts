@@ -5,110 +5,72 @@ export default {
   },
   // Home Page
   home: {
-    viewOnGithub: '在 GitHub 上查看',
+    // 以下几个键在密钥用量页和法务文档页也在用，改名要同步
     viewDocs: '查看文档',
     docs: '文档',
     switchToLight: '切换到浅色模式',
     switchToDark: '切换到深色模式',
     dashboard: '控制台',
     login: '登录',
-    getStarted: '立即开始',
     goToDashboard: '进入控制台',
-    // 新增：面向用户的价值主张
-    heroSubtitle: '一个密钥，畅用多个 AI 模型',
-    heroDescription: '无需管理多个订阅账号，一站式接入 Claude、GPT、Gemini 等主流 AI 服务',
-    tags: {
-      subscriptionToApi: '订阅转 API',
-      stickySession: '会话保持',
-      realtimeBilling: '按量计费'
+    register: '注册',
+
+    hero: {
+      title: '企业级 AI 模型接入',
+      description: '一套密钥接入多家模型服务。按组织分配额度和权限，每一次调用都能追溯到人。',
+      start: '开始接入'
     },
-    // 用户痛点区块
-    painPoints: {
-      title: '你是否也遇到这些问题？',
-      items: {
-        expensive: {
-          title: '订阅费用高',
-          desc: '每个 AI 服务都要单独订阅，每月支出越来越多'
-        },
-        complex: {
-          title: '多账号难管理',
-          desc: '不同平台的账号、密钥分散各处，管理起来很麻烦'
-        },
-        unstable: {
-          title: '服务不稳定',
-          desc: '单一账号容易触发限制，影响正常使用'
-        },
-        noControl: {
-          title: '用量无法控制',
-          desc: '不知道钱花在哪了，也无法限制团队成员的使用'
-        }
-      }
-    },
-    // 解决方案区块
-    solutions: {
-      title: '我们帮你解决',
-      subtitle: '简单三步，开始省心使用 AI'
-    },
-    features: {
-      unifiedGateway: '一键接入',
-      unifiedGatewayDesc: '获取一个 API 密钥，即可调用所有已接入的 AI 模型，无需分别申请。',
-      multiAccount: '稳定可靠',
-      multiAccountDesc: '智能调度多个上游账号，自动切换和负载均衡，告别频繁报错。',
-      balanceQuota: '用多少付多少',
-      balanceQuotaDesc: '按实际使用量计费，支持设置配额上限，团队用量一目了然。'
-    },
-    // 优势对比
-    comparison: {
-      title: '为什么选择我们？',
-      headers: {
-        feature: '对比项',
-        official: '官方订阅',
-        us: '本平台'
+
+    capabilities: {
+      title: '平台能力',
+      unified: {
+        title: '统一接入',
+        desc: '兼容 OpenAI 与 Anthropic 的接口规范，现有代码改一个请求地址就能切过来。'
       },
-      items: {
-        pricing: {
-          feature: '付费方式',
-          official: '固定月费，用不完也付',
-          us: '按量付费，用多少付多少'
-        },
-        models: {
-          feature: '模型选择',
-          official: '单一服务商',
-          us: '多模型随意切换'
-        },
-        management: {
-          feature: '账号管理',
-          official: '每个服务单独管理',
-          us: '统一密钥，一站管理'
-        },
-        stability: {
-          feature: '服务稳定性',
-          official: '单账号易触发限制',
-          us: '多账号池，自动切换'
-        },
-        control: {
-          feature: '用量控制',
-          official: '无法限制',
-          us: '可设配额、查明细'
-        }
+      routing: {
+        title: '自动调度',
+        desc: '同一个模型下挂多个上游账号，自动分配和切换，单个账号出问题不影响调用。'
+      },
+      metering: {
+        title: '按量计费',
+        desc: '每次调用按实际用量结算，余额和额度实时扣减，用尽即停。'
+      },
+      records: {
+        title: '逐条留存',
+        desc: '时间、模型、耗时、用量和费用逐条记录，可按成员和时间范围检索。'
       }
     },
-    providers: {
-      title: '已支持的 AI 模型',
-      description: '一个 API，多种选择',
-      supported: '已支持',
-      soon: '即将推出',
-      claude: 'Claude',
-      gemini: 'Gemini',
-      antigravity: 'Antigravity',
-      more: '更多'
+
+    governance: {
+      title: '组织治理',
+      isolation: {
+        title: '组织隔离',
+        desc: '成员只看得到本组织的数据，密钥和用量互不可见。'
+      },
+      quota: {
+        title: '成员额度',
+        desc: '给每个成员设消费上限，支持按总额批量均分。一个人用尽只停他一个。'
+      },
+      scope: {
+        title: '分组授权',
+        desc: '控制每个组织可用的模型分组范围，成员建密钥时只能选授权范围内的。'
+      },
+      suspend: {
+        title: '整组停用',
+        desc: '一个开关停掉整个组织的调用，成员账号状态不受影响，恢复时不会误放行。'
+      }
     },
-    // CTA 区块
-    cta: {
-      title: '准备好开始了吗？',
-      description: '注册即可获得免费试用额度，体验一站式 AI 服务',
-      button: '免费注册'
+
+    integration: {
+      title: '接入方式',
+      description: '把请求地址指向平台，其余不动。'
     },
+
+    personal: {
+      title: '个人也能用',
+      description: '不需要组织。注册后直接创建密钥开始调用，同样按量计费。'
+    },
+
     footer: {
       allRightsReserved: '保留所有权利。'
     }

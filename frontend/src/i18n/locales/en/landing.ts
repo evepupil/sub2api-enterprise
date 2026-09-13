@@ -5,110 +5,74 @@ export default {
   },
   // Home Page
   home: {
-    viewOnGithub: 'View on GitHub',
-    viewDocs: 'View Documentation',
+    // These keys are also used by the key usage page and the legal document page
+    viewDocs: 'View docs',
     docs: 'Docs',
-    switchToLight: 'Switch to Light Mode',
-    switchToDark: 'Switch to Dark Mode',
-    dashboard: 'Dashboard',
-    login: 'Login',
-    getStarted: 'Get Started',
-    goToDashboard: 'Go to Dashboard',
-    // User-focused value proposition
-    heroSubtitle: 'One Key, All AI Models',
-    heroDescription: 'No need to manage multiple subscriptions. Access Claude, GPT, Gemini and more with a single API key',
-    tags: {
-      subscriptionToApi: 'Subscription to API',
-      stickySession: 'Session Persistence',
-      realtimeBilling: 'Pay As You Go'
+    switchToLight: 'Switch to light mode',
+    switchToDark: 'Switch to dark mode',
+    dashboard: 'Console',
+    login: 'Sign in',
+    goToDashboard: 'Open console',
+    register: 'Sign up',
+
+    hero: {
+      title: 'AI model access for teams',
+      description:
+        'One key reaches every connected model service. Budgets and permissions follow your organisation, and every call traces back to a person.',
+      start: 'Get started'
     },
-    // Pain points section
-    painPoints: {
-      title: 'Sound Familiar?',
-      items: {
-        expensive: {
-          title: 'High Subscription Costs',
-          desc: 'Paying for multiple AI subscriptions that add up every month'
-        },
-        complex: {
-          title: 'Account Chaos',
-          desc: 'Managing scattered accounts and API keys across different platforms'
-        },
-        unstable: {
-          title: 'Service Interruptions',
-          desc: 'Single accounts hitting rate limits and disrupting your workflow'
-        },
-        noControl: {
-          title: 'No Usage Control',
-          desc: "Can't track where your money goes or limit team member usage"
-        }
-      }
-    },
-    // Solutions section
-    solutions: {
-      title: 'We Solve These Problems',
-      subtitle: 'Three simple steps to stress-free AI access'
-    },
-    features: {
-      unifiedGateway: 'One-Click Access',
-      unifiedGatewayDesc: 'Get a single API key to call all connected AI models. No separate applications needed.',
-      multiAccount: 'Always Reliable',
-      multiAccountDesc: 'Smart routing across multiple upstream accounts with automatic failover. Say goodbye to errors.',
-      balanceQuota: 'Pay What You Use',
-      balanceQuotaDesc: 'Usage-based billing with quota limits. Full visibility into team consumption.'
-    },
-    // Comparison section
-    comparison: {
-      title: 'Why Choose Us?',
-      headers: {
-        feature: 'Comparison',
-        official: 'Official Subscriptions',
-        us: 'Our Platform'
+
+    capabilities: {
+      title: 'Platform',
+      unified: {
+        title: 'One endpoint',
+        desc: 'Speaks the OpenAI and Anthropic request formats, so existing code only changes its base URL.'
       },
-      items: {
-        pricing: {
-          feature: 'Pricing',
-          official: 'Fixed monthly fee, pay even if unused',
-          us: 'Pay only for what you use'
-        },
-        models: {
-          feature: 'Model Selection',
-          official: 'Single provider only',
-          us: 'Switch between models freely'
-        },
-        management: {
-          feature: 'Account Management',
-          official: 'Manage each service separately',
-          us: 'Unified key, one dashboard'
-        },
-        stability: {
-          feature: 'Stability',
-          official: 'Single account rate limits',
-          us: 'Multi-account pool, auto-failover'
-        },
-        control: {
-          feature: 'Usage Control',
-          official: 'Not available',
-          us: 'Quotas & detailed analytics'
-        }
+      routing: {
+        title: 'Automatic routing',
+        desc: 'A model can sit behind several upstream accounts; traffic moves between them on its own when one fails.'
+      },
+      metering: {
+        title: 'Metered billing',
+        desc: 'Every call settles against real usage. Balance and limits update as it happens, and calls stop when they run out.'
+      },
+      records: {
+        title: 'Full history',
+        desc: 'Time, model, latency, usage and cost are kept per call, searchable by member and date range.'
       }
     },
-    providers: {
-      title: 'Supported AI Models',
-      description: 'One API, Multiple Choices',
-      supported: 'Supported',
-      soon: 'Soon',
-      claude: 'Claude',
-      gemini: 'Gemini',
-      antigravity: 'Antigravity',
-      more: 'More'
+
+    governance: {
+      title: 'Organisation control',
+      isolation: {
+        title: 'Isolated by organisation',
+        desc: 'Members see only their own organisation. Keys and usage stay invisible to everyone else.'
+      },
+      quota: {
+        title: 'Per-member budgets',
+        desc: 'Set a spending cap per member, or split a total evenly across several. One member running out stops only that member.'
+      },
+      scope: {
+        title: 'Scoped model access',
+        desc: 'Decide which model groups an organisation may use; members can only pick from what was granted.'
+      },
+      suspend: {
+        title: 'Suspend a whole organisation',
+        desc: 'One switch stops every call from an organisation. Member accounts keep their own status, so resuming never re-enables someone you had disabled.'
+      }
     },
-    // CTA section
-    cta: {
-      title: 'Ready to Get Started?',
-      description: 'Sign up now and get free trial credits to experience seamless AI access',
-      button: 'Sign Up Free'
+
+    integration: {
+      title: 'Integration',
+      description: 'Point the base URL at the platform. Nothing else changes.'
     },
+
+    personal: {
+      title: 'Individuals too',
+      description:
+        'No organisation required. Sign up, create a key and start calling, metered the same way.'
+    },
+
     footer: {
       allRightsReserved: 'All rights reserved.'
     }
