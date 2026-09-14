@@ -1,12 +1,12 @@
 <template>
-  <div class="scope" role="img" :aria-label="t('home.scope.caption')">
+  <div class="scope" role="img" :aria-label="t('landing.scope.caption')">
     <div class="scope-head">
       <div>
-        <div class="scope-eyebrow">{{ t('home.scope.org') }}</div>
+        <div class="scope-eyebrow">{{ t('landing.scope.org') }}</div>
         <div class="scope-name">acme.io</div>
       </div>
       <div class="scope-balance">
-        <div class="scope-eyebrow">{{ t('home.scope.pool') }}</div>
+        <div class="scope-eyebrow">{{ t('landing.scope.pool') }}</div>
         <div class="scope-amount">$2,000.00</div>
       </div>
     </div>
@@ -24,15 +24,15 @@
         <div class="scope-track">
           <div class="scope-fill" :style="{ width: member.percent + '%' }"></div>
         </div>
-        <div v-if="member.spent" class="scope-note">{{ t('home.scope.stopped') }}</div>
+        <div v-if="member.spent" class="scope-note">{{ t('landing.scope.stopped') }}</div>
       </li>
     </ul>
 
     <div class="scope-groups">
-      <span class="scope-eyebrow">{{ t('home.scope.granted') }}</span>
+      <span class="scope-eyebrow">{{ t('landing.scope.granted') }}</span>
       <div class="scope-chips">
         <span v-for="chip in chips" :key="chip" class="scope-chip">{{ chip }}</span>
-        <span class="scope-chip is-denied">{{ t('home.scope.denied') }}</span>
+        <span class="scope-chip is-denied">{{ t('landing.scope.denied') }}</span>
       </div>
     </div>
   </div>
@@ -57,9 +57,9 @@ const members = [
 ]
 
 const chips = computed(() => [
-  t('home.ledger.group.default'),
-  t('home.ledger.group.enterprise'),
-  t('home.ledger.group.image')
+  t('landing.console.group.default'),
+  t('landing.console.group.enterprise'),
+  t('landing.console.group.image')
 ])
 </script>
 

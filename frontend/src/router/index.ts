@@ -176,6 +176,28 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
+    // 对外服务状态页。匿名可访问，平台开关关闭时接口 404，页面显示暂不可用。
+    path: '/status',
+    name: 'ServiceStatus',
+    component: () => import('@/views/StatusView.vue'),
+    meta: {
+      requiresAuth: false,
+      title: 'Service Status',
+      titleKey: 'landing.nav.status'
+    }
+  },
+  {
+    // 官网定价页。首页的「立即体验」落到这里，分个人版和企业版。
+    path: '/pricing',
+    name: 'Pricing',
+    component: () => import('@/views/PricingView.vue'),
+    meta: {
+      requiresAuth: false,
+      title: 'Pricing',
+      titleKey: 'landing.nav.pricing'
+    }
+  },
+  {
     path: '/model-plaza',
     name: 'ModelPlaza',
     component: () => import('@/views/ModelPlazaView.vue'),
@@ -765,10 +787,14 @@ const routes: RouteRecordRaw[] = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
-  scrollBehavior(_to, _from, savedPosition) {
+  scrollBehavior(to, _from, savedPosition) {
     // Scroll to saved position when using browser back/forward
     if (savedPosition) {
       return savedPosition
+    }
+    // 官网顶栏是吸顶的，锚点要留出它的高度，否则标题会被盖住
+    if (to.hash) {
+      return { el: to.hash, top: 72, behavior: 'smooth' }
     }
     // Scroll to top for new routes
     return { top: 0 }
