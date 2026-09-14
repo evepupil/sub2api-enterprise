@@ -422,6 +422,7 @@ type PublicSettings struct {
 
 	AvailableChannelsEnabled bool `json:"available_channels_enabled"`
 
+	PublicStatusEnabled     bool `json:"public_status_enabled"`
 	ModelPlazaEnabled       bool `json:"model_plaza_enabled"`
 	ModelPlazaRequireAuth   bool `json:"model_plaza_require_auth"`
 	PluginManagementEnabled bool `json:"plugin_management_enabled"`

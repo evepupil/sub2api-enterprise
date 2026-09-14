@@ -146,9 +146,12 @@ type CheckResult struct {
 
 // UserMonitorView 用户只读视图：监控概览（含主模型最近状态 + 7d 可用率 + 附加模型最近状态）。
 type UserMonitorView struct {
-	ID                   int64
-	Name                 string
-	Provider             string
+	ID       int64
+	Name     string
+	Provider string
+	// APIMode 是探测走的接口形态（chat_completions / responses）。
+	// 属于协议标识，不含厂商信息，可以对外展示。
+	APIMode              string
 	GroupName            string
 	PrimaryModel         string
 	PrimaryStatus        string

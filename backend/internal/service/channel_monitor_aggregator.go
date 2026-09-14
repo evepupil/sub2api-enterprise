@@ -234,6 +234,7 @@ func buildUserViewFromSummary(
 		ID:               m.ID,
 		Name:             m.Name,
 		Provider:         m.Provider,
+		APIMode:          m.APIMode,
 		GroupName:        m.GroupName,
 		PrimaryModel:     m.PrimaryModel,
 		PrimaryStatus:    summary.PrimaryStatus,

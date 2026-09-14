@@ -945,6 +945,7 @@ var ProviderSet = wire.NewSet(
 	wire.Bind(new(ChannelCacheInvalidator), new(*ChannelService)),
 	NewModelPricingResolver,
 	NewModelPlazaService,
+	ProvidePublicStatusService,
 	NewContentModerationService,
 	NewAffiliateService,
 	ProvidePaymentConfigService,
@@ -1037,6 +1038,17 @@ func ProvideChannelMonitorV2Service(repo ChannelMonitorV2Repository, settingServ
 	svc := NewChannelMonitorV2Service(repo)
 	svc.SetRuntimeReader(settingService)
 	return svc
+}
+
+// ProvidePublicStatusService wires the anonymous status page on top of the
+// admin-configured channel monitors. Status, latency, availability and the
+// timeline are already computed by ListUserView; this service only strips the
+// fields that must not leave the platform — see public_status.go.
+func ProvidePublicStatusService(
+	monitor *ChannelMonitorService,
+	settingService *SettingService,
+) *PublicStatusService {
+	return NewPublicStatusService(monitor, settingService)
 }
 
 // ProvideChannelMonitorV2Aggregator starts the passive minute-rollup worker.

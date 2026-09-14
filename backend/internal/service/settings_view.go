@@ -393,6 +393,10 @@ type PublicSettings struct {
 	// Available Channels feature (user-facing aggregate view)
 	AvailableChannelsEnabled bool `json:"available_channels_enabled"`
 
+	// PublicStatusEnabled 打开后官网出现「服务状态」入口，/status 接口对匿名开放。
+	// 默认关闭：该页面把各分组的可用率摊给任何知道地址的人。
+	PublicStatusEnabled bool `json:"public_status_enabled"`
+
 	// Model Plaza feature (public group/model pricing showcase)
 	ModelPlazaEnabled       bool `json:"model_plaza_enabled"`
 	ModelPlazaRequireAuth   bool `json:"model_plaza_require_auth"`

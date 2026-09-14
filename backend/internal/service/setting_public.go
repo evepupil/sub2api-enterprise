@@ -234,6 +234,7 @@ func (s *SettingService) GetPublicSettings(ctx context.Context) (*PublicSettings
 		SettingKeyChannelMonitorShowQuota,
 		SettingKeyChannelMonitorHideUserRanking,
 		SettingKeyAvailableChannelsEnabled,
+		SettingKeyPublicStatusEnabled,
 		SettingKeyModelPlazaEnabled,
 		SettingKeyModelPlazaRequireAuth,
 		SettingKeyPluginManagementEnabled,
@@ -362,6 +363,8 @@ func (s *SettingService) GetPublicSettings(ctx context.Context) (*PublicSettings
 		ChannelMonitorHideUserRanking:        isTrueSettingValue(settings[SettingKeyChannelMonitorHideUserRanking]),
 
 		AvailableChannelsEnabled: settings[SettingKeyAvailableChannelsEnabled] == "true",
+
+		PublicStatusEnabled: settings[SettingKeyPublicStatusEnabled] == "true",
 
 		ModelPlazaEnabled:       settings[SettingKeyModelPlazaEnabled] == "true",
 		ModelPlazaRequireAuth:   settings[SettingKeyModelPlazaRequireAuth] == "true",
@@ -530,6 +533,18 @@ func (s *SettingService) GetModelPlazaRuntime(ctx context.Context) ModelPlazaRun
 	}
 }
 
+// IsPublicStatusEnabled reports whether the anonymous service status page is open.
+// Fail-closed: on error returns false, matching the opt-in default. The page is
+// reachable without a session, so an unreadable setting must not open it.
+func (s *SettingService) IsPublicStatusEnabled(ctx context.Context) bool {
+	vals, err := s.settingRepo.GetMultiple(ctx, []string{SettingKeyPublicStatusEnabled})
+	if err != nil {
+		slog.Warn("failed to read public_status_enabled setting, defaulting to false", "error", err)
+		return false
+	}
+	return vals[SettingKeyPublicStatusEnabled] == "true"
+}
+
 // IsUserErrorViewAllowed reads the user-facing error-requests visibility switch
 // directly from the settings store. Fail-closed: on error returns false (opt-in default).
 func (s *SettingService) IsUserErrorViewAllowed(ctx context.Context) bool {
@@ -630,6 +645,7 @@ type PublicSettingsInjectionPayload struct {
 	ChannelMonitorHideUserRanking bool `json:"channel_monitor_hide_user_ranking"`
 	ChannelMonitorShowQuota       bool `json:"channel_monitor_show_quota"`
 	AvailableChannelsEnabled      bool `json:"available_channels_enabled"`
+	PublicStatusEnabled           bool `json:"public_status_enabled"`
 	ModelPlazaEnabled             bool `json:"model_plaza_enabled"`
 	ModelPlazaRequireAuth         bool `json:"model_plaza_require_auth"`
 	PluginManagementEnabled       bool `json:"plugin_management_enabled"`
@@ -712,6 +728,7 @@ func (s *SettingService) GetPublicSettingsForInjection(ctx context.Context) (any
 		ChannelMonitorShowQuota:              settings.ChannelMonitorShowQuota,
 		ChannelMonitorHideUserRanking:        settings.ChannelMonitorHideUserRanking,
 		AvailableChannelsEnabled:             settings.AvailableChannelsEnabled,
+		PublicStatusEnabled:                  settings.PublicStatusEnabled,
 		ModelPlazaEnabled:                    settings.ModelPlazaEnabled,
 		ModelPlazaRequireAuth:                settings.ModelPlazaRequireAuth,
 		PluginManagementEnabled:              settings.PluginManagementEnabled,
