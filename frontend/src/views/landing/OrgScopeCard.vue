@@ -89,7 +89,7 @@ const chips = computed(() => [
 .scope-eyebrow {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 10px;
-  letter-spacing: 0.12em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--muted);
 }
@@ -107,7 +107,7 @@ const chips = computed(() => [
   margin-top: 4px;
   font-size: 18px;
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: 0;
   color: var(--ink);
 }
 
@@ -187,7 +187,7 @@ const chips = computed(() => [
   margin-top: 6px;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 10px;
-  letter-spacing: 0.06em;
+  letter-spacing: 0;
   color: var(--subtle);
 }
 

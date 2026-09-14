@@ -5,10 +5,8 @@
     <main>
       <!-- ══════ 首屏：整块深蓝 ══════ -->
       <section class="hm-hero lp-on-dark">
-        <div class="hm-hero-grid" aria-hidden="true"></div>
         <div class="lp-shell hm-hero-inner">
           <div class="hm-hero-copy">
-            <p class="hm-eyebrow">{{ t('landing.home.eyebrow') }}</p>
             <h1 class="hm-title">{{ t('landing.home.title') }}</h1>
             <p class="hm-lede">{{ t('landing.home.lede') }}</p>
             <div class="hm-actions">
@@ -31,7 +29,6 @@
         <div class="lp-shell">
           <div class="lp-secthead">
             <div>
-              <p class="lp-eyebrow">{{ t('landing.price.eyebrow') }}</p>
               <h2 class="lp-heading">{{ t('landing.price.title') }}</h2>
             </div>
             <p class="lp-secnote">{{ t('landing.price.note') }}</p>
@@ -71,7 +68,6 @@
         <div class="lp-shell">
           <div class="lp-secthead">
             <div>
-              <p class="lp-eyebrow">{{ t('landing.capabilities.eyebrow') }}</p>
               <h2 class="lp-heading">{{ t('landing.capabilities.title') }}</h2>
             </div>
             <p class="lp-secnote">{{ t('landing.capabilities.note') }}</p>
@@ -93,7 +89,6 @@
         <div class="lp-shell">
           <div class="lp-secthead">
             <div>
-              <p class="lp-eyebrow">{{ t('landing.governance.eyebrow') }}</p>
               <h2 class="lp-heading">{{ t('landing.governance.title') }}</h2>
             </div>
             <p class="lp-secnote">{{ t('landing.governance.note') }}</p>
@@ -116,7 +111,6 @@
         <div class="lp-shell">
           <div class="lp-secthead">
             <div>
-              <p class="lp-eyebrow">{{ t('landing.spec.eyebrow') }}</p>
               <h2 class="lp-heading">{{ t('landing.spec.title') }}</h2>
             </div>
             <p class="lp-secnote">{{ t('landing.spec.note') }}</p>
@@ -138,7 +132,6 @@
         <div class="lp-shell">
           <div class="lp-secthead">
             <div>
-              <p class="lp-eyebrow">{{ t('landing.steps.eyebrow') }}</p>
               <h2 class="lp-heading">{{ t('landing.steps.title') }}</h2>
             </div>
             <p class="lp-secnote">{{ t('landing.steps.note') }}</p>
@@ -176,7 +169,6 @@
         <div class="lp-shell">
           <div class="lp-secthead">
             <div>
-              <p class="lp-eyebrow">{{ t('landing.service.eyebrow') }}</p>
               <h2 class="lp-heading">{{ t('landing.service.title') }}</h2>
             </div>
             <p class="lp-secnote">
@@ -201,7 +193,6 @@
         <div class="lp-shell">
           <div class="lp-secthead">
             <div>
-              <p class="lp-eyebrow">{{ t('landing.cases.eyebrow') }}</p>
               <h2 class="lp-heading">{{ t('landing.cases.title') }}</h2>
             </div>
             <p class="lp-secnote">{{ t('landing.cases.note') }}</p>
@@ -398,18 +389,7 @@ const snippet = `curl https://your-domain.example/v1/chat/completions \\
 .hm-hero {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(160deg, #0a1938 0%, #102a55 55%, #0c1f42 100%);
-}
-
-/* 极淡的网格，只提供质地，不抢内容 */
-.hm-hero-grid {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
-  background-size: 56px 56px;
-  mask-image: radial-gradient(ellipse 80% 70% at 30% 30%, #000 25%, transparent 75%);
+  background: #0a1938;
 }
 
 .hm-hero-inner {
@@ -420,30 +400,11 @@ const snippet = `curl https://your-domain.example/v1/chat/completions \\
   padding-bottom: 72px;
 }
 
-.hm-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  margin: 0;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  color: #8fa8d8;
-}
-
-.hm-eyebrow::before {
-  width: 2px;
-  height: 12px;
-  background: #5080e2;
-  content: '';
-}
-
 .hm-title {
-  margin: 20px 0 0;
-  font-size: clamp(2.125rem, 4.2vw, 3.125rem);
+  margin: 0;
+  font-size: 2.125rem;
   font-weight: 700;
   line-height: 1.24;
-  letter-spacing: -0.02em;
   color: #fff;
 }
 
@@ -476,6 +437,7 @@ const snippet = `curl https://your-domain.example/v1/chat/completions \\
     padding-top: 96px;
     padding-bottom: 104px;
   }
+  .hm-title { font-size: 3.125rem; }
 }
 
 /* ══════ 定价入口：细线分隔的三栏，不是圆角卡 ══════ */
@@ -503,7 +465,6 @@ a.hm-price-item:hover {
   margin: 0;
   font-size: 1rem;
   font-weight: 700;
-  letter-spacing: -0.01em;
   color: var(--ink);
 }
 
@@ -512,14 +473,12 @@ a.hm-price-item:hover {
   font-size: 2.5rem;
   font-weight: 700;
   line-height: 1;
-  letter-spacing: -0.03em;
   color: var(--ink);
   font-variant-numeric: tabular-nums;
 }
 
 .hm-price-value.is-text {
   font-size: 1.5rem;
-  letter-spacing: -0.015em;
 }
 
 .hm-price-desc {
@@ -567,7 +526,6 @@ a.hm-price-item:hover {
   margin: 0;
   font-size: 1.0625rem;
   font-weight: 700;
-  letter-spacing: -0.01em;
   color: var(--ink);
 }
 
@@ -576,7 +534,6 @@ a.hm-price-item:hover {
   font-size: 1.375rem;
   font-weight: 700;
   line-height: 1.1;
-  letter-spacing: -0.02em;
   color: var(--navy);
   font-variant-numeric: tabular-nums;
 }
@@ -635,7 +592,7 @@ a.hm-price-item:hover {
 .hm-def {
   padding: 18px 20px;
   border: 1px solid var(--rule);
-  border-left: 3px solid var(--navy);
+  border-top: 1px solid var(--navy);
   border-radius: 4px;
   background: var(--paper);
 }
@@ -727,7 +684,6 @@ a.hm-price-item:hover {
   width: 2rem;
   font-size: 0.875rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
   color: var(--navy);
   font-variant-numeric: tabular-nums;
 }
@@ -760,14 +716,12 @@ a.hm-price-item:hover {
   padding: 12px 18px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   font-size: 11px;
-  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: #7286a8;
 }
 
 .hm-code-hint {
   text-transform: none;
-  letter-spacing: 0.02em;
 }
 
 .hm-code-bar.is-foot {
@@ -828,7 +782,7 @@ a.hm-price-item:hover {
 .hm-case {
   padding: 24px;
   border: 1px solid var(--rule);
-  border-top: 3px solid var(--rule-strong);
+  border-top: 1px solid var(--rule-strong);
   border-radius: 4px;
   background: var(--paper);
 }
@@ -843,7 +797,6 @@ a.hm-price-item:hover {
 .hm-case-scale {
   margin: 6px 0 0;
   font-size: 0.75rem;
-  letter-spacing: 0.04em;
   color: var(--subtle);
 }
 
@@ -883,7 +836,6 @@ a.hm-price-item:hover {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
-  letter-spacing: -0.015em;
   color: #fff;
 }
 

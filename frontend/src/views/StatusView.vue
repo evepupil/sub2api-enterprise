@@ -185,7 +185,7 @@ onMounted(async () => {
   font-size: 2.25rem;
   font-weight: 700;
   line-height: 1;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
   color: var(--ink);
   font-variant-numeric: tabular-nums;
 }

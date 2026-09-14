@@ -37,7 +37,7 @@ vi.mock('vue-i18n', async (importOriginal) => {
   }
 })
 
-function mountHome(settings: Record<string, unknown> = {}) {
+function mountHome(settings: Record<string, unknown> = {}, attachTo?: HTMLElement) {
   appStore.cachedPublicSettings = {
     site_name: 'Test site',
     site_subtitle: 'Test subtitle',
@@ -45,6 +45,7 @@ function mountHome(settings: Record<string, unknown> = {}) {
   }
 
   return mount(HomeView, {
+    attachTo,
     global: {
       stubs: {
         RouterLink: RouterLinkStub,
@@ -170,6 +171,32 @@ describe('HomeView compact mode', () => {
     })
 
     expect(modelPlazaDestination(wrapper)).toBe('/model-plaza')
+  })
+
+  it('opens the default home mobile menu and returns focus after Escape', async () => {
+    const wrapper = mountHome({}, document.body)
+    const menuButton = wrapper.get('button[aria-controls="lp-mobile-menu"]')
+
+    expect(menuButton.attributes('aria-expanded')).toBe('false')
+    expect(wrapper.find('#lp-mobile-menu').exists()).toBe(false)
+
+    await menuButton.trigger('click')
+    expect(menuButton.attributes('aria-expanded')).toBe('true')
+    expect(wrapper.find('#lp-mobile-menu').exists()).toBe(true)
+
+    await wrapper.get('header').trigger('keydown', { key: 'Escape' })
+    expect(wrapper.find('#lp-mobile-menu').exists()).toBe(false)
+    expect(document.activeElement).toBe(menuButton.element)
+    wrapper.unmount()
+  })
+
+  it('closes the default home mobile menu after navigation', async () => {
+    const wrapper = mountHome()
+
+    await wrapper.get('button[aria-controls="lp-mobile-menu"]').trigger('click')
+    await wrapper.get('#lp-mobile-menu a').trigger('click')
+
+    expect(wrapper.find('#lp-mobile-menu').exists()).toBe(false)
   })
 
   it('hides the model plaza link when the feature is disabled', () => {

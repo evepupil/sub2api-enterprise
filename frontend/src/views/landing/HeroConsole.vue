@@ -232,7 +232,7 @@ onBeforeUnmount(() => {
   padding: 11px 16px;
   border-bottom: 1px solid var(--rule);
   font-size: 11px;
-  letter-spacing: 0.08em;
+  letter-spacing: 0;
 }
 
 .hc-live {
@@ -276,7 +276,7 @@ onBeforeUnmount(() => {
 
 .hc-metric-label {
   font-size: 10px;
-  letter-spacing: 0.1em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--dim);
 }
@@ -320,7 +320,7 @@ onBeforeUnmount(() => {
 
 .hc-chart-label {
   font-size: 10px;
-  letter-spacing: 0.1em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--dim);
 }
@@ -359,7 +359,7 @@ onBeforeUnmount(() => {
   height: 28px;
   border-bottom: 1px solid var(--rule);
   font-size: 10px;
-  letter-spacing: 0.1em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--dim);
 }
@@ -428,7 +428,7 @@ onBeforeUnmount(() => {
   border: 1px solid var(--rule);
   border-radius: 999px;
   font-size: 10px;
-  letter-spacing: 0.06em;
+  letter-spacing: 0;
   color: var(--dim);
 }
 

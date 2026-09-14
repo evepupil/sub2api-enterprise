@@ -50,40 +50,19 @@
 }
 
 /* ══════════ 排版 ══════════ */
-/* 眉标：小号大写加字距，前面一道短竖线。企业官网的通用标记。 */
-.lp-eyebrow {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  color: var(--navy);
-}
-
-.lp-eyebrow::before {
-  width: 2px;
-  height: 12px;
-  background: var(--navy);
-  content: '';
-}
-
 .lp-display {
-  margin: 20px 0 0;
-  font-size: clamp(2rem, 4vw, 3rem);
+  margin: 0;
+  font-size: 2rem;
   font-weight: 700;
   line-height: 1.22;
-  letter-spacing: -0.02em;
   color: var(--ink);
 }
 
 .lp-heading {
-  margin: 14px 0 0;
-  font-size: clamp(1.375rem, 2.2vw, 1.75rem);
+  margin: 0;
+  font-size: 1.375rem;
   font-weight: 700;
   line-height: 1.3;
-  letter-spacing: -0.015em;
   color: var(--ink);
 }
 
@@ -235,7 +214,6 @@
 .lp-brandname {
   font-size: 0.9375rem;
   font-weight: 700;
-  letter-spacing: -0.01em;
   color: var(--ink);
 }
 
@@ -243,6 +221,11 @@
   display: none;
   align-items: center;
   gap: 0;
+}
+
+.lp-mobile-menu,
+.lp-menu-toggle {
+  display: none;
 }
 
 .lp-nav-actions {
@@ -282,8 +265,8 @@
 
 .lp-icon {
   display: inline-flex;
-  height: 32px;
-  width: 32px;
+  height: 40px;
+  width: 40px;
   align-items: center;
   justify-content: center;
   border: 0;
@@ -300,6 +283,84 @@
 @media (min-width: 900px) {
   .lp-nav-links {
     display: flex;
+  }
+
+  .lp-display {
+    font-size: 3rem;
+  }
+
+  .lp-heading {
+    font-size: 1.75rem;
+  }
+}
+
+@media (max-width: 899px) {
+  .lp-nav-inner {
+    gap: 12px;
+  }
+
+  .lp-brand {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .lp-brandname {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .lp-nav-actions {
+    flex-shrink: 0;
+  }
+
+  .lp-nav-actions > .lp-navlink,
+  .lp-nav-actions > .lp-cta {
+    display: none;
+  }
+
+  .lp-menu-toggle {
+    display: inline-flex;
+  }
+
+  .lp-nav-links {
+    display: none;
+  }
+
+  .lp-mobile-menu {
+    display: block;
+    max-height: calc(100vh - 60px);
+    overflow-y: auto;
+    border-top: 1px solid var(--rule);
+    background: var(--paper);
+  }
+
+  .lp-mobile-menu-inner {
+    display: grid;
+    gap: 2px;
+    padding-top: 10px;
+    padding-bottom: 14px;
+  }
+
+  .lp-mobile-link {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    color: var(--body);
+    font-size: 0.9375rem;
+    text-decoration: none;
+  }
+
+  .lp-mobile-link:hover,
+  .lp-mobile-link.is-active {
+    background: var(--navy-tint);
+    color: var(--navy);
+  }
+
+  .lp-mobile-cta {
+    width: 100%;
+    margin-top: 8px;
   }
 }
 

@@ -7,7 +7,6 @@
       <section class="lp-band">
         <div class="lp-shell">
           <div class="pg-head">
-            <p class="lp-eyebrow">{{ t('pricing.eyebrow') }}</p>
             <h1 class="lp-display">{{ t('pricing.title') }}</h1>
             <p class="lp-lede">{{ t('pricing.lede') }}</p>
           </div>
@@ -70,7 +69,6 @@
         <div class="lp-shell">
           <div class="lp-secthead">
             <div>
-              <p class="lp-eyebrow">{{ t('pricing.compare.eyebrow') }}</p>
               <h2 class="lp-heading">{{ t('pricing.compare.title') }}</h2>
             </div>
             <p class="lp-secnote">{{ t('pricing.compare.note') }}</p>
@@ -92,12 +90,12 @@
                   </tr>
                   <tr v-for="row in group.rows" :key="row.key">
                     <th scope="row">{{ row.label }}</th>
-                    <td>
+                    <td :data-plan="t('pricing.personal.name')">
                       <Icon v-if="row.personal === true" name="check" size="xs" class="pg-check" />
                       <span v-else-if="row.personal === false" class="pg-dash">—</span>
                       <span v-else>{{ row.personal }}</span>
                     </td>
-                    <td>
+                    <td :data-plan="t('pricing.enterprise.name')">
                       <Icon v-if="row.enterprise === true" name="check" size="xs" class="pg-check" />
                       <span v-else-if="row.enterprise === false" class="pg-dash">—</span>
                       <span v-else>{{ row.enterprise }}</span>
@@ -115,7 +113,6 @@
         <div class="lp-shell">
           <div class="lp-secthead">
             <div>
-              <p class="lp-eyebrow">{{ t('pricing.billing.eyebrow') }}</p>
               <h2 class="lp-heading">{{ t('pricing.billing.title') }}</h2>
             </div>
             <p class="lp-secnote">
@@ -140,7 +137,6 @@
         <div class="lp-shell">
           <div class="lp-secthead">
             <div>
-              <p class="lp-eyebrow">{{ t('pricing.faq.eyebrow') }}</p>
               <h2 class="lp-heading">{{ t('pricing.faq.title') }}</h2>
             </div>
             <p class="lp-secnote">
@@ -287,7 +283,7 @@ onMounted(() => {
   flex-direction: column;
   padding: 30px 28px 32px;
   border: 1px solid var(--rule);
-  border-top: 3px solid var(--rule-strong);
+  border-top: 1px solid var(--rule-strong);
   border-radius: 4px;
   background: var(--paper);
 }
@@ -301,7 +297,6 @@ onMounted(() => {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 800;
-  letter-spacing: -0.02em;
   color: var(--ink);
 }
 
@@ -323,7 +318,6 @@ onMounted(() => {
   font-variant-numeric: tabular-nums;
   font-weight: 700;
   line-height: 1;
-  letter-spacing: -0.03em;
   color: var(--ink);
 }
 
@@ -336,7 +330,6 @@ onMounted(() => {
 .pg-quote {
   font-size: 1.75rem;
   font-weight: 800;
-  letter-spacing: -0.02em;
   line-height: 1.15;
   color: var(--ink);
 }
@@ -420,11 +413,73 @@ onMounted(() => {
   text-align: center;
 }
 
+@media (max-width: 819px) {
+  .pg-table-wrap {
+    overflow: visible;
+    border: 0;
+    background: transparent;
+  }
+
+  .pg-table {
+    min-width: 0;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+  }
+
+  .pg-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  .pg-table tbody {
+    display: grid;
+    gap: 10px;
+  }
+
+  .pg-table tbody tr.pg-group-row {
+    display: block;
+  }
+
+  .pg-group-row th {
+    padding: 16px 0 2px;
+  }
+
+  .pg-table tbody tr:not(.pg-group-row) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    border: 1px solid var(--rule);
+    background: var(--paper);
+  }
+
+  .pg-table tbody tr:not(.pg-group-row) th[scope='row'] {
+    grid-column: 1 / -1;
+    padding: 14px 16px 8px;
+  }
+
+  .pg-table tbody tr:not(.pg-group-row) td {
+    width: auto;
+    padding: 8px 16px 14px;
+    text-align: left;
+    border-top: 0;
+  }
+
+  .pg-table tbody tr:not(.pg-group-row) td::before {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 0.75rem;
+    color: var(--subtle);
+    content: attr(data-plan);
+  }
+}
+
 .pg-group-row th {
   padding: 16px 20px 8px;
   font-size: 0.75rem;
   font-weight: 600;
-  letter-spacing: 0.1em;
   text-align: left;
   color: var(--navy);
 }
@@ -444,6 +499,17 @@ onMounted(() => {
 .pg-table tbody tr:not(.pg-group-row) + tr:not(.pg-group-row) th,
 .pg-table tbody tr:not(.pg-group-row) + tr:not(.pg-group-row) td {
   border-top: 1px solid var(--rule);
+}
+
+@media (max-width: 819px) {
+  .pg-table .pg-group-row th {
+    padding: 16px 0 2px;
+  }
+
+  .pg-table tbody tr:not(.pg-group-row) + tr:not(.pg-group-row) th,
+  .pg-table tbody tr:not(.pg-group-row) + tr:not(.pg-group-row) td {
+    border-top: 0;
+  }
 }
 
 /* ══════ 计费口径 ══════ */
