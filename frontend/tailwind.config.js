@@ -105,8 +105,6 @@ export default {
       boxShadow: {
         glass: '0 4px 16px rgba(15, 23, 42, 0.06)',
         'glass-sm': '0 2px 8px rgba(15, 23, 42, 0.05)',
-        glow: '0 0 0 3px rgba(27, 75, 168, 0.12)',
-        'glow-lg': '0 0 0 4px rgba(27, 75, 168, 0.16)',
         card: 'none',
         'card-hover': '0 2px 8px rgba(15, 23, 42, 0.06)',
         pop: '0 4px 12px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.06)',
@@ -119,8 +117,6 @@ export default {
         'gradient-dark': 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
         'gradient-glass':
           'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
-        'mesh-gradient':
-          'radial-gradient(at 40% 20%, rgba(27, 75, 168, 0.10) 0px, transparent 50%), radial-gradient(at 80% 0%, rgba(34, 93, 211, 0.07) 0px, transparent 50%), radial-gradient(at 0% 50%, rgba(27, 75, 168, 0.06) 0px, transparent 50%)'
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-out',
@@ -129,8 +125,7 @@ export default {
         'slide-in-right': 'slideInRight 0.3s ease-out',
         'scale-in': 'scaleIn 0.2s ease-out',
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        shimmer: 'shimmer 2s linear infinite',
-        glow: 'glow 2s ease-in-out infinite alternate'
+        shimmer: 'shimmer 2s linear infinite'
       },
       keyframes: {
         fadeIn: {
@@ -157,10 +152,6 @@ export default {
           '0%': { backgroundPosition: '-200% 0' },
           '100%': { backgroundPosition: '200% 0' }
         },
-        glow: {
-          '0%': { boxShadow: '0 0 0 2px rgba(27, 75, 168, 0.18)' },
-          '100%': { boxShadow: '0 0 0 4px rgba(27, 75, 168, 0.26)' }
-        }
       },
       backdropBlur: {
         xs: '2px'

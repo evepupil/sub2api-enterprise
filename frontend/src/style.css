@@ -533,15 +533,11 @@
     @apply flex w-60 flex-col bg-surface-raised;
     @apply border-r border-line-subtle;
     @apply transition-transform duration-200;
-    transition-property: width, transform;
   }
 
   .sidebar-header {
     @apply flex h-14 items-center gap-2.5 px-4;
     @apply border-b border-line-subtle;
-    transition:
-      padding 0.2s ease,
-      gap 0.2s ease;
   }
 
   .sidebar-nav {
@@ -656,7 +652,7 @@
 
   .progress-bar {
     @apply h-full bg-primary-600;
-    @apply transition-all duration-300;
+    @apply transition-[width] duration-300;
   }
 
   /* ============ 开关 ============ */
@@ -781,11 +777,6 @@
 }
 
 @layer utilities {
-  /* 文字渐变 */
-  .text-gradient {
-    @apply bg-gradient-to-r from-primary-500 to-accent-500 bg-clip-text text-transparent;
-  }
-
   /* 玻璃效果 */
   .glass {
     @apply bg-white/80 backdrop-blur-xl dark:bg-dark-800/80;
