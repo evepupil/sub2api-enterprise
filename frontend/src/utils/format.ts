@@ -69,6 +69,8 @@ export function formatCurrency(amount: number | null | undefined, currency: stri
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: currency,
+    // zh 下默认 symbol 会变成 US$，和控制台余额的 $ 不一致。
+    currencyDisplay: 'narrowSymbol',
     minimumFractionDigits: fractionDigits,
     maximumFractionDigits: fractionDigits
   }).format(amount)

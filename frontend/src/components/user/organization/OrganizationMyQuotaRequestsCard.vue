@@ -18,7 +18,7 @@
       <li v-for="request in requests" :key="request.id" class="flex flex-col gap-2 px-5 py-3 sm:flex-row sm:items-center">
         <div class="min-w-0 flex-1">
           <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-            <span class="font-mono font-medium text-content-strong">${{ formatCurrency(request.amount) }}</span>
+            <span class="font-mono font-medium text-content-strong">{{ formatCurrency(request.amount) }}</span>
             <span
               :class="statusClass(request.status)"
               class="rounded-full px-2 py-0.5 text-xs"

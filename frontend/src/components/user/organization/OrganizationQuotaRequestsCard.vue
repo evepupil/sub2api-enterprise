@@ -32,7 +32,7 @@
         <div class="min-w-0 flex-1">
           <div class="text-sm font-medium text-content-strong">{{ request.email }}</div>
           <div class="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-content-muted">
-            <span class="font-mono text-content">${{ formatCurrency(request.amount) }}</span>
+            <span class="font-mono text-content">{{ formatCurrency(request.amount) }}</span>
             <span v-if="request.reason">{{ request.reason }}</span>
             <span>{{ formatDateTime(request.created_at) }}</span>
             <span
@@ -130,7 +130,7 @@
     >
       <form class="space-y-4" @submit.prevent="submitReject">
         <p class="text-sm text-content">
-          {{ rejectDialog.email }} · ${{ formatCurrency(rejectDialog.amount) }}
+          {{ rejectDialog.email }} · {{ formatCurrency(rejectDialog.amount) }}
         </p>
         <div class="space-y-2">
           <label class="input-label" for="quota-request-reject-note">

@@ -14,7 +14,7 @@
       <div class="min-w-0 flex-1">
         <p class="text-xs font-medium text-content-muted">{{ t('dashboard.orgQuota') }}</p>
         <p v-if="overview.remaining !== null" class="text-xl font-bold text-cyan-700 dark:text-cyan-300">
-          ${{ formatCurrency(overview.remaining) }}
+          {{ formatCurrency(overview.remaining) }}
         </p>
         <p v-else class="text-xl font-bold text-content-strong">{{ t('organization.unlimited') }}</p>
         <p v-if="overview.window_end" class="text-xs text-content-muted">
