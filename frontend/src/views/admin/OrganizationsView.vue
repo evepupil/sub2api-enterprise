@@ -16,89 +16,70 @@
           />
         </div>
 
-        <div v-if="loading" class="flex justify-center py-16">
-          <div class="h-8 w-8 animate-spin rounded-full border-2 border-primary-500 border-t-transparent"></div>
-        </div>
-
-        <div
-          v-else-if="organizations.length === 0"
-          class="px-5 py-16 text-center text-sm text-content-muted"
+        <DataTable
+          :columns="columns"
+          :data="organizations"
+          :loading="loading"
+          row-key="id"
         >
-          {{ t('admin.organizations.empty') }}
-        </div>
-
-        <div v-else class="overflow-x-auto">
-          <table class="w-full min-w-[880px] text-left text-sm">
-            <thead>
-              <tr class="border-b border-gray-200 text-gray-500 dark:border-dark-700 dark:text-dark-400">
-                <th class="px-4 py-2 font-medium">{{ t('admin.organizations.name') }}</th>
-                <th class="px-4 py-2 font-medium">{{ t('admin.organizations.owner') }}</th>
-                <th class="px-4 py-2 text-right font-medium">{{ t('admin.organizations.memberCount') }}</th>
-                <th class="px-4 py-2 font-medium">{{ t('common.status') }}</th>
-                <th class="px-4 py-2 font-medium">{{ t('admin.organizations.groupScope') }}</th>
-                <th class="px-4 py-2 font-medium">{{ t('admin.organizations.createdAt') }}</th>
-                <th class="px-4 py-2 text-right font-medium">{{ t('common.actions') }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="organization in organizations"
-                :key="organization.id"
-                class="border-b border-gray-100 last:border-b-0 dark:border-dark-800"
-              >
-                <td class="px-3 py-2 font-medium text-content-strong">{{ organization.name }}</td>
-                <td class="px-3 py-2">
-                  <div class="text-content-strong">{{ organization.owner_email }}</div>
-                  <div v-if="organization.owner_username" class="text-xs text-content-muted">
-                    {{ organization.owner_username }}
-                  </div>
-                </td>
-                <td class="px-3 py-2 text-right text-content">
-                  {{ organization.member_count }}
-                </td>
-                <td class="px-3 py-2">
-                  <span
-                    class="rounded-full px-2.5 py-1 text-xs font-medium"
-                    :class="
-                      organization.status === 'active'
-                        ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
-                        : 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
-                    "
-                  >
-                    {{ organization.status === 'active' ? t('common.enabled') : t('common.disabled') }}
-                  </span>
-                </td>
-                <td class="px-3 py-2 text-content">
-                  {{ describeScope(organization) }}
-                </td>
-                <td class="px-3 py-2 text-content">
-                  {{ formatDateTime(organization.created_at) }}
-                </td>
-                <td class="px-3 py-2">
-                  <div class="flex justify-end gap-2">
-                    <RouterLink
-                      class="btn btn-secondary btn-sm"
-                      :to="{ path: '/admin/users', query: { organization_id: organization.id } }"
-                    >
-                      {{ t('admin.organizations.viewMembers') }}
-                    </RouterLink>
-                    <button type="button" class="btn btn-secondary btn-sm" @click="openScopeDialog(organization)">
-                      {{ t('admin.organizations.configureGroups') }}
-                    </button>
-                    <button
-                      type="button"
-                      class="btn btn-secondary btn-sm"
-                      :disabled="statusUpdatingId === organization.id"
-                      @click="toggleStatus(organization)"
-                    >
-                      {{ organization.status === 'active' ? t('admin.organizations.disable') : t('admin.organizations.enable') }}
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+          <template #empty>
+            <div class="empty-state">
+              <Icon name="inbox" class="empty-state-icon" />
+              <p class="empty-state-title">{{ t('admin.organizations.empty') }}</p>
+            </div>
+          </template>
+          <template #cell-name="{ row }">
+            <span class="font-medium text-content-strong">{{ row.name }}</span>
+          </template>
+          <template #cell-owner="{ row }">
+            <div class="text-content-strong">{{ row.owner_email }}</div>
+            <div v-if="row.owner_username" class="text-xs text-content-muted">
+              {{ row.owner_username }}
+            </div>
+          </template>
+          <template #cell-member_count="{ row }">
+            {{ row.member_count }}
+          </template>
+          <template #cell-status="{ row }">
+            <span
+              class="rounded-full px-2.5 py-1 text-xs font-medium"
+              :class="
+                row.status === 'active'
+                  ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                  : 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
+              "
+            >
+              {{ row.status === 'active' ? t('common.enabled') : t('common.disabled') }}
+            </span>
+          </template>
+          <template #cell-group_scope="{ row }">
+            {{ describeScope(row) }}
+          </template>
+          <template #cell-created_at="{ row }">
+            {{ formatDateTime(row.created_at) }}
+          </template>
+          <template #cell-actions="{ row }">
+            <div class="flex items-center gap-1">
+              <TableActionButton
+                icon="users"
+                :label="t('admin.organizations.viewMembers')"
+                :to="{ path: '/admin/users', query: { organization_id: row.id } }"
+              />
+              <TableActionButton
+                icon="cog"
+                :label="t('admin.organizations.configureGroups')"
+                @click="openScopeDialog(row)"
+              />
+              <TableActionButton
+                :icon="row.status === 'active' ? 'ban' : 'checkCircle'"
+                :label="row.status === 'active' ? t('admin.organizations.disable') : t('admin.organizations.enable')"
+                :tone="row.status === 'active' ? 'warning' : 'success'"
+                :disabled="statusUpdatingId === row.id"
+                @click="toggleStatus(row)"
+              />
+            </div>
+          </template>
+        </DataTable>
 
         <Pagination
           v-if="total > 0"
@@ -164,13 +145,16 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
-import { RouterLink } from 'vue-router'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import BaseDialog from '@/components/common/BaseDialog.vue'
+import DataTable from '@/components/common/DataTable.vue'
+import TableActionButton from '@/components/common/TableActionButton.vue'
 import Pagination from '@/components/common/Pagination.vue'
 import SearchInput from '@/components/common/SearchInput.vue'
+import Icon from '@/components/icons/Icon.vue'
+import type { Column } from '@/components/common/types'
 import adminAPI from '@/api/admin'
 import type { AdminOrganization, Group } from '@/types'
 import { useAppStore } from '@/stores/app'
@@ -179,6 +163,17 @@ import { formatDateTime } from '@/utils/format'
 
 const { t } = useI18n()
 const appStore = useAppStore()
+
+// 组织列表不做排序：列定义全部不开 sortable，表头沿用 DataTable 的统一小字号样式
+const columns = computed<Column[]>(() => [
+  { key: 'name', label: t('admin.organizations.name') },
+  { key: 'owner', label: t('admin.organizations.owner') },
+  { key: 'member_count', label: t('admin.organizations.memberCount'), class: 'text-right' },
+  { key: 'status', label: t('common.status') },
+  { key: 'group_scope', label: t('admin.organizations.groupScope') },
+  { key: 'created_at', label: t('admin.organizations.createdAt') },
+  { key: 'actions', label: t('common.actions') }
+])
 
 const organizations = ref<AdminOrganization[]>([])
 const total = ref(0)

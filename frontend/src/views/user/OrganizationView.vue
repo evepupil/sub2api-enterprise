@@ -100,148 +100,137 @@
             </div>
           </div>
 
-          <div v-if="membersLoading" class="flex justify-center py-12">
-            <div class="h-6 w-6 animate-spin rounded-full border-2 border-primary-500 border-t-transparent"></div>
-          </div>
-
-          <div
-            v-else-if="members.length === 0"
-            class="px-5 py-12 text-center text-sm text-content-muted"
+          <DataTable
+            :columns="memberColumns"
+            :data="members"
+            :loading="membersLoading"
+            row-key="user_id"
           >
-            {{ t('organization.memberEmpty') }}
-          </div>
+            <template #empty>
+              <div class="empty-state">
+                <Icon name="inbox" class="empty-state-icon" />
+                <p class="empty-state-title">{{ t('organization.memberEmpty') }}</p>
+              </div>
+            </template>
 
-          <div v-else class="overflow-x-auto">
-            <table class="w-full min-w-[760px] text-left text-sm">
-              <thead>
-                <tr class="border-b border-gray-200 text-gray-500 dark:border-dark-700 dark:text-dark-400">
-                  <th class="w-10 px-3 py-2">
-                    <input
-                      type="checkbox"
-                      class="h-4 w-4 cursor-pointer rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                      :checked="allSelectableChecked"
-                      :disabled="selectableMembers.length === 0"
-                      @change="toggleSelectAll"
-                    />
-                  </th>
-                  <th class="px-3 py-2 font-medium">{{ t('organization.memberName') }}</th>
-                  <th class="px-3 py-2 font-medium">{{ t('common.email') }}</th>
-                  <th class="px-3 py-2 font-medium">{{ t('common.status') }}</th>
-                  <th class="px-3 py-2 text-right font-medium">{{ t('organization.spendingLimit') }}</th>
-                  <th class="px-3 py-2 text-right font-medium">{{ t('organization.spendingUsed') }}</th>
-                  <th class="px-3 py-2 text-right font-medium">{{ t('organization.spendingRemaining') }}</th>
-                  <th class="px-3 py-2 text-right font-medium">{{ t('common.actions') }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="member in members"
-                  :key="member.user_id"
-                  class="border-b border-gray-100 last:border-b-0 dark:border-dark-800"
-                >
-                  <td class="px-3 py-3">
-                    <input
-                      v-if="!member.is_owner"
-                      type="checkbox"
-                      class="h-4 w-4 cursor-pointer rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                      :checked="selectedUserIds.includes(member.user_id)"
-                      @change="toggleSelect(member.user_id)"
-                    />
-                  </td>
-                  <td class="px-3 py-3">
-                    <div class="font-medium text-content-strong">{{ member.display_name || '-' }}</div>
-                  </td>
-                  <td class="px-3 py-3">
-                    <div class="text-content">{{ member.email }}</div>
-                    <div v-if="member.username" class="text-xs text-content-muted">
-                      {{ member.username }}
-                    </div>
-                  </td>
-                  <td class="px-3 py-3">
-                    <span
-                      v-if="member.is_owner"
-                      class="rounded-full bg-primary-50 px-2.5 py-1 text-xs font-medium text-primary-700 dark:bg-primary-900/30 dark:text-primary-300"
-                    >
-                      {{ t('organization.owner') }}
-                    </span>
-                    <span
-                      v-else
-                      class="rounded-full px-2.5 py-1 text-xs font-medium"
-                      :class="
-                        member.status === 'active'
-                          ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
-                          : 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
-                      "
-                    >
-                      {{ member.status === 'active' ? t('common.enabled') : t('common.disabled') }}
-                    </span>
-                  </td>
-                  <td class="px-3 py-3 text-right text-content-strong">
-                    <template v-if="member.is_owner">-</template>
-                    <template v-else-if="member.quota">
-                      <div>{{ formatCurrency(member.quota.amount) }}</div>
-                      <div class="text-xs text-content-muted">
-                        {{ t('organization.quotaEveryDays', { days: member.quota.period_days }) }}
-                        <span v-if="member.quota.mode === 'periodic_pending'">
-                          · {{ t('organization.quotaPending') }}
-                        </span>
-                      </div>
-                    </template>
-                    <template v-else>{{ formatSpending(member.spending_limit) }}</template>
-                  </td>
-                  <td class="px-3 py-3 text-right text-content">
-                    {{ member.is_owner ? '-' : formatCurrency(member.spending_used) }}
-                  </td>
-                  <td
-                    class="px-3 py-3 text-right"
-                    :class="
-                      isExhausted(member)
-                        ? 'font-medium text-amber-600 dark:text-amber-400'
-                        : 'text-content'
-                    "
-                  >
-                    {{ member.is_owner ? '-' : formatSpending(member.spending_remaining) }}
-                    <div
-                      v-if="!member.is_owner && member.quota?.mode === 'periodic_active' && member.quota.window_end"
-                      class="text-xs text-content-muted"
-                    >
-                      {{ t('organization.quotaResetAt', { date: formatDateTime(member.quota.window_end) }) }}
-                    </div>
-                    <div
-                      v-if="!member.is_owner && member.spending_frozen > 0"
-                      class="text-xs text-content-muted"
-                    >
-                      {{ t('organization.spendingFrozen') }} {{ formatCurrency(member.spending_frozen) }}
-                    </div>
-                  </td>
-                  <td class="px-3 py-3">
-                    <div class="flex justify-end gap-2">
-                      <button
-                        type="button"
-                        class="btn btn-secondary btn-sm"
-                        :disabled="renamingId === member.user_id"
-                        @click="openRenameDialog(member)"
-                      >
-                        {{ t('organization.rename') }}
-                      </button>
-                      <button v-if="!member.is_owner" type="button" class="btn btn-secondary btn-sm" @click="openLimitDialog(member)">
-                        {{ t('organization.quotaTitle') }}
-                      </button>
-                      <button
-                        v-if="!member.is_owner"
-                        type="button"
-                        class="btn btn-secondary btn-sm"
-                        :disabled="statusUpdatingId === member.user_id"
-                        @click="toggleMemberStatus(member)"
-                      >
-                        {{ member.status === 'active' ? t('organization.disableMember') : t('organization.enableMember') }}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+            <template #header-select>
+              <input
+                type="checkbox"
+                class="h-4 w-4 cursor-pointer rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                :checked="allSelectableChecked"
+                :disabled="selectableMembers.length === 0"
+                @change="toggleSelectAll"
+              />
+            </template>
+
+            <template #cell-select="{ row }">
+              <input
+                v-if="!row.is_owner"
+                type="checkbox"
+                class="h-4 w-4 cursor-pointer rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                :checked="selectedUserIds.includes(row.user_id)"
+                @change="toggleSelect(row.user_id)"
+              />
+            </template>
+
+            <template #cell-display_name="{ row }">
+              <span class="font-medium text-content-strong">{{ row.display_name || '-' }}</span>
+            </template>
+
+            <template #cell-email="{ row }">
+              <div class="text-content">{{ row.email }}</div>
+              <div v-if="row.username" class="text-xs text-content-muted">
+                {{ row.username }}
+              </div>
+            </template>
+
+            <template #cell-status="{ row }">
+              <span
+                v-if="row.is_owner"
+                class="rounded-full bg-primary-50 px-2.5 py-1 text-xs font-medium text-primary-700 dark:bg-primary-900/30 dark:text-primary-300"
+              >
+                {{ t('organization.owner') }}
+              </span>
+              <span
+                v-else
+                class="rounded-full px-2.5 py-1 text-xs font-medium"
+                :class="
+                  row.status === 'active'
+                    ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                    : 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
+                "
+              >
+                {{ row.status === 'active' ? t('common.enabled') : t('common.disabled') }}
+              </span>
+            </template>
+
+            <template #cell-spending_limit="{ row }">
+              <template v-if="row.is_owner">-</template>
+              <template v-else-if="row.quota">
+                <div>{{ formatCurrency(row.quota.amount) }}</div>
+                <div class="text-xs text-content-muted">
+                  {{ t('organization.quotaEveryDays', { days: row.quota.period_days }) }}
+                  <span v-if="row.quota.mode === 'periodic_pending'">
+                    · {{ t('organization.quotaPending') }}
+                  </span>
+                </div>
+              </template>
+              <template v-else>{{ formatSpending(row.spending_limit) }}</template>
+            </template>
+
+            <template #cell-spending_used="{ row }">
+              {{ row.is_owner ? '-' : formatCurrency(row.spending_used) }}
+            </template>
+
+            <template #cell-spending_remaining="{ row }">
+              <span
+                :class="
+                  isExhausted(row)
+                    ? 'font-medium text-amber-600 dark:text-amber-400'
+                    : 'text-content'
+                "
+              >
+                {{ row.is_owner ? '-' : formatSpending(row.spending_remaining) }}
+              </span>
+              <div
+                v-if="!row.is_owner && row.quota?.mode === 'periodic_active' && row.quota.window_end"
+                class="text-xs text-content-muted"
+              >
+                {{ t('organization.quotaResetAt', { date: formatDateTime(row.quota.window_end) }) }}
+              </div>
+              <div
+                v-if="!row.is_owner && row.spending_frozen > 0"
+                class="text-xs text-content-muted"
+              >
+                {{ t('organization.spendingFrozen') }} {{ formatCurrency(row.spending_frozen) }}
+              </div>
+            </template>
+
+            <template #cell-actions="{ row }">
+              <div class="flex items-center gap-1">
+                <TableActionButton
+                  icon="edit"
+                  :label="t('organization.rename')"
+                  :disabled="renamingId === row.user_id"
+                  @click="openRenameDialog(row)"
+                />
+                <TableActionButton
+                  v-if="!row.is_owner"
+                  icon="dollar"
+                  :label="t('organization.quotaTitle')"
+                  @click="openLimitDialog(row)"
+                />
+                <TableActionButton
+                  v-if="!row.is_owner"
+                  :icon="row.status === 'active' ? 'ban' : 'checkCircle'"
+                  :label="row.status === 'active' ? t('organization.disableMember') : t('organization.enableMember')"
+                  :tone="row.status === 'active' ? 'warning' : 'success'"
+                  :disabled="statusUpdatingId === row.user_id"
+                  @click="toggleMemberStatus(row)"
+                />
+              </div>
+            </template>
+          </DataTable>
 
           <Pagination
             v-if="memberTotal > 0"
@@ -292,30 +281,29 @@
                 </div>
               </div>
 
-              <div class="flex shrink-0 flex-wrap items-center gap-2">
+              <div class="flex shrink-0 flex-wrap items-center gap-1">
                 <span :class="statusClass(invitation)" class="rounded-full px-2.5 py-1 text-xs font-medium">
                   {{ t(`organization.status.${effectiveStatus(invitation)}`) }}
                 </span>
-                <button type="button" class="btn btn-secondary btn-sm" @click="copyInvitation(invitation.code)">
-                  {{ t('organization.copyCode') }}
-                </button>
-                <button
-                  type="button"
-                  class="btn btn-secondary btn-sm"
+                <TableActionButton
+                  icon="copy"
+                  :label="t('organization.copyCode')"
+                  @click="copyInvitation(invitation.code)"
+                />
+                <TableActionButton
+                  icon="link"
+                  :label="t('organization.copyLink')"
                   :title="inviteLink(invitation.code)"
                   @click="copyInviteLink(invitation.code)"
-                >
-                  {{ t('organization.copyLink') }}
-                </button>
-                <button
+                />
+                <TableActionButton
                   v-if="effectiveStatus(invitation) === 'unused'"
-                  type="button"
-                  class="btn btn-secondary btn-sm"
+                  icon="ban"
+                  :label="t('organization.disableInvitation')"
+                  tone="warning"
                   :disabled="disablingId === invitation.id"
                   @click="disableInvitation(invitation)"
-                >
-                  {{ t('organization.disableInvitation') }}
-                </button>
+                />
               </div>
             </li>
           </ul>
@@ -527,9 +515,12 @@ import { useI18n } from 'vue-i18n'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import Icon from '@/components/icons/Icon.vue'
 import BaseDialog from '@/components/common/BaseDialog.vue'
+import DataTable from '@/components/common/DataTable.vue'
+import TableActionButton from '@/components/common/TableActionButton.vue'
 import Pagination from '@/components/common/Pagination.vue'
 import SearchInput from '@/components/common/SearchInput.vue'
 import Select, { type SelectOption } from '@/components/common/Select.vue'
+import type { Column } from '@/components/common/types'
 import OrganizationQuotaRequestsCard from '@/components/user/organization/OrganizationQuotaRequestsCard.vue'
 import OrganizationMyQuotaRequestsCard from '@/components/user/organization/OrganizationMyQuotaRequestsCard.vue'
 import organizationAPI from '@/api/organization'
@@ -569,6 +560,17 @@ const loadError = ref('')
 const members = ref<OrganizationMember[]>([])
 const memberTotal = ref(0)
 const membersLoading = ref(false)
+// 成员表不做排序：列全部不开 sortable，表头沿用 DataTable 的统一小字号样式
+const memberColumns = computed<Column[]>(() => [
+  { key: 'select', label: '', class: 'w-10 text-center' },
+  { key: 'display_name', label: t('organization.memberName') },
+  { key: 'email', label: t('common.email') },
+  { key: 'status', label: t('common.status') },
+  { key: 'spending_limit', label: t('organization.spendingLimit'), class: 'text-right' },
+  { key: 'spending_used', label: t('organization.spendingUsed'), class: 'text-right' },
+  { key: 'spending_remaining', label: t('organization.spendingRemaining'), class: 'text-right' },
+  { key: 'actions', label: t('common.actions') }
+])
 const page = ref(1)
 const pageSize = ref(20)
 const search = ref('')

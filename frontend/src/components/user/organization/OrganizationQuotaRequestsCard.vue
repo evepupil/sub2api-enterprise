@@ -45,23 +45,21 @@
             <span v-if="request.review_note" class="text-content-subtle">{{ request.review_note }}</span>
           </div>
         </div>
-        <div v-if="request.status === 'pending'" class="flex shrink-0 gap-2">
-          <button
-            type="button"
-            class="btn btn-primary btn-sm"
+        <div v-if="request.status === 'pending'" class="flex shrink-0 gap-1">
+          <TableActionButton
+            icon="check"
+            :label="t('organization.quotaRequestApprove')"
+            tone="success"
             :disabled="handlingId === request.id"
             @click="approve(request)"
-          >
-            {{ t('organization.quotaRequestApprove') }}
-          </button>
-          <button
-            type="button"
-            class="btn btn-secondary btn-sm"
+          />
+          <TableActionButton
+            icon="x"
+            :label="t('organization.quotaRequestReject')"
+            tone="danger"
             :disabled="handlingId === request.id"
             @click="openReject(request)"
-          >
-            {{ t('organization.quotaRequestReject') }}
-          </button>
+          />
         </div>
       </li>
     </ul>
@@ -164,6 +162,7 @@ import { computed, onMounted, reactive, ref, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import BaseDialog from '@/components/common/BaseDialog.vue'
 import Pagination from '@/components/common/Pagination.vue'
+import TableActionButton from '@/components/common/TableActionButton.vue'
 import Select, { type SelectOption } from '@/components/common/Select.vue'
 import {
   approveQuotaRequest,

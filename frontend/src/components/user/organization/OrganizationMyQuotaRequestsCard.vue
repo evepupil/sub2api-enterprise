@@ -32,15 +32,14 @@
             <span v-if="request.review_note" class="text-content-subtle">{{ request.review_note }}</span>
           </div>
         </div>
-        <button
+        <TableActionButton
           v-if="request.status === 'pending'"
-          type="button"
-          class="btn btn-secondary btn-sm shrink-0"
+          icon="x"
+          :label="t('organization.quotaRequestWithdraw')"
+          class="shrink-0"
           :disabled="withdrawingId === request.id"
           @click="withdraw(request)"
-        >
-          {{ t('organization.quotaRequestWithdraw') }}
-        </button>
+        />
       </li>
     </ul>
   </section>
@@ -49,6 +48,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import TableActionButton from '@/components/common/TableActionButton.vue'
 import { listQuotaRequests, withdrawQuotaRequest } from '@/api/organization'
 import type { OrganizationQuotaRequest } from '@/types'
 import { useAppStore } from '@/stores/app'
