@@ -1,5 +1,6 @@
 export interface OrganizationRegistrationContext {
   organizationName: string
+  memberName: string
   invitationCode: string
 }
 
@@ -8,6 +9,7 @@ const STORAGE_KEY = 'organization_registration_context'
 export function storeOrganizationRegistrationContext(context: OrganizationRegistrationContext): void {
   const normalized: OrganizationRegistrationContext = {
     organizationName: context.organizationName.trim(),
+    memberName: context.memberName.trim(),
     invitationCode: context.invitationCode.trim()
   }
   if (!normalized.organizationName && !normalized.invitationCode) {
@@ -18,7 +20,7 @@ export function storeOrganizationRegistrationContext(context: OrganizationRegist
 }
 
 export function loadOrganizationRegistrationContext(): OrganizationRegistrationContext {
-  const fallback: OrganizationRegistrationContext = { organizationName: '', invitationCode: '' }
+  const fallback: OrganizationRegistrationContext = { organizationName: '', memberName: '', invitationCode: '' }
   if (typeof window === 'undefined') return fallback
   const raw = window.sessionStorage.getItem(STORAGE_KEY)
   if (!raw) return fallback
@@ -26,6 +28,7 @@ export function loadOrganizationRegistrationContext(): OrganizationRegistrationC
     const parsed = JSON.parse(raw) as Partial<OrganizationRegistrationContext>
     return {
       organizationName: typeof parsed.organizationName === 'string' ? parsed.organizationName.trim() : '',
+      memberName: typeof parsed.memberName === 'string' ? parsed.memberName.trim() : '',
       invitationCode: typeof parsed.invitationCode === 'string' ? parsed.invitationCode.trim() : ''
     }
   } catch {

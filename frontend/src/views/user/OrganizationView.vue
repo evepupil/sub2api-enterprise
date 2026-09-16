@@ -124,6 +124,7 @@
                       @change="toggleSelectAll"
                     />
                   </th>
+                  <th class="px-3 py-2 font-medium">{{ t('organization.memberName') }}</th>
                   <th class="px-3 py-2 font-medium">{{ t('common.email') }}</th>
                   <th class="px-3 py-2 font-medium">{{ t('common.status') }}</th>
                   <th class="px-3 py-2 text-right font-medium">{{ t('organization.spendingLimit') }}</th>
@@ -148,7 +149,10 @@
                     />
                   </td>
                   <td class="px-3 py-3">
-                    <div class="font-medium text-content-strong">{{ member.email }}</div>
+                    <div class="font-medium text-content-strong">{{ member.display_name || '-' }}</div>
+                  </td>
+                  <td class="px-3 py-3">
+                    <div class="text-content">{{ member.email }}</div>
                     <div v-if="member.username" class="text-xs text-content-muted">
                       {{ member.username }}
                     </div>
@@ -211,11 +215,20 @@
                     </div>
                   </td>
                   <td class="px-3 py-3">
-                    <div v-if="!member.is_owner" class="flex justify-end gap-2">
-                      <button type="button" class="btn btn-secondary btn-sm" @click="openLimitDialog(member)">
+                    <div class="flex justify-end gap-2">
+                      <button
+                        type="button"
+                        class="btn btn-secondary btn-sm"
+                        :disabled="renamingId === member.user_id"
+                        @click="openRenameDialog(member)"
+                      >
+                        {{ t('organization.rename') }}
+                      </button>
+                      <button v-if="!member.is_owner" type="button" class="btn btn-secondary btn-sm" @click="openLimitDialog(member)">
                         {{ t('organization.quotaTitle') }}
                       </button>
                       <button
+                        v-if="!member.is_owner"
                         type="button"
                         class="btn btn-secondary btn-sm"
                         :disabled="statusUpdatingId === member.user_id"
@@ -313,6 +326,35 @@
         <OrganizationMyQuotaRequestsCard />
       </template>
     </div>
+
+    <BaseDialog
+      :show="renameDialog.show"
+      :title="t('organization.rename')"
+      width="narrow"
+      @close="renameDialog.show = false"
+    >
+      <form class="space-y-4" @submit.prevent="submitRename">
+        <div class="space-y-2">
+          <label class="input-label" for="member-display-name">{{ t('organization.memberName') }}</label>
+          <input
+            id="member-display-name"
+            v-model="renameDialog.name"
+            type="text"
+            maxlength="50"
+            class="input w-full"
+          />
+        </div>
+        <p v-if="renameDialog.error" class="text-sm text-red-600 dark:text-red-400">{{ renameDialog.error }}</p>
+        <div class="flex justify-end gap-2">
+          <button type="button" class="btn btn-secondary" @click="renameDialog.show = false">
+            {{ t('common.cancel') }}
+          </button>
+          <button type="submit" class="btn btn-primary" :disabled="renameDialog.saving">
+            {{ renameDialog.saving ? t('common.saving') : t('common.save') }}
+          </button>
+        </div>
+      </form>
+    </BaseDialog>
 
     <BaseDialog
       :show="limitDialog.show"
@@ -533,6 +575,46 @@ const search = ref('')
 const statusFilter = ref('')
 const selectedUserIds = ref<number[]>([])
 const statusUpdatingId = ref<number | null>(null)
+
+// 改名弹窗：组织内名称必填 1-50 字，不限制重名（邮箱本身唯一）。
+const renameDialog = reactive({
+  show: false,
+  userId: 0,
+  name: '',
+  error: '',
+  saving: false
+})
+const renamingId = ref<number | null>(null)
+
+function openRenameDialog(member: OrganizationMember): void {
+  renameDialog.userId = member.user_id
+  renameDialog.name = member.display_name || ''
+  renameDialog.error = ''
+  renameDialog.show = true
+}
+
+async function submitRename(): Promise<void> {
+  const name = renameDialog.name.trim()
+  if (!name || name.length > 50) {
+    renameDialog.error = t('organization.memberNameInvalid')
+    return
+  }
+  renameDialog.saving = true
+  renameDialog.error = ''
+  renamingId.value = renameDialog.userId
+  try {
+    const updated = await organizationAPI.updateOrganizationMemberDisplayName(renameDialog.userId, name)
+    const index = members.value.findIndex((item) => item.user_id === updated.user_id)
+    if (index >= 0) members.value.splice(index, 1, updated)
+    renameDialog.show = false
+    appStore.showSuccess(t('common.saved'))
+  } catch (error) {
+    renameDialog.error = extractApiErrorMessage(error, t('organization.memberUpdateFailed'))
+  } finally {
+    renameDialog.saving = false
+    renamingId.value = null
+  }
+}
 
 // 配额编辑弹窗：不限额 / 固定累计 / 周期 三种模式互斥，切换即生效另一种退出。
 const limitDialog = reactive({

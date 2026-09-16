@@ -1169,6 +1169,7 @@ var (
 		{Name: "id", Type: field.TypeInt64, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
 		{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "display_name", Type: field.TypeString, Nullable: true, Size: 50},
 		{Name: "spending_limit", Type: field.TypeFloat64, Nullable: true, SchemaType: map[string]string{"postgres": "decimal(20,8)"}},
 		{Name: "spending_used", Type: field.TypeFloat64, Default: 0, SchemaType: map[string]string{"postgres": "decimal(20,8)"}},
 		{Name: "spending_frozen", Type: field.TypeFloat64, Default: 0, SchemaType: map[string]string{"postgres": "decimal(20,8)"}},
@@ -1188,13 +1189,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "organization_members_organizations_members",
-				Columns:    []*schema.Column{OrganizationMembersColumns[11]},
+				Columns:    []*schema.Column{OrganizationMembersColumns[12]},
 				RefColumns: []*schema.Column{OrganizationsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "organization_members_users_organization_membership",
-				Columns:    []*schema.Column{OrganizationMembersColumns[12]},
+				Columns:    []*schema.Column{OrganizationMembersColumns[13]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -1203,7 +1204,7 @@ var (
 			{
 				Name:    "organizationmember_organization_id",
 				Unique:  false,
-				Columns: []*schema.Column{OrganizationMembersColumns[11]},
+				Columns: []*schema.Column{OrganizationMembersColumns[12]},
 			},
 		},
 	}

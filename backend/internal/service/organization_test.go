@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 	"time"
 
@@ -185,14 +186,14 @@ func TestOrganizationServiceResolveRegistrationIntent(t *testing.T) {
 	service := NewOrganizationService(organizationRepo, redeemRepo)
 
 	t.Run("personal registration without gate", func(t *testing.T) {
-		intent, err := service.ResolveRegistrationIntent(ctx, "", "", false)
+		intent, err := service.ResolveRegistrationIntent(ctx, "", "", "", false)
 		require.NoError(t, err)
 		require.Equal(t, OrganizationRegistrationPersonal, intent.Kind)
 		require.Nil(t, intent.Invitation)
 	})
 
 	t.Run("create organization with platform invitation", func(t *testing.T) {
-		intent, err := service.ResolveRegistrationIntent(ctx, "  Example Team  ", "PLATFORM", true)
+		intent, err := service.ResolveRegistrationIntent(ctx, "  Example Team  ", "创始人", "PLATFORM", true)
 		require.NoError(t, err)
 		require.Equal(t, OrganizationRegistrationCreate, intent.Kind)
 		require.Equal(t, "Example Team", intent.OrganizationName)
@@ -200,31 +201,45 @@ func TestOrganizationServiceResolveRegistrationIntent(t *testing.T) {
 	})
 
 	t.Run("join organization", func(t *testing.T) {
-		intent, err := service.ResolveRegistrationIntent(ctx, "", "ORG", false)
+		intent, err := service.ResolveRegistrationIntent(ctx, "", "新同事", "ORG", false)
 		require.NoError(t, err)
 		require.Equal(t, OrganizationRegistrationJoin, intent.Kind)
 		require.Equal(t, organizationID, intent.Organization.ID)
 	})
 
 	t.Run("organization invitation conflicts with create", func(t *testing.T) {
-		_, err := service.ResolveRegistrationIntent(ctx, "Another Team", "ORG", true)
+		_, err := service.ResolveRegistrationIntent(ctx, "Another Team", "", "ORG", true)
 		require.ErrorIs(t, err, ErrOrganizationRegistrationConflict)
 	})
 
 	t.Run("platform invitation is not consumed when gate is off", func(t *testing.T) {
-		intent, err := service.ResolveRegistrationIntent(ctx, "", "PLATFORM", false)
+		intent, err := service.ResolveRegistrationIntent(ctx, "", "", "PLATFORM", false)
 		require.NoError(t, err)
 		require.Nil(t, intent.Invitation)
 	})
 
 	t.Run("invitation required", func(t *testing.T) {
-		_, err := service.ResolveRegistrationIntent(ctx, "", "", true)
+		_, err := service.ResolveRegistrationIntent(ctx, "", "", "", true)
 		require.ErrorIs(t, err, ErrInvitationCodeRequired)
 	})
 
 	t.Run("expired organization invitation", func(t *testing.T) {
-		_, err := service.ResolveRegistrationIntent(ctx, "", "EXPIRED-ORG", false)
+		_, err := service.ResolveRegistrationIntent(ctx, "", "", "EXPIRED-ORG", false)
 		require.ErrorIs(t, err, ErrInvitationCodeInvalid)
+	})
+
+	t.Run("创建组织与加入组织必须填组织内名称", func(t *testing.T) {
+		_, err := service.ResolveRegistrationIntent(ctx, "Example Team", "", "PLATFORM", true)
+		require.ErrorIs(t, err, ErrOrganizationMemberNameInvalid)
+		_, err = service.ResolveRegistrationIntent(ctx, "", "", "ORG", false)
+		require.ErrorIs(t, err, ErrOrganizationMemberNameInvalid)
+		tooLong := strings.Repeat("名", 51)
+		_, err = service.ResolveRegistrationIntent(ctx, "Example Team", tooLong, "PLATFORM", true)
+		require.ErrorIs(t, err, ErrOrganizationMemberNameInvalid)
+
+		intent, err := service.ResolveRegistrationIntent(ctx, "  Example Team  ", "  张三  ", "PLATFORM", true)
+		require.NoError(t, err)
+		require.Equal(t, "张三", intent.MemberName, "成员名去空格后保存")
 	})
 }
 
@@ -236,7 +251,7 @@ func TestOrganizationServiceCompleteRegistration(t *testing.T) {
 	)
 	service := NewOrganizationService(organizationRepo, redeemRepo)
 
-	intent, err := service.ResolveRegistrationIntent(ctx, "Acme", "PLATFORM", true)
+	intent, err := service.ResolveRegistrationIntent(ctx, "Acme", "创始人", "PLATFORM", true)
 	require.NoError(t, err)
 	summary, err := service.CompleteRegistration(ctx, 101, intent)
 	require.NoError(t, err)
@@ -268,7 +283,7 @@ func TestOrganizationServiceCompleteJoinRegistration(t *testing.T) {
 	)
 	service := NewOrganizationService(organizationRepo, redeemRepo)
 
-	intent, err := service.ResolveRegistrationIntent(ctx, "", "ORG", false)
+	intent, err := service.ResolveRegistrationIntent(ctx, "", "新同事", "ORG", false)
 	require.NoError(t, err)
 	summary, err := service.CompleteRegistration(ctx, 101, intent)
 	require.NoError(t, err)
@@ -285,7 +300,7 @@ func TestOrganizationServiceCompleteJoinRegistration(t *testing.T) {
 	require.Equal(t, StatusUnused, reused.Status)
 	require.True(t, reused.CanUse())
 
-	secondIntent, err := service.ResolveRegistrationIntent(ctx, "", "ORG", false)
+	secondIntent, err := service.ResolveRegistrationIntent(ctx, "", "新同事", "ORG", false)
 	require.NoError(t, err)
 	secondSummary, err := service.CompleteRegistration(ctx, 102, secondIntent)
 	require.NoError(t, err)
@@ -302,7 +317,7 @@ func TestPlatformInvitationStaysSingleUse(t *testing.T) {
 	)
 	service := NewOrganizationService(organizationRepo, redeemRepo)
 
-	intent, err := service.ResolveRegistrationIntent(ctx, "", "PLAT", true)
+	intent, err := service.ResolveRegistrationIntent(ctx, "Acme2", "创始人", "PLAT", true)
 	require.NoError(t, err)
 	_, err = service.CompleteRegistration(ctx, 201, intent)
 	require.NoError(t, err)

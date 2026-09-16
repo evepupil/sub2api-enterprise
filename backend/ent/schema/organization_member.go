@@ -32,6 +32,12 @@ func (OrganizationMember) Fields() []ent.Field {
 		field.Int64("organization_id"),
 		field.Int64("user_id"),
 
+		// 组织内名称：注册时由本人填写（「你在组织中的名称」），管理员可改。
+		// 组织侧展示一律优先它、回退邮箱；与个人资料的昵称互不干扰。不限制重名。
+		field.String("display_name").
+			Optional().
+			MaxLen(50),
+
 		// 成员消费上限（USD）：
 		//   nil / 未设置 → 不限额（默认），成员只受组织付款账号余额约束
 		//   0            → 完全不能消费

@@ -64,6 +64,26 @@ func (_u *OrganizationMemberUpdate) SetNillableUserID(v *int64) *OrganizationMem
 	return _u
 }
 
+// SetDisplayName sets the "display_name" field.
+func (_u *OrganizationMemberUpdate) SetDisplayName(v string) *OrganizationMemberUpdate {
+	_u.mutation.SetDisplayName(v)
+	return _u
+}
+
+// SetNillableDisplayName sets the "display_name" field if the given value is not nil.
+func (_u *OrganizationMemberUpdate) SetNillableDisplayName(v *string) *OrganizationMemberUpdate {
+	if v != nil {
+		_u.SetDisplayName(*v)
+	}
+	return _u
+}
+
+// ClearDisplayName clears the value of the "display_name" field.
+func (_u *OrganizationMemberUpdate) ClearDisplayName() *OrganizationMemberUpdate {
+	_u.mutation.ClearDisplayName()
+	return _u
+}
+
 // SetSpendingLimit sets the "spending_limit" field.
 func (_u *OrganizationMemberUpdate) SetSpendingLimit(v float64) *OrganizationMemberUpdate {
 	_u.mutation.ResetSpendingLimit()
@@ -313,6 +333,11 @@ func (_u *OrganizationMemberUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *OrganizationMemberUpdate) check() error {
+	if v, ok := _u.mutation.DisplayName(); ok {
+		if err := organizationmember.DisplayNameValidator(v); err != nil {
+			return &ValidationError{Name: "display_name", err: fmt.Errorf(`ent: validator failed for field "OrganizationMember.display_name": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.QuotaPeriodDays(); ok {
 		if err := organizationmember.QuotaPeriodDaysValidator(v); err != nil {
 			return &ValidationError{Name: "quota_period_days", err: fmt.Errorf(`ent: validator failed for field "OrganizationMember.quota_period_days": %w`, err)}
@@ -341,6 +366,12 @@ func (_u *OrganizationMemberUpdate) sqlSave(ctx context.Context) (_node int, err
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(organizationmember.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.DisplayName(); ok {
+		_spec.SetField(organizationmember.FieldDisplayName, field.TypeString, value)
+	}
+	if _u.mutation.DisplayNameCleared() {
+		_spec.ClearField(organizationmember.FieldDisplayName, field.TypeString)
 	}
 	if value, ok := _u.mutation.SpendingLimit(); ok {
 		_spec.SetField(organizationmember.FieldSpendingLimit, field.TypeFloat64, value)
@@ -508,6 +539,26 @@ func (_u *OrganizationMemberUpdateOne) SetNillableUserID(v *int64) *Organization
 	if v != nil {
 		_u.SetUserID(*v)
 	}
+	return _u
+}
+
+// SetDisplayName sets the "display_name" field.
+func (_u *OrganizationMemberUpdateOne) SetDisplayName(v string) *OrganizationMemberUpdateOne {
+	_u.mutation.SetDisplayName(v)
+	return _u
+}
+
+// SetNillableDisplayName sets the "display_name" field if the given value is not nil.
+func (_u *OrganizationMemberUpdateOne) SetNillableDisplayName(v *string) *OrganizationMemberUpdateOne {
+	if v != nil {
+		_u.SetDisplayName(*v)
+	}
+	return _u
+}
+
+// ClearDisplayName clears the value of the "display_name" field.
+func (_u *OrganizationMemberUpdateOne) ClearDisplayName() *OrganizationMemberUpdateOne {
+	_u.mutation.ClearDisplayName()
 	return _u
 }
 
@@ -773,6 +824,11 @@ func (_u *OrganizationMemberUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *OrganizationMemberUpdateOne) check() error {
+	if v, ok := _u.mutation.DisplayName(); ok {
+		if err := organizationmember.DisplayNameValidator(v); err != nil {
+			return &ValidationError{Name: "display_name", err: fmt.Errorf(`ent: validator failed for field "OrganizationMember.display_name": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.QuotaPeriodDays(); ok {
 		if err := organizationmember.QuotaPeriodDaysValidator(v); err != nil {
 			return &ValidationError{Name: "quota_period_days", err: fmt.Errorf(`ent: validator failed for field "OrganizationMember.quota_period_days": %w`, err)}
@@ -818,6 +874,12 @@ func (_u *OrganizationMemberUpdateOne) sqlSave(ctx context.Context) (_node *Orga
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(organizationmember.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.DisplayName(); ok {
+		_spec.SetField(organizationmember.FieldDisplayName, field.TypeString, value)
+	}
+	if _u.mutation.DisplayNameCleared() {
+		_spec.ClearField(organizationmember.FieldDisplayName, field.TypeString)
 	}
 	if value, ok := _u.mutation.SpendingLimit(); ok {
 		_spec.SetField(organizationmember.FieldSpendingLimit, field.TypeFloat64, value)

@@ -924,6 +924,7 @@ async function handleCreateAccount(payload: PendingOAuthCreateAccountPayload) {
         : {}),
       invitation_code: payload.invitationCode || undefined,
       organization_name: payload.organizationName || undefined,
+      organization_member_name: payload.memberName || undefined,
       ...oauthAffiliatePayload(loadOAuthAffiliateCode()),
       ...serializeAdoptionDecision(currentAdoptionDecision())
     })

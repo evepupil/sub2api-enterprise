@@ -107,7 +107,7 @@ const emit = defineEmits<{
 const chartColors = CHART_COLORS
 
 const memberLabel = (member: OrganizationMemberUsageStat): string =>
-  member.username || member.email || String(member.user_id)
+  member.display_name || member.email || String(member.user_id)
 
 const displayMembers = computed(() => {
   if (!props.members?.length) return []

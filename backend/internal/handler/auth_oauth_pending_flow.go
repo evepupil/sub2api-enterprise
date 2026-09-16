@@ -34,6 +34,7 @@ const (
 	oauthPendingSessionCookieName = "oauth_pending_session"
 	oauthPromoCodeCookieName      = "oauth_promo_code"
 	oauthOrganizationNameCookie   = "oauth_organization_name"
+	oauthMemberNameCookie         = "oauth_member_name"
 	oauthInvitationCodeCookie     = "oauth_invitation_code"
 	oauthPendingCookieMaxAgeSec   = 10 * 60
 	oauthPendingChoiceStep        = "choose_account_action_required"
@@ -41,6 +42,7 @@ const (
 	oauthCompletionResponseKey = "completion_response"
 	oauthPromoCodeStateKey     = "promo_code"
 	oauthOrganizationNameKey   = "organization_name"
+	oauthMemberNameKey         = "member_name"
 	oauthInvitationCodeKey     = "invitation_code"
 )
 
@@ -70,17 +72,18 @@ type bindPendingOAuthLoginRequest struct {
 }
 
 type createPendingOAuthAccountRequest struct {
-	Email                 string `json:"email" binding:"required,email"`
-	VerifyCode            string `json:"verify_code,omitempty"`
-	Password              string `json:"password" binding:"required,min=6"`
-	TurnstileToken        string `json:"turnstile_token,omitempty"`
-	TencentCaptchaTicket  string `json:"tencent_captcha_ticket,omitempty"`
-	TencentCaptchaRandstr string `json:"tencent_captcha_randstr,omitempty"`
-	InvitationCode        string `json:"invitation_code,omitempty"`
-	OrganizationName      string `json:"organization_name,omitempty"`
-	AffCode               string `json:"aff_code,omitempty"`
-	AdoptDisplayName      *bool  `json:"adopt_display_name,omitempty"`
-	AdoptAvatar           *bool  `json:"adopt_avatar,omitempty"`
+	Email                  string `json:"email" binding:"required,email"`
+	VerifyCode             string `json:"verify_code,omitempty"`
+	Password               string `json:"password" binding:"required,min=6"`
+	TurnstileToken         string `json:"turnstile_token,omitempty"`
+	TencentCaptchaTicket   string `json:"tencent_captcha_ticket,omitempty"`
+	TencentCaptchaRandstr  string `json:"tencent_captcha_randstr,omitempty"`
+	InvitationCode         string `json:"invitation_code,omitempty"`
+	OrganizationName       string `json:"organization_name,omitempty"`
+	OrganizationMemberName string `json:"organization_member_name,omitempty"`
+	AffCode                string `json:"aff_code,omitempty"`
+	AdoptDisplayName       *bool  `json:"adopt_display_name,omitempty"`
+	AdoptAvatar            *bool  `json:"adopt_avatar,omitempty"`
 }
 
 type sendPendingOAuthVerifyCodeRequest struct {
@@ -207,6 +210,7 @@ func captureOAuthOrganizationRegistration(c *gin.Context, secure bool) {
 		return
 	}
 	setOAuthRegistrationCookie(c, oauthOrganizationNameCookie, strings.TrimSpace(c.Query("organization_name")), 400, secure)
+	setOAuthRegistrationCookie(c, oauthMemberNameCookie, strings.TrimSpace(c.Query("member_name")), 200, secure)
 	setOAuthRegistrationCookie(c, oauthInvitationCodeCookie, strings.TrimSpace(c.Query("invitation_code")), 128, secure)
 }
 
@@ -240,6 +244,7 @@ func clearOAuthRegistrationCookie(c *gin.Context, name string, secure bool) {
 
 func clearOAuthOrganizationRegistration(c *gin.Context, secure bool) {
 	clearOAuthRegistrationCookie(c, oauthOrganizationNameCookie, secure)
+	clearOAuthRegistrationCookie(c, oauthMemberNameCookie, secure)
 	clearOAuthRegistrationCookie(c, oauthInvitationCodeCookie, secure)
 }
 
@@ -279,6 +284,13 @@ func pendingOAuthOrganizationName(session *dbent.PendingAuthSession) string {
 	return pendingSessionStringValue(session.LocalFlowState, oauthOrganizationNameKey)
 }
 
+func pendingOAuthMemberName(session *dbent.PendingAuthSession) string {
+	if session == nil {
+		return ""
+	}
+	return pendingSessionStringValue(session.LocalFlowState, oauthMemberNameKey)
+}
+
 func pendingOAuthInvitationCode(session *dbent.PendingAuthSession) string {
 	if session == nil {
 		return ""
@@ -286,16 +298,20 @@ func pendingOAuthInvitationCode(session *dbent.PendingAuthSession) string {
 	return pendingSessionStringValue(session.LocalFlowState, oauthInvitationCodeKey)
 }
 
-func pendingOAuthRegistrationValues(session *dbent.PendingAuthSession, organizationName, invitationCode string) (string, string) {
+func pendingOAuthRegistrationValues(session *dbent.PendingAuthSession, organizationName, memberName, invitationCode string) (string, string, string) {
 	organizationName = strings.TrimSpace(organizationName)
 	if organizationName == "" {
 		organizationName = pendingOAuthOrganizationName(session)
+	}
+	memberName = strings.TrimSpace(memberName)
+	if memberName == "" {
+		memberName = pendingOAuthMemberName(session)
 	}
 	invitationCode = strings.TrimSpace(invitationCode)
 	if invitationCode == "" {
 		invitationCode = pendingOAuthInvitationCode(session)
 	}
-	return organizationName, invitationCode
+	return organizationName, memberName, invitationCode
 }
 
 func redirectToFrontendCallback(c *gin.Context, frontendCallback string) {
@@ -328,6 +344,9 @@ func (h *AuthHandler) createOAuthPendingSession(c *gin.Context, payload oauthPen
 	}
 	if organizationName := readOAuthRegistrationCookie(c, oauthOrganizationNameCookie); organizationName != "" {
 		localFlowState[oauthOrganizationNameKey] = organizationName
+	}
+	if memberName := readOAuthRegistrationCookie(c, oauthMemberNameCookie); memberName != "" {
+		localFlowState[oauthMemberNameKey] = memberName
 	}
 	if invitationCode := readOAuthRegistrationCookie(c, oauthInvitationCodeCookie); invitationCode != "" {
 		localFlowState[oauthInvitationCodeKey] = invitationCode
@@ -1857,7 +1876,7 @@ func (h *AuthHandler) createPendingOAuthAccount(c *gin.Context, provider string)
 		return
 	}
 
-	organizationName, invitationCode := pendingOAuthRegistrationValues(session, req.OrganizationName, req.InvitationCode)
+	organizationName, memberName, invitationCode := pendingOAuthRegistrationValues(session, req.OrganizationName, req.OrganizationMemberName, req.InvitationCode)
 	tokenPair, user, err := h.authService.RegisterOAuthEmailAccountWithOrganization(
 		c.Request.Context(),
 		email,
@@ -1866,6 +1885,7 @@ func (h *AuthHandler) createPendingOAuthAccount(c *gin.Context, provider string)
 		invitationCode,
 		strings.TrimSpace(session.ProviderType),
 		organizationName,
+		memberName,
 	)
 	if err != nil {
 		if errors.Is(err, service.ErrEmailExists) {
@@ -1941,6 +1961,7 @@ func (h *AuthHandler) createPendingOAuthAccount(c *gin.Context, provider string)
 		strings.TrimSpace(session.ProviderType),
 		strings.TrimSpace(req.AffCode),
 		organizationName,
+		memberName,
 	); err != nil {
 		_ = tx.Rollback()
 		if rollbackCreatedUser(err) {

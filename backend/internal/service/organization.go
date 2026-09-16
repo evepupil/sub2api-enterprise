@@ -34,6 +34,10 @@ var (
 		"ORGANIZATION_NAME_INVALID",
 		"organization name must contain between 1 and 100 characters",
 	)
+	ErrOrganizationMemberNameInvalid = infraerrors.BadRequest(
+		"ORGANIZATION_MEMBER_NAME_INVALID",
+		"organization member name must contain between 1 and 50 characters",
+	)
 	ErrOrganizationRegistrationConflict = infraerrors.BadRequest(
 		"ORGANIZATION_REGISTRATION_CONFLICT",
 		"organization name cannot be used with an organization invitation",
@@ -62,9 +66,11 @@ type OrganizationMembership struct {
 	ID             int64
 	OrganizationID int64
 	UserID         int64
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
-	Organization   *Organization
+	// DisplayName 是本人在组织中的名称，注册时填写、管理员可改；组织侧展示优先它。
+	DisplayName  string
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+	Organization *Organization
 }
 
 type OrganizationSummary struct {
@@ -78,8 +84,10 @@ type OrganizationSummary struct {
 type OrganizationRegistrationIntent struct {
 	Kind             string
 	OrganizationName string
-	Organization     *Organization
-	Invitation       *RedeemCode
+	// MemberName 是本人在组织中的名称，创建组织和加入组织时必填。
+	MemberName   string
+	Organization *Organization
+	Invitation   *RedeemCode
 }
 
 type OrganizationRepository interface {
@@ -109,9 +117,19 @@ func normalizeOrganizationName(value string) (string, error) {
 	return name, nil
 }
 
+// normalizeMemberName 校验组织内名称：创建组织或加入组织时必填，1 到 50 个字符。
+func normalizeMemberName(value string) (string, error) {
+	name := strings.TrimSpace(value)
+	if name == "" || utf8.RuneCountInString(name) > 50 {
+		return "", ErrOrganizationMemberNameInvalid
+	}
+	return name, nil
+}
+
 func (s *OrganizationService) ResolveRegistrationIntent(
 	ctx context.Context,
 	organizationName string,
+	memberName string,
 	invitationCode string,
 	invitationRequired bool,
 ) (*OrganizationRegistrationIntent, error) {
@@ -120,6 +138,7 @@ func (s *OrganizationService) ResolveRegistrationIntent(
 	}
 
 	organizationName = strings.TrimSpace(organizationName)
+	memberName = strings.TrimSpace(memberName)
 	invitationCode = strings.TrimSpace(invitationCode)
 
 	var invitation *RedeemCode
@@ -146,8 +165,13 @@ func (s *OrganizationService) ResolveRegistrationIntent(
 		if organization.IsDisabled() {
 			return nil, ErrOrganizationDisabled
 		}
+		name, err := normalizeMemberName(memberName)
+		if err != nil {
+			return nil, err
+		}
 		return &OrganizationRegistrationIntent{
 			Kind:         OrganizationRegistrationJoin,
+			MemberName:   name,
 			Organization: organization,
 			Invitation:   invitation,
 		}, nil
@@ -167,9 +191,14 @@ func (s *OrganizationService) ResolveRegistrationIntent(
 		if err != nil {
 			return nil, err
 		}
+		member, err := normalizeMemberName(memberName)
+		if err != nil {
+			return nil, err
+		}
 		return &OrganizationRegistrationIntent{
 			Kind:             OrganizationRegistrationCreate,
 			OrganizationName: name,
+			MemberName:       member,
 			Invitation:       invitation,
 		}, nil
 	}
@@ -206,6 +235,7 @@ func (s *OrganizationService) CompleteRegistration(
 		if err := s.repo.CreateMember(ctx, &OrganizationMembership{
 			OrganizationID: organization.ID,
 			UserID:         userID,
+			DisplayName:    intent.MemberName,
 		}); err != nil {
 			return nil, err
 		}
@@ -217,6 +247,7 @@ func (s *OrganizationService) CompleteRegistration(
 		if err := s.repo.CreateMember(ctx, &OrganizationMembership{
 			OrganizationID: organization.ID,
 			UserID:         userID,
+			DisplayName:    intent.MemberName,
 		}); err != nil {
 			return nil, err
 		}

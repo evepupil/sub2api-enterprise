@@ -166,7 +166,7 @@ func (s *AuthService) Register(ctx context.Context, email, password string) (str
 
 // RegisterWithVerification 用户注册（支持邮件验证、优惠码、邀请码和邀请返利码），返回token和用户。
 func (s *AuthService) RegisterWithVerification(ctx context.Context, email, password, verifyCode, promoCode, invitationCode, affiliateCode string) (string, *User, error) {
-	return s.RegisterWithOrganizationVerification(ctx, email, password, verifyCode, promoCode, invitationCode, affiliateCode, "")
+	return s.RegisterWithOrganizationVerification(ctx, email, password, verifyCode, promoCode, invitationCode, affiliateCode, "", "")
 }
 
 func (s *AuthService) RegisterWithOrganizationVerification(
@@ -178,6 +178,7 @@ func (s *AuthService) RegisterWithOrganizationVerification(
 	invitationCode string,
 	affiliateCode string,
 	organizationName string,
+	organizationMemberName string,
 ) (string, *User, error) {
 	// 检查是否开放注册（默认关闭：settingService 未配置时不允许注册）
 	if s.settingService == nil || !s.settingService.IsRegistrationEnabled(ctx) {
@@ -197,6 +198,7 @@ func (s *AuthService) RegisterWithOrganizationVerification(
 		organizationIntent, err = s.organizationService.ResolveRegistrationIntent(
 			ctx,
 			organizationName,
+			organizationMemberName,
 			invitationCode,
 			s.settingService.IsInvitationCodeEnabled(ctx),
 		)
@@ -730,14 +732,14 @@ func (s *AuthService) canBypassRegistrationDisabledForOAuth(ctx context.Context,
 // affiliateCode 用于邀请返利绑定，仅在新用户注册时使用。
 // signupSource 标识来源渠道（"dingtalk"/"linuxdo"/"wechat"/"oidc" 等），仅用于豁免检查。
 func (s *AuthService) LoginOrRegisterOAuthWithTokenPair(ctx context.Context, email, username, invitationCode, affiliateCode, signupSource string) (*TokenPair, *User, error) {
-	return s.loginOrRegisterOAuthWithTokenPair(ctx, email, username, invitationCode, affiliateCode, "", "", signupSource)
+	return s.loginOrRegisterOAuthWithTokenPair(ctx, email, username, invitationCode, affiliateCode, "", "", "", signupSource)
 }
 
 // LoginOrRegisterOAuthWithTokenPairAndPromoCode behaves like
 // LoginOrRegisterOAuthWithTokenPair and applies promoCode only when a new user
 // is created.
 func (s *AuthService) LoginOrRegisterOAuthWithTokenPairAndPromoCode(ctx context.Context, email, username, invitationCode, affiliateCode, promoCode, signupSource string) (*TokenPair, *User, error) {
-	return s.loginOrRegisterOAuthWithTokenPair(ctx, email, username, invitationCode, affiliateCode, promoCode, "", signupSource)
+	return s.loginOrRegisterOAuthWithTokenPair(ctx, email, username, invitationCode, affiliateCode, promoCode, "", "", signupSource)
 }
 
 func (s *AuthService) LoginOrRegisterOAuthWithTokenPairAndOrganization(
@@ -748,12 +750,13 @@ func (s *AuthService) LoginOrRegisterOAuthWithTokenPairAndOrganization(
 	affiliateCode string,
 	promoCode string,
 	organizationName string,
+	organizationMemberName string,
 	signupSource string,
 ) (*TokenPair, *User, error) {
-	return s.loginOrRegisterOAuthWithTokenPair(ctx, email, username, invitationCode, affiliateCode, promoCode, organizationName, signupSource)
+	return s.loginOrRegisterOAuthWithTokenPair(ctx, email, username, invitationCode, affiliateCode, promoCode, organizationName, organizationMemberName, signupSource)
 }
 
-func (s *AuthService) loginOrRegisterOAuthWithTokenPair(ctx context.Context, email, username, invitationCode, affiliateCode, promoCode, organizationName, signupSource string) (*TokenPair, *User, error) {
+func (s *AuthService) loginOrRegisterOAuthWithTokenPair(ctx context.Context, email, username, invitationCode, affiliateCode, promoCode, organizationName, organizationMemberName, signupSource string) (*TokenPair, *User, error) {
 	// 检查 refreshTokenCache 是否可用
 	if s.refreshTokenCache == nil {
 		return nil, nil, errors.New("refresh token cache not configured")
@@ -791,6 +794,7 @@ func (s *AuthService) loginOrRegisterOAuthWithTokenPair(ctx context.Context, ema
 				organizationIntent, err = s.organizationService.ResolveRegistrationIntent(
 					ctx,
 					organizationName,
+					organizationMemberName,
 					invitationCode,
 					s.settingService.IsInvitationCodeEnabled(ctx),
 				)

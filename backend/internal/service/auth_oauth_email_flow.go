@@ -118,6 +118,7 @@ func (s *AuthService) RegisterOAuthEmailAccount(
 		invitationCode,
 		signupSource,
 		"",
+		"",
 	)
 }
 
@@ -129,6 +130,7 @@ func (s *AuthService) RegisterOAuthEmailAccountWithOrganization(
 	invitationCode string,
 	signupSource string,
 	organizationName string,
+	organizationMemberName string,
 ) (*TokenPair, *User, error) {
 	if s == nil {
 		return nil, nil, ErrServiceUnavailable
@@ -149,7 +151,7 @@ func (s *AuthService) RegisterOAuthEmailAccountWithOrganization(
 		return nil, nil, err
 	}
 
-	if err := s.validateOAuthOrganizationRegistration(ctx, organizationName, invitationCode); err != nil {
+	if err := s.validateOAuthOrganizationRegistration(ctx, organizationName, organizationMemberName, invitationCode); err != nil {
 		slog.Error("oauth email register: invitation failed", "email", email, "error", err.Error())
 		return nil, nil, err
 	}
@@ -222,6 +224,7 @@ func (s *AuthService) RegisterVerifiedOAuthEmailAccount(
 		invitationCode,
 		signupSource,
 		"",
+		"",
 	)
 }
 
@@ -232,6 +235,7 @@ func (s *AuthService) RegisterVerifiedOAuthEmailAccountWithOrganization(
 	invitationCode string,
 	signupSource string,
 	organizationName string,
+	organizationMemberName string,
 ) (*TokenPair, *User, error) {
 	if s == nil {
 		return nil, nil, ErrServiceUnavailable
@@ -256,7 +260,7 @@ func (s *AuthService) RegisterVerifiedOAuthEmailAccountWithOrganization(
 	if strings.TrimSpace(password) == "" {
 		return nil, nil, infraerrors.BadRequest("PASSWORD_REQUIRED", "password is required")
 	}
-	if err := s.validateOAuthOrganizationRegistration(ctx, organizationName, invitationCode); err != nil {
+	if err := s.validateOAuthOrganizationRegistration(ctx, organizationName, organizationMemberName, invitationCode); err != nil {
 		return nil, nil, err
 	}
 
@@ -329,6 +333,7 @@ func (s *AuthService) FinalizeOAuthEmailAccount(
 		signupSource,
 		affiliateCode,
 		"",
+		"",
 	)
 }
 
@@ -339,6 +344,7 @@ func (s *AuthService) FinalizeOAuthEmailAccountWithOrganization(
 	signupSource string,
 	affiliateCode string,
 	organizationName string,
+	organizationMemberName string,
 ) error {
 	if s == nil || user == nil || user.ID <= 0 {
 		return ErrServiceUnavailable
@@ -349,6 +355,7 @@ func (s *AuthService) FinalizeOAuthEmailAccountWithOrganization(
 		intent, err := s.organizationService.ResolveRegistrationIntent(
 			ctx,
 			organizationName,
+			organizationMemberName,
 			invitationCode,
 			s.settingService != nil && s.settingService.IsInvitationCodeEnabled(ctx),
 		)
@@ -381,11 +388,12 @@ func (s *AuthService) FinalizeOAuthEmailAccountWithOrganization(
 	return nil
 }
 
-func (s *AuthService) validateOAuthOrganizationRegistration(ctx context.Context, organizationName, invitationCode string) error {
+func (s *AuthService) validateOAuthOrganizationRegistration(ctx context.Context, organizationName, organizationMemberName, invitationCode string) error {
 	if s != nil && s.organizationService != nil {
 		_, err := s.organizationService.ResolveRegistrationIntent(
 			ctx,
 			organizationName,
+			organizationMemberName,
 			invitationCode,
 			s.settingService != nil && s.settingService.IsInvitationCodeEnabled(ctx),
 		)

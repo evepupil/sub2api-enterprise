@@ -26,7 +26,7 @@ type EmailOAuthIdentityInput struct {
 }
 
 func (s *AuthService) LoginOrRegisterVerifiedEmailOAuth(ctx context.Context, input EmailOAuthIdentityInput) (*TokenPair, *User, error) {
-	return s.loginOrRegisterVerifiedEmailOAuth(ctx, input, "", "", "", "")
+	return s.loginOrRegisterVerifiedEmailOAuth(ctx, input, "", "", "", "", "")
 }
 
 func (s *AuthService) LoginOrRegisterVerifiedEmailOAuthWithInvitation(
@@ -35,7 +35,7 @@ func (s *AuthService) LoginOrRegisterVerifiedEmailOAuthWithInvitation(
 	invitationCode string,
 	affiliateCode string,
 ) (*TokenPair, *User, error) {
-	return s.loginOrRegisterVerifiedEmailOAuth(ctx, input, invitationCode, affiliateCode, "", "")
+	return s.loginOrRegisterVerifiedEmailOAuth(ctx, input, invitationCode, affiliateCode, "", "", "")
 }
 
 func (s *AuthService) LoginOrRegisterVerifiedEmailOAuthWithSignupCodes(
@@ -45,7 +45,7 @@ func (s *AuthService) LoginOrRegisterVerifiedEmailOAuthWithSignupCodes(
 	affiliateCode string,
 	promoCode string,
 ) (*TokenPair, *User, error) {
-	return s.loginOrRegisterVerifiedEmailOAuth(ctx, input, invitationCode, affiliateCode, promoCode, "")
+	return s.loginOrRegisterVerifiedEmailOAuth(ctx, input, invitationCode, affiliateCode, promoCode, "", "")
 }
 
 func (s *AuthService) LoginOrRegisterVerifiedEmailOAuthWithOrganization(
@@ -55,8 +55,9 @@ func (s *AuthService) LoginOrRegisterVerifiedEmailOAuthWithOrganization(
 	affiliateCode string,
 	promoCode string,
 	organizationName string,
+	organizationMemberName string,
 ) (*TokenPair, *User, error) {
-	return s.loginOrRegisterVerifiedEmailOAuth(ctx, input, invitationCode, affiliateCode, promoCode, organizationName)
+	return s.loginOrRegisterVerifiedEmailOAuth(ctx, input, invitationCode, affiliateCode, promoCode, organizationName, organizationMemberName)
 }
 
 func (s *AuthService) loginOrRegisterVerifiedEmailOAuth(
@@ -66,6 +67,7 @@ func (s *AuthService) loginOrRegisterVerifiedEmailOAuth(
 	affiliateCode string,
 	promoCode string,
 	organizationName string,
+	organizationMemberName string,
 ) (*TokenPair, *User, error) {
 	if s == nil || s.userRepo == nil || s.entClient == nil {
 		return nil, nil, ErrServiceUnavailable
@@ -115,7 +117,7 @@ func (s *AuthService) loginOrRegisterVerifiedEmailOAuth(
 		user, err = s.userRepo.GetByEmail(ctx, email)
 		if err != nil {
 			if errors.Is(err, ErrUserNotFound) {
-				user, err = s.createEmailOAuthUserWithOrganization(ctx, email, input.Username, providerType, invitationCode, affiliateCode, organizationName)
+				user, err = s.createEmailOAuthUserWithOrganization(ctx, email, input.Username, providerType, invitationCode, affiliateCode, organizationName, organizationMemberName)
 				if err != nil {
 					return nil, nil, err
 				}
@@ -166,7 +168,7 @@ func (s *AuthService) loginOrRegisterVerifiedEmailOAuth(
 	return tokenPair, user, nil
 }
 
-func (s *AuthService) createEmailOAuthUserWithOrganization(ctx context.Context, email, username, providerType, invitationCode, affiliateCode, organizationName string) (*User, error) {
+func (s *AuthService) createEmailOAuthUserWithOrganization(ctx context.Context, email, username, providerType, invitationCode, affiliateCode, organizationName, organizationMemberName string) (*User, error) {
 	if s.settingService == nil || !s.settingService.IsRegistrationEnabled(ctx) {
 		return nil, ErrRegDisabled
 	}
@@ -177,6 +179,7 @@ func (s *AuthService) createEmailOAuthUserWithOrganization(ctx context.Context, 
 		organizationIntent, err = s.organizationService.ResolveRegistrationIntent(
 			ctx,
 			organizationName,
+			organizationMemberName,
 			invitationCode,
 			s.settingService.IsInvitationCodeEnabled(ctx),
 		)

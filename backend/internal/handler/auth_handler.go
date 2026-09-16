@@ -48,16 +48,17 @@ func NewAuthHandler(cfg *config.Config, authService *service.AuthService, userSe
 
 // RegisterRequest represents the registration request payload
 type RegisterRequest struct {
-	Email                 string `json:"email" binding:"required,email"`
-	Password              string `json:"password" binding:"required,min=6"`
-	VerifyCode            string `json:"verify_code"`
-	TurnstileToken        string `json:"turnstile_token"`
-	TencentCaptchaTicket  string `json:"tencent_captcha_ticket"`
-	TencentCaptchaRandstr string `json:"tencent_captcha_randstr"`
-	PromoCode             string `json:"promo_code"`      // 注册优惠码
-	InvitationCode        string `json:"invitation_code"` // 邀请码
-	AffCode               string `json:"aff_code"`        // 邀请返利码
-	OrganizationName      string `json:"organization_name"`
+	Email                  string `json:"email" binding:"required,email"`
+	Password               string `json:"password" binding:"required,min=6"`
+	VerifyCode             string `json:"verify_code"`
+	TurnstileToken         string `json:"turnstile_token"`
+	TencentCaptchaTicket   string `json:"tencent_captcha_ticket"`
+	TencentCaptchaRandstr  string `json:"tencent_captcha_randstr"`
+	PromoCode              string `json:"promo_code"`      // 注册优惠码
+	InvitationCode         string `json:"invitation_code"` // 邀请码
+	AffCode                string `json:"aff_code"`        // 邀请返利码
+	OrganizationName       string `json:"organization_name"`
+	OrganizationMemberName string `json:"organization_member_name"`
 }
 
 // SendVerifyCodeRequest 发送验证码请求
@@ -204,6 +205,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		req.InvitationCode,
 		req.AffCode,
 		req.OrganizationName,
+		req.OrganizationMemberName,
 	)
 	if err != nil {
 		response.ErrorFrom(c, err)

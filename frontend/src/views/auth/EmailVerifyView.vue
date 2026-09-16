@@ -250,6 +250,7 @@ const initialTencentCaptchaRandstr = ref<string>('')
 const promoCode = ref<string>('')
 const invitationCode = ref<string>('')
 const organizationName = ref<string>('')
+const organizationMemberName = ref<string>('')
 const affCode = ref<string>('')
 const pendingAuthToken = ref<string>('')
 const pendingAuthTokenField = ref<PendingAuthTokenField>('pending_auth_token')
@@ -340,6 +341,7 @@ onMounted(async () => {
       promoCode.value = registerData.promo_code || ''
       invitationCode.value = registerData.invitation_code || ''
       organizationName.value = registerData.organization_name || ''
+      organizationMemberName.value = registerData.organization_member_name || ''
       affCode.value = registerData.aff_code || loadAffiliateReferralCode()
       pendingAuthToken.value = registerData.pending_auth_token || activePendingSession?.token || ''
       pendingAuthTokenField.value = registerData.pending_auth_token_field || activePendingSession?.token_field || 'pending_auth_token'
@@ -698,6 +700,9 @@ async function handleVerify(): Promise<void> {
       if (organizationName.value) {
         payload.organization_name = organizationName.value
       }
+      if (organizationMemberName.value) {
+        payload.organization_member_name = organizationMemberName.value
+      }
       if (pendingAdoptionDecision.value?.adoptDisplayName !== undefined) {
         payload.adopt_display_name = pendingAdoptionDecision.value.adoptDisplayName
       }
@@ -737,6 +742,7 @@ async function handleVerify(): Promise<void> {
         promo_code: promoCode.value || undefined,
         invitation_code: invitationCode.value || undefined,
         organization_name: organizationName.value || undefined,
+        organization_member_name: organizationMemberName.value || undefined,
         ...(affCode.value ? { aff_code: affCode.value } : {})
       })
     }

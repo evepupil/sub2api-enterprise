@@ -339,10 +339,11 @@ func (h *AuthHandler) createEmailOAuthRegistrationPendingSession(
 }
 
 type completeEmailOAuthRequest struct {
-	Password         string `json:"password" binding:"required,min=6"`
-	InvitationCode   string `json:"invitation_code,omitempty"`
-	OrganizationName string `json:"organization_name,omitempty"`
-	AffCode          string `json:"aff_code,omitempty"`
+	Password               string `json:"password" binding:"required,min=6"`
+	InvitationCode         string `json:"invitation_code,omitempty"`
+	OrganizationName       string `json:"organization_name,omitempty"`
+	OrganizationMemberName string `json:"organization_member_name,omitempty"`
+	AffCode                string `json:"aff_code,omitempty"`
 }
 
 func (h *AuthHandler) completeEmailOAuthRegistration(c *gin.Context, provider string) {
@@ -375,7 +376,7 @@ func (h *AuthHandler) completeEmailOAuthRegistration(c *gin.Context, provider st
 		affiliateCode = pendingSessionStringValue(session.UpstreamIdentityClaims, "aff_code")
 	}
 
-	organizationName, invitationCode := pendingOAuthRegistrationValues(session, req.OrganizationName, req.InvitationCode)
+	organizationName, memberName, invitationCode := pendingOAuthRegistrationValues(session, req.OrganizationName, req.OrganizationMemberName, req.InvitationCode)
 	tokenPair, user, err := h.authService.RegisterVerifiedOAuthEmailAccountWithOrganization(
 		c.Request.Context(),
 		strings.TrimSpace(session.ResolvedEmail),
@@ -383,6 +384,7 @@ func (h *AuthHandler) completeEmailOAuthRegistration(c *gin.Context, provider st
 		invitationCode,
 		strings.TrimSpace(session.ProviderType),
 		organizationName,
+		memberName,
 	)
 	if err != nil {
 		response.ErrorFrom(c, err)
@@ -426,6 +428,7 @@ func (h *AuthHandler) completeEmailOAuthRegistration(c *gin.Context, provider st
 		strings.TrimSpace(session.ProviderType),
 		affiliateCode,
 		organizationName,
+		memberName,
 	); err != nil {
 		_ = tx.Rollback()
 		_ = h.authService.RollbackOAuthEmailAccountCreation(c.Request.Context(), user.ID, invitationCode)

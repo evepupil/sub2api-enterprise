@@ -75,6 +75,11 @@ func UserID(v int64) predicate.OrganizationMember {
 	return predicate.OrganizationMember(sql.FieldEQ(FieldUserID, v))
 }
 
+// DisplayName applies equality check predicate on the "display_name" field. It's identical to DisplayNameEQ.
+func DisplayName(v string) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldEQ(FieldDisplayName, v))
+}
+
 // SpendingLimit applies equality check predicate on the "spending_limit" field. It's identical to SpendingLimitEQ.
 func SpendingLimit(v float64) predicate.OrganizationMember {
 	return predicate.OrganizationMember(sql.FieldEQ(FieldSpendingLimit, v))
@@ -233,6 +238,81 @@ func UserIDIn(vs ...int64) predicate.OrganizationMember {
 // UserIDNotIn applies the NotIn predicate on the "user_id" field.
 func UserIDNotIn(vs ...int64) predicate.OrganizationMember {
 	return predicate.OrganizationMember(sql.FieldNotIn(FieldUserID, vs...))
+}
+
+// DisplayNameEQ applies the EQ predicate on the "display_name" field.
+func DisplayNameEQ(v string) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldEQ(FieldDisplayName, v))
+}
+
+// DisplayNameNEQ applies the NEQ predicate on the "display_name" field.
+func DisplayNameNEQ(v string) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldNEQ(FieldDisplayName, v))
+}
+
+// DisplayNameIn applies the In predicate on the "display_name" field.
+func DisplayNameIn(vs ...string) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldIn(FieldDisplayName, vs...))
+}
+
+// DisplayNameNotIn applies the NotIn predicate on the "display_name" field.
+func DisplayNameNotIn(vs ...string) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldNotIn(FieldDisplayName, vs...))
+}
+
+// DisplayNameGT applies the GT predicate on the "display_name" field.
+func DisplayNameGT(v string) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldGT(FieldDisplayName, v))
+}
+
+// DisplayNameGTE applies the GTE predicate on the "display_name" field.
+func DisplayNameGTE(v string) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldGTE(FieldDisplayName, v))
+}
+
+// DisplayNameLT applies the LT predicate on the "display_name" field.
+func DisplayNameLT(v string) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldLT(FieldDisplayName, v))
+}
+
+// DisplayNameLTE applies the LTE predicate on the "display_name" field.
+func DisplayNameLTE(v string) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldLTE(FieldDisplayName, v))
+}
+
+// DisplayNameContains applies the Contains predicate on the "display_name" field.
+func DisplayNameContains(v string) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldContains(FieldDisplayName, v))
+}
+
+// DisplayNameHasPrefix applies the HasPrefix predicate on the "display_name" field.
+func DisplayNameHasPrefix(v string) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldHasPrefix(FieldDisplayName, v))
+}
+
+// DisplayNameHasSuffix applies the HasSuffix predicate on the "display_name" field.
+func DisplayNameHasSuffix(v string) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldHasSuffix(FieldDisplayName, v))
+}
+
+// DisplayNameIsNil applies the IsNil predicate on the "display_name" field.
+func DisplayNameIsNil() predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldIsNull(FieldDisplayName))
+}
+
+// DisplayNameNotNil applies the NotNil predicate on the "display_name" field.
+func DisplayNameNotNil() predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldNotNull(FieldDisplayName))
+}
+
+// DisplayNameEqualFold applies the EqualFold predicate on the "display_name" field.
+func DisplayNameEqualFold(v string) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldEqualFold(FieldDisplayName, v))
+}
+
+// DisplayNameContainsFold applies the ContainsFold predicate on the "display_name" field.
+func DisplayNameContainsFold(v string) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldContainsFold(FieldDisplayName, v))
 }
 
 // SpendingLimitEQ applies the EQ predicate on the "spending_limit" field.

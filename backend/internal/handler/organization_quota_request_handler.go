@@ -50,6 +50,7 @@ type organizationQuotaRequestResponse struct {
 	UserID        int64      `json:"user_id"`
 	Email         string     `json:"email"`
 	Username      string     `json:"username"`
+	DisplayName   string     `json:"display_name"`
 	Amount        float64    `json:"amount"`
 	Reason        string     `json:"reason"`
 	Status        string     `json:"status"`
@@ -238,6 +239,7 @@ func organizationQuotaRequestFromService(request *service.OrganizationQuotaReque
 		UserID:        request.UserID,
 		Email:         request.Email,
 		Username:      request.Username,
+		DisplayName:   request.DisplayName,
 		Amount:        request.Amount,
 		Reason:        request.Reason,
 		Status:        request.Status,

@@ -22,6 +22,8 @@ const (
 	FieldOrganizationID = "organization_id"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
+	// FieldDisplayName holds the string denoting the display_name field in the database.
+	FieldDisplayName = "display_name"
 	// FieldSpendingLimit holds the string denoting the spending_limit field in the database.
 	FieldSpendingLimit = "spending_limit"
 	// FieldSpendingUsed holds the string denoting the spending_used field in the database.
@@ -67,6 +69,7 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldOrganizationID,
 	FieldUserID,
+	FieldDisplayName,
 	FieldSpendingLimit,
 	FieldSpendingUsed,
 	FieldSpendingFrozen,
@@ -94,6 +97,8 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
+	// DisplayNameValidator is a validator for the "display_name" field. It is called by the builders before save.
+	DisplayNameValidator func(string) error
 	// DefaultSpendingUsed holds the default value on creation for the "spending_used" field.
 	DefaultSpendingUsed float64
 	// DefaultSpendingFrozen holds the default value on creation for the "spending_frozen" field.
@@ -130,6 +135,11 @@ func ByOrganizationID(opts ...sql.OrderTermOption) OrderOption {
 // ByUserID orders the results by the user_id field.
 func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUserID, opts...).ToFunc()
+}
+
+// ByDisplayName orders the results by the display_name field.
+func ByDisplayName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDisplayName, opts...).ToFunc()
 }
 
 // BySpendingLimit orders the results by the spending_limit field.

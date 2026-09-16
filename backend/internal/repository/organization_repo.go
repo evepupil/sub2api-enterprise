@@ -40,10 +40,13 @@ func (r *organizationRepository) CreateMember(ctx context.Context, value *servic
 	if value == nil {
 		return service.ErrServiceUnavailable
 	}
-	created, err := clientFromContext(ctx, r.client).OrganizationMember.Create().
+	create := clientFromContext(ctx, r.client).OrganizationMember.Create().
 		SetOrganizationID(value.OrganizationID).
-		SetUserID(value.UserID).
-		Save(ctx)
+		SetUserID(value.UserID)
+	if value.DisplayName != "" {
+		create = create.SetDisplayName(value.DisplayName)
+	}
+	created, err := create.Save(ctx)
 	if err != nil {
 		if isUniqueConstraintViolation(err) {
 			return service.ErrUserAlreadyInOrganization

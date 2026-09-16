@@ -228,17 +228,31 @@ func (r *organizationQuotaRequestRepository) list(
 	if err != nil {
 		return nil, nil, err
 	}
-	emails := make(map[int64]service.OrganizationMember, len(users))
+	profiles := make(map[int64]service.OrganizationMember, len(users))
 	for _, user := range users {
-		emails[user.ID] = service.OrganizationMember{Email: user.Email, Username: user.Username}
+		profiles[user.ID] = service.OrganizationMember{Email: user.Email, Username: user.Username}
+	}
+	// 组织侧展示成员一律优先组织内名称。
+	displayNames := make(map[int64]string, len(userIDs))
+	if len(userIDs) > 0 {
+		memberRows, err := client.OrganizationMember.Query().
+			Where(organizationmember.UserIDIn(userIDs...)).
+			All(ctx)
+		if err != nil {
+			return nil, nil, err
+		}
+		for _, row := range memberRows {
+			displayNames[row.UserID] = row.DisplayName
+		}
 	}
 
 	for _, entity := range entities {
 		request := quotaRequestEntityToService(entity)
-		if profile, ok := emails[entity.UserID]; ok {
+		if profile, ok := profiles[entity.UserID]; ok {
 			request.Email = profile.Email
 			request.Username = profile.Username
 		}
+		request.DisplayName = displayNames[entity.UserID]
 		requests = append(requests, request)
 	}
 	return requests, paginationResultFromTotal(int64(total), params), nil

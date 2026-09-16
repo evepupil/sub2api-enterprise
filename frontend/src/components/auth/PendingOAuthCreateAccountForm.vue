@@ -95,12 +95,22 @@
         :placeholder="t('auth.organizationNamePlaceholder')"
         :disabled="isSubmitting"
       />
+      <input
+        v-if="needsOrganizationMemberName"
+        v-model="memberName"
+        :data-testid="`${testIdPrefix}-create-account-member-name`"
+        type="text"
+        maxlength="50"
+        class="input w-full"
+        :placeholder="t('auth.memberNamePlaceholder')"
+        :disabled="isSubmitting"
+      />
     </div>
     <button
       :data-testid="`${testIdPrefix}-create-account-submit`"
       type="button"
       class="btn btn-primary w-full"
-      :disabled="isSubmitting || !email.trim() || password.length < 6 || (invitationCodeEnabled && !invitationCode.trim()) || (isCreatingOrganization && !organizationName.trim()) || (turnstileEnabled && !turnstileToken)"
+      :disabled="isSubmitting || !email.trim() || password.length < 6 || (invitationCodeEnabled && !invitationCode.trim()) || (isCreatingOrganization && !organizationName.trim()) || (needsOrganizationMemberName && !memberName.trim()) || (turnstileEnabled && !turnstileToken)"
       @click="handleSubmit"
     >
       {{ isSubmitting ? t('common.processing') : t('auth.createAccount') }}
@@ -133,6 +143,7 @@ export type PendingOAuthCreateAccountPayload = {
   tencentCaptchaRandstr?: string
   invitationCode?: string
   organizationName?: string
+  memberName?: string
 }
 
 const props = defineProps<{
@@ -155,7 +166,14 @@ const password = ref('')
 const verifyCode = ref('')
 const invitationCode = ref('')
 const organizationName = ref('')
+const memberName = ref('')
+// 组织邀请码注册时从注册页上下文带过来的成员名，用于决定是否显示输入。
+const contextMemberName = ref('')
 const isCreatingOrganization = ref(false)
+// 创建组织或经组织邀请码加入（上下文带了成员名）时，组织内名称必填。
+const needsOrganizationMemberName = computed(
+  () => isCreatingOrganization.value || contextMemberName.value !== ''
+)
 const isSendingCode = ref(false)
 const sendCodeError = ref('')
 const sendCodeSuccess = ref(false)
@@ -356,7 +374,8 @@ async function handleSubmit() {
         }
       : {}),
     invitationCode: invitationCode.value.trim() || undefined,
-    organizationName: isCreatingOrganization.value ? organizationName.value.trim() || undefined : undefined
+    organizationName: isCreatingOrganization.value ? organizationName.value.trim() || undefined : undefined,
+    memberName: needsOrganizationMemberName.value ? memberName.value.trim() || undefined : undefined
   })
 
   if (actionCaptchaEnabled.value) {
@@ -379,6 +398,8 @@ onMounted(async () => {
   const organizationContext = loadOrganizationRegistrationContext()
   invitationCode.value = organizationContext.invitationCode
   organizationName.value = organizationContext.organizationName
+  memberName.value = organizationContext.memberName
+  contextMemberName.value = organizationContext.memberName
   isCreatingOrganization.value = organizationContext.organizationName !== ''
   try {
     const settings = await getPublicSettings()

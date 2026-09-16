@@ -137,9 +137,11 @@ type GroupStat struct {
 // MemberStat 是组织成员分布的一行：某个成员在统计区间内的用量。
 // 口径与其他分布统计一致，按用量记录所属账号聚合。
 type MemberStat struct {
-	UserID      int64   `json:"user_id"`
-	Email       string  `json:"email"`
-	Username    string  `json:"username"`
+	UserID   int64  `json:"user_id"`
+	Email    string `json:"email"`
+	Username string `json:"username"`
+	// DisplayName 是成员在组织中的名称，组织侧展示优先它、回退邮箱。
+	DisplayName string  `json:"display_name"`
 	Requests    int64   `json:"requests"`
 	TotalTokens int64   `json:"total_tokens"`
 	Cost        float64 `json:"cost"`

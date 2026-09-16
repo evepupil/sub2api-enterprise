@@ -607,11 +607,12 @@ func (h *AuthHandler) createOIDCOAuthChoicePendingSession(
 }
 
 type completeOIDCOAuthRequest struct {
-	InvitationCode   string `json:"invitation_code,omitempty"`
-	OrganizationName string `json:"organization_name,omitempty"`
-	AffCode          string `json:"aff_code,omitempty"`
-	AdoptDisplayName *bool  `json:"adopt_display_name,omitempty"`
-	AdoptAvatar      *bool  `json:"adopt_avatar,omitempty"`
+	InvitationCode         string `json:"invitation_code,omitempty"`
+	OrganizationName       string `json:"organization_name,omitempty"`
+	OrganizationMemberName string `json:"organization_member_name,omitempty"`
+	AffCode                string `json:"aff_code,omitempty"`
+	AdoptDisplayName       *bool  `json:"adopt_display_name,omitempty"`
+	AdoptAvatar            *bool  `json:"adopt_avatar,omitempty"`
 }
 
 // CompleteOIDCOAuthRegistration completes a pending OAuth registration by validating
@@ -693,7 +694,7 @@ func (h *AuthHandler) CompleteOIDCOAuthRegistration(c *gin.Context) {
 		response.ErrorFrom(c, err)
 		return
 	}
-	organizationName, invitationCode := pendingOAuthRegistrationValues(session, req.OrganizationName, req.InvitationCode)
+	organizationName, memberName, invitationCode := pendingOAuthRegistrationValues(session, req.OrganizationName, req.OrganizationMemberName, req.InvitationCode)
 	tokenPair, user, err := h.authService.LoginOrRegisterOAuthWithTokenPairAndOrganization(
 		c.Request.Context(),
 		email,
@@ -702,6 +703,7 @@ func (h *AuthHandler) CompleteOIDCOAuthRegistration(c *gin.Context) {
 		req.AffCode,
 		pendingOAuthPromoCode(session),
 		organizationName,
+		memberName,
 		"oidc",
 	)
 	if err != nil {

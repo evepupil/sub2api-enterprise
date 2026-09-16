@@ -27,6 +27,8 @@ type OrganizationMember struct {
 	OrganizationID int64 `json:"organization_id,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID int64 `json:"user_id,omitempty"`
+	// DisplayName holds the value of the "display_name" field.
+	DisplayName string `json:"display_name,omitempty"`
 	// SpendingLimit holds the value of the "spending_limit" field.
 	SpendingLimit *float64 `json:"spending_limit,omitempty"`
 	// SpendingUsed holds the value of the "spending_used" field.
@@ -91,6 +93,8 @@ func (*OrganizationMember) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullFloat64)
 		case organizationmember.FieldID, organizationmember.FieldOrganizationID, organizationmember.FieldUserID, organizationmember.FieldQuotaPeriodDays:
 			values[i] = new(sql.NullInt64)
+		case organizationmember.FieldDisplayName:
+			values[i] = new(sql.NullString)
 		case organizationmember.FieldCreatedAt, organizationmember.FieldUpdatedAt, organizationmember.FieldQuotaStartAt, organizationmember.FieldQuotaCycleStart:
 			values[i] = new(sql.NullTime)
 		default:
@@ -137,6 +141,12 @@ func (_m *OrganizationMember) assignValues(columns []string, values []any) error
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
 				_m.UserID = value.Int64
+			}
+		case organizationmember.FieldDisplayName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field display_name", values[i])
+			} else if value.Valid {
+				_m.DisplayName = value.String
 			}
 		case organizationmember.FieldSpendingLimit:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
@@ -248,6 +258,9 @@ func (_m *OrganizationMember) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
+	builder.WriteString(", ")
+	builder.WriteString("display_name=")
+	builder.WriteString(_m.DisplayName)
 	builder.WriteString(", ")
 	if v := _m.SpendingLimit; v != nil {
 		builder.WriteString("spending_limit=")

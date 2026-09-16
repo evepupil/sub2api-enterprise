@@ -60,6 +60,8 @@ type OrganizationMember struct {
 	UserID         int64
 	Email          string
 	Username       string
+	// DisplayName 是本人在组织中的名称，注册时填写、管理员可改；组织侧展示优先它、回退邮箱。
+	DisplayName    string
 	Status         string
 	Role           string
 	IsOwner        bool
@@ -115,6 +117,8 @@ type OrganizationMemberRepository interface {
 		filters OrganizationMemberListFilters,
 	) ([]OrganizationMember, *pagination.PaginationResult, error)
 	Get(ctx context.Context, organizationID int64, userID int64) (*OrganizationMember, error)
+	// UpdateMemberDisplayName 修改一个成员在组织中的名称（组织管理员本人也可以改）。
+	UpdateMemberDisplayName(ctx context.Context, organizationID int64, userID int64, displayName string) error
 	// SetSpendingLimits 在同一个事务里写入多个成员的上限（静态模式），
 	// 同时清掉各自的周期配额配置。全部成功或全部不生效。
 	SetSpendingLimits(ctx context.Context, organizationID int64, limits []OrganizationMemberSpendingLimit) error
@@ -274,6 +278,33 @@ func (s *OrganizationMemberService) UpdateStatus(
 		s.authCache.InvalidateAuthCacheByUserID(ctx, targetUserID)
 	}
 	member.Status = status
+	return member, nil
+}
+
+// UpdateMemberDisplayName 修改一个成员在组织中的名称。组织管理员本人也在成员
+// 列表里，自己的名称同样可以改；不限制重名，靠邮箱区分。
+func (s *OrganizationMemberService) UpdateMemberDisplayName(
+	ctx context.Context,
+	actorUserID int64,
+	targetUserID int64,
+	displayName string,
+) (*OrganizationMember, error) {
+	summary, err := s.requireOwnedOrganization(ctx, actorUserID)
+	if err != nil {
+		return nil, err
+	}
+	member, err := s.members.Get(ctx, summary.ID, targetUserID)
+	if err != nil {
+		return nil, err
+	}
+	name, err := normalizeMemberName(displayName)
+	if err != nil {
+		return nil, err
+	}
+	if err := s.members.UpdateMemberDisplayName(ctx, summary.ID, targetUserID, name); err != nil {
+		return nil, err
+	}
+	member.DisplayName = name
 	return member, nil
 }
 

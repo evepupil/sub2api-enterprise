@@ -30,7 +30,8 @@
     <ul v-else-if="policy && policy.mode !== 'off'" class="divide-y divide-line-subtle">
       <li v-for="request in requests" :key="request.id" class="flex flex-col gap-2 px-5 py-3 sm:flex-row sm:items-center">
         <div class="min-w-0 flex-1">
-          <div class="text-sm font-medium text-content-strong">{{ request.email }}</div>
+          <div class="text-sm font-medium text-content-strong">{{ request.display_name || request.email }}</div>
+          <div v-if="request.display_name" class="text-xs text-content-muted">{{ request.email }}</div>
           <div class="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-content-muted">
             <span class="font-mono text-content">{{ formatCurrency(request.amount) }}</span>
             <span v-if="request.reason">{{ request.reason }}</span>
@@ -130,7 +131,7 @@
     >
       <form class="space-y-4" @submit.prevent="submitReject">
         <p class="text-sm text-content">
-          {{ rejectDialog.email }} · {{ formatCurrency(rejectDialog.amount) }}
+          {{ rejectDialog.name || rejectDialog.email }} · {{ formatCurrency(rejectDialog.amount) }}
         </p>
         <div class="space-y-2">
           <label class="input-label" for="quota-request-reject-note">
@@ -217,6 +218,7 @@ const rejectDialog = reactive({
   show: false,
   id: 0,
   email: '',
+  name: '',
   amount: 0,
   note: '',
   error: '',
@@ -312,6 +314,7 @@ async function approve(request: OrganizationQuotaRequest): Promise<void> {
 function openReject(request: OrganizationQuotaRequest): void {
   rejectDialog.id = request.id
   rejectDialog.email = request.email
+  rejectDialog.name = request.display_name || request.email
   rejectDialog.amount = request.amount
   rejectDialog.note = ''
   rejectDialog.error = ''

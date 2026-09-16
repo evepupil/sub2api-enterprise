@@ -95,6 +95,8 @@ type OrganizationQuotaRequest struct {
 	UserID         int64
 	Email          string
 	Username       string
+	// DisplayName 是申请人在组织中的名称，组织侧展示优先它、回退邮箱。
+	DisplayName    string
 	Amount         float64
 	Reason         string
 	Status         string

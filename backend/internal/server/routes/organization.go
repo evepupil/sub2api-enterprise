@@ -20,6 +20,7 @@ func registerOrganizationRoutes(authenticated *gin.RouterGroup, h *handler.Handl
 
 		organization.GET("/members", h.OrganizationMember.List)
 		organization.PUT("/members/:user_id/status", h.OrganizationMember.UpdateStatus)
+		organization.PUT("/members/:user_id/display-name", h.OrganizationMember.UpdateDisplayName)
 		organization.PUT("/members/:user_id/spending-limit", h.OrganizationMember.UpdateSpendingLimit)
 		organization.PUT("/members/:user_id/quota", h.OrganizationMember.UpdateQuota)
 		organization.POST("/members/spending-limit-split", h.OrganizationMember.SplitSpendingLimit)

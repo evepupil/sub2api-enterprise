@@ -15,13 +15,13 @@ func TestOAuthOrganizationRegistrationContextSurvivesProviderRedirect(t *testing
 	ctx, _ := gin.CreateTestContext(recorder)
 	ctx.Request = httptest.NewRequest(
 		"GET",
-		"/api/v1/auth/oauth/github/start?organization_name=Example%20Team&invitation_code=ORG-CODE",
+		"/api/v1/auth/oauth/github/start?organization_name=Example%20Team&member_name=%E5%BC%A0%E4%B8%89&invitation_code=ORG-CODE",
 		nil,
 	)
 
 	captureOAuthOrganizationRegistration(ctx, false)
 	cookies := recorder.Result().Cookies()
-	require.Len(t, cookies, 2)
+	require.Len(t, cookies, 3)
 
 	callbackRecorder := httptest.NewRecorder()
 	callbackCtx, _ := gin.CreateTestContext(callbackRecorder)
@@ -31,20 +31,24 @@ func TestOAuthOrganizationRegistrationContextSurvivesProviderRedirect(t *testing
 	}
 
 	require.Equal(t, "Example Team", readOAuthRegistrationCookie(callbackCtx, oauthOrganizationNameCookie))
+	require.Equal(t, "张三", readOAuthRegistrationCookie(callbackCtx, oauthMemberNameCookie))
 	require.Equal(t, "ORG-CODE", readOAuthRegistrationCookie(callbackCtx, oauthInvitationCodeCookie))
 }
 
 func TestPendingOAuthRegistrationValuesPreferRequestThenSession(t *testing.T) {
 	session := &dbent.PendingAuthSession{LocalFlowState: map[string]any{
 		oauthOrganizationNameKey: "Stored Team",
+		oauthMemberNameKey:       "Stored Name",
 		oauthInvitationCodeKey:   "STORED-CODE",
 	}}
 
-	organizationName, invitationCode := pendingOAuthRegistrationValues(session, "", "")
+	organizationName, memberName, invitationCode := pendingOAuthRegistrationValues(session, "", "", "")
 	require.Equal(t, "Stored Team", organizationName)
+	require.Equal(t, "Stored Name", memberName)
 	require.Equal(t, "STORED-CODE", invitationCode)
 
-	organizationName, invitationCode = pendingOAuthRegistrationValues(session, "Request Team", "REQUEST-CODE")
+	organizationName, memberName, invitationCode = pendingOAuthRegistrationValues(session, "Request Team", "Request Name", "REQUEST-CODE")
 	require.Equal(t, "Request Team", organizationName)
+	require.Equal(t, "Request Name", memberName)
 	require.Equal(t, "REQUEST-CODE", invitationCode)
 }

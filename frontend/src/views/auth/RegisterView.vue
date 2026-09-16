@@ -175,6 +175,27 @@
               </p>
             </div>
           </transition>
+
+          <transition name="fade">
+            <div v-if="needsOrganizationMemberName" class="mt-4">
+              <label for="organization_member_name" class="input-label">
+                {{ t('auth.memberNameLabel') }}
+              </label>
+              <input
+                id="organization_member_name"
+                v-model="formData.organization_member_name"
+                type="text"
+                maxlength="50"
+                :disabled="registrationActionDisabled"
+                class="input"
+                :class="{ 'input-error': errors.organization_member_name }"
+                :placeholder="t('auth.memberNamePlaceholder')"
+              />
+              <p v-if="errors.organization_member_name" class="input-error-text">
+                {{ errors.organization_member_name }}
+              </p>
+            </div>
+          </transition>
         </div>
 
         <!-- Affiliate code remains separate from registration invitations. -->
@@ -509,7 +530,8 @@ const formData = reactive({
   promo_code: '',
   invitation_code: '',
   aff_code: '',
-  organization_name: ''
+  organization_name: '',
+  organization_member_name: ''
 })
 
 const isCreatingOrganization = ref(false)
@@ -519,8 +541,14 @@ const errors = reactive({
   password: '',
   turnstile: '',
   invitation_code: '',
-  organization_name: ''
+  organization_name: '',
+  organization_member_name: ''
 })
+
+// 创建组织或经组织邀请码加入时，必须填「你在组织中的名称」，组织里才分得出谁是谁。
+const needsOrganizationMemberName = computed(
+  () => isCreatingOrganization.value || invitationValidation.type === 'organization'
+)
 
 const validationToastMessage = computed(() =>
   errors.email ||
@@ -528,6 +556,7 @@ const validationToastMessage = computed(() =>
   (invitationValidation.invalid ? invitationValidation.message : '') ||
   errors.invitation_code ||
   errors.organization_name ||
+  errors.organization_member_name ||
   (promoValidation.invalid ? promoValidation.message : '') ||
   errors.turnstile ||
   ''
@@ -915,12 +944,19 @@ async function handleOAuthStart(request: OAuthLoginStart): Promise<void> {
     appStore.showError(errors.organization_name)
     return
   }
-  storeOrganizationRegistrationContext({ organizationName, invitationCode })
+  const memberName = formData.organization_member_name.trim()
+  if (needsOrganizationMemberName.value && !memberName) {
+    errors.organization_member_name = t('auth.memberNameRequired')
+    appStore.showError(errors.organization_member_name)
+    return
+  }
+  storeOrganizationRegistrationContext({ organizationName, memberName, invitationCode })
   const organizationRequest: OAuthLoginStart = {
     ...request,
     params: {
       ...request.params,
       ...(organizationName ? { organization_name: organizationName } : {}),
+      ...(memberName ? { member_name: memberName } : {}),
       ...(invitationCode ? { invitation_code: invitationCode } : {})
     }
   }
@@ -1038,6 +1074,11 @@ function validateForm(): boolean {
     isValid = false
   }
 
+  if (needsOrganizationMemberName.value && !formData.organization_member_name.trim()) {
+    errors.organization_member_name = t('auth.memberNameRequired')
+    isValid = false
+  }
+
   // Turnstile validation
   if (turnstileEnabled.value && !turnstileToken.value) {
     errors.turnstile = t('auth.completeVerification')
@@ -1123,6 +1164,7 @@ async function handleRegister(): Promise<void> {
           promo_code: formData.promo_code || undefined,
           invitation_code: formData.invitation_code || undefined,
           organization_name: isCreatingOrganization.value ? formData.organization_name.trim() : undefined,
+          organization_member_name: needsOrganizationMemberName.value ? formData.organization_member_name.trim() : undefined,
           ...(affCode ? { aff_code: affCode } : {})
         })
       )
@@ -1143,6 +1185,7 @@ async function handleRegister(): Promise<void> {
       promo_code: formData.promo_code || undefined,
       invitation_code: formData.invitation_code || undefined,
       organization_name: isCreatingOrganization.value ? formData.organization_name.trim() : undefined,
+      organization_member_name: needsOrganizationMemberName.value ? formData.organization_member_name.trim() : undefined,
       ...(affCode ? { aff_code: affCode } : {})
     })
     clearAffiliateReferralCode()
@@ -1172,6 +1215,8 @@ function buildRegistrationErrorMessage(error: unknown, fallback: string): string
       return t('auth.emailDomainRegistrationLimit')
     case 'ORGANIZATION_NAME_INVALID':
       return t('auth.organizationNameRequired')
+    case 'ORGANIZATION_MEMBER_NAME_INVALID':
+      return t('auth.memberNameRequired')
     case 'ORGANIZATION_REGISTRATION_CONFLICT':
       return t('auth.organizationRegistrationConflict')
     case 'USER_ALREADY_IN_ORGANIZATION':

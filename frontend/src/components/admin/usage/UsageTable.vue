@@ -34,9 +34,9 @@
               @click="$emit('userClick', row.user_id, row.user?.email)"
               :title="t('admin.usage.clickToViewBalance')"
             >
-              {{ row.user.email }}
+              {{ memberNameByUserId?.[row.user_id] || row.user.email }}
             </button>
-            <span v-else class="font-medium text-content-strong">{{ row.user?.email || '-' }}</span>
+            <span v-else class="font-medium text-content-strong">{{ memberNameByUserId?.[row.user_id] || row.user?.email || '-' }}</span>
             <span v-if="row.user?.deleted_at" class="ml-1 inline-flex items-center rounded px-1 py-px text-[10px] font-medium leading-tight bg-rose-100 text-rose-600 ring-1 ring-inset ring-rose-200 dark:bg-rose-500/20 dark:text-rose-400 dark:ring-rose-500/30">
               {{ t('admin.usage.userDeletedBadge') }}
             </span>
@@ -597,6 +597,8 @@ interface Props {
   showUpstreamEndpoint?: boolean
   /** 用户列是否可点击跳转查看余额：只有平台管理端需要，组织侧只做展示 */
   userClickable?: boolean
+  // 组织管理员视角：按成员标识映射组织内名称，成员列优先显示它。
+  memberNameByUserId?: Record<number, string>
   /** 嵌入统一卡片内使用：去掉自身卡片外观 */
   flat?: boolean
 }

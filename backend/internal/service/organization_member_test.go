@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"sort"
+	"strings"
 	"testing"
 	"time"
 
@@ -53,6 +54,23 @@ func (r *organizationMemberRepoStub) Get(_ context.Context, organizationID int64
 	}
 	copyValue := *member
 	return &copyValue, nil
+}
+
+func (r *organizationMemberRepoStub) UpdateMemberDisplayName(
+	_ context.Context,
+	organizationID int64,
+	userID int64,
+	displayName string,
+) error {
+	if organizationID != r.organizationID {
+		return ErrOrganizationMemberNotFound
+	}
+	member, ok := r.members[userID]
+	if !ok {
+		return ErrOrganizationMemberNotFound
+	}
+	member.DisplayName = displayName
+	return nil
 }
 
 func (r *organizationMemberRepoStub) SetSpendingLimits(
@@ -494,4 +512,41 @@ func TestSplitSpendingAmountRejectsInvalidInput(t *testing.T) {
 
 	_, err = SplitSpendingAmount(-1, 3)
 	require.ErrorIs(t, err, ErrOrganizationSpendingLimitInvalid)
+}
+
+func TestUpdateMemberDisplayName(t *testing.T) {
+	t.Run("只有组织管理员能改", func(t *testing.T) {
+		fixture := newOrganizationMemberFixture(t)
+		_, err := fixture.service.UpdateMemberDisplayName(
+			context.Background(), testOrganizationOtherID, testOrganizationMemberID, "新名字",
+		)
+		require.ErrorIs(t, err, ErrOrganizationOwnerRequired)
+	})
+
+	t.Run("管理员可以改自己的名称", func(t *testing.T) {
+		fixture := newOrganizationMemberFixture(t)
+		member, err := fixture.service.UpdateMemberDisplayName(
+			context.Background(), testOrganizationOwnerID, testOrganizationOwnerID, "老板",
+		)
+		require.NoError(t, err)
+		require.Equal(t, "老板", member.DisplayName)
+		require.Equal(t, "老板", fixture.members.members[testOrganizationOwnerID].DisplayName)
+	})
+
+	t.Run("名称必填且不超长", func(t *testing.T) {
+		fixture := newOrganizationMemberFixture(t)
+		ctx := context.Background()
+		_, err := fixture.service.UpdateMemberDisplayName(ctx, testOrganizationOwnerID, testOrganizationMemberID, "  ")
+		require.ErrorIs(t, err, ErrOrganizationMemberNameInvalid)
+		_, err = fixture.service.UpdateMemberDisplayName(ctx, testOrganizationOwnerID, testOrganizationMemberID, strings.Repeat("名", 51))
+		require.ErrorIs(t, err, ErrOrganizationMemberNameInvalid)
+	})
+
+	t.Run("外组织成员改不到", func(t *testing.T) {
+		fixture := newOrganizationMemberFixture(t)
+		_, err := fixture.service.UpdateMemberDisplayName(
+			context.Background(), testOrganizationOwnerID, 999999, "路人",
+		)
+		require.ErrorIs(t, err, ErrOrganizationMemberNotFound)
+	})
 }

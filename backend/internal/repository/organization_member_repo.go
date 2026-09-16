@@ -132,6 +132,29 @@ func (r *organizationMemberRepository) Get(
 	return member, nil
 }
 
+// UpdateMemberDisplayName 修改一个成员在组织中的名称；成员不存在时返回稳定的业务错误。
+func (r *organizationMemberRepository) UpdateMemberDisplayName(
+	ctx context.Context,
+	organizationID int64,
+	userID int64,
+	displayName string,
+) error {
+	affected, err := clientFromContext(ctx, r.client).OrganizationMember.Update().
+		Where(
+			organizationmember.OrganizationIDEQ(organizationID),
+			organizationmember.UserIDEQ(userID),
+		).
+		SetDisplayName(displayName).
+		Save(ctx)
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return service.ErrOrganizationMemberNotFound
+	}
+	return nil
+}
+
 func (r *organizationMemberRepository) SetSpendingLimits(
 	ctx context.Context,
 	organizationID int64,
@@ -405,6 +428,7 @@ func organizationMemberEntityToService(entity *dbent.OrganizationMember, ownerUs
 		UserID:          entity.UserID,
 		Email:           user.Email,
 		Username:        user.Username,
+		DisplayName:     entity.DisplayName,
 		Status:          user.Status,
 		Role:            user.Role,
 		IsOwner:         entity.UserID == ownerUserID,

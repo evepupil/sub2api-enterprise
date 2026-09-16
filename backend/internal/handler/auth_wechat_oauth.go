@@ -487,11 +487,12 @@ func (h *AuthHandler) wechatPaymentResumeService() *service.PaymentResumeService
 }
 
 type completeWeChatOAuthRequest struct {
-	InvitationCode   string `json:"invitation_code,omitempty"`
-	OrganizationName string `json:"organization_name,omitempty"`
-	AffCode          string `json:"aff_code,omitempty"`
-	AdoptDisplayName *bool  `json:"adopt_display_name,omitempty"`
-	AdoptAvatar      *bool  `json:"adopt_avatar,omitempty"`
+	InvitationCode         string `json:"invitation_code,omitempty"`
+	OrganizationName       string `json:"organization_name,omitempty"`
+	OrganizationMemberName string `json:"organization_member_name,omitempty"`
+	AffCode                string `json:"aff_code,omitempty"`
+	AdoptDisplayName       *bool  `json:"adopt_display_name,omitempty"`
+	AdoptAvatar            *bool  `json:"adopt_avatar,omitempty"`
 }
 
 // CompleteWeChatOAuthRegistration completes a pending WeChat OAuth registration by
@@ -556,7 +557,7 @@ func (h *AuthHandler) CompleteWeChatOAuthRegistration(c *gin.Context) {
 		return
 	}
 
-	organizationName, invitationCode := pendingOAuthRegistrationValues(session, req.OrganizationName, req.InvitationCode)
+	organizationName, memberName, invitationCode := pendingOAuthRegistrationValues(session, req.OrganizationName, req.OrganizationMemberName, req.InvitationCode)
 	tokenPair, user, err := h.authService.LoginOrRegisterOAuthWithTokenPairAndOrganization(
 		c.Request.Context(),
 		email,
@@ -565,6 +566,7 @@ func (h *AuthHandler) CompleteWeChatOAuthRegistration(c *gin.Context) {
 		req.AffCode,
 		pendingOAuthPromoCode(session),
 		organizationName,
+		memberName,
 		"wechat",
 	)
 	if err != nil {

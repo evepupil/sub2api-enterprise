@@ -199,6 +199,7 @@
           :show-account-billing="false"
           :show-upstream-endpoint="false"
           :user-clickable="false"
+          :member-name-by-user-id="memberNameByUserId"
           default-sort-key="created_at"
           default-sort-order="desc"
           @sort="handleSort"
@@ -379,11 +380,20 @@ const memberUsage = ref<OrganizationMemberUsageStat[]>([])
 const memberUsageLoading = ref(false)
 const memberDistributionMetric = ref<DistributionMetric>('tokens')
 
+// 组织管理员看全组织记录：成员列按组织内名称显示，没有则回退邮箱。
+const memberNameByUserId = computed<Record<number, string>>(() => {
+  const names: Record<number, string> = {}
+  for (const member of organizationMembers.value) {
+    names[member.user_id] = member.display_name
+  }
+  return names
+})
+
 const memberOptions = computed<SelectOption[]>(() => [
   { value: null, label: t('usage.allMembers') },
   ...organizationMembers.value.map((member) => ({
     value: member.user_id,
-    label: member.username ? `${member.email} (${member.username})` : member.email,
+    label: member.display_name || member.email,
   })),
 ])
 

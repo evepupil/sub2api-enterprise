@@ -129,6 +129,7 @@ export interface OrganizationMember {
   username: string
   status: 'active' | 'disabled'
   is_owner: boolean
+  display_name: string
   spending_limit: number | null
   spending_used: number
   spending_frozen: number
@@ -151,6 +152,7 @@ export interface OrganizationQuotaRequest {
   user_id: number
   email: string
   username: string
+  display_name: string
   amount: number
   reason: string
   status: 'pending' | 'granted' | 'rejected' | 'withdrawn'
@@ -243,6 +245,7 @@ export interface RegisterRequest {
   invitation_code?: string
   aff_code?: string
   organization_name?: string
+  organization_member_name?: string
 }
 
 export interface AffiliateInvitee {
@@ -2273,6 +2276,7 @@ export interface OrganizationMemberUsageStat {
   user_id: number
   email: string
   username: string
+  display_name: string
   requests: number
   total_tokens: number
   cost: number

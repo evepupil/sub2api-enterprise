@@ -22,12 +22,14 @@ func NewOrganizationMemberHandler(service *service.OrganizationMemberService) *O
 }
 
 // organizationMemberResponse 是成员管理页看到的一行。
+// display_name 是成员在组织中的名称，组织侧展示优先它、回退邮箱。
 // spending_limit 为 null 表示不限额，0 表示完全不能消费。
 // spending_remaining 在不限额时同样为 null，按生效配额模式计算。
 type organizationMemberResponse struct {
 	UserID            int64                          `json:"user_id"`
 	Email             string                         `json:"email"`
 	Username          string                         `json:"username"`
+	DisplayName       string                         `json:"display_name"`
 	Status            string                         `json:"status"`
 	IsOwner           bool                           `json:"is_owner"`
 	SpendingLimit     *float64                       `json:"spending_limit"`
@@ -52,6 +54,11 @@ type organizationMemberQuotaDetail struct {
 
 type updateOrganizationMemberStatusRequest struct {
 	Status string `json:"status"`
+}
+
+// updateOrganizationMemberDisplayNameRequest 的 display_name 必填，1 到 50 个字符。
+type updateOrganizationMemberDisplayNameRequest struct {
+	DisplayName string `json:"display_name"`
 }
 
 // updateOrganizationMemberSpendingLimitRequest 的 spending_limit 为 null 表示改为不限额。
@@ -123,6 +130,30 @@ func (h *OrganizationMemberHandler) UpdateStatus(c *gin.Context) {
 		return
 	}
 	member, err := h.service.UpdateStatus(c.Request.Context(), actorUserID, targetUserID, req.Status)
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+	response.Success(c, organizationMemberToResponse(member))
+}
+
+// UpdateDisplayName 修改一个成员在组织中的名称（组织管理员本人也可以改自己）。
+// PUT /api/v1/organization/members/:user_id/display-name
+func (h *OrganizationMemberHandler) UpdateDisplayName(c *gin.Context) {
+	actorUserID, ok := organizationUserID(c)
+	if !ok {
+		return
+	}
+	targetUserID, ok := organizationMemberUserID(c)
+	if !ok {
+		return
+	}
+	var req updateOrganizationMemberDisplayNameRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "Invalid request: "+err.Error())
+		return
+	}
+	member, err := h.service.UpdateMemberDisplayName(c.Request.Context(), actorUserID, targetUserID, req.DisplayName)
 	if err != nil {
 		response.ErrorFrom(c, err)
 		return
@@ -245,6 +276,7 @@ func organizationMemberToResponse(member *service.OrganizationMember) *organizat
 		UserID:            member.UserID,
 		Email:             member.Email,
 		Username:          member.Username,
+		DisplayName:       member.DisplayName,
 		Status:            member.Status,
 		IsOwner:           member.IsOwner,
 		SpendingLimit:     member.SpendingLimit,

@@ -24,7 +24,7 @@ func setMemberPeriodicQuota(
 ) {
 	t.Helper()
 	update := testEntClient(t).OrganizationMember.Update().
-		Where(/* 按成员标识定位 */ organizationmember.UserIDEQ(userID)).
+		Where( /* 按成员标识定位 */ organizationmember.UserIDEQ(userID)).
 		SetQuotaAmount(amount).
 		SetQuotaPeriodDays(periodDays).
 		SetQuotaStartAt(startAt)
@@ -66,8 +66,8 @@ func TestSetPeriodicQuotasWritesAllModesAtomically(t *testing.T) {
 	future := now.Add(48 * time.Hour)
 	require.NoError(t, repo.SetPeriodicQuotas(ctx, organization.ID, []service.OrganizationMemberQuotaWrite{
 		{
-			UserID:   memberID,
-			Quota:    &service.PeriodicQuotaInput{Amount: 100, PeriodDays: 30, StartAt: future},
+			UserID:    memberID,
+			Quota:     &service.PeriodicQuotaInput{Amount: 100, PeriodDays: 30, StartAt: future},
 			ResetUsed: false,
 		},
 	}))
@@ -89,8 +89,8 @@ func TestSetPeriodicQuotasWritesAllModesAtomically(t *testing.T) {
 	// 批量里出现不存在的成员时整批拒绝。
 	require.Error(t, repo.SetPeriodicQuotas(ctx, organization.ID, []service.OrganizationMemberQuotaWrite{
 		{
-			UserID:   memberID,
-			Quota:    &service.PeriodicQuotaInput{Amount: 1, PeriodDays: 1, StartAt: future},
+			UserID:    memberID,
+			Quota:     &service.PeriodicQuotaInput{Amount: 1, PeriodDays: 1, StartAt: future},
 			ResetUsed: false,
 		},
 		{UserID: 0},

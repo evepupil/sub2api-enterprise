@@ -64,6 +64,20 @@ func (_c *OrganizationMemberCreate) SetUserID(v int64) *OrganizationMemberCreate
 	return _c
 }
 
+// SetDisplayName sets the "display_name" field.
+func (_c *OrganizationMemberCreate) SetDisplayName(v string) *OrganizationMemberCreate {
+	_c.mutation.SetDisplayName(v)
+	return _c
+}
+
+// SetNillableDisplayName sets the "display_name" field if the given value is not nil.
+func (_c *OrganizationMemberCreate) SetNillableDisplayName(v *string) *OrganizationMemberCreate {
+	if v != nil {
+		_c.SetDisplayName(*v)
+	}
+	return _c
+}
+
 // SetSpendingLimit sets the "spending_limit" field.
 func (_c *OrganizationMemberCreate) SetSpendingLimit(v float64) *OrganizationMemberCreate {
 	_c.mutation.SetSpendingLimit(v)
@@ -257,6 +271,11 @@ func (_c *OrganizationMemberCreate) check() error {
 	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "OrganizationMember.user_id"`)}
 	}
+	if v, ok := _c.mutation.DisplayName(); ok {
+		if err := organizationmember.DisplayNameValidator(v); err != nil {
+			return &ValidationError{Name: "display_name", err: fmt.Errorf(`ent: validator failed for field "OrganizationMember.display_name": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.SpendingUsed(); !ok {
 		return &ValidationError{Name: "spending_used", err: errors.New(`ent: missing required field "OrganizationMember.spending_used"`)}
 	}
@@ -311,6 +330,10 @@ func (_c *OrganizationMemberCreate) createSpec() (*OrganizationMember, *sqlgraph
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(organizationmember.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
+	}
+	if value, ok := _c.mutation.DisplayName(); ok {
+		_spec.SetField(organizationmember.FieldDisplayName, field.TypeString, value)
+		_node.DisplayName = value
 	}
 	if value, ok := _c.mutation.SpendingLimit(); ok {
 		_spec.SetField(organizationmember.FieldSpendingLimit, field.TypeFloat64, value)
@@ -463,6 +486,24 @@ func (u *OrganizationMemberUpsert) SetUserID(v int64) *OrganizationMemberUpsert 
 // UpdateUserID sets the "user_id" field to the value that was provided on create.
 func (u *OrganizationMemberUpsert) UpdateUserID() *OrganizationMemberUpsert {
 	u.SetExcluded(organizationmember.FieldUserID)
+	return u
+}
+
+// SetDisplayName sets the "display_name" field.
+func (u *OrganizationMemberUpsert) SetDisplayName(v string) *OrganizationMemberUpsert {
+	u.Set(organizationmember.FieldDisplayName, v)
+	return u
+}
+
+// UpdateDisplayName sets the "display_name" field to the value that was provided on create.
+func (u *OrganizationMemberUpsert) UpdateDisplayName() *OrganizationMemberUpsert {
+	u.SetExcluded(organizationmember.FieldDisplayName)
+	return u
+}
+
+// ClearDisplayName clears the value of the "display_name" field.
+func (u *OrganizationMemberUpsert) ClearDisplayName() *OrganizationMemberUpsert {
+	u.SetNull(organizationmember.FieldDisplayName)
 	return u
 }
 
@@ -712,6 +753,27 @@ func (u *OrganizationMemberUpsertOne) SetUserID(v int64) *OrganizationMemberUpse
 func (u *OrganizationMemberUpsertOne) UpdateUserID() *OrganizationMemberUpsertOne {
 	return u.Update(func(s *OrganizationMemberUpsert) {
 		s.UpdateUserID()
+	})
+}
+
+// SetDisplayName sets the "display_name" field.
+func (u *OrganizationMemberUpsertOne) SetDisplayName(v string) *OrganizationMemberUpsertOne {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.SetDisplayName(v)
+	})
+}
+
+// UpdateDisplayName sets the "display_name" field to the value that was provided on create.
+func (u *OrganizationMemberUpsertOne) UpdateDisplayName() *OrganizationMemberUpsertOne {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.UpdateDisplayName()
+	})
+}
+
+// ClearDisplayName clears the value of the "display_name" field.
+func (u *OrganizationMemberUpsertOne) ClearDisplayName() *OrganizationMemberUpsertOne {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.ClearDisplayName()
 	})
 }
 
@@ -1154,6 +1216,27 @@ func (u *OrganizationMemberUpsertBulk) SetUserID(v int64) *OrganizationMemberUps
 func (u *OrganizationMemberUpsertBulk) UpdateUserID() *OrganizationMemberUpsertBulk {
 	return u.Update(func(s *OrganizationMemberUpsert) {
 		s.UpdateUserID()
+	})
+}
+
+// SetDisplayName sets the "display_name" field.
+func (u *OrganizationMemberUpsertBulk) SetDisplayName(v string) *OrganizationMemberUpsertBulk {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.SetDisplayName(v)
+	})
+}
+
+// UpdateDisplayName sets the "display_name" field to the value that was provided on create.
+func (u *OrganizationMemberUpsertBulk) UpdateDisplayName() *OrganizationMemberUpsertBulk {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.UpdateDisplayName()
+	})
+}
+
+// ClearDisplayName clears the value of the "display_name" field.
+func (u *OrganizationMemberUpsertBulk) ClearDisplayName() *OrganizationMemberUpsertBulk {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.ClearDisplayName()
 	})
 }
 

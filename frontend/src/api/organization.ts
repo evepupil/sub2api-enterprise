@@ -68,6 +68,18 @@ export async function updateOrganizationMemberStatus(
 }
 
 // spendingLimit 传 null 表示改为不限额，传 0 表示完全不能消费。
+// 修改成员在组织中的名称（组织管理员本人也可改自己）；display_name 必填，1-50 字符。
+export async function updateOrganizationMemberDisplayName(
+  userId: number,
+  displayName: string
+): Promise<OrganizationMember> {
+  const { data } = await apiClient.put<OrganizationMember>(
+    `/organization/members/${userId}/display-name`,
+    { display_name: displayName }
+  )
+  return data
+}
+
 export async function updateOrganizationMemberSpendingLimit(
   userId: number,
   spendingLimit: number | null
@@ -191,6 +203,7 @@ export default {
   disableOrganizationInvitation,
   listOrganizationMembers,
   updateOrganizationMemberStatus,
+  updateOrganizationMemberDisplayName,
   updateOrganizationMemberSpendingLimit,
   splitOrganizationMemberSpendingLimit,
   updateOrganizationMemberQuota,

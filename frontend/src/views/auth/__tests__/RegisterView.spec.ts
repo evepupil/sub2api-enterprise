@@ -136,6 +136,7 @@ describe('RegisterView invitation layout', () => {
     expect(createOrganizationButton).toBeDefined()
     await createOrganizationButton!.trigger('click')
     await wrapper.get('#organization_name').setValue('Example Team')
+    await wrapper.get('#organization_member_name').setValue('Zhang San')
     await wrapper.get('#email').setValue('owner@example.com')
     await wrapper.get('#password').setValue('secret-123')
     await wrapper.get('form').trigger('submit.prevent')
@@ -144,7 +145,8 @@ describe('RegisterView invitation layout', () => {
     expect(registerMock).toHaveBeenCalledWith(
       expect.objectContaining({
         email: 'owner@example.com',
-        organization_name: 'Example Team'
+        organization_name: 'Example Team',
+        organization_member_name: 'Zhang San'
       })
     )
   })

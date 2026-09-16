@@ -1359,16 +1359,20 @@ func init() {
 	organizationmember.DefaultUpdatedAt = organizationmemberDescUpdatedAt.Default.(func() time.Time)
 	// organizationmember.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	organizationmember.UpdateDefaultUpdatedAt = organizationmemberDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// organizationmemberDescDisplayName is the schema descriptor for display_name field.
+	organizationmemberDescDisplayName := organizationmemberFields[2].Descriptor()
+	// organizationmember.DisplayNameValidator is a validator for the "display_name" field. It is called by the builders before save.
+	organizationmember.DisplayNameValidator = organizationmemberDescDisplayName.Validators[0].(func(string) error)
 	// organizationmemberDescSpendingUsed is the schema descriptor for spending_used field.
-	organizationmemberDescSpendingUsed := organizationmemberFields[3].Descriptor()
+	organizationmemberDescSpendingUsed := organizationmemberFields[4].Descriptor()
 	// organizationmember.DefaultSpendingUsed holds the default value on creation for the spending_used field.
 	organizationmember.DefaultSpendingUsed = organizationmemberDescSpendingUsed.Default.(float64)
 	// organizationmemberDescSpendingFrozen is the schema descriptor for spending_frozen field.
-	organizationmemberDescSpendingFrozen := organizationmemberFields[4].Descriptor()
+	organizationmemberDescSpendingFrozen := organizationmemberFields[5].Descriptor()
 	// organizationmember.DefaultSpendingFrozen holds the default value on creation for the spending_frozen field.
 	organizationmember.DefaultSpendingFrozen = organizationmemberDescSpendingFrozen.Default.(float64)
 	// organizationmemberDescQuotaPeriodDays is the schema descriptor for quota_period_days field.
-	organizationmemberDescQuotaPeriodDays := organizationmemberFields[6].Descriptor()
+	organizationmemberDescQuotaPeriodDays := organizationmemberFields[7].Descriptor()
 	// organizationmember.QuotaPeriodDaysValidator is a validator for the "quota_period_days" field. It is called by the builders before save.
 	organizationmember.QuotaPeriodDaysValidator = func() func(int) error {
 		validators := organizationmemberDescQuotaPeriodDays.Validators
@@ -1386,7 +1390,7 @@ func init() {
 		}
 	}()
 	// organizationmemberDescQuotaCycleBonus is the schema descriptor for quota_cycle_bonus field.
-	organizationmemberDescQuotaCycleBonus := organizationmemberFields[9].Descriptor()
+	organizationmemberDescQuotaCycleBonus := organizationmemberFields[10].Descriptor()
 	// organizationmember.DefaultQuotaCycleBonus holds the default value on creation for the quota_cycle_bonus field.
 	organizationmember.DefaultQuotaCycleBonus = organizationmemberDescQuotaCycleBonus.Default.(float64)
 	organizationquotarequestMixin := schema.OrganizationQuotaRequest{}.Mixin()
