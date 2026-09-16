@@ -11,6 +11,8 @@ export default {
     orgQuotaSubmitted: '已提交',
     orgQuotaSubmitFailed: '提交失败，请重试',
     orgQuotaAmountRequired: '请输入大于 0 的金额',
+    orgQuotaRecent: '最近申请',
+    orgQuotaRecentFailed: '申请记录加载失败',
     apiKeys: 'API 密钥',
     todayRequests: '今日请求',
     todayCost: '今日消费',

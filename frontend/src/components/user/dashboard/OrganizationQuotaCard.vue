@@ -26,7 +26,6 @@
         v-if="canApply"
         type="button"
         class="btn btn-primary btn-sm shrink-0"
-        data-tour="org-quota-apply"
         @click="openDialog"
       >
         {{ t('dashboard.orgQuotaApply') }}
@@ -83,16 +82,61 @@
           </button>
         </div>
       </form>
+
+      <!-- 最近申请：成员在提交的同一处就能看到进度并撤回，不用另找入口 -->
+      <div v-if="requests.length > 0 || requestsError" class="mt-4 border-t border-line-subtle pt-3">
+        <p class="mb-2 text-xs font-medium text-content-muted">{{ t('dashboard.orgQuotaRecent') }}</p>
+        <div v-if="requestsError" class="flex items-center justify-between text-xs text-content-muted">
+          <span>{{ t('dashboard.orgQuotaRecentFailed') }}</span>
+          <button type="button" class="font-medium text-primary-600 hover:underline" @click="loadRequests">
+            {{ t('common.retry') }}
+          </button>
+        </div>
+        <ul v-else class="max-h-44 space-y-1.5 overflow-y-auto">
+          <li
+            v-for="request in requests"
+            :key="request.id"
+            class="flex items-center gap-3 text-xs"
+          >
+            <span class="shrink-0 font-mono text-content">{{ formatCurrency(request.amount) }}</span>
+            <span class="shrink-0 text-content-muted">{{ formatDateTime(request.created_at) }}</span>
+            <span
+              v-if="request.reason"
+              class="min-w-0 flex-1 truncate text-content-muted"
+              :title="request.reason"
+            >
+              {{ request.reason }}
+            </span>
+            <span v-else class="flex-1"></span>
+            <span
+              v-if="request.status !== 'pending'"
+              class="shrink-0 rounded-full px-2 py-0.5"
+              :class="statusClass(request.status)"
+            >
+              {{ t(`organization.quotaRequestStatus.${request.status}`) }}
+            </span>
+            <button
+              v-else
+              type="button"
+              class="shrink-0 font-medium text-primary-600 hover:underline disabled:opacity-50"
+              :disabled="withdrawingId === request.id"
+              @click="withdraw(request)"
+            >
+              {{ t('organization.quotaRequestWithdraw') }}
+            </button>
+          </li>
+        </ul>
+      </div>
     </BaseDialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, reactive } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import BaseDialog from '@/components/common/BaseDialog.vue'
-import { submitQuotaRequest } from '@/api/organization'
-import type { UserOrganizationQuotaOverview } from '@/types'
+import { listQuotaRequests, submitQuotaRequest, withdrawQuotaRequest } from '@/api/organization'
+import type { OrganizationQuotaRequest, UserOrganizationQuotaOverview } from '@/types'
 import { useAppStore } from '@/stores/app'
 import { extractApiErrorMessage } from '@/utils/apiError'
 import { formatCurrency, formatDateTime } from '@/utils/format'
@@ -128,11 +172,27 @@ const dialog = reactive({
   saving: false
 })
 
+const requests = ref<OrganizationQuotaRequest[]>([])
+const requestsError = ref(false)
+const withdrawingId = ref<number | null>(null)
+
+// 服务端按身份分流：普通成员只拿得到自己的申请。
+async function loadRequests(): Promise<void> {
+  requestsError.value = false
+  try {
+    const result = await listQuotaRequests({ page: 1, page_size: 10 })
+    requests.value = result.items || []
+  } catch {
+    requestsError.value = true
+  }
+}
+
 function openDialog(): void {
   dialog.amount = props.overview.min_amount ?? ''
   dialog.reason = ''
   dialog.error = ''
   dialog.show = true
+  void loadRequests()
 }
 
 function closeDialog(): void {
@@ -149,13 +209,41 @@ async function submit(): Promise<void> {
   dialog.error = ''
   try {
     await submitQuotaRequest(amount, dialog.reason.trim() || undefined)
-    dialog.show = false
+    // 弹框不关：新单立刻出现在下面的记录里，带撤回入口。
+    dialog.amount = props.overview.min_amount ?? ''
+    dialog.reason = ''
     appStore.showSuccess(t('dashboard.orgQuotaSubmitted'))
     emit('applied')
+    await loadRequests()
   } catch (error) {
     dialog.error = extractApiErrorMessage(error, t('dashboard.orgQuotaSubmitFailed'))
   } finally {
     dialog.saving = false
+  }
+}
+
+async function withdraw(request: OrganizationQuotaRequest): Promise<void> {
+  withdrawingId.value = request.id
+  try {
+    await withdrawQuotaRequest(request.id)
+    appStore.showSuccess(t('organization.quotaRequestWithdrawn'))
+    emit('applied')
+    await loadRequests()
+  } catch (error) {
+    appStore.showError(extractApiErrorMessage(error, t('organization.memberUpdateFailed')))
+  } finally {
+    withdrawingId.value = null
+  }
+}
+
+function statusClass(status: OrganizationQuotaRequest['status']): string {
+  switch (status) {
+    case 'granted':
+      return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200'
+    case 'rejected':
+      return 'bg-gray-100 text-content-muted dark:bg-dark-700 dark:text-dark-300'
+    default:
+      return 'bg-gray-100 text-content-muted dark:bg-dark-700 dark:text-dark-300'
   }
 }
 </script>

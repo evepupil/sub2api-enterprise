@@ -11,6 +11,8 @@ export default {
     orgQuotaSubmitted: 'Submitted',
     orgQuotaSubmitFailed: 'Failed to submit, please try again',
     orgQuotaAmountRequired: 'Enter an amount greater than 0',
+    orgQuotaRecent: 'Recent requests',
+    orgQuotaRecentFailed: 'Failed to load request history',
     apiKeys: 'API Keys',
     todayRequests: 'Today Requests',
     todayCost: 'Today Cost',
