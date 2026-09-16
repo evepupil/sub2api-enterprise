@@ -436,6 +436,8 @@ export default {
       title: '用户管理',
       description: '管理用户账户和权限',
       createUser: '创建用户',
+      organizationFilter: '组织',
+      clearOrganizationFilter: '点击取消组织筛选，查看全部用户',
       bulkLimits: {
         action: '批量设置限制（{count}）',
         title: '批量设置用户限制',

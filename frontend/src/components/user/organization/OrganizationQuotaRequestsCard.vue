@@ -8,33 +8,51 @@
       </h2>
       <div class="flex items-center gap-2">
         <div class="w-32">
-          <Select v-model="statusFilter" :options="statusOptions" @update:model-value="reloadRequests" />
+          <Select v-model="statusFilter" :options="statusOptions" @update:model-value="handleStatusFilterChange" />
         </div>
-        <button type="button" class="btn btn-secondary btn-sm" @click="openPolicyDialog">
+        <button type="button" class="btn btn-secondary" @click="openPolicyDialog">
           {{ t('organization.quotaRequestMode') }}
         </button>
       </div>
     </div>
 
-    <div v-if="policy && policy.mode !== 'off' && requestsLoading" class="flex justify-center py-10">
+    <div v-if="policyError" class="px-5 py-10 text-center">
+      <p class="text-sm text-content-muted">{{ t('organization.quotaPolicyLoadFailed') }}</p>
+      <button type="button" class="btn btn-secondary btn-sm mt-3" @click="reloadAll">
+        {{ t('common.retry') }}
+      </button>
+    </div>
+
+    <div v-else-if="policyLoading" class="flex justify-center py-10">
+      <div class="h-7 w-7 animate-spin rounded-full border-2 border-primary-500 border-t-transparent"></div>
+    </div>
+
+    <!-- 申请通道关闭时明确说出来，避免看起来像功能坏了 -->
+    <div v-else-if="policy && policy.mode === 'off'" class="empty-state px-5 py-10">
+      <p class="empty-state-title">{{ t('organization.quotaRequestOff') }}</p>
+    </div>
+
+    <div v-else-if="requestsLoading" class="flex justify-center py-10">
       <div class="h-7 w-7 animate-spin rounded-full border-2 border-primary-500 border-t-transparent"></div>
     </div>
 
     <div
-      v-else-if="policy && policy.mode !== 'off' && requests.length === 0"
-      class="px-5 py-10 text-center text-sm text-content-muted"
+      v-else-if="requests.length === 0"
+      class="empty-state px-5 py-10"
     >
-      {{ t('organization.quotaRequestEmpty') }}
+      <p class="empty-state-title">{{ t('organization.quotaRequestEmpty') }}</p>
     </div>
 
-    <ul v-else-if="policy && policy.mode !== 'off'" class="divide-y divide-line-subtle">
+    <ul v-else class="divide-y divide-line-subtle">
       <li v-for="request in requests" :key="request.id" class="flex flex-col gap-2 px-5 py-3 sm:flex-row sm:items-center">
         <div class="min-w-0 flex-1">
-          <div class="text-sm font-medium text-content-strong">{{ request.display_name || request.email }}</div>
-          <div v-if="request.display_name" class="text-xs text-content-muted">{{ request.email }}</div>
-          <div class="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-content-muted">
+          <div class="truncate text-sm font-medium text-content-strong">{{ request.display_name || request.email }}</div>
+          <div v-if="request.display_name" class="truncate text-xs text-content-muted">{{ request.email }}</div>
+          <div class="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-content-muted">
             <span class="font-mono text-content">{{ formatCurrency(request.amount) }}</span>
-            <span v-if="request.reason">{{ request.reason }}</span>
+            <span v-if="request.reason" class="min-w-0 max-w-[12rem] truncate" :title="request.reason">
+              {{ request.reason }}
+            </span>
             <span>{{ formatDateTime(request.created_at) }}</span>
             <span
               :class="statusClass(request.status)"
@@ -42,7 +60,13 @@
             >
               {{ t(`organization.quotaRequestStatus.${request.status}`) }}
             </span>
-            <span v-if="request.review_note" class="text-content-subtle">{{ request.review_note }}</span>
+            <span
+              v-if="request.review_note"
+              class="min-w-0 max-w-[12rem] truncate text-content-subtle"
+              :title="request.review_note"
+            >
+              {{ request.review_note }}
+            </span>
           </div>
         </div>
         <div v-if="request.status === 'pending'" class="flex shrink-0 gap-1">
@@ -148,7 +172,7 @@
           <button type="button" class="btn btn-secondary" @click="rejectDialog.show = false">
             {{ t('common.cancel') }}
           </button>
-          <button type="submit" class="btn btn-primary" :disabled="rejectDialog.saving">
+          <button type="submit" class="btn btn-danger" :disabled="rejectDialog.saving">
             {{ rejectDialog.saving ? t('common.submitting') : t('organization.quotaRequestReject') }}
           </button>
         </div>
@@ -185,6 +209,8 @@ const { t } = useI18n()
 const appStore = useAppStore()
 
 const policy = ref<OrganizationQuotaRequestPolicy | null>(null)
+const policyLoading = ref(true)
+const policyError = ref(false)
 const requests = ref<OrganizationQuotaRequest[]>([])
 const requestsLoading = ref(false)
 const total = ref(0)
@@ -192,6 +218,34 @@ const page = ref(1)
 const pageSize = ref(10)
 const statusFilter = ref('pending')
 const handlingId = ref<number | null>(null)
+// 用户手动换过筛选后不再替他切默认值。
+let filterTouched = false
+
+function handleStatusFilterChange(): void {
+  filterTouched = true
+  reloadRequests()
+}
+
+async function loadPolicy(): Promise<void> {
+  policyLoading.value = true
+  policyError.value = false
+  try {
+    policy.value = await getQuotaRequestPolicy()
+  } catch {
+    policyError.value = true
+  } finally {
+    policyLoading.value = false
+  }
+}
+
+function reloadAll(): void {
+  void loadPolicy().then(() => {
+    if (policy.value?.mode === 'auto' && !filterTouched) {
+      statusFilter.value = ''
+    }
+    loadRequests()
+  })
+}
 
 const statusOptions = computed<SelectOption[]>(() => [
   { value: 'pending', label: t('organization.quotaRequestFilterPending') },
@@ -326,6 +380,7 @@ async function submitReject(): Promise<void> {
   try {
     await rejectQuotaRequest(rejectDialog.id, rejectDialog.note.trim() || undefined)
     rejectDialog.show = false
+    appStore.showSuccess(t('organization.quotaRequestStatus.rejected'))
     await loadRequests()
   } catch (error) {
     rejectDialog.error = extractApiErrorMessage(error, t('organization.memberUpdateFailed'))
@@ -355,13 +410,12 @@ watchEffect(() => {
 })
 
 onMounted(() => {
-  getQuotaRequestPolicy()
-    .then((loaded) => {
-      policy.value = loaded
-    })
-    .catch(() => {
-      // 策略拿不到时保持 null，列表照常展示。
-    })
-  loadRequests()
+  void loadPolicy().then(() => {
+    // 即申即加没有「待处理」这个状态，默认筛选留在待处理会一直显示空列表。
+    if (policy.value?.mode === 'auto' && !filterTouched) {
+      statusFilter.value = ''
+    }
+    loadRequests()
+  })
 })
 </script>

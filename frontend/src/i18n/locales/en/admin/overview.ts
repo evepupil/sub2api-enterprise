@@ -436,6 +436,8 @@ export default {
       title: 'User Management',
       description: 'Manage users and their permissions',
       createUser: 'Create User',
+      organizationFilter: 'Org',
+      clearOrganizationFilter: 'Click to clear the organization filter and show all users',
       bulkLimits: {
         action: 'Set limits ({count})',
         title: 'Set user limits',

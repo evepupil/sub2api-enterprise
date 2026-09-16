@@ -3,7 +3,7 @@
     <div class="space-y-6">
       <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div class="min-w-0">
-          <h1 class="truncate text-xl font-semibold text-content-strong">
+          <h1 class="truncate text-lg font-semibold text-content-strong">
             {{ organization?.name || t('organization.title') }}
           </h1>
           <span
@@ -55,13 +55,12 @@
       </div>
 
       <template v-else-if="organization.is_owner">
-        <OrganizationQuotaRequestsCard
-          v-if="quotaSectionAbove"
-          @loaded="onQuotaSectionLoaded"
-          @changed="loadMembers"
-        />
-
-        <section class="card overflow-hidden">
+        <!-- 审批卡只挂载一次，有待处理时用 order 提到成员表上面；换位不重建组件，筛选与滚动不丢。 -->
+        <div class="flex flex-col gap-6">
+        <section
+          class="card overflow-hidden"
+          :class="quotaSectionAbove ? 'order-2' : 'order-1'"
+        >
           <div
             class="flex flex-col gap-3 border-b border-gray-200 px-5 py-4 dark:border-dark-700 lg:flex-row lg:items-center lg:justify-between"
           >
@@ -86,7 +85,7 @@
                   :disabled="selectedUserIds.length === 0"
                   @click="openQuotaGrantDialog"
                 >
-                  {{ t('organization.quotaGrant') }}
+                  {{ t('organization.quotaGrant') }}{{ selectedSuffix }}
                 </button>
                 <button
                   type="button"
@@ -94,7 +93,7 @@
                   :disabled="selectedUserIds.length === 0"
                   @click="openSplitDialog"
                 >
-                  {{ t('organization.split') }}
+                  {{ t('organization.split') }}{{ selectedSuffix }}
                 </button>
               </div>
             </div>
@@ -107,9 +106,16 @@
             row-key="user_id"
           >
             <template #empty>
-              <div class="empty-state">
+              <div v-if="membersError" class="empty-state">
+                <p class="empty-state-title">{{ t('organization.memberLoadFailed') }}</p>
+                <button type="button" class="btn btn-secondary btn-sm mt-3" @click="loadMembers">
+                  {{ t('organization.retry') }}
+                </button>
+              </div>
+              <div v-else class="empty-state">
                 <Icon name="inbox" class="empty-state-icon" />
                 <p class="empty-state-title">{{ t('organization.memberEmpty') }}</p>
+                <p class="empty-state-description">{{ t('organization.memberEmptyHint') }}</p>
               </div>
             </template>
 
@@ -118,7 +124,9 @@
                 type="checkbox"
                 class="h-4 w-4 cursor-pointer rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                 :checked="allSelectableChecked"
+                :indeterminate="someSelectableChecked"
                 :disabled="selectableMembers.length === 0"
+                :aria-label="t('common.selectAll')"
                 @change="toggleSelectAll"
               />
             </template>
@@ -129,6 +137,7 @@
                 type="checkbox"
                 class="h-4 w-4 cursor-pointer rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                 :checked="selectedUserIds.includes(row.user_id)"
+                :aria-label="row.display_name || row.email"
                 @change="toggleSelect(row.user_id)"
               />
             </template>
@@ -138,8 +147,8 @@
             </template>
 
             <template #cell-email="{ row }">
-              <div class="text-content">{{ row.email }}</div>
-              <div v-if="row.username" class="text-xs text-content-muted">
+              <div class="max-w-[16rem] truncate text-content" :title="row.email">{{ row.email }}</div>
+              <div v-if="row.username" class="max-w-[16rem] truncate text-xs text-content-muted" :title="row.username">
                 {{ row.username }}
               </div>
             </template>
@@ -167,7 +176,7 @@
             <template #cell-spending_limit="{ row }">
               <template v-if="row.is_owner">-</template>
               <template v-else-if="row.quota">
-                <div>{{ formatCurrency(row.quota.amount) }}</div>
+                <div class="font-mono">{{ formatCurrency(row.quota.amount) }}</div>
                 <div class="text-xs text-content-muted">
                   {{ t('organization.quotaEveryDays', { days: row.quota.period_days }) }}
                   <span v-if="row.quota.mode === 'periodic_pending'">
@@ -179,19 +188,23 @@
             </template>
 
             <template #cell-spending_used="{ row }">
-              {{ row.is_owner ? '-' : formatCurrency(row.spending_used) }}
+              <span v-if="!row.is_owner" class="font-mono">{{ formatCurrency(row.spending_used) }}</span>
+              <span v-else>-</span>
             </template>
 
             <template #cell-spending_remaining="{ row }">
               <span
+                v-if="!row.is_owner"
+                class="font-mono"
                 :class="
                   isExhausted(row)
                     ? 'font-medium text-amber-600 dark:text-amber-400'
                     : 'text-content'
                 "
               >
-                {{ row.is_owner ? '-' : formatSpending(row.spending_remaining) }}
+                {{ formatSpending(row.spending_remaining) }}
               </span>
+              <span v-else>-</span>
               <div
                 v-if="!row.is_owner && row.quota?.mode === 'periodic_active' && row.quota.window_end"
                 class="text-xs text-content-muted"
@@ -226,7 +239,7 @@
                   :label="row.status === 'active' ? t('organization.disableMember') : t('organization.enableMember')"
                   :tone="row.status === 'active' ? 'warning' : 'success'"
                   :disabled="statusUpdatingId === row.user_id"
-                  @click="toggleMemberStatus(row)"
+                  @click="confirmToggleMemberStatus(row)"
                 />
               </div>
             </template>
@@ -243,12 +256,12 @@
         </section>
 
         <OrganizationQuotaRequestsCard
-          v-if="!quotaSectionAbove"
+          :class="quotaSectionAbove ? 'order-1' : 'order-2'"
           @loaded="onQuotaSectionLoaded"
           @changed="loadMembers"
         />
 
-        <section class="card overflow-hidden">
+        <section class="card overflow-hidden order-3">
           <div class="border-b border-gray-200 px-5 py-4 dark:border-dark-700">
             <h2 class="text-base font-semibold text-content-strong">
               {{ t('organization.invitations') }}
@@ -257,9 +270,10 @@
 
           <div
             v-if="invitations.length === 0"
-            class="px-5 py-12 text-center text-sm text-content-muted"
+            class="empty-state px-5 py-12"
           >
-            {{ t('organization.invitationEmpty') }}
+            <Icon name="inbox" class="empty-state-icon" />
+            <p class="empty-state-title">{{ t('organization.invitationEmpty') }}</p>
           </div>
 
           <ul v-else class="divide-y divide-line-subtle">
@@ -281,7 +295,10 @@
                 </div>
               </div>
 
-              <div class="flex shrink-0 flex-wrap items-center gap-1">
+              <div
+                v-if="invitationCopyable(invitation)"
+                class="flex shrink-0 flex-wrap items-center gap-2"
+              >
                 <span :class="statusClass(invitation)" class="rounded-full px-2.5 py-1 text-xs font-medium">
                   {{ t(`organization.status.${effectiveStatus(invitation)}`) }}
                 </span>
@@ -302,12 +319,18 @@
                   :label="t('organization.disableInvitation')"
                   tone="warning"
                   :disabled="disablingId === invitation.id"
-                  @click="disableInvitation(invitation)"
+                  @click="confirmDisableInvitation(invitation)"
                 />
+              </div>
+              <div v-else class="flex shrink-0 items-center">
+                <span :class="statusClass(invitation)" class="rounded-full px-2.5 py-1 text-xs font-medium">
+                  {{ t(`organization.status.${effectiveStatus(invitation)}`) }}
+                </span>
               </div>
             </li>
           </ul>
         </section>
+        </div>
       </template>
 
       <template v-else>
@@ -393,6 +416,19 @@
           class="input"
           :placeholder="t('organization.amount')"
         />
+        <p v-if="limitDialog.mode === 'fixed'" class="text-xs text-content-muted">
+          {{ t('organization.quotaFixedHint') }}
+        </p>
+        <p v-if="limitDialog.mode === 'unlimited'" class="text-xs text-content-muted">
+          {{ t('organization.quotaUnlimitedHint') }}
+        </p>
+        <!-- 该成员已设周期配额时，换模式保存会清掉原周期配置，提前说明后果 -->
+        <p
+          v-if="limitDialog.hadQuota && limitDialog.mode !== 'periodic'"
+          class="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:bg-amber-900/20 dark:text-amber-300"
+        >
+          {{ t('organization.quotaSwitchClearsPeriodic') }}
+        </p>
         <div v-if="limitDialog.mode === 'periodic'" class="space-y-3">
           <input
             v-model="limitDialog.amount"
@@ -506,6 +542,26 @@
         </button>
       </template>
     </BaseDialog>
+
+    <ConfirmDialog
+      :show="memberStatusConfirm.show"
+      :title="t('organization.disableMember')"
+      :message="t('organization.disableMemberConfirm', { name: memberStatusConfirm.member?.display_name || memberStatusConfirm.member?.email || '' })"
+      :confirm-text="t('common.confirm')"
+      danger
+      @confirm="dismissMemberStatusConfirm(true)"
+      @cancel="dismissMemberStatusConfirm(false)"
+    />
+
+    <ConfirmDialog
+      :show="invitationConfirm.show"
+      :title="t('organization.disableInvitation')"
+      :message="t('organization.disableInvitationConfirm')"
+      :confirm-text="t('common.confirm')"
+      danger
+      @confirm="dismissInvitationConfirm(true)"
+      @cancel="dismissInvitationConfirm(false)"
+    />
   </AppLayout>
 </template>
 
@@ -515,6 +571,7 @@ import { useI18n } from 'vue-i18n'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import Icon from '@/components/icons/Icon.vue'
 import BaseDialog from '@/components/common/BaseDialog.vue'
+import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import DataTable from '@/components/common/DataTable.vue'
 import TableActionButton from '@/components/common/TableActionButton.vue'
 import Pagination from '@/components/common/Pagination.vue'
@@ -560,6 +617,7 @@ const loadError = ref('')
 const members = ref<OrganizationMember[]>([])
 const memberTotal = ref(0)
 const membersLoading = ref(false)
+const membersError = ref(false)
 // 成员表不做排序：列全部不开 sortable，表头沿用 DataTable 的统一小字号样式
 const memberColumns = computed<Column[]>(() => [
   { key: 'select', label: '', class: 'w-10 text-center' },
@@ -624,6 +682,8 @@ const limitDialog = reactive({
   userId: 0,
   email: '',
   mode: 'unlimited' as 'unlimited' | 'fixed' | 'periodic',
+  // 打开时成员是否已有周期配额：换模式保存会清掉它，弹窗里要提示后果
+  hadQuota: false,
   amount: '',
   periodDays: '',
   startAt: '',
@@ -661,6 +721,11 @@ const allSelectableChecked = computed(
     selectableMembers.value.length > 0 &&
     selectableMembers.value.every((member) => selectedUserIds.value.includes(member.user_id))
 )
+
+const someSelectableChecked = computed(() => {
+  if (allSelectableChecked.value) return false
+  return selectableMembers.value.some((member) => selectedUserIds.value.includes(member.user_id))
+})
 
 const splitPreview = computed(() => {
   const total = Number(splitDialog.amount)
@@ -724,6 +789,7 @@ async function loadOrganization(): Promise<void> {
 
 async function loadMembers(): Promise<void> {
   membersLoading.value = true
+  membersError.value = false
   try {
     const result = await organizationAPI.listOrganizationMembers({
       page: page.value,
@@ -733,9 +799,9 @@ async function loadMembers(): Promise<void> {
     })
     members.value = result.items || []
     memberTotal.value = result.total
-    const visibleIds = new Set(members.value.map((member) => member.user_id))
-    selectedUserIds.value = selectedUserIds.value.filter((id) => visibleIds.has(id))
+    // 勾选跨页保留：翻页/筛选后不清空，已选的人不在当前页也照样参与批量操作。
   } catch (error) {
+    membersError.value = true
     appStore.showError(extractApiErrorMessage(error, t('organization.memberLoadFailed')))
   } finally {
     membersLoading.value = false
@@ -767,13 +833,20 @@ function toggleSelect(userId: number): void {
   selectedUserIds.value.push(userId)
 }
 
+// 表头勾选只作用于当前页：勾上补选本页，取消只移除本页，其他页的选择不动。
 function toggleSelectAll(): void {
+  const pageIds = selectableMembers.value.map((member) => member.user_id)
   if (allSelectableChecked.value) {
-    selectedUserIds.value = []
+    const pageSet = new Set(pageIds)
+    selectedUserIds.value = selectedUserIds.value.filter((id) => !pageSet.has(id))
     return
   }
-  selectedUserIds.value = selectableMembers.value.map((member) => member.user_id)
+  selectedUserIds.value = [...new Set([...selectedUserIds.value, ...pageIds])]
 }
+
+const selectedSuffix = computed(() =>
+  selectedUserIds.value.length > 0 ? ` (${selectedUserIds.value.length})` : ''
+)
 
 function replaceMember(updated: OrganizationMember): void {
   const index = members.value.findIndex((member) => member.user_id === updated.user_id)
@@ -790,11 +863,33 @@ async function toggleMemberStatus(member: OrganizationMember): Promise<void> {
       member.status === 'active' ? 'disabled' : 'active'
     )
     replaceMember(updated)
+    appStore.showSuccess(t('organization.memberStatusUpdated'))
   } catch (error) {
     appStore.showError(extractApiErrorMessage(error, t('organization.memberUpdateFailed')))
   } finally {
     statusUpdatingId.value = null
   }
+}
+
+// 停用成员立即切断调用，单击误触代价高，先确认再执行；启用是恢复性操作，直接执行。
+const memberStatusConfirm = reactive({ show: false, member: null as OrganizationMember | null })
+
+function confirmToggleMemberStatus(member: OrganizationMember): void {
+  if (member.status === 'active') {
+    memberStatusConfirm.member = member
+    memberStatusConfirm.show = true
+    return
+  }
+  void toggleMemberStatus(member)
+}
+
+// confirmed=true 表示用户点了确认；否则只是关掉弹窗。
+function dismissMemberStatusConfirm(confirmed: boolean): void {
+  memberStatusConfirm.show = false
+  if (confirmed && memberStatusConfirm.member) {
+    void toggleMemberStatus(memberStatusConfirm.member)
+  }
+  memberStatusConfirm.member = null
 }
 
 function openLimitDialog(member: OrganizationMember): void {
@@ -817,6 +912,7 @@ function openLimitDialog(member: OrganizationMember): void {
     limitDialog.periodDays = ''
     limitDialog.startAt = ''
   }
+  limitDialog.hadQuota = Boolean(member.quota)
   limitDialog.error = ''
 }
 
@@ -874,6 +970,7 @@ async function saveLimit(): Promise<void> {
     })
     replaceMember(updated)
     limitDialog.show = false
+    appStore.showSuccess(t('organization.quotaSaved'))
   } catch (error) {
     limitDialog.error = extractApiErrorMessage(error, t('organization.memberUpdateFailed'))
   } finally {
@@ -889,6 +986,7 @@ async function saveStaticLimit(limit: number | null): Promise<void> {
     const updated = await organizationAPI.updateOrganizationMemberSpendingLimit(limitDialog.userId, limit)
     replaceMember(updated)
     limitDialog.show = false
+    appStore.showSuccess(t('organization.quotaSaved'))
   } catch (error) {
     limitDialog.error = extractApiErrorMessage(error, t('organization.memberUpdateFailed'))
   } finally {
@@ -933,6 +1031,7 @@ async function submitQuotaGrant(): Promise<void> {
     updated.forEach(replaceMember)
     quotaGrantDialog.show = false
     selectedUserIds.value = []
+    appStore.showSuccess(t('organization.quotaGrantDone'))
   } catch (error) {
     quotaGrantDialog.error = extractApiErrorMessage(error, t('organization.memberUpdateFailed'))
   } finally {
@@ -967,6 +1066,7 @@ async function submitSplit(): Promise<void> {
     updated.forEach(replaceMember)
     splitDialog.show = false
     selectedUserIds.value = []
+    appStore.showSuccess(t('organization.splitDone'))
   } catch (error) {
     splitDialog.error = extractApiErrorMessage(error, t('organization.memberUpdateFailed'))
   } finally {
@@ -988,11 +1088,33 @@ async function disableInvitation(invitation: OrganizationInvitation): Promise<vo
   try {
     await organizationAPI.disableOrganizationInvitation(invitation.id)
     invitation.status = 'disabled'
+    appStore.showSuccess(t('organization.invitationDisabled'))
   } catch (error) {
     appStore.showError(extractApiErrorMessage(error, t('organization.disableFailed')))
   } finally {
     disablingId.value = null
   }
+}
+
+const invitationConfirm = reactive({ show: false, invitation: null as OrganizationInvitation | null })
+
+function confirmDisableInvitation(invitation: OrganizationInvitation): void {
+  invitationConfirm.invitation = invitation
+  invitationConfirm.show = true
+}
+
+function dismissInvitationConfirm(confirmed: boolean): void {
+  invitationConfirm.show = false
+  if (confirmed && invitationConfirm.invitation) {
+    void disableInvitation(invitationConfirm.invitation)
+  }
+  invitationConfirm.invitation = null
+}
+
+// 邀请码在有效期内可重复使用：未用/已用都能继续复制拉人；过期或已停用的是死链，不再给复制入口。
+function invitationCopyable(invitation: OrganizationInvitation): boolean {
+  const status = effectiveStatus(invitation)
+  return status === 'unused' || status === 'used'
 }
 
 async function createInvitation(): Promise<void> {
@@ -1004,6 +1126,7 @@ async function createInvitation(): Promise<void> {
       days > 0 ? new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString() : undefined
     const invitation = await organizationAPI.createOrganizationInvitation(expiresAt)
     invitations.value = [invitation, ...invitations.value]
+    appStore.showSuccess(t('organization.invitationCreated'))
   } catch (error) {
     appStore.showError(extractApiErrorMessage(error, t('organization.createFailed')))
   } finally {

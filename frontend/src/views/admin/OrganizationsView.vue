@@ -23,7 +23,13 @@
           row-key="id"
         >
           <template #empty>
-            <div class="empty-state">
+            <div v-if="loadError" class="empty-state">
+              <p class="empty-state-title">{{ t('admin.organizations.loadFailed') }}</p>
+              <button type="button" class="btn btn-secondary btn-sm mt-3" @click="loadOrganizations">
+                {{ t('common.retry') }}
+              </button>
+            </div>
+            <div v-else class="empty-state">
               <Icon name="inbox" class="empty-state-icon" />
               <p class="empty-state-title">{{ t('admin.organizations.empty') }}</p>
             </div>
@@ -32,8 +38,14 @@
             <span class="font-medium text-content-strong">{{ row.name }}</span>
           </template>
           <template #cell-owner="{ row }">
-            <div class="text-content-strong">{{ row.owner_email }}</div>
-            <div v-if="row.owner_username" class="text-xs text-content-muted">
+            <div class="max-w-[14rem] truncate text-content-strong" :title="row.owner_email">
+              {{ row.owner_email }}
+            </div>
+            <div
+              v-if="row.owner_username"
+              class="max-w-[14rem] truncate text-xs text-content-muted"
+              :title="row.owner_username"
+            >
               {{ row.owner_username }}
             </div>
           </template>
@@ -75,7 +87,7 @@
                 :label="row.status === 'active' ? t('admin.organizations.disable') : t('admin.organizations.enable')"
                 :tone="row.status === 'active' ? 'warning' : 'success'"
                 :disabled="statusUpdatingId === row.id"
-                @click="toggleStatus(row)"
+                @click="confirmToggleStatus(row)"
               />
             </div>
           </template>
@@ -98,7 +110,7 @@
       @close="closeScopeDialog"
     >
       <div class="space-y-4">
-        <p class="text-sm font-medium text-content-strong">{{ scopeDialog.name }}</p>
+        <p class="truncate text-sm font-medium text-content-strong" :title="scopeDialog.name">{{ scopeDialog.name }}</p>
 
         <label class="flex items-start gap-2 text-sm text-content">
           <input
@@ -141,6 +153,16 @@
         </button>
       </template>
     </BaseDialog>
+
+    <ConfirmDialog
+      :show="statusConfirm.show"
+      :title="t('admin.organizations.disable')"
+      :message="t('admin.organizations.disableConfirm', { name: statusConfirm.name })"
+      :confirm-text="t('common.confirm')"
+      danger
+      @confirm="dismissStatusConfirm(true)"
+      @cancel="dismissStatusConfirm(false)"
+    />
   </AppLayout>
 </template>
 
@@ -149,6 +171,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import BaseDialog from '@/components/common/BaseDialog.vue'
+import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import DataTable from '@/components/common/DataTable.vue'
 import TableActionButton from '@/components/common/TableActionButton.vue'
 import Pagination from '@/components/common/Pagination.vue'
@@ -181,10 +204,18 @@ const page = ref(1)
 const pageSize = ref(20)
 const search = ref('')
 const loading = ref(true)
+const loadError = ref(false)
 
 const statusUpdatingId = ref<number | null>(null)
 const groups = ref<Group[]>([])
 const groupsLoading = ref(false)
+
+// 停用组织影响全体成员调用，先确认再执行；启用是恢复性操作，直接执行。
+const statusConfirm = reactive({
+  show: false,
+  name: '',
+  organization: null as AdminOrganization | null
+})
 
 const scopeDialog = reactive({
   show: false,
@@ -206,6 +237,7 @@ function describeScope(organization: AdminOrganization): string {
 
 async function loadOrganizations(): Promise<void> {
   loading.value = true
+  loadError.value = false
   try {
     const result = await adminAPI.organizations.list(page.value, pageSize.value, {
       search: search.value.trim() || undefined
@@ -213,6 +245,7 @@ async function loadOrganizations(): Promise<void> {
     organizations.value = result.items || []
     total.value = result.total
   } catch (error) {
+    loadError.value = true
     appStore.showError(extractApiErrorMessage(error, t('admin.organizations.loadFailed')))
   } finally {
     loading.value = false
@@ -250,21 +283,43 @@ function handlePageSizeChange(value: number): void {
 
 // 停用只作用在组织这一层：成员账号状态不动，恢复后原本被单独停用的成员仍然是停用的。
 async function toggleStatus(organization: AdminOrganization): Promise<void> {
+  const disabling = organization.status === 'active'
   statusUpdatingId.value = organization.id
   try {
     const updated = await adminAPI.organizations.updateStatus(
       organization.id,
-      organization.status === 'active' ? 'disabled' : 'active'
+      disabling ? 'disabled' : 'active'
     )
     const index = organizations.value.findIndex((item) => item.id === updated.id)
     if (index >= 0) {
       organizations.value.splice(index, 1, updated)
     }
+    appStore.showSuccess(t('admin.organizations.statusUpdated'))
   } catch (error) {
-    appStore.showError(extractApiErrorMessage(error, t('admin.organizations.statusFailed')))
+    const fallback = t(disabling ? 'admin.organizations.disableFailed' : 'admin.organizations.enableFailed')
+    appStore.showError(extractApiErrorMessage(error, fallback))
   } finally {
     statusUpdatingId.value = null
   }
+}
+
+function confirmToggleStatus(organization: AdminOrganization): void {
+  if (organization.status === 'active') {
+    statusConfirm.name = organization.name
+    statusConfirm.organization = organization
+    statusConfirm.show = true
+    return
+  }
+  void toggleStatus(organization)
+}
+
+// confirmed=true 表示用户点了确认；否则只是关掉弹窗。
+function dismissStatusConfirm(confirmed: boolean): void {
+  statusConfirm.show = false
+  if (confirmed && statusConfirm.organization) {
+    void toggleStatus(statusConfirm.organization)
+  }
+  statusConfirm.organization = null
 }
 
 function openScopeDialog(organization: AdminOrganization): void {

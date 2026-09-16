@@ -376,6 +376,22 @@ const UsersIcon = {
     )
 }
 
+// 组织入口用办公楼图标，和推广返佣共用的人群图标区分开
+const BuildingIcon = {
+  render: () =>
+    h(
+      'svg',
+      { fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '1.5' },
+      [
+        h('path', {
+          'stroke-linecap': 'round',
+          'stroke-linejoin': 'round',
+          d: 'M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21'
+        })
+      ]
+    )
+}
+
 const OrganizationIcon = {
   render: () =>
     h(
@@ -726,7 +742,7 @@ function buildSelfNavItems(withDashboard: boolean): NavItem[] {
   }
   items.push(
     { path: '/keys', label: t('nav.apiKeys'), icon: KeyIcon },
-    { path: '/organization', label: t('nav.organization'), icon: UsersIcon, hideInSimpleMode: true, featureFlag: flagOrganizationOwner },
+    { path: '/organization', label: t('nav.organization'), icon: BuildingIcon, hideInSimpleMode: true, featureFlag: flagOrganizationOwner },
     { path: '/batch-image', label: t('nav.batchImage'), icon: BatchImageIcon, hideInSimpleMode: true, featureFlag: flagBatchImageAccess },
     { path: '/usage', label: t('nav.usage'), icon: ChartIcon, hideInSimpleMode: true },
     { path: '/available-channels', label: t('nav.availableChannels'), icon: ChannelIcon, hideInSimpleMode: true, featureFlag: flagAvailableChannels },

@@ -22,6 +22,18 @@
               />
             </div>
 
+            <!-- 组织过滤签：从组织管理「查看成员」跳转时带上，可一键取消恢复全量用户 -->
+            <button
+              v-if="organizationFilterId"
+              type="button"
+              class="flex shrink-0 items-center gap-1.5 rounded-lg border border-primary-200 bg-primary-50 px-3 py-1.5 text-sm font-medium text-primary-700 hover:bg-primary-100 dark:border-primary-800 dark:bg-primary-900/30 dark:text-primary-300 dark:hover:bg-primary-900/50"
+              :title="t('admin.users.clearOrganizationFilter')"
+              @click="clearOrganizationFilter"
+            >
+              <span class="max-w-[10rem] truncate">{{ t('admin.users.organizationFilter') }}: {{ organizationFilterName }}</span>
+              <Icon name="x" size="xs" :stroke-width="2" />
+            </button>
+
             <!-- Role Filter (visible when enabled) -->
             <div v-if="visibleFilters.has('role')" class="w-full sm:w-32">
               <Select
@@ -772,9 +784,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import { getPersistedPageSize } from '@/composables/usePersistedPageSize'
 import { useTableSelection } from '@/composables/useTableSelection'
@@ -1024,11 +1036,30 @@ const users = ref<AdminUser[]>([])
 const loading = ref(false)
 // 从平台「组织管理」跳过来时带着组织标识，只列这个组织的成员。
 const route = useRoute()
+const router = useRouter()
 const organizationFilterId = computed(() => {
   const raw = route.query.organization_id
   const value = Number(Array.isArray(raw) ? raw[0] : raw)
   return Number.isInteger(value) && value > 0 ? value : null
 })
+// 过滤签上显示组织名，让人看得出当前列表只含这个组织。
+const organizationFilterName = ref('')
+watch(organizationFilterId, async (id) => {
+  organizationFilterName.value = ''
+  if (!id) return
+  try {
+    organizationFilterName.value = (await adminAPI.organizations.get(id)).name
+  } catch {
+    organizationFilterName.value = `#${id}`
+  }
+}, { immediate: true })
+
+function clearOrganizationFilter(): void {
+  const query = { ...route.query }
+  delete query.organization_id
+  void router.replace({ query })
+  applyFilter()
+}
 
 const searchQuery = ref('')
 const USER_SORT_STORAGE_KEY = 'admin-users-table-sort'
