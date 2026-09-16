@@ -48,30 +48,31 @@ type AdminHandlers struct {
 
 // Handlers contains all HTTP handlers
 type Handlers struct {
-	Auth               *AuthHandler
-	User               *UserHandler
-	APIKey             *APIKeyHandler
-	Usage              *UsageHandler
-	Redeem             *RedeemHandler
-	Subscription       *SubscriptionHandler
-	Announcement       *AnnouncementHandler
-	ChannelMonitor     *ChannelMonitorUserHandler
-	ChannelMonitorV2   *ChannelMonitorV2Handler
-	Admin              *AdminHandlers
-	Gateway            *GatewayHandler
-	OpenAIGateway      *OpenAIGatewayHandler
-	Setting            *SettingHandler
-	Totp               *TotpHandler
-	Passkey            *PasskeyHandler
-	Payment            *PaymentHandler
-	PaymentWebhook     *PaymentWebhookHandler
-	AvailableChannel   *AvailableChannelHandler
-	ModelPlaza         *ModelPlazaHandler
-	PublicStatus       *PublicStatusHandler
-	AsyncImage         *AsyncImageHandler
-	BatchImage         *BatchImageHandler
-	Organization       *OrganizationHandler
-	OrganizationMember *OrganizationMemberHandler
+	Auth                     *AuthHandler
+	User                     *UserHandler
+	APIKey                   *APIKeyHandler
+	Usage                    *UsageHandler
+	Redeem                   *RedeemHandler
+	Subscription             *SubscriptionHandler
+	Announcement             *AnnouncementHandler
+	ChannelMonitor           *ChannelMonitorUserHandler
+	ChannelMonitorV2         *ChannelMonitorV2Handler
+	Admin                    *AdminHandlers
+	Gateway                  *GatewayHandler
+	OpenAIGateway            *OpenAIGatewayHandler
+	Setting                  *SettingHandler
+	Totp                     *TotpHandler
+	Passkey                  *PasskeyHandler
+	Payment                  *PaymentHandler
+	PaymentWebhook           *PaymentWebhookHandler
+	AvailableChannel         *AvailableChannelHandler
+	ModelPlaza               *ModelPlazaHandler
+	PublicStatus             *PublicStatusHandler
+	AsyncImage               *AsyncImageHandler
+	BatchImage               *BatchImageHandler
+	Organization             *OrganizationHandler
+	OrganizationMember       *OrganizationMemberHandler
+	OrganizationQuotaRequest *OrganizationQuotaRequestHandler
 }
 
 // BuildInfo contains build-time information

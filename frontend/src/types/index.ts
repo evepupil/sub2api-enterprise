@@ -111,7 +111,18 @@ export interface OrganizationSummary {
 }
 
 // spending_limit 为 null 表示不限额，0 表示完全不能消费。
-// spending_remaining 在不限额时同样为 null。
+// spending_remaining 在不限额时同样为 null，按生效配额模式计算。
+// quota 非空表示配了周期配额：periodic_pending 锚点在未来、生效前沿用静态状态，
+// periodic_active 生效中，window_end 即下期重置时间。
+export interface OrganizationMemberQuota {
+  mode: 'periodic_pending' | 'periodic_active'
+  amount: number
+  period_days: number
+  start_at: string
+  window_start: string | null
+  window_end: string | null
+}
+
 export interface OrganizationMember {
   user_id: number
   email: string
@@ -122,7 +133,45 @@ export interface OrganizationMember {
   spending_used: number
   spending_frozen: number
   spending_remaining: number | null
+  quota: OrganizationMemberQuota | null
   joined_at: string
+}
+
+// 配额申请策略：off 关闭（默认）、approve 先批后加、auto 即申即加。
+// mode 不是 off 时 min_amount / max_amount 必填（单次最低、最高）。
+export interface OrganizationQuotaRequestPolicy {
+  mode: 'off' | 'approve' | 'auto'
+  min_amount: number | null
+  max_amount: number | null
+}
+
+// 一条配额申请流水。grant_source 仅已发放时有值（manual 人工通过 / auto 提交即发）。
+export interface OrganizationQuotaRequest {
+  id: number
+  user_id: number
+  email: string
+  username: string
+  amount: number
+  reason: string
+  status: 'pending' | 'granted' | 'rejected' | 'withdrawn'
+  grant_source: 'manual' | 'auto' | null
+  granted_amount: number | null
+  snapshot_mode: string
+  review_note: string
+  reviewed_at: string | null
+  created_at: string
+}
+
+// 仪表盘「组织配额」卡的数据块，仅组织普通成员返回。
+// remaining 为 null 表示不限额；can_request 为 true 时申请按钮才出现。
+export interface UserOrganizationQuotaOverview {
+  remaining: number | null
+  window_end: string | null
+  can_request: boolean
+  request_mode: 'off' | 'approve' | 'auto'
+  min_amount: number | null
+  max_amount: number | null
+  pending_exists: boolean
 }
 
 // 平台「组织管理」页看到的组织。

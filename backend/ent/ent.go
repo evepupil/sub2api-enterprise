@@ -34,6 +34,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/organization"
 	"github.com/Wei-Shaw/sub2api/ent/organizationallowedgroup"
 	"github.com/Wei-Shaw/sub2api/ent/organizationmember"
+	"github.com/Wei-Shaw/sub2api/ent/organizationquotarequest"
 	"github.com/Wei-Shaw/sub2api/ent/paymentauditlog"
 	"github.com/Wei-Shaw/sub2api/ent/paymentorder"
 	"github.com/Wei-Shaw/sub2api/ent/paymentproviderinstance"
@@ -136,6 +137,7 @@ func checkColumn(t, c string) error {
 			organization.Table:                  organization.ValidColumn,
 			organizationallowedgroup.Table:      organizationallowedgroup.ValidColumn,
 			organizationmember.Table:            organizationmember.ValidColumn,
+			organizationquotarequest.Table:      organizationquotarequest.ValidColumn,
 			paymentauditlog.Table:               paymentauditlog.ValidColumn,
 			paymentorder.Table:                  paymentorder.ValidColumn,
 			paymentproviderinstance.Table:       paymentproviderinstance.ValidColumn,

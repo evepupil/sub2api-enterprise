@@ -94,6 +94,74 @@ func (_u *OrganizationUpdate) SetNillableStatus(v *string) *OrganizationUpdate {
 	return _u
 }
 
+// SetQuotaRequestMode sets the "quota_request_mode" field.
+func (_u *OrganizationUpdate) SetQuotaRequestMode(v string) *OrganizationUpdate {
+	_u.mutation.SetQuotaRequestMode(v)
+	return _u
+}
+
+// SetNillableQuotaRequestMode sets the "quota_request_mode" field if the given value is not nil.
+func (_u *OrganizationUpdate) SetNillableQuotaRequestMode(v *string) *OrganizationUpdate {
+	if v != nil {
+		_u.SetQuotaRequestMode(*v)
+	}
+	return _u
+}
+
+// SetQuotaRequestMin sets the "quota_request_min" field.
+func (_u *OrganizationUpdate) SetQuotaRequestMin(v float64) *OrganizationUpdate {
+	_u.mutation.ResetQuotaRequestMin()
+	_u.mutation.SetQuotaRequestMin(v)
+	return _u
+}
+
+// SetNillableQuotaRequestMin sets the "quota_request_min" field if the given value is not nil.
+func (_u *OrganizationUpdate) SetNillableQuotaRequestMin(v *float64) *OrganizationUpdate {
+	if v != nil {
+		_u.SetQuotaRequestMin(*v)
+	}
+	return _u
+}
+
+// AddQuotaRequestMin adds value to the "quota_request_min" field.
+func (_u *OrganizationUpdate) AddQuotaRequestMin(v float64) *OrganizationUpdate {
+	_u.mutation.AddQuotaRequestMin(v)
+	return _u
+}
+
+// ClearQuotaRequestMin clears the value of the "quota_request_min" field.
+func (_u *OrganizationUpdate) ClearQuotaRequestMin() *OrganizationUpdate {
+	_u.mutation.ClearQuotaRequestMin()
+	return _u
+}
+
+// SetQuotaRequestMax sets the "quota_request_max" field.
+func (_u *OrganizationUpdate) SetQuotaRequestMax(v float64) *OrganizationUpdate {
+	_u.mutation.ResetQuotaRequestMax()
+	_u.mutation.SetQuotaRequestMax(v)
+	return _u
+}
+
+// SetNillableQuotaRequestMax sets the "quota_request_max" field if the given value is not nil.
+func (_u *OrganizationUpdate) SetNillableQuotaRequestMax(v *float64) *OrganizationUpdate {
+	if v != nil {
+		_u.SetQuotaRequestMax(*v)
+	}
+	return _u
+}
+
+// AddQuotaRequestMax adds value to the "quota_request_max" field.
+func (_u *OrganizationUpdate) AddQuotaRequestMax(v float64) *OrganizationUpdate {
+	_u.mutation.AddQuotaRequestMax(v)
+	return _u
+}
+
+// ClearQuotaRequestMax clears the value of the "quota_request_max" field.
+func (_u *OrganizationUpdate) ClearQuotaRequestMax() *OrganizationUpdate {
+	_u.mutation.ClearQuotaRequestMax()
+	return _u
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *OrganizationUpdate) SetOwnerID(id int64) *OrganizationUpdate {
 	_u.mutation.SetOwnerID(id)
@@ -272,6 +340,11 @@ func (_u *OrganizationUpdate) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Organization.status": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.QuotaRequestMode(); ok {
+		if err := organization.QuotaRequestModeValidator(v); err != nil {
+			return &ValidationError{Name: "quota_request_mode", err: fmt.Errorf(`ent: validator failed for field "Organization.quota_request_mode": %w`, err)}
+		}
+	}
 	if _u.mutation.OwnerCleared() && len(_u.mutation.OwnerIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Organization.owner"`)
 	}
@@ -301,6 +374,27 @@ func (_u *OrganizationUpdate) sqlSave(ctx context.Context) (_node int, err error
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(organization.FieldStatus, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.QuotaRequestMode(); ok {
+		_spec.SetField(organization.FieldQuotaRequestMode, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.QuotaRequestMin(); ok {
+		_spec.SetField(organization.FieldQuotaRequestMin, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedQuotaRequestMin(); ok {
+		_spec.AddField(organization.FieldQuotaRequestMin, field.TypeFloat64, value)
+	}
+	if _u.mutation.QuotaRequestMinCleared() {
+		_spec.ClearField(organization.FieldQuotaRequestMin, field.TypeFloat64)
+	}
+	if value, ok := _u.mutation.QuotaRequestMax(); ok {
+		_spec.SetField(organization.FieldQuotaRequestMax, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedQuotaRequestMax(); ok {
+		_spec.AddField(organization.FieldQuotaRequestMax, field.TypeFloat64, value)
+	}
+	if _u.mutation.QuotaRequestMaxCleared() {
+		_spec.ClearField(organization.FieldQuotaRequestMax, field.TypeFloat64)
 	}
 	if _u.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -560,6 +654,74 @@ func (_u *OrganizationUpdateOne) SetNillableStatus(v *string) *OrganizationUpdat
 	return _u
 }
 
+// SetQuotaRequestMode sets the "quota_request_mode" field.
+func (_u *OrganizationUpdateOne) SetQuotaRequestMode(v string) *OrganizationUpdateOne {
+	_u.mutation.SetQuotaRequestMode(v)
+	return _u
+}
+
+// SetNillableQuotaRequestMode sets the "quota_request_mode" field if the given value is not nil.
+func (_u *OrganizationUpdateOne) SetNillableQuotaRequestMode(v *string) *OrganizationUpdateOne {
+	if v != nil {
+		_u.SetQuotaRequestMode(*v)
+	}
+	return _u
+}
+
+// SetQuotaRequestMin sets the "quota_request_min" field.
+func (_u *OrganizationUpdateOne) SetQuotaRequestMin(v float64) *OrganizationUpdateOne {
+	_u.mutation.ResetQuotaRequestMin()
+	_u.mutation.SetQuotaRequestMin(v)
+	return _u
+}
+
+// SetNillableQuotaRequestMin sets the "quota_request_min" field if the given value is not nil.
+func (_u *OrganizationUpdateOne) SetNillableQuotaRequestMin(v *float64) *OrganizationUpdateOne {
+	if v != nil {
+		_u.SetQuotaRequestMin(*v)
+	}
+	return _u
+}
+
+// AddQuotaRequestMin adds value to the "quota_request_min" field.
+func (_u *OrganizationUpdateOne) AddQuotaRequestMin(v float64) *OrganizationUpdateOne {
+	_u.mutation.AddQuotaRequestMin(v)
+	return _u
+}
+
+// ClearQuotaRequestMin clears the value of the "quota_request_min" field.
+func (_u *OrganizationUpdateOne) ClearQuotaRequestMin() *OrganizationUpdateOne {
+	_u.mutation.ClearQuotaRequestMin()
+	return _u
+}
+
+// SetQuotaRequestMax sets the "quota_request_max" field.
+func (_u *OrganizationUpdateOne) SetQuotaRequestMax(v float64) *OrganizationUpdateOne {
+	_u.mutation.ResetQuotaRequestMax()
+	_u.mutation.SetQuotaRequestMax(v)
+	return _u
+}
+
+// SetNillableQuotaRequestMax sets the "quota_request_max" field if the given value is not nil.
+func (_u *OrganizationUpdateOne) SetNillableQuotaRequestMax(v *float64) *OrganizationUpdateOne {
+	if v != nil {
+		_u.SetQuotaRequestMax(*v)
+	}
+	return _u
+}
+
+// AddQuotaRequestMax adds value to the "quota_request_max" field.
+func (_u *OrganizationUpdateOne) AddQuotaRequestMax(v float64) *OrganizationUpdateOne {
+	_u.mutation.AddQuotaRequestMax(v)
+	return _u
+}
+
+// ClearQuotaRequestMax clears the value of the "quota_request_max" field.
+func (_u *OrganizationUpdateOne) ClearQuotaRequestMax() *OrganizationUpdateOne {
+	_u.mutation.ClearQuotaRequestMax()
+	return _u
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *OrganizationUpdateOne) SetOwnerID(id int64) *OrganizationUpdateOne {
 	_u.mutation.SetOwnerID(id)
@@ -751,6 +913,11 @@ func (_u *OrganizationUpdateOne) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Organization.status": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.QuotaRequestMode(); ok {
+		if err := organization.QuotaRequestModeValidator(v); err != nil {
+			return &ValidationError{Name: "quota_request_mode", err: fmt.Errorf(`ent: validator failed for field "Organization.quota_request_mode": %w`, err)}
+		}
+	}
 	if _u.mutation.OwnerCleared() && len(_u.mutation.OwnerIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Organization.owner"`)
 	}
@@ -797,6 +964,27 @@ func (_u *OrganizationUpdateOne) sqlSave(ctx context.Context) (_node *Organizati
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(organization.FieldStatus, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.QuotaRequestMode(); ok {
+		_spec.SetField(organization.FieldQuotaRequestMode, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.QuotaRequestMin(); ok {
+		_spec.SetField(organization.FieldQuotaRequestMin, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedQuotaRequestMin(); ok {
+		_spec.AddField(organization.FieldQuotaRequestMin, field.TypeFloat64, value)
+	}
+	if _u.mutation.QuotaRequestMinCleared() {
+		_spec.ClearField(organization.FieldQuotaRequestMin, field.TypeFloat64)
+	}
+	if value, ok := _u.mutation.QuotaRequestMax(); ok {
+		_spec.SetField(organization.FieldQuotaRequestMax, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedQuotaRequestMax(); ok {
+		_spec.AddField(organization.FieldQuotaRequestMax, field.TypeFloat64, value)
+	}
+	if _u.mutation.QuotaRequestMaxCleared() {
+		_spec.ClearField(organization.FieldQuotaRequestMax, field.TypeFloat64)
 	}
 	if _u.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{

@@ -135,7 +135,7 @@ func (b *billingCacheWorkerStub) GetOrganizationMemberSpending(_ context.Context
 	return 0, nil
 }
 
-func (b *billingCacheWorkerStub) SetOrganizationMemberSpending(_ context.Context, _ int64, _ float64) error {
+func (b *billingCacheWorkerStub) SetOrganizationMemberSpending(_ context.Context, _ int64, _ float64, _ *time.Time) error {
 	return nil
 }
 

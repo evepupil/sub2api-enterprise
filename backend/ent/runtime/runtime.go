@@ -27,6 +27,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/organization"
 	"github.com/Wei-Shaw/sub2api/ent/organizationallowedgroup"
 	"github.com/Wei-Shaw/sub2api/ent/organizationmember"
+	"github.com/Wei-Shaw/sub2api/ent/organizationquotarequest"
 	"github.com/Wei-Shaw/sub2api/ent/paymentauditlog"
 	"github.com/Wei-Shaw/sub2api/ent/paymentorder"
 	"github.com/Wei-Shaw/sub2api/ent/paymentproviderinstance"
@@ -1331,6 +1332,12 @@ func init() {
 	organization.DefaultStatus = organizationDescStatus.Default.(string)
 	// organization.StatusValidator is a validator for the "status" field. It is called by the builders before save.
 	organization.StatusValidator = organizationDescStatus.Validators[0].(func(string) error)
+	// organizationDescQuotaRequestMode is the schema descriptor for quota_request_mode field.
+	organizationDescQuotaRequestMode := organizationFields[4].Descriptor()
+	// organization.DefaultQuotaRequestMode holds the default value on creation for the quota_request_mode field.
+	organization.DefaultQuotaRequestMode = organizationDescQuotaRequestMode.Default.(string)
+	// organization.QuotaRequestModeValidator is a validator for the "quota_request_mode" field. It is called by the builders before save.
+	organization.QuotaRequestModeValidator = organizationDescQuotaRequestMode.Validators[0].(func(string) error)
 	organizationallowedgroupFields := schema.OrganizationAllowedGroup{}.Fields()
 	_ = organizationallowedgroupFields
 	// organizationallowedgroupDescCreatedAt is the schema descriptor for created_at field.
@@ -1360,6 +1367,71 @@ func init() {
 	organizationmemberDescSpendingFrozen := organizationmemberFields[4].Descriptor()
 	// organizationmember.DefaultSpendingFrozen holds the default value on creation for the spending_frozen field.
 	organizationmember.DefaultSpendingFrozen = organizationmemberDescSpendingFrozen.Default.(float64)
+	// organizationmemberDescQuotaPeriodDays is the schema descriptor for quota_period_days field.
+	organizationmemberDescQuotaPeriodDays := organizationmemberFields[6].Descriptor()
+	// organizationmember.QuotaPeriodDaysValidator is a validator for the "quota_period_days" field. It is called by the builders before save.
+	organizationmember.QuotaPeriodDaysValidator = func() func(int) error {
+		validators := organizationmemberDescQuotaPeriodDays.Validators
+		fns := [...]func(int) error{
+			validators[0].(func(int) error),
+			validators[1].(func(int) error),
+		}
+		return func(quota_period_days int) error {
+			for _, fn := range fns {
+				if err := fn(quota_period_days); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// organizationmemberDescQuotaCycleBonus is the schema descriptor for quota_cycle_bonus field.
+	organizationmemberDescQuotaCycleBonus := organizationmemberFields[9].Descriptor()
+	// organizationmember.DefaultQuotaCycleBonus holds the default value on creation for the quota_cycle_bonus field.
+	organizationmember.DefaultQuotaCycleBonus = organizationmemberDescQuotaCycleBonus.Default.(float64)
+	organizationquotarequestMixin := schema.OrganizationQuotaRequest{}.Mixin()
+	organizationquotarequestMixinFields0 := organizationquotarequestMixin[0].Fields()
+	_ = organizationquotarequestMixinFields0
+	organizationquotarequestFields := schema.OrganizationQuotaRequest{}.Fields()
+	_ = organizationquotarequestFields
+	// organizationquotarequestDescCreatedAt is the schema descriptor for created_at field.
+	organizationquotarequestDescCreatedAt := organizationquotarequestMixinFields0[0].Descriptor()
+	// organizationquotarequest.DefaultCreatedAt holds the default value on creation for the created_at field.
+	organizationquotarequest.DefaultCreatedAt = organizationquotarequestDescCreatedAt.Default.(func() time.Time)
+	// organizationquotarequestDescUpdatedAt is the schema descriptor for updated_at field.
+	organizationquotarequestDescUpdatedAt := organizationquotarequestMixinFields0[1].Descriptor()
+	// organizationquotarequest.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	organizationquotarequest.DefaultUpdatedAt = organizationquotarequestDescUpdatedAt.Default.(func() time.Time)
+	// organizationquotarequest.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	organizationquotarequest.UpdateDefaultUpdatedAt = organizationquotarequestDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// organizationquotarequestDescReason is the schema descriptor for reason field.
+	organizationquotarequestDescReason := organizationquotarequestFields[3].Descriptor()
+	// organizationquotarequest.ReasonValidator is a validator for the "reason" field. It is called by the builders before save.
+	organizationquotarequest.ReasonValidator = organizationquotarequestDescReason.Validators[0].(func(string) error)
+	// organizationquotarequestDescStatus is the schema descriptor for status field.
+	organizationquotarequestDescStatus := organizationquotarequestFields[4].Descriptor()
+	// organizationquotarequest.DefaultStatus holds the default value on creation for the status field.
+	organizationquotarequest.DefaultStatus = organizationquotarequestDescStatus.Default.(string)
+	// organizationquotarequest.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	organizationquotarequest.StatusValidator = organizationquotarequestDescStatus.Validators[0].(func(string) error)
+	// organizationquotarequestDescGrantSource is the schema descriptor for grant_source field.
+	organizationquotarequestDescGrantSource := organizationquotarequestFields[5].Descriptor()
+	// organizationquotarequest.GrantSourceValidator is a validator for the "grant_source" field. It is called by the builders before save.
+	organizationquotarequest.GrantSourceValidator = organizationquotarequestDescGrantSource.Validators[0].(func(string) error)
+	// organizationquotarequestDescSnapshotMode is the schema descriptor for snapshot_mode field.
+	organizationquotarequestDescSnapshotMode := organizationquotarequestFields[7].Descriptor()
+	// organizationquotarequest.DefaultSnapshotMode holds the default value on creation for the snapshot_mode field.
+	organizationquotarequest.DefaultSnapshotMode = organizationquotarequestDescSnapshotMode.Default.(string)
+	// organizationquotarequest.SnapshotModeValidator is a validator for the "snapshot_mode" field. It is called by the builders before save.
+	organizationquotarequest.SnapshotModeValidator = organizationquotarequestDescSnapshotMode.Validators[0].(func(string) error)
+	// organizationquotarequestDescSnapshotUsed is the schema descriptor for snapshot_used field.
+	organizationquotarequestDescSnapshotUsed := organizationquotarequestFields[9].Descriptor()
+	// organizationquotarequest.DefaultSnapshotUsed holds the default value on creation for the snapshot_used field.
+	organizationquotarequest.DefaultSnapshotUsed = organizationquotarequestDescSnapshotUsed.Default.(float64)
+	// organizationquotarequestDescReviewNote is the schema descriptor for review_note field.
+	organizationquotarequestDescReviewNote := organizationquotarequestFields[12].Descriptor()
+	// organizationquotarequest.ReviewNoteValidator is a validator for the "review_note" field. It is called by the builders before save.
+	organizationquotarequest.ReviewNoteValidator = organizationquotarequestDescReviewNote.Validators[0].(func(string) error)
 	paymentauditlogFields := schema.PaymentAuditLog{}.Fields()
 	_ = paymentauditlogFields
 	// paymentauditlogDescOrderID is the schema descriptor for order_id field.

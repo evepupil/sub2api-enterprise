@@ -26,7 +26,16 @@ vi.mock('@/api/organization', () => ({
     getCurrentOrganization: (...args: unknown[]) => getCurrentOrganizationMock(...args),
     listOrganizationInvitations: (...args: unknown[]) => listOrganizationInvitationsMock(...args),
     createOrganizationInvitation: (...args: unknown[]) => createOrganizationInvitationMock(...args)
-  }
+  },
+  getQuotaRequestPolicy: vi.fn(() =>
+    Promise.resolve({ mode: 'off', min_amount: null, max_amount: null })
+  ),
+  listQuotaRequests: vi.fn(() => Promise.resolve({ items: [], total: 0 })),
+  updateQuotaRequestPolicy: vi.fn(),
+  submitQuotaRequest: vi.fn(),
+  withdrawQuotaRequest: vi.fn(),
+  approveQuotaRequest: vi.fn(),
+  rejectQuotaRequest: vi.fn()
 }))
 
 vi.mock('@/stores/app', () => ({

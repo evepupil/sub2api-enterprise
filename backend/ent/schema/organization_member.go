@@ -51,6 +51,32 @@ func (OrganizationMember) Fields() []ent.Field {
 		field.Float("spending_frozen").
 			Default(0).
 			SchemaType(map[string]string{dialect.Postgres: "decimal(20,8)"}),
+
+		// 周期配额：静态上限之外按期发放额度的另一种模式。
+		//   quota_amount 非空即代表配了周期配额，每期金额 0 表示每期禁止消费；
+		//   quota_start_at 是管理员选的开始锚点，设定后不变；
+		//   quota_cycle_start 为空表示锚点在未来、尚未生效，生效前沿用静态上限；
+		//   到期恢复采用惰性推进，由组织结算在额度读写路径上完成，无后台任务。
+		field.Float("quota_amount").
+			Optional().
+			Nillable().
+			SchemaType(map[string]string{dialect.Postgres: "decimal(20,8)"}),
+		field.Int("quota_period_days").
+			Optional().
+			Nillable().
+			Min(1).
+			Max(3650),
+		field.Time("quota_start_at").
+			Optional().
+			Nillable(),
+		field.Time("quota_cycle_start").
+			Optional().
+			Nillable(),
+		// 本期一次性加成（USD）：配额申请批准后只加在当期可花上限上，
+		// 换期或取消周期时清零，不改每期金额。静态模式不使用这一列。
+		field.Float("quota_cycle_bonus").
+			Default(0).
+			SchemaType(map[string]string{dialect.Postgres: "decimal(20,8)"}),
 	}
 }
 

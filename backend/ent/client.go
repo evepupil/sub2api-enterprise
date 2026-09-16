@@ -37,6 +37,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/organization"
 	"github.com/Wei-Shaw/sub2api/ent/organizationallowedgroup"
 	"github.com/Wei-Shaw/sub2api/ent/organizationmember"
+	"github.com/Wei-Shaw/sub2api/ent/organizationquotarequest"
 	"github.com/Wei-Shaw/sub2api/ent/paymentauditlog"
 	"github.com/Wei-Shaw/sub2api/ent/paymentorder"
 	"github.com/Wei-Shaw/sub2api/ent/paymentproviderinstance"
@@ -110,6 +111,8 @@ type Client struct {
 	OrganizationAllowedGroup *OrganizationAllowedGroupClient
 	// OrganizationMember is the client for interacting with the OrganizationMember builders.
 	OrganizationMember *OrganizationMemberClient
+	// OrganizationQuotaRequest is the client for interacting with the OrganizationQuotaRequest builders.
+	OrganizationQuotaRequest *OrganizationQuotaRequestClient
 	// PaymentAuditLog is the client for interacting with the PaymentAuditLog builders.
 	PaymentAuditLog *PaymentAuditLogClient
 	// PaymentOrder is the client for interacting with the PaymentOrder builders.
@@ -183,6 +186,7 @@ func (c *Client) init() {
 	c.Organization = NewOrganizationClient(c.config)
 	c.OrganizationAllowedGroup = NewOrganizationAllowedGroupClient(c.config)
 	c.OrganizationMember = NewOrganizationMemberClient(c.config)
+	c.OrganizationQuotaRequest = NewOrganizationQuotaRequestClient(c.config)
 	c.PaymentAuditLog = NewPaymentAuditLogClient(c.config)
 	c.PaymentOrder = NewPaymentOrderClient(c.config)
 	c.PaymentProviderInstance = NewPaymentProviderInstanceClient(c.config)
@@ -317,6 +321,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Organization:                  NewOrganizationClient(cfg),
 		OrganizationAllowedGroup:      NewOrganizationAllowedGroupClient(cfg),
 		OrganizationMember:            NewOrganizationMemberClient(cfg),
+		OrganizationQuotaRequest:      NewOrganizationQuotaRequestClient(cfg),
 		PaymentAuditLog:               NewPaymentAuditLogClient(cfg),
 		PaymentOrder:                  NewPaymentOrderClient(cfg),
 		PaymentProviderInstance:       NewPaymentProviderInstanceClient(cfg),
@@ -378,6 +383,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Organization:                  NewOrganizationClient(cfg),
 		OrganizationAllowedGroup:      NewOrganizationAllowedGroupClient(cfg),
 		OrganizationMember:            NewOrganizationMemberClient(cfg),
+		OrganizationQuotaRequest:      NewOrganizationQuotaRequestClient(cfg),
 		PaymentAuditLog:               NewPaymentAuditLogClient(cfg),
 		PaymentOrder:                  NewPaymentOrderClient(cfg),
 		PaymentProviderInstance:       NewPaymentProviderInstanceClient(cfg),
@@ -433,11 +439,11 @@ func (c *Client) Use(hooks ...Hook) {
 		c.ChannelMonitorHistory, c.ChannelMonitorRequestTemplate,
 		c.CompositeModelRoute, c.ErrorPassthroughRule, c.Group, c.IdempotencyRecord,
 		c.IdentityAdoptionDecision, c.Organization, c.OrganizationAllowedGroup,
-		c.OrganizationMember, c.PaymentAuditLog, c.PaymentOrder,
-		c.PaymentProviderInstance, c.PendingAuthSession, c.PromoCode, c.PromoCodeUsage,
-		c.Proxy, c.RedeemCode, c.SecuritySecret, c.Setting, c.SubscriptionPlan,
-		c.TLSFingerprintProfile, c.UsageCleanupTask, c.UsageLog, c.User,
-		c.UserAllowedGroup, c.UserAttributeDefinition, c.UserAttributeValue,
+		c.OrganizationMember, c.OrganizationQuotaRequest, c.PaymentAuditLog,
+		c.PaymentOrder, c.PaymentProviderInstance, c.PendingAuthSession, c.PromoCode,
+		c.PromoCodeUsage, c.Proxy, c.RedeemCode, c.SecuritySecret, c.Setting,
+		c.SubscriptionPlan, c.TLSFingerprintProfile, c.UsageCleanupTask, c.UsageLog,
+		c.User, c.UserAllowedGroup, c.UserAttributeDefinition, c.UserAttributeValue,
 		c.UserPlatformQuota, c.UserSubscription,
 	} {
 		n.Use(hooks...)
@@ -454,11 +460,11 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.ChannelMonitorHistory, c.ChannelMonitorRequestTemplate,
 		c.CompositeModelRoute, c.ErrorPassthroughRule, c.Group, c.IdempotencyRecord,
 		c.IdentityAdoptionDecision, c.Organization, c.OrganizationAllowedGroup,
-		c.OrganizationMember, c.PaymentAuditLog, c.PaymentOrder,
-		c.PaymentProviderInstance, c.PendingAuthSession, c.PromoCode, c.PromoCodeUsage,
-		c.Proxy, c.RedeemCode, c.SecuritySecret, c.Setting, c.SubscriptionPlan,
-		c.TLSFingerprintProfile, c.UsageCleanupTask, c.UsageLog, c.User,
-		c.UserAllowedGroup, c.UserAttributeDefinition, c.UserAttributeValue,
+		c.OrganizationMember, c.OrganizationQuotaRequest, c.PaymentAuditLog,
+		c.PaymentOrder, c.PaymentProviderInstance, c.PendingAuthSession, c.PromoCode,
+		c.PromoCodeUsage, c.Proxy, c.RedeemCode, c.SecuritySecret, c.Setting,
+		c.SubscriptionPlan, c.TLSFingerprintProfile, c.UsageCleanupTask, c.UsageLog,
+		c.User, c.UserAllowedGroup, c.UserAttributeDefinition, c.UserAttributeValue,
 		c.UserPlatformQuota, c.UserSubscription,
 	} {
 		n.Intercept(interceptors...)
@@ -512,6 +518,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.OrganizationAllowedGroup.mutate(ctx, m)
 	case *OrganizationMemberMutation:
 		return c.OrganizationMember.mutate(ctx, m)
+	case *OrganizationQuotaRequestMutation:
+		return c.OrganizationQuotaRequest.mutate(ctx, m)
 	case *PaymentAuditLogMutation:
 		return c.PaymentAuditLog.mutate(ctx, m)
 	case *PaymentOrderMutation:
@@ -4129,6 +4137,139 @@ func (c *OrganizationMemberClient) mutate(ctx context.Context, m *OrganizationMe
 	}
 }
 
+// OrganizationQuotaRequestClient is a client for the OrganizationQuotaRequest schema.
+type OrganizationQuotaRequestClient struct {
+	config
+}
+
+// NewOrganizationQuotaRequestClient returns a client for the OrganizationQuotaRequest from the given config.
+func NewOrganizationQuotaRequestClient(c config) *OrganizationQuotaRequestClient {
+	return &OrganizationQuotaRequestClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `organizationquotarequest.Hooks(f(g(h())))`.
+func (c *OrganizationQuotaRequestClient) Use(hooks ...Hook) {
+	c.hooks.OrganizationQuotaRequest = append(c.hooks.OrganizationQuotaRequest, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `organizationquotarequest.Intercept(f(g(h())))`.
+func (c *OrganizationQuotaRequestClient) Intercept(interceptors ...Interceptor) {
+	c.inters.OrganizationQuotaRequest = append(c.inters.OrganizationQuotaRequest, interceptors...)
+}
+
+// Create returns a builder for creating a OrganizationQuotaRequest entity.
+func (c *OrganizationQuotaRequestClient) Create() *OrganizationQuotaRequestCreate {
+	mutation := newOrganizationQuotaRequestMutation(c.config, OpCreate)
+	return &OrganizationQuotaRequestCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of OrganizationQuotaRequest entities.
+func (c *OrganizationQuotaRequestClient) CreateBulk(builders ...*OrganizationQuotaRequestCreate) *OrganizationQuotaRequestCreateBulk {
+	return &OrganizationQuotaRequestCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *OrganizationQuotaRequestClient) MapCreateBulk(slice any, setFunc func(*OrganizationQuotaRequestCreate, int)) *OrganizationQuotaRequestCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &OrganizationQuotaRequestCreateBulk{err: fmt.Errorf("calling to OrganizationQuotaRequestClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*OrganizationQuotaRequestCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &OrganizationQuotaRequestCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for OrganizationQuotaRequest.
+func (c *OrganizationQuotaRequestClient) Update() *OrganizationQuotaRequestUpdate {
+	mutation := newOrganizationQuotaRequestMutation(c.config, OpUpdate)
+	return &OrganizationQuotaRequestUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *OrganizationQuotaRequestClient) UpdateOne(_m *OrganizationQuotaRequest) *OrganizationQuotaRequestUpdateOne {
+	mutation := newOrganizationQuotaRequestMutation(c.config, OpUpdateOne, withOrganizationQuotaRequest(_m))
+	return &OrganizationQuotaRequestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *OrganizationQuotaRequestClient) UpdateOneID(id int64) *OrganizationQuotaRequestUpdateOne {
+	mutation := newOrganizationQuotaRequestMutation(c.config, OpUpdateOne, withOrganizationQuotaRequestID(id))
+	return &OrganizationQuotaRequestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for OrganizationQuotaRequest.
+func (c *OrganizationQuotaRequestClient) Delete() *OrganizationQuotaRequestDelete {
+	mutation := newOrganizationQuotaRequestMutation(c.config, OpDelete)
+	return &OrganizationQuotaRequestDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *OrganizationQuotaRequestClient) DeleteOne(_m *OrganizationQuotaRequest) *OrganizationQuotaRequestDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *OrganizationQuotaRequestClient) DeleteOneID(id int64) *OrganizationQuotaRequestDeleteOne {
+	builder := c.Delete().Where(organizationquotarequest.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &OrganizationQuotaRequestDeleteOne{builder}
+}
+
+// Query returns a query builder for OrganizationQuotaRequest.
+func (c *OrganizationQuotaRequestClient) Query() *OrganizationQuotaRequestQuery {
+	return &OrganizationQuotaRequestQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeOrganizationQuotaRequest},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a OrganizationQuotaRequest entity by its id.
+func (c *OrganizationQuotaRequestClient) Get(ctx context.Context, id int64) (*OrganizationQuotaRequest, error) {
+	return c.Query().Where(organizationquotarequest.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *OrganizationQuotaRequestClient) GetX(ctx context.Context, id int64) *OrganizationQuotaRequest {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *OrganizationQuotaRequestClient) Hooks() []Hook {
+	return c.hooks.OrganizationQuotaRequest
+}
+
+// Interceptors returns the client interceptors.
+func (c *OrganizationQuotaRequestClient) Interceptors() []Interceptor {
+	return c.inters.OrganizationQuotaRequest
+}
+
+func (c *OrganizationQuotaRequestClient) mutate(ctx context.Context, m *OrganizationQuotaRequestMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&OrganizationQuotaRequestCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&OrganizationQuotaRequestUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&OrganizationQuotaRequestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&OrganizationQuotaRequestDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown OrganizationQuotaRequest mutation op: %q", m.Op())
+	}
+}
+
 // PaymentAuditLogClient is a client for the PaymentAuditLog schema.
 type PaymentAuditLogClient struct {
 	config
@@ -7446,11 +7587,12 @@ type (
 		ChannelMonitor, ChannelMonitorDailyRollup, ChannelMonitorHistory,
 		ChannelMonitorRequestTemplate, CompositeModelRoute, ErrorPassthroughRule,
 		Group, IdempotencyRecord, IdentityAdoptionDecision, Organization,
-		OrganizationAllowedGroup, OrganizationMember, PaymentAuditLog, PaymentOrder,
-		PaymentProviderInstance, PendingAuthSession, PromoCode, PromoCodeUsage, Proxy,
-		RedeemCode, SecuritySecret, Setting, SubscriptionPlan, TLSFingerprintProfile,
-		UsageCleanupTask, UsageLog, User, UserAllowedGroup, UserAttributeDefinition,
-		UserAttributeValue, UserPlatformQuota, UserSubscription []ent.Hook
+		OrganizationAllowedGroup, OrganizationMember, OrganizationQuotaRequest,
+		PaymentAuditLog, PaymentOrder, PaymentProviderInstance, PendingAuthSession,
+		PromoCode, PromoCodeUsage, Proxy, RedeemCode, SecuritySecret, Setting,
+		SubscriptionPlan, TLSFingerprintProfile, UsageCleanupTask, UsageLog, User,
+		UserAllowedGroup, UserAttributeDefinition, UserAttributeValue,
+		UserPlatformQuota, UserSubscription []ent.Hook
 	}
 	inters struct {
 		APIKey, Account, AccountGroup, Announcement, AnnouncementRead, AuthIdentity,
@@ -7458,11 +7600,12 @@ type (
 		ChannelMonitor, ChannelMonitorDailyRollup, ChannelMonitorHistory,
 		ChannelMonitorRequestTemplate, CompositeModelRoute, ErrorPassthroughRule,
 		Group, IdempotencyRecord, IdentityAdoptionDecision, Organization,
-		OrganizationAllowedGroup, OrganizationMember, PaymentAuditLog, PaymentOrder,
-		PaymentProviderInstance, PendingAuthSession, PromoCode, PromoCodeUsage, Proxy,
-		RedeemCode, SecuritySecret, Setting, SubscriptionPlan, TLSFingerprintProfile,
-		UsageCleanupTask, UsageLog, User, UserAllowedGroup, UserAttributeDefinition,
-		UserAttributeValue, UserPlatformQuota, UserSubscription []ent.Interceptor
+		OrganizationAllowedGroup, OrganizationMember, OrganizationQuotaRequest,
+		PaymentAuditLog, PaymentOrder, PaymentProviderInstance, PendingAuthSession,
+		PromoCode, PromoCodeUsage, Proxy, RedeemCode, SecuritySecret, Setting,
+		SubscriptionPlan, TLSFingerprintProfile, UsageCleanupTask, UsageLog, User,
+		UserAllowedGroup, UserAttributeDefinition, UserAttributeValue,
+		UserPlatformQuota, UserSubscription []ent.Interceptor
 	}
 )
 

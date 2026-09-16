@@ -16,6 +16,8 @@ type organizationMemberRepoStub struct {
 	organizationID int64
 	members        map[int64]*OrganizationMember
 	writes         [][]OrganizationMemberSpendingLimit
+	quotaWrites    [][]OrganizationMemberQuotaWrite
+	advanceCalls   []int64
 	listFilters    []OrganizationMemberListFilters
 }
 
@@ -68,9 +70,76 @@ func (r *organizationMemberRepoStub) SetSpendingLimits(
 	}
 	for _, limit := range limits {
 		r.members[limit.UserID].SpendingLimit = limit.Limit
+		// 与真实落库一致：写静态上限同时清掉周期配额配置与当期一次性加成。
+		r.members[limit.UserID].QuotaAmount = nil
+		r.members[limit.UserID].QuotaPeriodDays = nil
+		r.members[limit.UserID].QuotaStartAt = nil
+		r.members[limit.UserID].QuotaCycleStart = nil
+		r.members[limit.UserID].QuotaCycleBonus = 0
 	}
 	r.writes = append(r.writes, limits)
 	return nil
+}
+
+func (r *organizationMemberRepoStub) SetPeriodicQuotas(
+	_ context.Context,
+	organizationID int64,
+	writes []OrganizationMemberQuotaWrite,
+) error {
+	if organizationID != r.organizationID {
+		return ErrOrganizationMemberNotFound
+	}
+	for _, write := range writes {
+		if _, ok := r.members[write.UserID]; !ok {
+			return ErrOrganizationMemberNotFound
+		}
+	}
+	for _, write := range writes {
+		member := r.members[write.UserID]
+		if write.Quota == nil {
+			member.QuotaAmount = nil
+			member.QuotaPeriodDays = nil
+			member.QuotaStartAt = nil
+			member.QuotaCycleStart = nil
+			member.QuotaCycleBonus = 0
+			continue
+		}
+		amount := write.Quota.Amount
+		periodDays := write.Quota.PeriodDays
+		startAt := write.Quota.StartAt
+		member.QuotaAmount = &amount
+		member.QuotaPeriodDays = &periodDays
+		member.QuotaStartAt = &startAt
+		// 与真实落库一致：换一套周期配置等于换一期，加成不带过来。
+		member.QuotaCycleBonus = 0
+		if write.CycleStart != nil {
+			cycleStart := *write.CycleStart
+			member.QuotaCycleStart = &cycleStart
+		} else {
+			member.QuotaCycleStart = nil
+		}
+		if write.ResetUsed {
+			member.SpendingUsed = 0
+		}
+	}
+	r.quotaWrites = append(r.quotaWrites, writes)
+	return nil
+}
+
+func (r *organizationMemberRepoStub) AdvanceDueQuota(_ context.Context, userID int64, now time.Time) (*OrganizationMember, error) {
+	r.advanceCalls = append(r.advanceCalls, userID)
+	member, ok := r.members[userID]
+	if !ok {
+		return nil, nil
+	}
+	state := member.QuotaState(now)
+	if !state.NeedsAdvance {
+		return nil, nil
+	}
+	member.QuotaCycleStart = state.CycleStart
+	member.SpendingUsed = 0
+	member.QuotaCycleBonus = 0
+	return &OrganizationMember{UserID: userID, QuotaCycleStart: state.CycleStart, QuotaCycleBonus: 0}, nil
 }
 
 func (r *organizationMemberRepoStub) ListUserIDs(_ context.Context, organizationID int64) ([]int64, error) {
@@ -137,10 +206,11 @@ const (
 )
 
 type organizationMemberFixture struct {
-	service   *OrganizationMemberService
-	members   *organizationMemberRepoStub
-	users     *organizationMemberUserRepoStub
-	authCache *organizationAuthCacheStub
+	service       *OrganizationMemberService
+	members       *organizationMemberRepoStub
+	quotaRequests *organizationQuotaRequestRepoStub
+	users         *organizationMemberUserRepoStub
+	authCache     *organizationAuthCacheStub
 }
 
 func newOrganizationMemberFixture(t *testing.T) *organizationMemberFixture {
@@ -190,17 +260,30 @@ func newOrganizationMemberFixture(t *testing.T) *organizationMemberFixture {
 		testOrganizationAdminID:  {ID: testOrganizationAdminID, Status: StatusActive, Role: RoleAdmin},
 	}}
 	authCache := &organizationAuthCacheStub{}
+	quotaRequests := &organizationQuotaRequestRepoStub{
+		organizationID: organization.ID,
+		policy:         &OrganizationQuotaRequestPolicy{Mode: QuotaRequestModeOff},
+		requests:       map[int64]*OrganizationQuotaRequest{},
+	}
+
+	quotaRequests.members = members
+
+	for _, member := range members.members {
+		member.OrganizationID = organization.ID
+	}
 
 	return &organizationMemberFixture{
 		service: NewOrganizationMemberService(
 			NewOrganizationService(organizationRepo, newOrganizationRedeemRepoStub()),
 			members,
+			quotaRequests,
 			users,
 			authCache,
 		),
-		members:   members,
-		users:     users,
-		authCache: authCache,
+		members:       members,
+		quotaRequests: quotaRequests,
+		users:         users,
+		authCache:     authCache,
 	}
 }
 

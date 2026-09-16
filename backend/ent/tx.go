@@ -58,6 +58,8 @@ type Tx struct {
 	OrganizationAllowedGroup *OrganizationAllowedGroupClient
 	// OrganizationMember is the client for interacting with the OrganizationMember builders.
 	OrganizationMember *OrganizationMemberClient
+	// OrganizationQuotaRequest is the client for interacting with the OrganizationQuotaRequest builders.
+	OrganizationQuotaRequest *OrganizationQuotaRequestClient
 	// PaymentAuditLog is the client for interacting with the PaymentAuditLog builders.
 	PaymentAuditLog *PaymentAuditLogClient
 	// PaymentOrder is the client for interacting with the PaymentOrder builders.
@@ -251,6 +253,7 @@ func (tx *Tx) init() {
 	tx.Organization = NewOrganizationClient(tx.config)
 	tx.OrganizationAllowedGroup = NewOrganizationAllowedGroupClient(tx.config)
 	tx.OrganizationMember = NewOrganizationMemberClient(tx.config)
+	tx.OrganizationQuotaRequest = NewOrganizationQuotaRequestClient(tx.config)
 	tx.PaymentAuditLog = NewPaymentAuditLogClient(tx.config)
 	tx.PaymentOrder = NewPaymentOrderClient(tx.config)
 	tx.PaymentProviderInstance = NewPaymentProviderInstanceClient(tx.config)

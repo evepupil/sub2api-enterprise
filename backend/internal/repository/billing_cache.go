@@ -92,6 +92,9 @@ var (
 	`)
 
 	// 只在 key 存在时累加：缓存未命中时凭空 INCR 会写出一个缺少历史消费的错误值。
+	// incrOrgSpendingScript 只在已存在的键上累加（不凭空建键），并用 KEEPTTL
+	// 保留原存活期：回源建键时截到本期截止的 TTL 不会被累加冲掉，
+	// 换期那一刻缓存准时过期，下一次读取回源推进周期。
 	incrOrgSpendingScript = redis.NewScript(`
 		local current = redis.call('GET', KEYS[1])
 		if current == false then
@@ -101,8 +104,7 @@ var (
 		if newVal < 0 then
 			newVal = 0
 		end
-		redis.call('SET', KEYS[1], newVal)
-		redis.call('EXPIRE', KEYS[1], ARGV[2])
+		redis.call('SET', KEYS[1], newVal, 'KEEPTTL')
 		return 1
 	`)
 
@@ -203,8 +205,8 @@ func (c *billingCache) GetOrganizationMemberSpending(ctx context.Context, userID
 	return strconv.ParseFloat(val, 64)
 }
 
-func (c *billingCache) SetOrganizationMemberSpending(ctx context.Context, userID int64, spending float64) error {
-	return c.rdb.Set(ctx, billingOrgSpendingKey(userID), spending, jitteredTTL()).Err()
+func (c *billingCache) SetOrganizationMemberSpending(ctx context.Context, userID int64, spending float64, windowEnd *time.Time) error {
+	return c.rdb.Set(ctx, billingOrgSpendingKey(userID), spending, orgSpendingCacheTTL(windowEnd)).Err()
 }
 
 func (c *billingCache) IncrOrganizationMemberSpending(ctx context.Context, userID int64, delta float64) error {
@@ -214,6 +216,25 @@ func (c *billingCache) IncrOrganizationMemberSpending(ctx context.Context, userI
 		return err
 	}
 	return nil
+}
+
+// orgSpendingCacheTTL 决定已占用额度缓存的存活时间。
+// 周期配额生效中把 TTL 截到本期截止：换期那一刻缓存准时过期，下一次读取回源
+// （回源在行锁内推进周期），成员不会因为旧缓存多等一个周期。
+func orgSpendingCacheTTL(windowEnd *time.Time) time.Duration {
+	ttl := jitteredTTL()
+	if windowEnd == nil {
+		return ttl
+	}
+	remaining := time.Until(*windowEnd)
+	if remaining >= ttl {
+		return ttl
+	}
+	if remaining < time.Second {
+		// 已经压线或略过线：给一个最小存活，让并发请求能合并到这一次回源上。
+		return time.Second
+	}
+	return remaining
 }
 
 func (c *billingCache) InvalidateOrganizationMemberSpending(ctx context.Context, userID int64) error {

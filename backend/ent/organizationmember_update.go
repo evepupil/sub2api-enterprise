@@ -133,6 +133,121 @@ func (_u *OrganizationMemberUpdate) AddSpendingFrozen(v float64) *OrganizationMe
 	return _u
 }
 
+// SetQuotaAmount sets the "quota_amount" field.
+func (_u *OrganizationMemberUpdate) SetQuotaAmount(v float64) *OrganizationMemberUpdate {
+	_u.mutation.ResetQuotaAmount()
+	_u.mutation.SetQuotaAmount(v)
+	return _u
+}
+
+// SetNillableQuotaAmount sets the "quota_amount" field if the given value is not nil.
+func (_u *OrganizationMemberUpdate) SetNillableQuotaAmount(v *float64) *OrganizationMemberUpdate {
+	if v != nil {
+		_u.SetQuotaAmount(*v)
+	}
+	return _u
+}
+
+// AddQuotaAmount adds value to the "quota_amount" field.
+func (_u *OrganizationMemberUpdate) AddQuotaAmount(v float64) *OrganizationMemberUpdate {
+	_u.mutation.AddQuotaAmount(v)
+	return _u
+}
+
+// ClearQuotaAmount clears the value of the "quota_amount" field.
+func (_u *OrganizationMemberUpdate) ClearQuotaAmount() *OrganizationMemberUpdate {
+	_u.mutation.ClearQuotaAmount()
+	return _u
+}
+
+// SetQuotaPeriodDays sets the "quota_period_days" field.
+func (_u *OrganizationMemberUpdate) SetQuotaPeriodDays(v int) *OrganizationMemberUpdate {
+	_u.mutation.ResetQuotaPeriodDays()
+	_u.mutation.SetQuotaPeriodDays(v)
+	return _u
+}
+
+// SetNillableQuotaPeriodDays sets the "quota_period_days" field if the given value is not nil.
+func (_u *OrganizationMemberUpdate) SetNillableQuotaPeriodDays(v *int) *OrganizationMemberUpdate {
+	if v != nil {
+		_u.SetQuotaPeriodDays(*v)
+	}
+	return _u
+}
+
+// AddQuotaPeriodDays adds value to the "quota_period_days" field.
+func (_u *OrganizationMemberUpdate) AddQuotaPeriodDays(v int) *OrganizationMemberUpdate {
+	_u.mutation.AddQuotaPeriodDays(v)
+	return _u
+}
+
+// ClearQuotaPeriodDays clears the value of the "quota_period_days" field.
+func (_u *OrganizationMemberUpdate) ClearQuotaPeriodDays() *OrganizationMemberUpdate {
+	_u.mutation.ClearQuotaPeriodDays()
+	return _u
+}
+
+// SetQuotaStartAt sets the "quota_start_at" field.
+func (_u *OrganizationMemberUpdate) SetQuotaStartAt(v time.Time) *OrganizationMemberUpdate {
+	_u.mutation.SetQuotaStartAt(v)
+	return _u
+}
+
+// SetNillableQuotaStartAt sets the "quota_start_at" field if the given value is not nil.
+func (_u *OrganizationMemberUpdate) SetNillableQuotaStartAt(v *time.Time) *OrganizationMemberUpdate {
+	if v != nil {
+		_u.SetQuotaStartAt(*v)
+	}
+	return _u
+}
+
+// ClearQuotaStartAt clears the value of the "quota_start_at" field.
+func (_u *OrganizationMemberUpdate) ClearQuotaStartAt() *OrganizationMemberUpdate {
+	_u.mutation.ClearQuotaStartAt()
+	return _u
+}
+
+// SetQuotaCycleStart sets the "quota_cycle_start" field.
+func (_u *OrganizationMemberUpdate) SetQuotaCycleStart(v time.Time) *OrganizationMemberUpdate {
+	_u.mutation.SetQuotaCycleStart(v)
+	return _u
+}
+
+// SetNillableQuotaCycleStart sets the "quota_cycle_start" field if the given value is not nil.
+func (_u *OrganizationMemberUpdate) SetNillableQuotaCycleStart(v *time.Time) *OrganizationMemberUpdate {
+	if v != nil {
+		_u.SetQuotaCycleStart(*v)
+	}
+	return _u
+}
+
+// ClearQuotaCycleStart clears the value of the "quota_cycle_start" field.
+func (_u *OrganizationMemberUpdate) ClearQuotaCycleStart() *OrganizationMemberUpdate {
+	_u.mutation.ClearQuotaCycleStart()
+	return _u
+}
+
+// SetQuotaCycleBonus sets the "quota_cycle_bonus" field.
+func (_u *OrganizationMemberUpdate) SetQuotaCycleBonus(v float64) *OrganizationMemberUpdate {
+	_u.mutation.ResetQuotaCycleBonus()
+	_u.mutation.SetQuotaCycleBonus(v)
+	return _u
+}
+
+// SetNillableQuotaCycleBonus sets the "quota_cycle_bonus" field if the given value is not nil.
+func (_u *OrganizationMemberUpdate) SetNillableQuotaCycleBonus(v *float64) *OrganizationMemberUpdate {
+	if v != nil {
+		_u.SetQuotaCycleBonus(*v)
+	}
+	return _u
+}
+
+// AddQuotaCycleBonus adds value to the "quota_cycle_bonus" field.
+func (_u *OrganizationMemberUpdate) AddQuotaCycleBonus(v float64) *OrganizationMemberUpdate {
+	_u.mutation.AddQuotaCycleBonus(v)
+	return _u
+}
+
 // SetOrganization sets the "organization" edge to the Organization entity.
 func (_u *OrganizationMemberUpdate) SetOrganization(v *Organization) *OrganizationMemberUpdate {
 	return _u.SetOrganizationID(v.ID)
@@ -198,6 +313,11 @@ func (_u *OrganizationMemberUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *OrganizationMemberUpdate) check() error {
+	if v, ok := _u.mutation.QuotaPeriodDays(); ok {
+		if err := organizationmember.QuotaPeriodDaysValidator(v); err != nil {
+			return &ValidationError{Name: "quota_period_days", err: fmt.Errorf(`ent: validator failed for field "OrganizationMember.quota_period_days": %w`, err)}
+		}
+	}
 	if _u.mutation.OrganizationCleared() && len(_u.mutation.OrganizationIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "OrganizationMember.organization"`)
 	}
@@ -242,6 +362,42 @@ func (_u *OrganizationMemberUpdate) sqlSave(ctx context.Context) (_node int, err
 	}
 	if value, ok := _u.mutation.AddedSpendingFrozen(); ok {
 		_spec.AddField(organizationmember.FieldSpendingFrozen, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.QuotaAmount(); ok {
+		_spec.SetField(organizationmember.FieldQuotaAmount, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedQuotaAmount(); ok {
+		_spec.AddField(organizationmember.FieldQuotaAmount, field.TypeFloat64, value)
+	}
+	if _u.mutation.QuotaAmountCleared() {
+		_spec.ClearField(organizationmember.FieldQuotaAmount, field.TypeFloat64)
+	}
+	if value, ok := _u.mutation.QuotaPeriodDays(); ok {
+		_spec.SetField(organizationmember.FieldQuotaPeriodDays, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedQuotaPeriodDays(); ok {
+		_spec.AddField(organizationmember.FieldQuotaPeriodDays, field.TypeInt, value)
+	}
+	if _u.mutation.QuotaPeriodDaysCleared() {
+		_spec.ClearField(organizationmember.FieldQuotaPeriodDays, field.TypeInt)
+	}
+	if value, ok := _u.mutation.QuotaStartAt(); ok {
+		_spec.SetField(organizationmember.FieldQuotaStartAt, field.TypeTime, value)
+	}
+	if _u.mutation.QuotaStartAtCleared() {
+		_spec.ClearField(organizationmember.FieldQuotaStartAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.QuotaCycleStart(); ok {
+		_spec.SetField(organizationmember.FieldQuotaCycleStart, field.TypeTime, value)
+	}
+	if _u.mutation.QuotaCycleStartCleared() {
+		_spec.ClearField(organizationmember.FieldQuotaCycleStart, field.TypeTime)
+	}
+	if value, ok := _u.mutation.QuotaCycleBonus(); ok {
+		_spec.SetField(organizationmember.FieldQuotaCycleBonus, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedQuotaCycleBonus(); ok {
+		_spec.AddField(organizationmember.FieldQuotaCycleBonus, field.TypeFloat64, value)
 	}
 	if _u.mutation.OrganizationCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -424,6 +580,121 @@ func (_u *OrganizationMemberUpdateOne) AddSpendingFrozen(v float64) *Organizatio
 	return _u
 }
 
+// SetQuotaAmount sets the "quota_amount" field.
+func (_u *OrganizationMemberUpdateOne) SetQuotaAmount(v float64) *OrganizationMemberUpdateOne {
+	_u.mutation.ResetQuotaAmount()
+	_u.mutation.SetQuotaAmount(v)
+	return _u
+}
+
+// SetNillableQuotaAmount sets the "quota_amount" field if the given value is not nil.
+func (_u *OrganizationMemberUpdateOne) SetNillableQuotaAmount(v *float64) *OrganizationMemberUpdateOne {
+	if v != nil {
+		_u.SetQuotaAmount(*v)
+	}
+	return _u
+}
+
+// AddQuotaAmount adds value to the "quota_amount" field.
+func (_u *OrganizationMemberUpdateOne) AddQuotaAmount(v float64) *OrganizationMemberUpdateOne {
+	_u.mutation.AddQuotaAmount(v)
+	return _u
+}
+
+// ClearQuotaAmount clears the value of the "quota_amount" field.
+func (_u *OrganizationMemberUpdateOne) ClearQuotaAmount() *OrganizationMemberUpdateOne {
+	_u.mutation.ClearQuotaAmount()
+	return _u
+}
+
+// SetQuotaPeriodDays sets the "quota_period_days" field.
+func (_u *OrganizationMemberUpdateOne) SetQuotaPeriodDays(v int) *OrganizationMemberUpdateOne {
+	_u.mutation.ResetQuotaPeriodDays()
+	_u.mutation.SetQuotaPeriodDays(v)
+	return _u
+}
+
+// SetNillableQuotaPeriodDays sets the "quota_period_days" field if the given value is not nil.
+func (_u *OrganizationMemberUpdateOne) SetNillableQuotaPeriodDays(v *int) *OrganizationMemberUpdateOne {
+	if v != nil {
+		_u.SetQuotaPeriodDays(*v)
+	}
+	return _u
+}
+
+// AddQuotaPeriodDays adds value to the "quota_period_days" field.
+func (_u *OrganizationMemberUpdateOne) AddQuotaPeriodDays(v int) *OrganizationMemberUpdateOne {
+	_u.mutation.AddQuotaPeriodDays(v)
+	return _u
+}
+
+// ClearQuotaPeriodDays clears the value of the "quota_period_days" field.
+func (_u *OrganizationMemberUpdateOne) ClearQuotaPeriodDays() *OrganizationMemberUpdateOne {
+	_u.mutation.ClearQuotaPeriodDays()
+	return _u
+}
+
+// SetQuotaStartAt sets the "quota_start_at" field.
+func (_u *OrganizationMemberUpdateOne) SetQuotaStartAt(v time.Time) *OrganizationMemberUpdateOne {
+	_u.mutation.SetQuotaStartAt(v)
+	return _u
+}
+
+// SetNillableQuotaStartAt sets the "quota_start_at" field if the given value is not nil.
+func (_u *OrganizationMemberUpdateOne) SetNillableQuotaStartAt(v *time.Time) *OrganizationMemberUpdateOne {
+	if v != nil {
+		_u.SetQuotaStartAt(*v)
+	}
+	return _u
+}
+
+// ClearQuotaStartAt clears the value of the "quota_start_at" field.
+func (_u *OrganizationMemberUpdateOne) ClearQuotaStartAt() *OrganizationMemberUpdateOne {
+	_u.mutation.ClearQuotaStartAt()
+	return _u
+}
+
+// SetQuotaCycleStart sets the "quota_cycle_start" field.
+func (_u *OrganizationMemberUpdateOne) SetQuotaCycleStart(v time.Time) *OrganizationMemberUpdateOne {
+	_u.mutation.SetQuotaCycleStart(v)
+	return _u
+}
+
+// SetNillableQuotaCycleStart sets the "quota_cycle_start" field if the given value is not nil.
+func (_u *OrganizationMemberUpdateOne) SetNillableQuotaCycleStart(v *time.Time) *OrganizationMemberUpdateOne {
+	if v != nil {
+		_u.SetQuotaCycleStart(*v)
+	}
+	return _u
+}
+
+// ClearQuotaCycleStart clears the value of the "quota_cycle_start" field.
+func (_u *OrganizationMemberUpdateOne) ClearQuotaCycleStart() *OrganizationMemberUpdateOne {
+	_u.mutation.ClearQuotaCycleStart()
+	return _u
+}
+
+// SetQuotaCycleBonus sets the "quota_cycle_bonus" field.
+func (_u *OrganizationMemberUpdateOne) SetQuotaCycleBonus(v float64) *OrganizationMemberUpdateOne {
+	_u.mutation.ResetQuotaCycleBonus()
+	_u.mutation.SetQuotaCycleBonus(v)
+	return _u
+}
+
+// SetNillableQuotaCycleBonus sets the "quota_cycle_bonus" field if the given value is not nil.
+func (_u *OrganizationMemberUpdateOne) SetNillableQuotaCycleBonus(v *float64) *OrganizationMemberUpdateOne {
+	if v != nil {
+		_u.SetQuotaCycleBonus(*v)
+	}
+	return _u
+}
+
+// AddQuotaCycleBonus adds value to the "quota_cycle_bonus" field.
+func (_u *OrganizationMemberUpdateOne) AddQuotaCycleBonus(v float64) *OrganizationMemberUpdateOne {
+	_u.mutation.AddQuotaCycleBonus(v)
+	return _u
+}
+
 // SetOrganization sets the "organization" edge to the Organization entity.
 func (_u *OrganizationMemberUpdateOne) SetOrganization(v *Organization) *OrganizationMemberUpdateOne {
 	return _u.SetOrganizationID(v.ID)
@@ -502,6 +773,11 @@ func (_u *OrganizationMemberUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *OrganizationMemberUpdateOne) check() error {
+	if v, ok := _u.mutation.QuotaPeriodDays(); ok {
+		if err := organizationmember.QuotaPeriodDaysValidator(v); err != nil {
+			return &ValidationError{Name: "quota_period_days", err: fmt.Errorf(`ent: validator failed for field "OrganizationMember.quota_period_days": %w`, err)}
+		}
+	}
 	if _u.mutation.OrganizationCleared() && len(_u.mutation.OrganizationIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "OrganizationMember.organization"`)
 	}
@@ -563,6 +839,42 @@ func (_u *OrganizationMemberUpdateOne) sqlSave(ctx context.Context) (_node *Orga
 	}
 	if value, ok := _u.mutation.AddedSpendingFrozen(); ok {
 		_spec.AddField(organizationmember.FieldSpendingFrozen, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.QuotaAmount(); ok {
+		_spec.SetField(organizationmember.FieldQuotaAmount, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedQuotaAmount(); ok {
+		_spec.AddField(organizationmember.FieldQuotaAmount, field.TypeFloat64, value)
+	}
+	if _u.mutation.QuotaAmountCleared() {
+		_spec.ClearField(organizationmember.FieldQuotaAmount, field.TypeFloat64)
+	}
+	if value, ok := _u.mutation.QuotaPeriodDays(); ok {
+		_spec.SetField(organizationmember.FieldQuotaPeriodDays, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedQuotaPeriodDays(); ok {
+		_spec.AddField(organizationmember.FieldQuotaPeriodDays, field.TypeInt, value)
+	}
+	if _u.mutation.QuotaPeriodDaysCleared() {
+		_spec.ClearField(organizationmember.FieldQuotaPeriodDays, field.TypeInt)
+	}
+	if value, ok := _u.mutation.QuotaStartAt(); ok {
+		_spec.SetField(organizationmember.FieldQuotaStartAt, field.TypeTime, value)
+	}
+	if _u.mutation.QuotaStartAtCleared() {
+		_spec.ClearField(organizationmember.FieldQuotaStartAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.QuotaCycleStart(); ok {
+		_spec.SetField(organizationmember.FieldQuotaCycleStart, field.TypeTime, value)
+	}
+	if _u.mutation.QuotaCycleStartCleared() {
+		_spec.ClearField(organizationmember.FieldQuotaCycleStart, field.TypeTime)
+	}
+	if value, ok := _u.mutation.QuotaCycleBonus(); ok {
+		_spec.SetField(organizationmember.FieldQuotaCycleBonus, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedQuotaCycleBonus(); ok {
+		_spec.AddField(organizationmember.FieldQuotaCycleBonus, field.TypeFloat64, value)
 	}
 	if _u.mutation.OrganizationCleared() {
 		edge := &sqlgraph.EdgeSpec{

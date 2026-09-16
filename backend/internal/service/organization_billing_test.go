@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/Wei-Shaw/sub2api/internal/config"
 
@@ -14,11 +15,11 @@ type organizationSpendingRepoStub struct {
 	err      error
 }
 
-func (r *organizationSpendingRepoStub) GetMemberSpending(_ context.Context, userID int64) (float64, error) {
+func (r *organizationSpendingRepoStub) GetMemberSpending(_ context.Context, userID int64) (float64, *time.Time, error) {
 	if r.err != nil {
-		return 0, r.err
+		return 0, nil, r.err
 	}
-	return r.spending[userID], nil
+	return r.spending[userID], nil, nil
 }
 
 type billingUserRepoStub struct {

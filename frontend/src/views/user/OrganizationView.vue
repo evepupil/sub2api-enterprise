@@ -55,6 +55,12 @@
       </div>
 
       <template v-else-if="organization.is_owner">
+        <OrganizationQuotaRequestsCard
+          v-if="quotaSectionAbove"
+          @loaded="onQuotaSectionLoaded"
+          @changed="loadMembers"
+        />
+
         <section class="card overflow-hidden">
           <div
             class="flex flex-col gap-3 border-b border-gray-200 px-5 py-4 dark:border-dark-700 lg:flex-row lg:items-center lg:justify-between"
@@ -73,14 +79,24 @@
               <div class="sm:w-36">
                 <Select v-model="statusFilter" :options="statusOptions" @update:model-value="applyMemberFilters" />
               </div>
-              <button
-                type="button"
-                class="btn btn-secondary shrink-0"
-                :disabled="selectedUserIds.length === 0"
-                @click="openSplitDialog"
-              >
-                {{ t('organization.split') }}
-              </button>
+              <div class="flex shrink-0 gap-2">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  :disabled="selectedUserIds.length === 0"
+                  @click="openQuotaGrantDialog"
+                >
+                  {{ t('organization.quotaGrant') }}
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  :disabled="selectedUserIds.length === 0"
+                  @click="openSplitDialog"
+                >
+                  {{ t('organization.split') }}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -157,7 +173,17 @@
                     </span>
                   </td>
                   <td class="px-3 py-3 text-right text-content-strong">
-                    {{ member.is_owner ? '-' : formatSpending(member.spending_limit) }}
+                    <template v-if="member.is_owner">-</template>
+                    <template v-else-if="member.quota">
+                      <div>{{ formatCurrency(member.quota.amount) }}</div>
+                      <div class="text-xs text-content-muted">
+                        {{ t('organization.quotaEveryDays', { days: member.quota.period_days }) }}
+                        <span v-if="member.quota.mode === 'periodic_pending'">
+                          · {{ t('organization.quotaPending') }}
+                        </span>
+                      </div>
+                    </template>
+                    <template v-else>{{ formatSpending(member.spending_limit) }}</template>
                   </td>
                   <td class="px-3 py-3 text-right text-content">
                     {{ member.is_owner ? '-' : formatCurrency(member.spending_used) }}
@@ -172,6 +198,12 @@
                   >
                     {{ member.is_owner ? '-' : formatSpending(member.spending_remaining) }}
                     <div
+                      v-if="!member.is_owner && member.quota?.mode === 'periodic_active' && member.quota.window_end"
+                      class="text-xs text-content-muted"
+                    >
+                      {{ t('organization.quotaResetAt', { date: formatDateTime(member.quota.window_end) }) }}
+                    </div>
+                    <div
                       v-if="!member.is_owner && member.spending_frozen > 0"
                       class="text-xs text-content-muted"
                     >
@@ -181,7 +213,7 @@
                   <td class="px-3 py-3">
                     <div v-if="!member.is_owner" class="flex justify-end gap-2">
                       <button type="button" class="btn btn-secondary btn-sm" @click="openLimitDialog(member)">
-                        {{ t('organization.setLimit') }}
+                        {{ t('organization.quotaTitle') }}
                       </button>
                       <button
                         type="button"
@@ -207,6 +239,12 @@
             @update:pageSize="handlePageSizeChange"
           />
         </section>
+
+        <OrganizationQuotaRequestsCard
+          v-if="!quotaSectionAbove"
+          @loaded="onQuotaSectionLoaded"
+          @changed="loadMembers"
+        />
 
         <section class="card overflow-hidden">
           <div class="border-b border-gray-200 px-5 py-4 dark:border-dark-700">
@@ -270,26 +308,54 @@
           </ul>
         </section>
       </template>
+
+      <template v-else>
+        <OrganizationMyQuotaRequestsCard />
+      </template>
     </div>
 
     <BaseDialog
       :show="limitDialog.show"
-      :title="t('organization.setLimit')"
+      :title="t('organization.quotaTitle')"
       width="narrow"
       @close="closeLimitDialog"
     >
       <div class="space-y-4">
         <p class="text-sm text-content">{{ limitDialog.email }}</p>
-        <label class="flex items-center gap-2 text-sm text-content">
-          <input
-            type="checkbox"
-            class="h-4 w-4 cursor-pointer rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-            v-model="limitDialog.unlimited"
-          />
-          <span>{{ t('organization.unlimited') }}</span>
-        </label>
+        <div class="space-y-2">
+          <label class="flex items-center gap-2 text-sm text-content">
+            <input
+              type="radio"
+              name="quota-mode"
+              class="h-4 w-4 cursor-pointer border-gray-300 text-primary-600 focus:ring-primary-500"
+              value="unlimited"
+              v-model="limitDialog.mode"
+            />
+            <span>{{ t('organization.quotaModeUnlimited') }}</span>
+          </label>
+          <label class="flex items-center gap-2 text-sm text-content">
+            <input
+              type="radio"
+              name="quota-mode"
+              class="h-4 w-4 cursor-pointer border-gray-300 text-primary-600 focus:ring-primary-500"
+              value="fixed"
+              v-model="limitDialog.mode"
+            />
+            <span>{{ t('organization.quotaModeFixed') }}</span>
+          </label>
+          <label class="flex items-center gap-2 text-sm text-content">
+            <input
+              type="radio"
+              name="quota-mode"
+              class="h-4 w-4 cursor-pointer border-gray-300 text-primary-600 focus:ring-primary-500"
+              value="periodic"
+              v-model="limitDialog.mode"
+            />
+            <span>{{ t('organization.quotaModePeriodic') }}</span>
+          </label>
+        </div>
         <input
-          v-if="!limitDialog.unlimited"
+          v-if="limitDialog.mode === 'fixed'"
           v-model="limitDialog.amount"
           type="number"
           min="0"
@@ -297,6 +363,34 @@
           class="input"
           :placeholder="t('organization.amount')"
         />
+        <div v-if="limitDialog.mode === 'periodic'" class="space-y-3">
+          <input
+            v-model="limitDialog.amount"
+            type="number"
+            min="0"
+            step="0.01"
+            class="input"
+            :placeholder="t('organization.quotaPerPeriodAmount')"
+          />
+          <input
+            v-model="limitDialog.periodDays"
+            type="number"
+            min="1"
+            max="3650"
+            step="1"
+            class="input"
+            :placeholder="t('organization.quotaPeriodDays')"
+          />
+          <div>
+            <input
+              v-model="limitDialog.startAt"
+              type="datetime-local"
+              class="input"
+              :placeholder="t('organization.quotaStartTime')"
+            />
+            <p class="mt-1 text-xs text-content-muted">{{ t('organization.quotaStartTimeHint') }}</p>
+          </div>
+        </div>
         <p v-if="limitDialog.error" class="text-sm text-red-600 dark:text-red-400">{{ limitDialog.error }}</p>
       </div>
       <template #footer>
@@ -340,6 +434,48 @@
         </button>
       </template>
     </BaseDialog>
+
+    <BaseDialog :show="quotaGrantDialog.show" :title="t('organization.quotaGrant')" @close="closeQuotaGrantDialog">
+      <div class="space-y-3">
+        <input
+          v-model="quotaGrantDialog.amount"
+          type="number"
+          min="0"
+          step="0.01"
+          class="input"
+          :placeholder="t('organization.quotaPerPeriodAmount')"
+        />
+        <input
+          v-model="quotaGrantDialog.periodDays"
+          type="number"
+          min="1"
+          max="3650"
+          step="1"
+          class="input"
+          :placeholder="t('organization.quotaPeriodDays')"
+        />
+        <div>
+          <input
+            v-model="quotaGrantDialog.startAt"
+            type="datetime-local"
+            class="input"
+            :placeholder="t('organization.quotaStartTime')"
+          />
+          <p class="mt-1 text-xs text-content-muted">{{ t('organization.quotaStartTimeHint') }}</p>
+        </div>
+        <p v-if="quotaGrantDialog.error" class="text-sm text-red-600 dark:text-red-400">
+          {{ quotaGrantDialog.error }}
+        </p>
+      </div>
+      <template #footer>
+        <button type="button" class="btn btn-secondary" @click="closeQuotaGrantDialog">
+          {{ t('common.cancel') }}
+        </button>
+        <button type="button" class="btn btn-primary" :disabled="quotaGrantDialog.saving" @click="submitQuotaGrant">
+          {{ t('common.confirm') }}
+        </button>
+      </template>
+    </BaseDialog>
   </AppLayout>
 </template>
 
@@ -352,6 +488,8 @@ import BaseDialog from '@/components/common/BaseDialog.vue'
 import Pagination from '@/components/common/Pagination.vue'
 import SearchInput from '@/components/common/SearchInput.vue'
 import Select, { type SelectOption } from '@/components/common/Select.vue'
+import OrganizationQuotaRequestsCard from '@/components/user/organization/OrganizationQuotaRequestsCard.vue'
+import OrganizationMyQuotaRequestsCard from '@/components/user/organization/OrganizationMyQuotaRequestsCard.vue'
 import organizationAPI from '@/api/organization'
 import type { OrganizationInvitation, OrganizationMember, OrganizationSummary } from '@/types'
 import { useAppStore } from '@/stores/app'
@@ -359,6 +497,7 @@ import { useClipboard } from '@/composables/useClipboard'
 import { extractApiErrorMessage } from '@/utils/apiError'
 import { formatCurrency, formatDateTime } from '@/utils/format'
 import { previewSpendingSplit } from '@/utils/organizationSpending'
+import { datetimeLocalToISO, toDatetimeLocalValue } from '@/utils/quotaTime'
 
 const { t } = useI18n()
 const appStore = useAppStore()
@@ -369,6 +508,12 @@ const invitations = ref<OrganizationInvitation[]>([])
 const loading = ref(true)
 const creating = ref(false)
 const disablingId = ref<number | null>(null)
+// 先批后加且有待处理时，配额申请块排在成员表上面，避免漏批。
+const quotaSectionAbove = ref(false)
+
+function onQuotaSectionLoaded(summary: { mode: string; hasPending: boolean }): void {
+  quotaSectionAbove.value = summary.mode === 'approve' && summary.hasPending
+}
 // 邀请码限时可重复使用，创建时选有效期；长期有效就不带过期时间。
 const invitationValidity = ref<number>(7)
 const validityOptions = computed<SelectOption[]>(() => [
@@ -389,12 +534,15 @@ const statusFilter = ref('')
 const selectedUserIds = ref<number[]>([])
 const statusUpdatingId = ref<number | null>(null)
 
+// 配额编辑弹窗：不限额 / 固定累计 / 周期 三种模式互斥，切换即生效另一种退出。
 const limitDialog = reactive({
   show: false,
   userId: 0,
   email: '',
-  unlimited: true,
+  mode: 'unlimited' as 'unlimited' | 'fixed' | 'periodic',
   amount: '',
+  periodDays: '',
+  startAt: '',
   error: '',
   saving: false
 })
@@ -402,6 +550,16 @@ const limitDialog = reactive({
 const splitDialog = reactive({
   show: false,
   amount: '',
+  error: '',
+  saving: false
+})
+
+// 批量周期发放：选中成员统一套同一份周期配额。
+const quotaGrantDialog = reactive({
+  show: false,
+  amount: '',
+  periodDays: '',
+  startAt: '',
   error: '',
   saving: false
 })
@@ -559,8 +717,22 @@ function openLimitDialog(member: OrganizationMember): void {
   limitDialog.show = true
   limitDialog.userId = member.user_id
   limitDialog.email = member.email
-  limitDialog.unlimited = member.spending_limit === null
-  limitDialog.amount = member.spending_limit === null ? '' : String(member.spending_limit)
+  if (member.quota) {
+    limitDialog.mode = 'periodic'
+    limitDialog.amount = String(member.quota.amount)
+    limitDialog.periodDays = String(member.quota.period_days)
+    limitDialog.startAt = toDatetimeLocalValue(member.quota.start_at)
+  } else if (member.spending_limit === null) {
+    limitDialog.mode = 'unlimited'
+    limitDialog.amount = ''
+    limitDialog.periodDays = ''
+    limitDialog.startAt = ''
+  } else {
+    limitDialog.mode = 'fixed'
+    limitDialog.amount = String(member.spending_limit)
+    limitDialog.periodDays = ''
+    limitDialog.startAt = ''
+  }
   limitDialog.error = ''
 }
 
@@ -568,17 +740,65 @@ function closeLimitDialog(): void {
   limitDialog.show = false
 }
 
+// 校验周期配额的公共字段；返回 'amount' / 'period' 表示对应字段非法。
+function validatePeriodicInput(
+  amount: string,
+  periodDays: string
+): { amount: number; periodDays: number } | 'amount' | 'period' {
+  const parsedAmount = Number(amount)
+  if (amount === '' || !Number.isFinite(parsedAmount) || parsedAmount < 0) {
+    return 'amount'
+  }
+  const parsedDays = Number(periodDays)
+  if (periodDays === '' || !Number.isInteger(parsedDays) || parsedDays < 1 || parsedDays > 3650) {
+    return 'period'
+  }
+  return { amount: parsedAmount, periodDays: parsedDays }
+}
+
 async function saveLimit(): Promise<void> {
-  let limit: number | null = null
-  if (!limitDialog.unlimited) {
+  if (limitDialog.mode === 'unlimited') {
+    await saveStaticLimit(null)
+    return
+  }
+  if (limitDialog.mode === 'fixed') {
     const parsed = Number(limitDialog.amount)
     if (limitDialog.amount === '' || !Number.isFinite(parsed) || parsed < 0) {
       limitDialog.error = t('organization.invalidAmount')
       return
     }
-    limit = parsed
+    await saveStaticLimit(parsed)
+    return
+  }
+  const periodic = validatePeriodicInput(limitDialog.amount, limitDialog.periodDays)
+  if (periodic === 'amount') {
+    limitDialog.error = t('organization.invalidAmount')
+    return
+  }
+  if (periodic === 'period') {
+    limitDialog.error = t('organization.invalidPeriodDays')
+    return
   }
 
+  limitDialog.saving = true
+  limitDialog.error = ''
+  try {
+    const updated = await organizationAPI.updateOrganizationMemberQuota(limitDialog.userId, {
+      amount: periodic.amount,
+      period_days: periodic.periodDays,
+      start_at: datetimeLocalToISO(limitDialog.startAt)
+    })
+    replaceMember(updated)
+    limitDialog.show = false
+  } catch (error) {
+    limitDialog.error = extractApiErrorMessage(error, t('organization.memberUpdateFailed'))
+  } finally {
+    limitDialog.saving = false
+  }
+}
+
+// 静态两种模式走原接口，后端会同时清掉周期配置。
+async function saveStaticLimit(limit: number | null): Promise<void> {
   limitDialog.saving = true
   limitDialog.error = ''
   try {
@@ -589,6 +809,50 @@ async function saveLimit(): Promise<void> {
     limitDialog.error = extractApiErrorMessage(error, t('organization.memberUpdateFailed'))
   } finally {
     limitDialog.saving = false
+  }
+}
+
+function openQuotaGrantDialog(): void {
+  quotaGrantDialog.show = true
+  quotaGrantDialog.amount = ''
+  quotaGrantDialog.periodDays = ''
+  quotaGrantDialog.startAt = ''
+  quotaGrantDialog.error = ''
+}
+
+function closeQuotaGrantDialog(): void {
+  quotaGrantDialog.show = false
+}
+
+async function submitQuotaGrant(): Promise<void> {
+  const periodic = validatePeriodicInput(quotaGrantDialog.amount, quotaGrantDialog.periodDays)
+  if (periodic === 'amount') {
+    quotaGrantDialog.error = t('organization.invalidAmount')
+    return
+  }
+  if (periodic === 'period') {
+    quotaGrantDialog.error = t('organization.invalidPeriodDays')
+    return
+  }
+
+  quotaGrantDialog.saving = true
+  quotaGrantDialog.error = ''
+  try {
+    const updated = await organizationAPI.batchSetOrganizationMemberQuota(
+      [...selectedUserIds.value],
+      {
+        amount: periodic.amount,
+        period_days: periodic.periodDays,
+        start_at: datetimeLocalToISO(quotaGrantDialog.startAt)
+      }
+    )
+    updated.forEach(replaceMember)
+    quotaGrantDialog.show = false
+    selectedUserIds.value = []
+  } catch (error) {
+    quotaGrantDialog.error = extractApiErrorMessage(error, t('organization.memberUpdateFailed'))
+  } finally {
+    quotaGrantDialog.saving = false
   }
 }
 

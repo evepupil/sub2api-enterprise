@@ -30,6 +30,12 @@ type Organization struct {
 	RestrictPublicGroups bool `json:"restrict_public_groups,omitempty"`
 	// Status holds the value of the "status" field.
 	Status string `json:"status,omitempty"`
+	// QuotaRequestMode holds the value of the "quota_request_mode" field.
+	QuotaRequestMode string `json:"quota_request_mode,omitempty"`
+	// QuotaRequestMin holds the value of the "quota_request_min" field.
+	QuotaRequestMin *float64 `json:"quota_request_min,omitempty"`
+	// QuotaRequestMax holds the value of the "quota_request_max" field.
+	QuotaRequestMax *float64 `json:"quota_request_max,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the OrganizationQuery when eager-loading is set.
 	Edges        OrganizationEdges `json:"edges"`
@@ -107,9 +113,11 @@ func (*Organization) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case organization.FieldRestrictPublicGroups:
 			values[i] = new(sql.NullBool)
+		case organization.FieldQuotaRequestMin, organization.FieldQuotaRequestMax:
+			values[i] = new(sql.NullFloat64)
 		case organization.FieldID, organization.FieldOwnerUserID:
 			values[i] = new(sql.NullInt64)
-		case organization.FieldName, organization.FieldStatus:
+		case organization.FieldName, organization.FieldStatus, organization.FieldQuotaRequestMode:
 			values[i] = new(sql.NullString)
 		case organization.FieldCreatedAt, organization.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -169,6 +177,26 @@ func (_m *Organization) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
 				_m.Status = value.String
+			}
+		case organization.FieldQuotaRequestMode:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field quota_request_mode", values[i])
+			} else if value.Valid {
+				_m.QuotaRequestMode = value.String
+			}
+		case organization.FieldQuotaRequestMin:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field quota_request_min", values[i])
+			} else if value.Valid {
+				_m.QuotaRequestMin = new(float64)
+				*_m.QuotaRequestMin = value.Float64
+			}
+		case organization.FieldQuotaRequestMax:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field quota_request_max", values[i])
+			} else if value.Valid {
+				_m.QuotaRequestMax = new(float64)
+				*_m.QuotaRequestMax = value.Float64
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -248,6 +276,19 @@ func (_m *Organization) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(_m.Status)
+	builder.WriteString(", ")
+	builder.WriteString("quota_request_mode=")
+	builder.WriteString(_m.QuotaRequestMode)
+	builder.WriteString(", ")
+	if v := _m.QuotaRequestMin; v != nil {
+		builder.WriteString("quota_request_min=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.QuotaRequestMax; v != nil {
+		builder.WriteString("quota_request_max=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }

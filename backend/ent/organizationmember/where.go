@@ -90,6 +90,31 @@ func SpendingFrozen(v float64) predicate.OrganizationMember {
 	return predicate.OrganizationMember(sql.FieldEQ(FieldSpendingFrozen, v))
 }
 
+// QuotaAmount applies equality check predicate on the "quota_amount" field. It's identical to QuotaAmountEQ.
+func QuotaAmount(v float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldEQ(FieldQuotaAmount, v))
+}
+
+// QuotaPeriodDays applies equality check predicate on the "quota_period_days" field. It's identical to QuotaPeriodDaysEQ.
+func QuotaPeriodDays(v int) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldEQ(FieldQuotaPeriodDays, v))
+}
+
+// QuotaStartAt applies equality check predicate on the "quota_start_at" field. It's identical to QuotaStartAtEQ.
+func QuotaStartAt(v time.Time) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldEQ(FieldQuotaStartAt, v))
+}
+
+// QuotaCycleStart applies equality check predicate on the "quota_cycle_start" field. It's identical to QuotaCycleStartEQ.
+func QuotaCycleStart(v time.Time) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldEQ(FieldQuotaCycleStart, v))
+}
+
+// QuotaCycleBonus applies equality check predicate on the "quota_cycle_bonus" field. It's identical to QuotaCycleBonusEQ.
+func QuotaCycleBonus(v float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldEQ(FieldQuotaCycleBonus, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.OrganizationMember {
 	return predicate.OrganizationMember(sql.FieldEQ(FieldCreatedAt, v))
@@ -338,6 +363,246 @@ func SpendingFrozenLT(v float64) predicate.OrganizationMember {
 // SpendingFrozenLTE applies the LTE predicate on the "spending_frozen" field.
 func SpendingFrozenLTE(v float64) predicate.OrganizationMember {
 	return predicate.OrganizationMember(sql.FieldLTE(FieldSpendingFrozen, v))
+}
+
+// QuotaAmountEQ applies the EQ predicate on the "quota_amount" field.
+func QuotaAmountEQ(v float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldEQ(FieldQuotaAmount, v))
+}
+
+// QuotaAmountNEQ applies the NEQ predicate on the "quota_amount" field.
+func QuotaAmountNEQ(v float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldNEQ(FieldQuotaAmount, v))
+}
+
+// QuotaAmountIn applies the In predicate on the "quota_amount" field.
+func QuotaAmountIn(vs ...float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldIn(FieldQuotaAmount, vs...))
+}
+
+// QuotaAmountNotIn applies the NotIn predicate on the "quota_amount" field.
+func QuotaAmountNotIn(vs ...float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldNotIn(FieldQuotaAmount, vs...))
+}
+
+// QuotaAmountGT applies the GT predicate on the "quota_amount" field.
+func QuotaAmountGT(v float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldGT(FieldQuotaAmount, v))
+}
+
+// QuotaAmountGTE applies the GTE predicate on the "quota_amount" field.
+func QuotaAmountGTE(v float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldGTE(FieldQuotaAmount, v))
+}
+
+// QuotaAmountLT applies the LT predicate on the "quota_amount" field.
+func QuotaAmountLT(v float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldLT(FieldQuotaAmount, v))
+}
+
+// QuotaAmountLTE applies the LTE predicate on the "quota_amount" field.
+func QuotaAmountLTE(v float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldLTE(FieldQuotaAmount, v))
+}
+
+// QuotaAmountIsNil applies the IsNil predicate on the "quota_amount" field.
+func QuotaAmountIsNil() predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldIsNull(FieldQuotaAmount))
+}
+
+// QuotaAmountNotNil applies the NotNil predicate on the "quota_amount" field.
+func QuotaAmountNotNil() predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldNotNull(FieldQuotaAmount))
+}
+
+// QuotaPeriodDaysEQ applies the EQ predicate on the "quota_period_days" field.
+func QuotaPeriodDaysEQ(v int) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldEQ(FieldQuotaPeriodDays, v))
+}
+
+// QuotaPeriodDaysNEQ applies the NEQ predicate on the "quota_period_days" field.
+func QuotaPeriodDaysNEQ(v int) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldNEQ(FieldQuotaPeriodDays, v))
+}
+
+// QuotaPeriodDaysIn applies the In predicate on the "quota_period_days" field.
+func QuotaPeriodDaysIn(vs ...int) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldIn(FieldQuotaPeriodDays, vs...))
+}
+
+// QuotaPeriodDaysNotIn applies the NotIn predicate on the "quota_period_days" field.
+func QuotaPeriodDaysNotIn(vs ...int) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldNotIn(FieldQuotaPeriodDays, vs...))
+}
+
+// QuotaPeriodDaysGT applies the GT predicate on the "quota_period_days" field.
+func QuotaPeriodDaysGT(v int) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldGT(FieldQuotaPeriodDays, v))
+}
+
+// QuotaPeriodDaysGTE applies the GTE predicate on the "quota_period_days" field.
+func QuotaPeriodDaysGTE(v int) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldGTE(FieldQuotaPeriodDays, v))
+}
+
+// QuotaPeriodDaysLT applies the LT predicate on the "quota_period_days" field.
+func QuotaPeriodDaysLT(v int) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldLT(FieldQuotaPeriodDays, v))
+}
+
+// QuotaPeriodDaysLTE applies the LTE predicate on the "quota_period_days" field.
+func QuotaPeriodDaysLTE(v int) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldLTE(FieldQuotaPeriodDays, v))
+}
+
+// QuotaPeriodDaysIsNil applies the IsNil predicate on the "quota_period_days" field.
+func QuotaPeriodDaysIsNil() predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldIsNull(FieldQuotaPeriodDays))
+}
+
+// QuotaPeriodDaysNotNil applies the NotNil predicate on the "quota_period_days" field.
+func QuotaPeriodDaysNotNil() predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldNotNull(FieldQuotaPeriodDays))
+}
+
+// QuotaStartAtEQ applies the EQ predicate on the "quota_start_at" field.
+func QuotaStartAtEQ(v time.Time) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldEQ(FieldQuotaStartAt, v))
+}
+
+// QuotaStartAtNEQ applies the NEQ predicate on the "quota_start_at" field.
+func QuotaStartAtNEQ(v time.Time) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldNEQ(FieldQuotaStartAt, v))
+}
+
+// QuotaStartAtIn applies the In predicate on the "quota_start_at" field.
+func QuotaStartAtIn(vs ...time.Time) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldIn(FieldQuotaStartAt, vs...))
+}
+
+// QuotaStartAtNotIn applies the NotIn predicate on the "quota_start_at" field.
+func QuotaStartAtNotIn(vs ...time.Time) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldNotIn(FieldQuotaStartAt, vs...))
+}
+
+// QuotaStartAtGT applies the GT predicate on the "quota_start_at" field.
+func QuotaStartAtGT(v time.Time) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldGT(FieldQuotaStartAt, v))
+}
+
+// QuotaStartAtGTE applies the GTE predicate on the "quota_start_at" field.
+func QuotaStartAtGTE(v time.Time) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldGTE(FieldQuotaStartAt, v))
+}
+
+// QuotaStartAtLT applies the LT predicate on the "quota_start_at" field.
+func QuotaStartAtLT(v time.Time) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldLT(FieldQuotaStartAt, v))
+}
+
+// QuotaStartAtLTE applies the LTE predicate on the "quota_start_at" field.
+func QuotaStartAtLTE(v time.Time) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldLTE(FieldQuotaStartAt, v))
+}
+
+// QuotaStartAtIsNil applies the IsNil predicate on the "quota_start_at" field.
+func QuotaStartAtIsNil() predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldIsNull(FieldQuotaStartAt))
+}
+
+// QuotaStartAtNotNil applies the NotNil predicate on the "quota_start_at" field.
+func QuotaStartAtNotNil() predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldNotNull(FieldQuotaStartAt))
+}
+
+// QuotaCycleStartEQ applies the EQ predicate on the "quota_cycle_start" field.
+func QuotaCycleStartEQ(v time.Time) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldEQ(FieldQuotaCycleStart, v))
+}
+
+// QuotaCycleStartNEQ applies the NEQ predicate on the "quota_cycle_start" field.
+func QuotaCycleStartNEQ(v time.Time) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldNEQ(FieldQuotaCycleStart, v))
+}
+
+// QuotaCycleStartIn applies the In predicate on the "quota_cycle_start" field.
+func QuotaCycleStartIn(vs ...time.Time) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldIn(FieldQuotaCycleStart, vs...))
+}
+
+// QuotaCycleStartNotIn applies the NotIn predicate on the "quota_cycle_start" field.
+func QuotaCycleStartNotIn(vs ...time.Time) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldNotIn(FieldQuotaCycleStart, vs...))
+}
+
+// QuotaCycleStartGT applies the GT predicate on the "quota_cycle_start" field.
+func QuotaCycleStartGT(v time.Time) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldGT(FieldQuotaCycleStart, v))
+}
+
+// QuotaCycleStartGTE applies the GTE predicate on the "quota_cycle_start" field.
+func QuotaCycleStartGTE(v time.Time) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldGTE(FieldQuotaCycleStart, v))
+}
+
+// QuotaCycleStartLT applies the LT predicate on the "quota_cycle_start" field.
+func QuotaCycleStartLT(v time.Time) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldLT(FieldQuotaCycleStart, v))
+}
+
+// QuotaCycleStartLTE applies the LTE predicate on the "quota_cycle_start" field.
+func QuotaCycleStartLTE(v time.Time) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldLTE(FieldQuotaCycleStart, v))
+}
+
+// QuotaCycleStartIsNil applies the IsNil predicate on the "quota_cycle_start" field.
+func QuotaCycleStartIsNil() predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldIsNull(FieldQuotaCycleStart))
+}
+
+// QuotaCycleStartNotNil applies the NotNil predicate on the "quota_cycle_start" field.
+func QuotaCycleStartNotNil() predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldNotNull(FieldQuotaCycleStart))
+}
+
+// QuotaCycleBonusEQ applies the EQ predicate on the "quota_cycle_bonus" field.
+func QuotaCycleBonusEQ(v float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldEQ(FieldQuotaCycleBonus, v))
+}
+
+// QuotaCycleBonusNEQ applies the NEQ predicate on the "quota_cycle_bonus" field.
+func QuotaCycleBonusNEQ(v float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldNEQ(FieldQuotaCycleBonus, v))
+}
+
+// QuotaCycleBonusIn applies the In predicate on the "quota_cycle_bonus" field.
+func QuotaCycleBonusIn(vs ...float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldIn(FieldQuotaCycleBonus, vs...))
+}
+
+// QuotaCycleBonusNotIn applies the NotIn predicate on the "quota_cycle_bonus" field.
+func QuotaCycleBonusNotIn(vs ...float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldNotIn(FieldQuotaCycleBonus, vs...))
+}
+
+// QuotaCycleBonusGT applies the GT predicate on the "quota_cycle_bonus" field.
+func QuotaCycleBonusGT(v float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldGT(FieldQuotaCycleBonus, v))
+}
+
+// QuotaCycleBonusGTE applies the GTE predicate on the "quota_cycle_bonus" field.
+func QuotaCycleBonusGTE(v float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldGTE(FieldQuotaCycleBonus, v))
+}
+
+// QuotaCycleBonusLT applies the LT predicate on the "quota_cycle_bonus" field.
+func QuotaCycleBonusLT(v float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldLT(FieldQuotaCycleBonus, v))
+}
+
+// QuotaCycleBonusLTE applies the LTE predicate on the "quota_cycle_bonus" field.
+func QuotaCycleBonusLTE(v float64) predicate.OrganizationMember {
+	return predicate.OrganizationMember(sql.FieldLTE(FieldQuotaCycleBonus, v))
 }
 
 // HasOrganization applies the HasEdge predicate on the "organization" edge.

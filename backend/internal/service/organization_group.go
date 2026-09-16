@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"sort"
+	"time"
 
 	infraerrors "github.com/Wei-Shaw/sub2api/internal/pkg/errors"
 )
@@ -49,6 +50,15 @@ type OrganizationMemberScope struct {
 	RestrictPublicGroups bool
 	AllowedGroupIDs      []int64
 	SpendingLimit        *float64
+	// QuotaAmount 等四个周期配额列。生效上限在 ApplyScopeToUser 里按当前时刻
+	// 解析后填进账号数据，下游（鉴权快照、调用前判断）只见一个生效上限。
+	QuotaAmount     *float64
+	QuotaPeriodDays *int
+	QuotaStartAt    *time.Time
+	QuotaCycleStart *time.Time
+	// QuotaCycleBonus 本期一次性加成（配额申请批准后补当期），周期生效中计入
+	// 生效上限；发放后服务端会清成员的鉴权缓存，让新额度立刻生效。
+	QuotaCycleBonus float64
 	// OwnerBalance 是组织付款账号当前的余额，供鉴权层的余额闸使用。
 	OwnerBalance float64
 	// Disabled 为 true 表示整个组织已被平台停用，全体成员的调用都要拒绝。
@@ -115,9 +125,28 @@ func (s *OrganizationGroupService) ApplyScopeToUser(ctx context.Context, user *U
 		return nil
 	}
 	user.OrganizationPayerUserID = scope.OwnerUserID
-	user.OrganizationSpendingLimit = scope.SpendingLimit
+	user.OrganizationSpendingLimit = resolveScopeEffectiveLimit(scope, time.Now())
 	user.OrganizationPayerBalance = scope.OwnerBalance
 	return nil
+}
+
+// resolveScopeEffectiveLimit 把成员的配额列按当前时刻解析成生效上限：
+// 周期生效中取「每期金额加本期一次性加成」（金额每期相同，换期不需要重建快照；
+// 加成变化时服务端会清缓存）；
+// 没配周期或锚点在未来时取静态上限。锚点从未来跨到已过时，
+// 快照里的静态值最长存活一个快照周期，由预扣路径的数据库判断兜底。
+func resolveScopeEffectiveLimit(scope *OrganizationMemberScope, now time.Time) *float64 {
+	if scope == nil {
+		return nil
+	}
+	state := ResolveMemberQuotaState(
+		scope.QuotaAmount, scope.QuotaPeriodDays, scope.QuotaStartAt, scope.QuotaCycleStart, now,
+	)
+	if state.Mode == QuotaModeActive {
+		limit := QuantizeUsageBillingAmount(*state.Amount + scope.QuotaCycleBonus)
+		return &limit
+	}
+	return scope.SpendingLimit
 }
 
 // MemberUserIDsOfOwnedOrganization 返回该账号作为创建者所拥有组织的全部成员。

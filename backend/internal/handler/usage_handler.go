@@ -585,6 +585,26 @@ func apiKeyDailyUsageRange(days int, userTZ string) (time.Time, time.Time) {
 	return startTime, endTime
 }
 
+// userDashboardStatsResponse 在用户仪表盘概况上附带组织配额块。
+// organization_quota 仅组织普通成员返回（前端据此渲染「组织配额」卡），
+// 个人用户和组织管理员为 null。
+type userDashboardStatsResponse struct {
+	*usagestats.UserDashboardStats
+	OrganizationQuota *userOrganizationQuotaOverview `json:"organization_quota"`
+}
+
+// userOrganizationQuotaOverview 是仪表盘「组织配额」卡的数据块。
+// remaining 为 null 表示不限额；can_request 为 true 时申请按钮才出现。
+type userOrganizationQuotaOverview struct {
+	Remaining     *float64   `json:"remaining"`
+	WindowEnd     *time.Time `json:"window_end"`
+	CanRequest    bool       `json:"can_request"`
+	RequestMode   string     `json:"request_mode"`
+	MinAmount     *float64   `json:"min_amount"`
+	MaxAmount     *float64   `json:"max_amount"`
+	PendingExists bool       `json:"pending_exists"`
+}
+
 // DashboardStats handles getting user dashboard statistics
 // GET /api/v1/usage/dashboard/stats
 func (h *UsageHandler) DashboardStats(c *gin.Context) {
@@ -600,7 +620,26 @@ func (h *UsageHandler) DashboardStats(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, stats)
+	payload := userDashboardStatsResponse{UserDashboardStats: stats}
+	if h.organizationMemberService != nil {
+		overview, err := h.organizationMemberService.GetMyQuotaOverview(c.Request.Context(), subject.UserID)
+		if err != nil {
+			// 配额块拿不到不让整张仪表盘失败；额度闸仍在调用路径上兜底。
+			c.Error(err) //nolint:errcheck // 仅记录日志上下文
+		} else if overview != nil {
+			payload.OrganizationQuota = &userOrganizationQuotaOverview{
+				Remaining:     overview.Remaining,
+				WindowEnd:     overview.WindowEnd,
+				CanRequest:    overview.CanRequest,
+				RequestMode:   overview.RequestMode,
+				MinAmount:     overview.MinAmount,
+				MaxAmount:     overview.MaxAmount,
+				PendingExists: overview.PendingExists,
+			}
+		}
+	}
+
+	response.Success(c, payload)
 }
 
 // DashboardTrend handles getting user usage trend data

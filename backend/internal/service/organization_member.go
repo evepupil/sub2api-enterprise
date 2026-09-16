@@ -53,8 +53,10 @@ var (
 // 与 user_platform_quotas 一致。
 //
 // SpendingUsed 是累计已消费金额，SpendingFrozen 是批量出图等预扣业务占住的金额，
-// 两者都由组织结算在扣费事务里维护。
+// 两者都由组织结算在扣费事务里维护。成员配了生效中的周期配额时，SpendingUsed
+// 表示当期已消费，换期时清零（见 organization_member_quota.go）。
 type OrganizationMember struct {
+	OrganizationID int64
 	UserID         int64
 	Email          string
 	Username       string
@@ -64,20 +66,21 @@ type OrganizationMember struct {
 	SpendingLimit  *float64
 	SpendingUsed   float64
 	SpendingFrozen float64
-	JoinedAt       time.Time
+	// QuotaAmount 等四个周期配额列，非空的 QuotaAmount 表示配了周期配额。
+	QuotaAmount     *float64
+	QuotaPeriodDays *int
+	QuotaStartAt    *time.Time
+	QuotaCycleStart *time.Time
+	// QuotaCycleBonus 本期一次性加成：配额申请批准后只加在当期可花上限上，
+	// 换期或取消周期时清零，不改每期金额。静态模式不使用。
+	QuotaCycleBonus float64
+	JoinedAt        time.Time
 }
 
-// SpendingRemaining 返回剩余额度，等于上限减已消费金额再减已冻结金额。
+// SpendingRemaining 返回剩余额度，等于生效上限减已消费金额再减已冻结金额。
 // 不限额时返回 nil；算出来是负数时返回 0。
 func (m *OrganizationMember) SpendingRemaining() *float64 {
-	if m == nil || m.SpendingLimit == nil {
-		return nil
-	}
-	remaining := QuantizeUsageBillingAmount(*m.SpendingLimit - m.SpendingUsed - m.SpendingFrozen)
-	if remaining < 0 {
-		remaining = 0
-	}
-	return &remaining
+	return m.SpendingRemainingAt(time.Now())
 }
 
 // OrganizationMemberListFilters 限定成员列表的查询条件。组织范围不在这里传，
@@ -93,6 +96,17 @@ type OrganizationMemberSpendingLimit struct {
 	Limit  *float64
 }
 
+// OrganizationMemberQuotaWrite 是一次周期配额写入中的单个成员。
+// Quota 为 nil 表示取消周期回到静态模式；CycleStart 为 nil 表示锚点在未来、
+// 尚未生效；ResetUsed 为 true 时把当期已消费清零（第一期开始）。
+// 两种写入都会清掉本期一次性加成（换一套周期配置等于换一期）。
+type OrganizationMemberQuotaWrite struct {
+	UserID     int64
+	Quota      *PeriodicQuotaInput
+	CycleStart *time.Time
+	ResetUsed  bool
+}
+
 type OrganizationMemberRepository interface {
 	List(
 		ctx context.Context,
@@ -101,17 +115,25 @@ type OrganizationMemberRepository interface {
 		filters OrganizationMemberListFilters,
 	) ([]OrganizationMember, *pagination.PaginationResult, error)
 	Get(ctx context.Context, organizationID int64, userID int64) (*OrganizationMember, error)
-	// SetSpendingLimits 在同一个事务里写入多个成员的上限，全部成功或全部不生效。
+	// SetSpendingLimits 在同一个事务里写入多个成员的上限（静态模式），
+	// 同时清掉各自的周期配额配置。全部成功或全部不生效。
 	SetSpendingLimits(ctx context.Context, organizationID int64, limits []OrganizationMemberSpendingLimit) error
+	// SetPeriodicQuotas 在同一个事务里写入多个成员的周期配额，全部成功或全部不生效。
+	SetPeriodicQuotas(ctx context.Context, organizationID int64, writes []OrganizationMemberQuotaWrite) error
+	// AdvanceDueQuota 在行锁里把到期未推进的成员行推进到当前期，
+	// 返回推进后的当期起点与已消费；无需推进时返回 nil。
+	AdvanceDueQuota(ctx context.Context, userID int64, now time.Time) (*OrganizationMember, error)
 	// ListUserIDs 返回组织全部成员的账号标识，含组织创建者本人。
 	ListUserIDs(ctx context.Context, organizationID int64) ([]int64, error)
 }
 
-// OrganizationMemberService 提供组织管理员对本组织成员的查看、启停和消费上限管理。
+// OrganizationMemberService 提供组织管理员对本组织成员的查看、启停和消费上限管理，
+// 以及成员侧的配额申请（策略配置、提交、审批、流水查询）。
 // 每个入口都先确认调用者是组织创建者，再确认目标成员属于同一组织。
 type OrganizationMemberService struct {
 	organizations *OrganizationService
 	members       OrganizationMemberRepository
+	quotaRequests OrganizationQuotaRequestRepository
 	users         UserRepository
 	authCache     APIKeyAuthCacheInvalidator
 }
@@ -119,12 +141,14 @@ type OrganizationMemberService struct {
 func NewOrganizationMemberService(
 	organizations *OrganizationService,
 	members OrganizationMemberRepository,
+	quotaRequests OrganizationQuotaRequestRepository,
 	users UserRepository,
 	authCache APIKeyAuthCacheInvalidator,
 ) *OrganizationMemberService {
 	return &OrganizationMemberService{
 		organizations: organizations,
 		members:       members,
+		quotaRequests: quotaRequests,
 		users:         users,
 		authCache:     authCache,
 	}
@@ -188,7 +212,13 @@ func (s *OrganizationMemberService) List(
 	default:
 		return nil, nil, ErrOrganizationMemberStatusInvalid
 	}
-	return s.members.List(ctx, summary.ID, params, filters)
+	members, result, err := s.members.List(ctx, summary.ID, params, filters)
+	if err != nil {
+		return nil, nil, err
+	}
+	// 到期未推进的行先推进，管理员看到的当期已用与剩余才是真的。
+	s.AdvanceDueQuotas(ctx, members)
+	return members, result, nil
 }
 
 // MemberUserIDs 返回调用者所属组织的全部成员账号，供组织用量查询限定范围。
@@ -274,6 +304,12 @@ func (s *OrganizationMemberService) UpdateSpendingLimit(
 	}
 	s.invalidateSpendingCaches(ctx, targetUserID)
 	member.SpendingLimit = normalized
+	// 三种模式互斥：改静态上限即退出周期模式，当期加成随之作废。
+	member.QuotaAmount = nil
+	member.QuotaPeriodDays = nil
+	member.QuotaStartAt = nil
+	member.QuotaCycleStart = nil
+	member.QuotaCycleBonus = 0
 	return member, nil
 }
 
@@ -320,6 +356,12 @@ func (s *OrganizationMemberService) SplitSpendingLimit(
 		}
 		share := shares[i]
 		member.SpendingLimit = &share
+		// 均分是静态操作，整批退出周期模式。
+		member.QuotaAmount = nil
+		member.QuotaPeriodDays = nil
+		member.QuotaStartAt = nil
+		member.QuotaCycleStart = nil
+		member.QuotaCycleBonus = 0
 		members = append(members, *member)
 		limits = append(limits, OrganizationMemberSpendingLimit{UserID: userID, Limit: &share})
 	}

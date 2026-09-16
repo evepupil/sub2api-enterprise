@@ -33,6 +33,16 @@ type OrganizationMember struct {
 	SpendingUsed float64 `json:"spending_used,omitempty"`
 	// SpendingFrozen holds the value of the "spending_frozen" field.
 	SpendingFrozen float64 `json:"spending_frozen,omitempty"`
+	// QuotaAmount holds the value of the "quota_amount" field.
+	QuotaAmount *float64 `json:"quota_amount,omitempty"`
+	// QuotaPeriodDays holds the value of the "quota_period_days" field.
+	QuotaPeriodDays *int `json:"quota_period_days,omitempty"`
+	// QuotaStartAt holds the value of the "quota_start_at" field.
+	QuotaStartAt *time.Time `json:"quota_start_at,omitempty"`
+	// QuotaCycleStart holds the value of the "quota_cycle_start" field.
+	QuotaCycleStart *time.Time `json:"quota_cycle_start,omitempty"`
+	// QuotaCycleBonus holds the value of the "quota_cycle_bonus" field.
+	QuotaCycleBonus float64 `json:"quota_cycle_bonus,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the OrganizationMemberQuery when eager-loading is set.
 	Edges        OrganizationMemberEdges `json:"edges"`
@@ -77,11 +87,11 @@ func (*OrganizationMember) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case organizationmember.FieldSpendingLimit, organizationmember.FieldSpendingUsed, organizationmember.FieldSpendingFrozen:
+		case organizationmember.FieldSpendingLimit, organizationmember.FieldSpendingUsed, organizationmember.FieldSpendingFrozen, organizationmember.FieldQuotaAmount, organizationmember.FieldQuotaCycleBonus:
 			values[i] = new(sql.NullFloat64)
-		case organizationmember.FieldID, organizationmember.FieldOrganizationID, organizationmember.FieldUserID:
+		case organizationmember.FieldID, organizationmember.FieldOrganizationID, organizationmember.FieldUserID, organizationmember.FieldQuotaPeriodDays:
 			values[i] = new(sql.NullInt64)
-		case organizationmember.FieldCreatedAt, organizationmember.FieldUpdatedAt:
+		case organizationmember.FieldCreatedAt, organizationmember.FieldUpdatedAt, organizationmember.FieldQuotaStartAt, organizationmember.FieldQuotaCycleStart:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -146,6 +156,40 @@ func (_m *OrganizationMember) assignValues(columns []string, values []any) error
 				return fmt.Errorf("unexpected type %T for field spending_frozen", values[i])
 			} else if value.Valid {
 				_m.SpendingFrozen = value.Float64
+			}
+		case organizationmember.FieldQuotaAmount:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field quota_amount", values[i])
+			} else if value.Valid {
+				_m.QuotaAmount = new(float64)
+				*_m.QuotaAmount = value.Float64
+			}
+		case organizationmember.FieldQuotaPeriodDays:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field quota_period_days", values[i])
+			} else if value.Valid {
+				_m.QuotaPeriodDays = new(int)
+				*_m.QuotaPeriodDays = int(value.Int64)
+			}
+		case organizationmember.FieldQuotaStartAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field quota_start_at", values[i])
+			} else if value.Valid {
+				_m.QuotaStartAt = new(time.Time)
+				*_m.QuotaStartAt = value.Time
+			}
+		case organizationmember.FieldQuotaCycleStart:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field quota_cycle_start", values[i])
+			} else if value.Valid {
+				_m.QuotaCycleStart = new(time.Time)
+				*_m.QuotaCycleStart = value.Time
+			}
+		case organizationmember.FieldQuotaCycleBonus:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field quota_cycle_bonus", values[i])
+			} else if value.Valid {
+				_m.QuotaCycleBonus = value.Float64
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -215,6 +259,29 @@ func (_m *OrganizationMember) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("spending_frozen=")
 	builder.WriteString(fmt.Sprintf("%v", _m.SpendingFrozen))
+	builder.WriteString(", ")
+	if v := _m.QuotaAmount; v != nil {
+		builder.WriteString("quota_amount=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.QuotaPeriodDays; v != nil {
+		builder.WriteString("quota_period_days=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.QuotaStartAt; v != nil {
+		builder.WriteString("quota_start_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.QuotaCycleStart; v != nil {
+		builder.WriteString("quota_cycle_start=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("quota_cycle_bonus=")
+	builder.WriteString(fmt.Sprintf("%v", _m.QuotaCycleBonus))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -34,6 +34,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/organization"
 	"github.com/Wei-Shaw/sub2api/ent/organizationallowedgroup"
 	"github.com/Wei-Shaw/sub2api/ent/organizationmember"
+	"github.com/Wei-Shaw/sub2api/ent/organizationquotarequest"
 	"github.com/Wei-Shaw/sub2api/ent/paymentauditlog"
 	"github.com/Wei-Shaw/sub2api/ent/paymentorder"
 	"github.com/Wei-Shaw/sub2api/ent/paymentproviderinstance"
@@ -89,6 +90,7 @@ const (
 	TypeOrganization                  = "Organization"
 	TypeOrganizationAllowedGroup      = "OrganizationAllowedGroup"
 	TypeOrganizationMember            = "OrganizationMember"
+	TypeOrganizationQuotaRequest      = "OrganizationQuotaRequest"
 	TypePaymentAuditLog               = "PaymentAuditLog"
 	TypePaymentOrder                  = "PaymentOrder"
 	TypePaymentProviderInstance       = "PaymentProviderInstance"
@@ -29656,6 +29658,11 @@ type OrganizationMutation struct {
 	name                   *string
 	restrict_public_groups *bool
 	status                 *string
+	quota_request_mode     *string
+	quota_request_min      *float64
+	addquota_request_min   *float64
+	quota_request_max      *float64
+	addquota_request_max   *float64
 	clearedFields          map[string]struct{}
 	owner                  *int64
 	clearedowner           bool
@@ -29987,6 +29994,182 @@ func (m *OrganizationMutation) ResetStatus() {
 	m.status = nil
 }
 
+// SetQuotaRequestMode sets the "quota_request_mode" field.
+func (m *OrganizationMutation) SetQuotaRequestMode(s string) {
+	m.quota_request_mode = &s
+}
+
+// QuotaRequestMode returns the value of the "quota_request_mode" field in the mutation.
+func (m *OrganizationMutation) QuotaRequestMode() (r string, exists bool) {
+	v := m.quota_request_mode
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldQuotaRequestMode returns the old "quota_request_mode" field's value of the Organization entity.
+// If the Organization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrganizationMutation) OldQuotaRequestMode(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldQuotaRequestMode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldQuotaRequestMode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldQuotaRequestMode: %w", err)
+	}
+	return oldValue.QuotaRequestMode, nil
+}
+
+// ResetQuotaRequestMode resets all changes to the "quota_request_mode" field.
+func (m *OrganizationMutation) ResetQuotaRequestMode() {
+	m.quota_request_mode = nil
+}
+
+// SetQuotaRequestMin sets the "quota_request_min" field.
+func (m *OrganizationMutation) SetQuotaRequestMin(f float64) {
+	m.quota_request_min = &f
+	m.addquota_request_min = nil
+}
+
+// QuotaRequestMin returns the value of the "quota_request_min" field in the mutation.
+func (m *OrganizationMutation) QuotaRequestMin() (r float64, exists bool) {
+	v := m.quota_request_min
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldQuotaRequestMin returns the old "quota_request_min" field's value of the Organization entity.
+// If the Organization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrganizationMutation) OldQuotaRequestMin(ctx context.Context) (v *float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldQuotaRequestMin is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldQuotaRequestMin requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldQuotaRequestMin: %w", err)
+	}
+	return oldValue.QuotaRequestMin, nil
+}
+
+// AddQuotaRequestMin adds f to the "quota_request_min" field.
+func (m *OrganizationMutation) AddQuotaRequestMin(f float64) {
+	if m.addquota_request_min != nil {
+		*m.addquota_request_min += f
+	} else {
+		m.addquota_request_min = &f
+	}
+}
+
+// AddedQuotaRequestMin returns the value that was added to the "quota_request_min" field in this mutation.
+func (m *OrganizationMutation) AddedQuotaRequestMin() (r float64, exists bool) {
+	v := m.addquota_request_min
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearQuotaRequestMin clears the value of the "quota_request_min" field.
+func (m *OrganizationMutation) ClearQuotaRequestMin() {
+	m.quota_request_min = nil
+	m.addquota_request_min = nil
+	m.clearedFields[organization.FieldQuotaRequestMin] = struct{}{}
+}
+
+// QuotaRequestMinCleared returns if the "quota_request_min" field was cleared in this mutation.
+func (m *OrganizationMutation) QuotaRequestMinCleared() bool {
+	_, ok := m.clearedFields[organization.FieldQuotaRequestMin]
+	return ok
+}
+
+// ResetQuotaRequestMin resets all changes to the "quota_request_min" field.
+func (m *OrganizationMutation) ResetQuotaRequestMin() {
+	m.quota_request_min = nil
+	m.addquota_request_min = nil
+	delete(m.clearedFields, organization.FieldQuotaRequestMin)
+}
+
+// SetQuotaRequestMax sets the "quota_request_max" field.
+func (m *OrganizationMutation) SetQuotaRequestMax(f float64) {
+	m.quota_request_max = &f
+	m.addquota_request_max = nil
+}
+
+// QuotaRequestMax returns the value of the "quota_request_max" field in the mutation.
+func (m *OrganizationMutation) QuotaRequestMax() (r float64, exists bool) {
+	v := m.quota_request_max
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldQuotaRequestMax returns the old "quota_request_max" field's value of the Organization entity.
+// If the Organization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrganizationMutation) OldQuotaRequestMax(ctx context.Context) (v *float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldQuotaRequestMax is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldQuotaRequestMax requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldQuotaRequestMax: %w", err)
+	}
+	return oldValue.QuotaRequestMax, nil
+}
+
+// AddQuotaRequestMax adds f to the "quota_request_max" field.
+func (m *OrganizationMutation) AddQuotaRequestMax(f float64) {
+	if m.addquota_request_max != nil {
+		*m.addquota_request_max += f
+	} else {
+		m.addquota_request_max = &f
+	}
+}
+
+// AddedQuotaRequestMax returns the value that was added to the "quota_request_max" field in this mutation.
+func (m *OrganizationMutation) AddedQuotaRequestMax() (r float64, exists bool) {
+	v := m.addquota_request_max
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearQuotaRequestMax clears the value of the "quota_request_max" field.
+func (m *OrganizationMutation) ClearQuotaRequestMax() {
+	m.quota_request_max = nil
+	m.addquota_request_max = nil
+	m.clearedFields[organization.FieldQuotaRequestMax] = struct{}{}
+}
+
+// QuotaRequestMaxCleared returns if the "quota_request_max" field was cleared in this mutation.
+func (m *OrganizationMutation) QuotaRequestMaxCleared() bool {
+	_, ok := m.clearedFields[organization.FieldQuotaRequestMax]
+	return ok
+}
+
+// ResetQuotaRequestMax resets all changes to the "quota_request_max" field.
+func (m *OrganizationMutation) ResetQuotaRequestMax() {
+	m.quota_request_max = nil
+	m.addquota_request_max = nil
+	delete(m.clearedFields, organization.FieldQuotaRequestMax)
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by id.
 func (m *OrganizationMutation) SetOwnerID(id int64) {
 	m.owner = &id
@@ -30223,7 +30406,7 @@ func (m *OrganizationMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *OrganizationMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 9)
 	if m.created_at != nil {
 		fields = append(fields, organization.FieldCreatedAt)
 	}
@@ -30241,6 +30424,15 @@ func (m *OrganizationMutation) Fields() []string {
 	}
 	if m.status != nil {
 		fields = append(fields, organization.FieldStatus)
+	}
+	if m.quota_request_mode != nil {
+		fields = append(fields, organization.FieldQuotaRequestMode)
+	}
+	if m.quota_request_min != nil {
+		fields = append(fields, organization.FieldQuotaRequestMin)
+	}
+	if m.quota_request_max != nil {
+		fields = append(fields, organization.FieldQuotaRequestMax)
 	}
 	return fields
 }
@@ -30262,6 +30454,12 @@ func (m *OrganizationMutation) Field(name string) (ent.Value, bool) {
 		return m.RestrictPublicGroups()
 	case organization.FieldStatus:
 		return m.Status()
+	case organization.FieldQuotaRequestMode:
+		return m.QuotaRequestMode()
+	case organization.FieldQuotaRequestMin:
+		return m.QuotaRequestMin()
+	case organization.FieldQuotaRequestMax:
+		return m.QuotaRequestMax()
 	}
 	return nil, false
 }
@@ -30283,6 +30481,12 @@ func (m *OrganizationMutation) OldField(ctx context.Context, name string) (ent.V
 		return m.OldRestrictPublicGroups(ctx)
 	case organization.FieldStatus:
 		return m.OldStatus(ctx)
+	case organization.FieldQuotaRequestMode:
+		return m.OldQuotaRequestMode(ctx)
+	case organization.FieldQuotaRequestMin:
+		return m.OldQuotaRequestMin(ctx)
+	case organization.FieldQuotaRequestMax:
+		return m.OldQuotaRequestMax(ctx)
 	}
 	return nil, fmt.Errorf("unknown Organization field %s", name)
 }
@@ -30334,6 +30538,27 @@ func (m *OrganizationMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetStatus(v)
 		return nil
+	case organization.FieldQuotaRequestMode:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetQuotaRequestMode(v)
+		return nil
+	case organization.FieldQuotaRequestMin:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetQuotaRequestMin(v)
+		return nil
+	case organization.FieldQuotaRequestMax:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetQuotaRequestMax(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Organization field %s", name)
 }
@@ -30342,6 +30567,12 @@ func (m *OrganizationMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *OrganizationMutation) AddedFields() []string {
 	var fields []string
+	if m.addquota_request_min != nil {
+		fields = append(fields, organization.FieldQuotaRequestMin)
+	}
+	if m.addquota_request_max != nil {
+		fields = append(fields, organization.FieldQuotaRequestMax)
+	}
 	return fields
 }
 
@@ -30350,6 +30581,10 @@ func (m *OrganizationMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *OrganizationMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
+	case organization.FieldQuotaRequestMin:
+		return m.AddedQuotaRequestMin()
+	case organization.FieldQuotaRequestMax:
+		return m.AddedQuotaRequestMax()
 	}
 	return nil, false
 }
@@ -30359,6 +30594,20 @@ func (m *OrganizationMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *OrganizationMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case organization.FieldQuotaRequestMin:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddQuotaRequestMin(v)
+		return nil
+	case organization.FieldQuotaRequestMax:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddQuotaRequestMax(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Organization numeric field %s", name)
 }
@@ -30366,7 +30615,14 @@ func (m *OrganizationMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *OrganizationMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(organization.FieldQuotaRequestMin) {
+		fields = append(fields, organization.FieldQuotaRequestMin)
+	}
+	if m.FieldCleared(organization.FieldQuotaRequestMax) {
+		fields = append(fields, organization.FieldQuotaRequestMax)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -30379,6 +30635,14 @@ func (m *OrganizationMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *OrganizationMutation) ClearField(name string) error {
+	switch name {
+	case organization.FieldQuotaRequestMin:
+		m.ClearQuotaRequestMin()
+		return nil
+	case organization.FieldQuotaRequestMax:
+		m.ClearQuotaRequestMax()
+		return nil
+	}
 	return fmt.Errorf("unknown Organization nullable field %s", name)
 }
 
@@ -30403,6 +30667,15 @@ func (m *OrganizationMutation) ResetField(name string) error {
 		return nil
 	case organization.FieldStatus:
 		m.ResetStatus()
+		return nil
+	case organization.FieldQuotaRequestMode:
+		m.ResetQuotaRequestMode()
+		return nil
+	case organization.FieldQuotaRequestMin:
+		m.ResetQuotaRequestMin()
+		return nil
+	case organization.FieldQuotaRequestMax:
+		m.ResetQuotaRequestMax()
 		return nil
 	}
 	return fmt.Errorf("unknown Organization field %s", name)
@@ -30982,25 +31255,33 @@ func (m *OrganizationAllowedGroupMutation) ResetEdge(name string) error {
 // OrganizationMemberMutation represents an operation that mutates the OrganizationMember nodes in the graph.
 type OrganizationMemberMutation struct {
 	config
-	op                  Op
-	typ                 string
-	id                  *int64
-	created_at          *time.Time
-	updated_at          *time.Time
-	spending_limit      *float64
-	addspending_limit   *float64
-	spending_used       *float64
-	addspending_used    *float64
-	spending_frozen     *float64
-	addspending_frozen  *float64
-	clearedFields       map[string]struct{}
-	organization        *int64
-	clearedorganization bool
-	user                *int64
-	cleareduser         bool
-	done                bool
-	oldValue            func(context.Context) (*OrganizationMember, error)
-	predicates          []predicate.OrganizationMember
+	op                   Op
+	typ                  string
+	id                   *int64
+	created_at           *time.Time
+	updated_at           *time.Time
+	spending_limit       *float64
+	addspending_limit    *float64
+	spending_used        *float64
+	addspending_used     *float64
+	spending_frozen      *float64
+	addspending_frozen   *float64
+	quota_amount         *float64
+	addquota_amount      *float64
+	quota_period_days    *int
+	addquota_period_days *int
+	quota_start_at       *time.Time
+	quota_cycle_start    *time.Time
+	quota_cycle_bonus    *float64
+	addquota_cycle_bonus *float64
+	clearedFields        map[string]struct{}
+	organization         *int64
+	clearedorganization  bool
+	user                 *int64
+	cleareduser          bool
+	done                 bool
+	oldValue             func(context.Context) (*OrganizationMember, error)
+	predicates           []predicate.OrganizationMember
 }
 
 var _ ent.Mutation = (*OrganizationMemberMutation)(nil)
@@ -31427,6 +31708,300 @@ func (m *OrganizationMemberMutation) ResetSpendingFrozen() {
 	m.addspending_frozen = nil
 }
 
+// SetQuotaAmount sets the "quota_amount" field.
+func (m *OrganizationMemberMutation) SetQuotaAmount(f float64) {
+	m.quota_amount = &f
+	m.addquota_amount = nil
+}
+
+// QuotaAmount returns the value of the "quota_amount" field in the mutation.
+func (m *OrganizationMemberMutation) QuotaAmount() (r float64, exists bool) {
+	v := m.quota_amount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldQuotaAmount returns the old "quota_amount" field's value of the OrganizationMember entity.
+// If the OrganizationMember object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrganizationMemberMutation) OldQuotaAmount(ctx context.Context) (v *float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldQuotaAmount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldQuotaAmount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldQuotaAmount: %w", err)
+	}
+	return oldValue.QuotaAmount, nil
+}
+
+// AddQuotaAmount adds f to the "quota_amount" field.
+func (m *OrganizationMemberMutation) AddQuotaAmount(f float64) {
+	if m.addquota_amount != nil {
+		*m.addquota_amount += f
+	} else {
+		m.addquota_amount = &f
+	}
+}
+
+// AddedQuotaAmount returns the value that was added to the "quota_amount" field in this mutation.
+func (m *OrganizationMemberMutation) AddedQuotaAmount() (r float64, exists bool) {
+	v := m.addquota_amount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearQuotaAmount clears the value of the "quota_amount" field.
+func (m *OrganizationMemberMutation) ClearQuotaAmount() {
+	m.quota_amount = nil
+	m.addquota_amount = nil
+	m.clearedFields[organizationmember.FieldQuotaAmount] = struct{}{}
+}
+
+// QuotaAmountCleared returns if the "quota_amount" field was cleared in this mutation.
+func (m *OrganizationMemberMutation) QuotaAmountCleared() bool {
+	_, ok := m.clearedFields[organizationmember.FieldQuotaAmount]
+	return ok
+}
+
+// ResetQuotaAmount resets all changes to the "quota_amount" field.
+func (m *OrganizationMemberMutation) ResetQuotaAmount() {
+	m.quota_amount = nil
+	m.addquota_amount = nil
+	delete(m.clearedFields, organizationmember.FieldQuotaAmount)
+}
+
+// SetQuotaPeriodDays sets the "quota_period_days" field.
+func (m *OrganizationMemberMutation) SetQuotaPeriodDays(i int) {
+	m.quota_period_days = &i
+	m.addquota_period_days = nil
+}
+
+// QuotaPeriodDays returns the value of the "quota_period_days" field in the mutation.
+func (m *OrganizationMemberMutation) QuotaPeriodDays() (r int, exists bool) {
+	v := m.quota_period_days
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldQuotaPeriodDays returns the old "quota_period_days" field's value of the OrganizationMember entity.
+// If the OrganizationMember object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrganizationMemberMutation) OldQuotaPeriodDays(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldQuotaPeriodDays is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldQuotaPeriodDays requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldQuotaPeriodDays: %w", err)
+	}
+	return oldValue.QuotaPeriodDays, nil
+}
+
+// AddQuotaPeriodDays adds i to the "quota_period_days" field.
+func (m *OrganizationMemberMutation) AddQuotaPeriodDays(i int) {
+	if m.addquota_period_days != nil {
+		*m.addquota_period_days += i
+	} else {
+		m.addquota_period_days = &i
+	}
+}
+
+// AddedQuotaPeriodDays returns the value that was added to the "quota_period_days" field in this mutation.
+func (m *OrganizationMemberMutation) AddedQuotaPeriodDays() (r int, exists bool) {
+	v := m.addquota_period_days
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearQuotaPeriodDays clears the value of the "quota_period_days" field.
+func (m *OrganizationMemberMutation) ClearQuotaPeriodDays() {
+	m.quota_period_days = nil
+	m.addquota_period_days = nil
+	m.clearedFields[organizationmember.FieldQuotaPeriodDays] = struct{}{}
+}
+
+// QuotaPeriodDaysCleared returns if the "quota_period_days" field was cleared in this mutation.
+func (m *OrganizationMemberMutation) QuotaPeriodDaysCleared() bool {
+	_, ok := m.clearedFields[organizationmember.FieldQuotaPeriodDays]
+	return ok
+}
+
+// ResetQuotaPeriodDays resets all changes to the "quota_period_days" field.
+func (m *OrganizationMemberMutation) ResetQuotaPeriodDays() {
+	m.quota_period_days = nil
+	m.addquota_period_days = nil
+	delete(m.clearedFields, organizationmember.FieldQuotaPeriodDays)
+}
+
+// SetQuotaStartAt sets the "quota_start_at" field.
+func (m *OrganizationMemberMutation) SetQuotaStartAt(t time.Time) {
+	m.quota_start_at = &t
+}
+
+// QuotaStartAt returns the value of the "quota_start_at" field in the mutation.
+func (m *OrganizationMemberMutation) QuotaStartAt() (r time.Time, exists bool) {
+	v := m.quota_start_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldQuotaStartAt returns the old "quota_start_at" field's value of the OrganizationMember entity.
+// If the OrganizationMember object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrganizationMemberMutation) OldQuotaStartAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldQuotaStartAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldQuotaStartAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldQuotaStartAt: %w", err)
+	}
+	return oldValue.QuotaStartAt, nil
+}
+
+// ClearQuotaStartAt clears the value of the "quota_start_at" field.
+func (m *OrganizationMemberMutation) ClearQuotaStartAt() {
+	m.quota_start_at = nil
+	m.clearedFields[organizationmember.FieldQuotaStartAt] = struct{}{}
+}
+
+// QuotaStartAtCleared returns if the "quota_start_at" field was cleared in this mutation.
+func (m *OrganizationMemberMutation) QuotaStartAtCleared() bool {
+	_, ok := m.clearedFields[organizationmember.FieldQuotaStartAt]
+	return ok
+}
+
+// ResetQuotaStartAt resets all changes to the "quota_start_at" field.
+func (m *OrganizationMemberMutation) ResetQuotaStartAt() {
+	m.quota_start_at = nil
+	delete(m.clearedFields, organizationmember.FieldQuotaStartAt)
+}
+
+// SetQuotaCycleStart sets the "quota_cycle_start" field.
+func (m *OrganizationMemberMutation) SetQuotaCycleStart(t time.Time) {
+	m.quota_cycle_start = &t
+}
+
+// QuotaCycleStart returns the value of the "quota_cycle_start" field in the mutation.
+func (m *OrganizationMemberMutation) QuotaCycleStart() (r time.Time, exists bool) {
+	v := m.quota_cycle_start
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldQuotaCycleStart returns the old "quota_cycle_start" field's value of the OrganizationMember entity.
+// If the OrganizationMember object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrganizationMemberMutation) OldQuotaCycleStart(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldQuotaCycleStart is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldQuotaCycleStart requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldQuotaCycleStart: %w", err)
+	}
+	return oldValue.QuotaCycleStart, nil
+}
+
+// ClearQuotaCycleStart clears the value of the "quota_cycle_start" field.
+func (m *OrganizationMemberMutation) ClearQuotaCycleStart() {
+	m.quota_cycle_start = nil
+	m.clearedFields[organizationmember.FieldQuotaCycleStart] = struct{}{}
+}
+
+// QuotaCycleStartCleared returns if the "quota_cycle_start" field was cleared in this mutation.
+func (m *OrganizationMemberMutation) QuotaCycleStartCleared() bool {
+	_, ok := m.clearedFields[organizationmember.FieldQuotaCycleStart]
+	return ok
+}
+
+// ResetQuotaCycleStart resets all changes to the "quota_cycle_start" field.
+func (m *OrganizationMemberMutation) ResetQuotaCycleStart() {
+	m.quota_cycle_start = nil
+	delete(m.clearedFields, organizationmember.FieldQuotaCycleStart)
+}
+
+// SetQuotaCycleBonus sets the "quota_cycle_bonus" field.
+func (m *OrganizationMemberMutation) SetQuotaCycleBonus(f float64) {
+	m.quota_cycle_bonus = &f
+	m.addquota_cycle_bonus = nil
+}
+
+// QuotaCycleBonus returns the value of the "quota_cycle_bonus" field in the mutation.
+func (m *OrganizationMemberMutation) QuotaCycleBonus() (r float64, exists bool) {
+	v := m.quota_cycle_bonus
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldQuotaCycleBonus returns the old "quota_cycle_bonus" field's value of the OrganizationMember entity.
+// If the OrganizationMember object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrganizationMemberMutation) OldQuotaCycleBonus(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldQuotaCycleBonus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldQuotaCycleBonus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldQuotaCycleBonus: %w", err)
+	}
+	return oldValue.QuotaCycleBonus, nil
+}
+
+// AddQuotaCycleBonus adds f to the "quota_cycle_bonus" field.
+func (m *OrganizationMemberMutation) AddQuotaCycleBonus(f float64) {
+	if m.addquota_cycle_bonus != nil {
+		*m.addquota_cycle_bonus += f
+	} else {
+		m.addquota_cycle_bonus = &f
+	}
+}
+
+// AddedQuotaCycleBonus returns the value that was added to the "quota_cycle_bonus" field in this mutation.
+func (m *OrganizationMemberMutation) AddedQuotaCycleBonus() (r float64, exists bool) {
+	v := m.addquota_cycle_bonus
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetQuotaCycleBonus resets all changes to the "quota_cycle_bonus" field.
+func (m *OrganizationMemberMutation) ResetQuotaCycleBonus() {
+	m.quota_cycle_bonus = nil
+	m.addquota_cycle_bonus = nil
+}
+
 // ClearOrganization clears the "organization" edge to the Organization entity.
 func (m *OrganizationMemberMutation) ClearOrganization() {
 	m.clearedorganization = true
@@ -31515,7 +32090,7 @@ func (m *OrganizationMemberMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *OrganizationMemberMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 12)
 	if m.created_at != nil {
 		fields = append(fields, organizationmember.FieldCreatedAt)
 	}
@@ -31536,6 +32111,21 @@ func (m *OrganizationMemberMutation) Fields() []string {
 	}
 	if m.spending_frozen != nil {
 		fields = append(fields, organizationmember.FieldSpendingFrozen)
+	}
+	if m.quota_amount != nil {
+		fields = append(fields, organizationmember.FieldQuotaAmount)
+	}
+	if m.quota_period_days != nil {
+		fields = append(fields, organizationmember.FieldQuotaPeriodDays)
+	}
+	if m.quota_start_at != nil {
+		fields = append(fields, organizationmember.FieldQuotaStartAt)
+	}
+	if m.quota_cycle_start != nil {
+		fields = append(fields, organizationmember.FieldQuotaCycleStart)
+	}
+	if m.quota_cycle_bonus != nil {
+		fields = append(fields, organizationmember.FieldQuotaCycleBonus)
 	}
 	return fields
 }
@@ -31559,6 +32149,16 @@ func (m *OrganizationMemberMutation) Field(name string) (ent.Value, bool) {
 		return m.SpendingUsed()
 	case organizationmember.FieldSpendingFrozen:
 		return m.SpendingFrozen()
+	case organizationmember.FieldQuotaAmount:
+		return m.QuotaAmount()
+	case organizationmember.FieldQuotaPeriodDays:
+		return m.QuotaPeriodDays()
+	case organizationmember.FieldQuotaStartAt:
+		return m.QuotaStartAt()
+	case organizationmember.FieldQuotaCycleStart:
+		return m.QuotaCycleStart()
+	case organizationmember.FieldQuotaCycleBonus:
+		return m.QuotaCycleBonus()
 	}
 	return nil, false
 }
@@ -31582,6 +32182,16 @@ func (m *OrganizationMemberMutation) OldField(ctx context.Context, name string) 
 		return m.OldSpendingUsed(ctx)
 	case organizationmember.FieldSpendingFrozen:
 		return m.OldSpendingFrozen(ctx)
+	case organizationmember.FieldQuotaAmount:
+		return m.OldQuotaAmount(ctx)
+	case organizationmember.FieldQuotaPeriodDays:
+		return m.OldQuotaPeriodDays(ctx)
+	case organizationmember.FieldQuotaStartAt:
+		return m.OldQuotaStartAt(ctx)
+	case organizationmember.FieldQuotaCycleStart:
+		return m.OldQuotaCycleStart(ctx)
+	case organizationmember.FieldQuotaCycleBonus:
+		return m.OldQuotaCycleBonus(ctx)
 	}
 	return nil, fmt.Errorf("unknown OrganizationMember field %s", name)
 }
@@ -31640,6 +32250,41 @@ func (m *OrganizationMemberMutation) SetField(name string, value ent.Value) erro
 		}
 		m.SetSpendingFrozen(v)
 		return nil
+	case organizationmember.FieldQuotaAmount:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetQuotaAmount(v)
+		return nil
+	case organizationmember.FieldQuotaPeriodDays:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetQuotaPeriodDays(v)
+		return nil
+	case organizationmember.FieldQuotaStartAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetQuotaStartAt(v)
+		return nil
+	case organizationmember.FieldQuotaCycleStart:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetQuotaCycleStart(v)
+		return nil
+	case organizationmember.FieldQuotaCycleBonus:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetQuotaCycleBonus(v)
+		return nil
 	}
 	return fmt.Errorf("unknown OrganizationMember field %s", name)
 }
@@ -31657,6 +32302,15 @@ func (m *OrganizationMemberMutation) AddedFields() []string {
 	if m.addspending_frozen != nil {
 		fields = append(fields, organizationmember.FieldSpendingFrozen)
 	}
+	if m.addquota_amount != nil {
+		fields = append(fields, organizationmember.FieldQuotaAmount)
+	}
+	if m.addquota_period_days != nil {
+		fields = append(fields, organizationmember.FieldQuotaPeriodDays)
+	}
+	if m.addquota_cycle_bonus != nil {
+		fields = append(fields, organizationmember.FieldQuotaCycleBonus)
+	}
 	return fields
 }
 
@@ -31671,6 +32325,12 @@ func (m *OrganizationMemberMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedSpendingUsed()
 	case organizationmember.FieldSpendingFrozen:
 		return m.AddedSpendingFrozen()
+	case organizationmember.FieldQuotaAmount:
+		return m.AddedQuotaAmount()
+	case organizationmember.FieldQuotaPeriodDays:
+		return m.AddedQuotaPeriodDays()
+	case organizationmember.FieldQuotaCycleBonus:
+		return m.AddedQuotaCycleBonus()
 	}
 	return nil, false
 }
@@ -31701,6 +32361,27 @@ func (m *OrganizationMemberMutation) AddField(name string, value ent.Value) erro
 		}
 		m.AddSpendingFrozen(v)
 		return nil
+	case organizationmember.FieldQuotaAmount:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddQuotaAmount(v)
+		return nil
+	case organizationmember.FieldQuotaPeriodDays:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddQuotaPeriodDays(v)
+		return nil
+	case organizationmember.FieldQuotaCycleBonus:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddQuotaCycleBonus(v)
+		return nil
 	}
 	return fmt.Errorf("unknown OrganizationMember numeric field %s", name)
 }
@@ -31711,6 +32392,18 @@ func (m *OrganizationMemberMutation) ClearedFields() []string {
 	var fields []string
 	if m.FieldCleared(organizationmember.FieldSpendingLimit) {
 		fields = append(fields, organizationmember.FieldSpendingLimit)
+	}
+	if m.FieldCleared(organizationmember.FieldQuotaAmount) {
+		fields = append(fields, organizationmember.FieldQuotaAmount)
+	}
+	if m.FieldCleared(organizationmember.FieldQuotaPeriodDays) {
+		fields = append(fields, organizationmember.FieldQuotaPeriodDays)
+	}
+	if m.FieldCleared(organizationmember.FieldQuotaStartAt) {
+		fields = append(fields, organizationmember.FieldQuotaStartAt)
+	}
+	if m.FieldCleared(organizationmember.FieldQuotaCycleStart) {
+		fields = append(fields, organizationmember.FieldQuotaCycleStart)
 	}
 	return fields
 }
@@ -31728,6 +32421,18 @@ func (m *OrganizationMemberMutation) ClearField(name string) error {
 	switch name {
 	case organizationmember.FieldSpendingLimit:
 		m.ClearSpendingLimit()
+		return nil
+	case organizationmember.FieldQuotaAmount:
+		m.ClearQuotaAmount()
+		return nil
+	case organizationmember.FieldQuotaPeriodDays:
+		m.ClearQuotaPeriodDays()
+		return nil
+	case organizationmember.FieldQuotaStartAt:
+		m.ClearQuotaStartAt()
+		return nil
+	case organizationmember.FieldQuotaCycleStart:
+		m.ClearQuotaCycleStart()
 		return nil
 	}
 	return fmt.Errorf("unknown OrganizationMember nullable field %s", name)
@@ -31757,6 +32462,21 @@ func (m *OrganizationMemberMutation) ResetField(name string) error {
 		return nil
 	case organizationmember.FieldSpendingFrozen:
 		m.ResetSpendingFrozen()
+		return nil
+	case organizationmember.FieldQuotaAmount:
+		m.ResetQuotaAmount()
+		return nil
+	case organizationmember.FieldQuotaPeriodDays:
+		m.ResetQuotaPeriodDays()
+		return nil
+	case organizationmember.FieldQuotaStartAt:
+		m.ResetQuotaStartAt()
+		return nil
+	case organizationmember.FieldQuotaCycleStart:
+		m.ResetQuotaCycleStart()
+		return nil
+	case organizationmember.FieldQuotaCycleBonus:
+		m.ResetQuotaCycleBonus()
 		return nil
 	}
 	return fmt.Errorf("unknown OrganizationMember field %s", name)
@@ -31852,6 +32572,1461 @@ func (m *OrganizationMemberMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown OrganizationMember edge %s", name)
+}
+
+// OrganizationQuotaRequestMutation represents an operation that mutates the OrganizationQuotaRequest nodes in the graph.
+type OrganizationQuotaRequestMutation struct {
+	config
+	op                  Op
+	typ                 string
+	id                  *int64
+	created_at          *time.Time
+	updated_at          *time.Time
+	organization_id     *int64
+	addorganization_id  *int64
+	user_id             *int64
+	adduser_id          *int64
+	amount              *float64
+	addamount           *float64
+	reason              *string
+	status              *string
+	grant_source        *string
+	granted_amount      *float64
+	addgranted_amount   *float64
+	snapshot_mode       *string
+	snapshot_limit      *float64
+	addsnapshot_limit   *float64
+	snapshot_used       *float64
+	addsnapshot_used    *float64
+	reviewer_user_id    *int64
+	addreviewer_user_id *int64
+	reviewed_at         *time.Time
+	review_note         *string
+	clearedFields       map[string]struct{}
+	done                bool
+	oldValue            func(context.Context) (*OrganizationQuotaRequest, error)
+	predicates          []predicate.OrganizationQuotaRequest
+}
+
+var _ ent.Mutation = (*OrganizationQuotaRequestMutation)(nil)
+
+// organizationquotarequestOption allows management of the mutation configuration using functional options.
+type organizationquotarequestOption func(*OrganizationQuotaRequestMutation)
+
+// newOrganizationQuotaRequestMutation creates new mutation for the OrganizationQuotaRequest entity.
+func newOrganizationQuotaRequestMutation(c config, op Op, opts ...organizationquotarequestOption) *OrganizationQuotaRequestMutation {
+	m := &OrganizationQuotaRequestMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeOrganizationQuotaRequest,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withOrganizationQuotaRequestID sets the ID field of the mutation.
+func withOrganizationQuotaRequestID(id int64) organizationquotarequestOption {
+	return func(m *OrganizationQuotaRequestMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *OrganizationQuotaRequest
+		)
+		m.oldValue = func(ctx context.Context) (*OrganizationQuotaRequest, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().OrganizationQuotaRequest.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withOrganizationQuotaRequest sets the old OrganizationQuotaRequest of the mutation.
+func withOrganizationQuotaRequest(node *OrganizationQuotaRequest) organizationquotarequestOption {
+	return func(m *OrganizationQuotaRequestMutation) {
+		m.oldValue = func(context.Context) (*OrganizationQuotaRequest, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m OrganizationQuotaRequestMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m OrganizationQuotaRequestMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *OrganizationQuotaRequestMutation) ID() (id int64, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *OrganizationQuotaRequestMutation) IDs(ctx context.Context) ([]int64, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int64{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().OrganizationQuotaRequest.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *OrganizationQuotaRequestMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *OrganizationQuotaRequestMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the OrganizationQuotaRequest entity.
+// If the OrganizationQuotaRequest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrganizationQuotaRequestMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *OrganizationQuotaRequestMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *OrganizationQuotaRequestMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *OrganizationQuotaRequestMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the OrganizationQuotaRequest entity.
+// If the OrganizationQuotaRequest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrganizationQuotaRequestMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *OrganizationQuotaRequestMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetOrganizationID sets the "organization_id" field.
+func (m *OrganizationQuotaRequestMutation) SetOrganizationID(i int64) {
+	m.organization_id = &i
+	m.addorganization_id = nil
+}
+
+// OrganizationID returns the value of the "organization_id" field in the mutation.
+func (m *OrganizationQuotaRequestMutation) OrganizationID() (r int64, exists bool) {
+	v := m.organization_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOrganizationID returns the old "organization_id" field's value of the OrganizationQuotaRequest entity.
+// If the OrganizationQuotaRequest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrganizationQuotaRequestMutation) OldOrganizationID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOrganizationID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOrganizationID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOrganizationID: %w", err)
+	}
+	return oldValue.OrganizationID, nil
+}
+
+// AddOrganizationID adds i to the "organization_id" field.
+func (m *OrganizationQuotaRequestMutation) AddOrganizationID(i int64) {
+	if m.addorganization_id != nil {
+		*m.addorganization_id += i
+	} else {
+		m.addorganization_id = &i
+	}
+}
+
+// AddedOrganizationID returns the value that was added to the "organization_id" field in this mutation.
+func (m *OrganizationQuotaRequestMutation) AddedOrganizationID() (r int64, exists bool) {
+	v := m.addorganization_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetOrganizationID resets all changes to the "organization_id" field.
+func (m *OrganizationQuotaRequestMutation) ResetOrganizationID() {
+	m.organization_id = nil
+	m.addorganization_id = nil
+}
+
+// SetUserID sets the "user_id" field.
+func (m *OrganizationQuotaRequestMutation) SetUserID(i int64) {
+	m.user_id = &i
+	m.adduser_id = nil
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *OrganizationQuotaRequestMutation) UserID() (r int64, exists bool) {
+	v := m.user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the OrganizationQuotaRequest entity.
+// If the OrganizationQuotaRequest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrganizationQuotaRequestMutation) OldUserID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// AddUserID adds i to the "user_id" field.
+func (m *OrganizationQuotaRequestMutation) AddUserID(i int64) {
+	if m.adduser_id != nil {
+		*m.adduser_id += i
+	} else {
+		m.adduser_id = &i
+	}
+}
+
+// AddedUserID returns the value that was added to the "user_id" field in this mutation.
+func (m *OrganizationQuotaRequestMutation) AddedUserID() (r int64, exists bool) {
+	v := m.adduser_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *OrganizationQuotaRequestMutation) ResetUserID() {
+	m.user_id = nil
+	m.adduser_id = nil
+}
+
+// SetAmount sets the "amount" field.
+func (m *OrganizationQuotaRequestMutation) SetAmount(f float64) {
+	m.amount = &f
+	m.addamount = nil
+}
+
+// Amount returns the value of the "amount" field in the mutation.
+func (m *OrganizationQuotaRequestMutation) Amount() (r float64, exists bool) {
+	v := m.amount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAmount returns the old "amount" field's value of the OrganizationQuotaRequest entity.
+// If the OrganizationQuotaRequest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrganizationQuotaRequestMutation) OldAmount(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAmount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAmount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAmount: %w", err)
+	}
+	return oldValue.Amount, nil
+}
+
+// AddAmount adds f to the "amount" field.
+func (m *OrganizationQuotaRequestMutation) AddAmount(f float64) {
+	if m.addamount != nil {
+		*m.addamount += f
+	} else {
+		m.addamount = &f
+	}
+}
+
+// AddedAmount returns the value that was added to the "amount" field in this mutation.
+func (m *OrganizationQuotaRequestMutation) AddedAmount() (r float64, exists bool) {
+	v := m.addamount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetAmount resets all changes to the "amount" field.
+func (m *OrganizationQuotaRequestMutation) ResetAmount() {
+	m.amount = nil
+	m.addamount = nil
+}
+
+// SetReason sets the "reason" field.
+func (m *OrganizationQuotaRequestMutation) SetReason(s string) {
+	m.reason = &s
+}
+
+// Reason returns the value of the "reason" field in the mutation.
+func (m *OrganizationQuotaRequestMutation) Reason() (r string, exists bool) {
+	v := m.reason
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReason returns the old "reason" field's value of the OrganizationQuotaRequest entity.
+// If the OrganizationQuotaRequest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrganizationQuotaRequestMutation) OldReason(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReason is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReason requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReason: %w", err)
+	}
+	return oldValue.Reason, nil
+}
+
+// ClearReason clears the value of the "reason" field.
+func (m *OrganizationQuotaRequestMutation) ClearReason() {
+	m.reason = nil
+	m.clearedFields[organizationquotarequest.FieldReason] = struct{}{}
+}
+
+// ReasonCleared returns if the "reason" field was cleared in this mutation.
+func (m *OrganizationQuotaRequestMutation) ReasonCleared() bool {
+	_, ok := m.clearedFields[organizationquotarequest.FieldReason]
+	return ok
+}
+
+// ResetReason resets all changes to the "reason" field.
+func (m *OrganizationQuotaRequestMutation) ResetReason() {
+	m.reason = nil
+	delete(m.clearedFields, organizationquotarequest.FieldReason)
+}
+
+// SetStatus sets the "status" field.
+func (m *OrganizationQuotaRequestMutation) SetStatus(s string) {
+	m.status = &s
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *OrganizationQuotaRequestMutation) Status() (r string, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the OrganizationQuotaRequest entity.
+// If the OrganizationQuotaRequest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrganizationQuotaRequestMutation) OldStatus(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *OrganizationQuotaRequestMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetGrantSource sets the "grant_source" field.
+func (m *OrganizationQuotaRequestMutation) SetGrantSource(s string) {
+	m.grant_source = &s
+}
+
+// GrantSource returns the value of the "grant_source" field in the mutation.
+func (m *OrganizationQuotaRequestMutation) GrantSource() (r string, exists bool) {
+	v := m.grant_source
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGrantSource returns the old "grant_source" field's value of the OrganizationQuotaRequest entity.
+// If the OrganizationQuotaRequest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrganizationQuotaRequestMutation) OldGrantSource(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGrantSource is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGrantSource requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGrantSource: %w", err)
+	}
+	return oldValue.GrantSource, nil
+}
+
+// ClearGrantSource clears the value of the "grant_source" field.
+func (m *OrganizationQuotaRequestMutation) ClearGrantSource() {
+	m.grant_source = nil
+	m.clearedFields[organizationquotarequest.FieldGrantSource] = struct{}{}
+}
+
+// GrantSourceCleared returns if the "grant_source" field was cleared in this mutation.
+func (m *OrganizationQuotaRequestMutation) GrantSourceCleared() bool {
+	_, ok := m.clearedFields[organizationquotarequest.FieldGrantSource]
+	return ok
+}
+
+// ResetGrantSource resets all changes to the "grant_source" field.
+func (m *OrganizationQuotaRequestMutation) ResetGrantSource() {
+	m.grant_source = nil
+	delete(m.clearedFields, organizationquotarequest.FieldGrantSource)
+}
+
+// SetGrantedAmount sets the "granted_amount" field.
+func (m *OrganizationQuotaRequestMutation) SetGrantedAmount(f float64) {
+	m.granted_amount = &f
+	m.addgranted_amount = nil
+}
+
+// GrantedAmount returns the value of the "granted_amount" field in the mutation.
+func (m *OrganizationQuotaRequestMutation) GrantedAmount() (r float64, exists bool) {
+	v := m.granted_amount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGrantedAmount returns the old "granted_amount" field's value of the OrganizationQuotaRequest entity.
+// If the OrganizationQuotaRequest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrganizationQuotaRequestMutation) OldGrantedAmount(ctx context.Context) (v *float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGrantedAmount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGrantedAmount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGrantedAmount: %w", err)
+	}
+	return oldValue.GrantedAmount, nil
+}
+
+// AddGrantedAmount adds f to the "granted_amount" field.
+func (m *OrganizationQuotaRequestMutation) AddGrantedAmount(f float64) {
+	if m.addgranted_amount != nil {
+		*m.addgranted_amount += f
+	} else {
+		m.addgranted_amount = &f
+	}
+}
+
+// AddedGrantedAmount returns the value that was added to the "granted_amount" field in this mutation.
+func (m *OrganizationQuotaRequestMutation) AddedGrantedAmount() (r float64, exists bool) {
+	v := m.addgranted_amount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearGrantedAmount clears the value of the "granted_amount" field.
+func (m *OrganizationQuotaRequestMutation) ClearGrantedAmount() {
+	m.granted_amount = nil
+	m.addgranted_amount = nil
+	m.clearedFields[organizationquotarequest.FieldGrantedAmount] = struct{}{}
+}
+
+// GrantedAmountCleared returns if the "granted_amount" field was cleared in this mutation.
+func (m *OrganizationQuotaRequestMutation) GrantedAmountCleared() bool {
+	_, ok := m.clearedFields[organizationquotarequest.FieldGrantedAmount]
+	return ok
+}
+
+// ResetGrantedAmount resets all changes to the "granted_amount" field.
+func (m *OrganizationQuotaRequestMutation) ResetGrantedAmount() {
+	m.granted_amount = nil
+	m.addgranted_amount = nil
+	delete(m.clearedFields, organizationquotarequest.FieldGrantedAmount)
+}
+
+// SetSnapshotMode sets the "snapshot_mode" field.
+func (m *OrganizationQuotaRequestMutation) SetSnapshotMode(s string) {
+	m.snapshot_mode = &s
+}
+
+// SnapshotMode returns the value of the "snapshot_mode" field in the mutation.
+func (m *OrganizationQuotaRequestMutation) SnapshotMode() (r string, exists bool) {
+	v := m.snapshot_mode
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSnapshotMode returns the old "snapshot_mode" field's value of the OrganizationQuotaRequest entity.
+// If the OrganizationQuotaRequest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrganizationQuotaRequestMutation) OldSnapshotMode(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSnapshotMode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSnapshotMode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSnapshotMode: %w", err)
+	}
+	return oldValue.SnapshotMode, nil
+}
+
+// ResetSnapshotMode resets all changes to the "snapshot_mode" field.
+func (m *OrganizationQuotaRequestMutation) ResetSnapshotMode() {
+	m.snapshot_mode = nil
+}
+
+// SetSnapshotLimit sets the "snapshot_limit" field.
+func (m *OrganizationQuotaRequestMutation) SetSnapshotLimit(f float64) {
+	m.snapshot_limit = &f
+	m.addsnapshot_limit = nil
+}
+
+// SnapshotLimit returns the value of the "snapshot_limit" field in the mutation.
+func (m *OrganizationQuotaRequestMutation) SnapshotLimit() (r float64, exists bool) {
+	v := m.snapshot_limit
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSnapshotLimit returns the old "snapshot_limit" field's value of the OrganizationQuotaRequest entity.
+// If the OrganizationQuotaRequest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrganizationQuotaRequestMutation) OldSnapshotLimit(ctx context.Context) (v *float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSnapshotLimit is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSnapshotLimit requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSnapshotLimit: %w", err)
+	}
+	return oldValue.SnapshotLimit, nil
+}
+
+// AddSnapshotLimit adds f to the "snapshot_limit" field.
+func (m *OrganizationQuotaRequestMutation) AddSnapshotLimit(f float64) {
+	if m.addsnapshot_limit != nil {
+		*m.addsnapshot_limit += f
+	} else {
+		m.addsnapshot_limit = &f
+	}
+}
+
+// AddedSnapshotLimit returns the value that was added to the "snapshot_limit" field in this mutation.
+func (m *OrganizationQuotaRequestMutation) AddedSnapshotLimit() (r float64, exists bool) {
+	v := m.addsnapshot_limit
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearSnapshotLimit clears the value of the "snapshot_limit" field.
+func (m *OrganizationQuotaRequestMutation) ClearSnapshotLimit() {
+	m.snapshot_limit = nil
+	m.addsnapshot_limit = nil
+	m.clearedFields[organizationquotarequest.FieldSnapshotLimit] = struct{}{}
+}
+
+// SnapshotLimitCleared returns if the "snapshot_limit" field was cleared in this mutation.
+func (m *OrganizationQuotaRequestMutation) SnapshotLimitCleared() bool {
+	_, ok := m.clearedFields[organizationquotarequest.FieldSnapshotLimit]
+	return ok
+}
+
+// ResetSnapshotLimit resets all changes to the "snapshot_limit" field.
+func (m *OrganizationQuotaRequestMutation) ResetSnapshotLimit() {
+	m.snapshot_limit = nil
+	m.addsnapshot_limit = nil
+	delete(m.clearedFields, organizationquotarequest.FieldSnapshotLimit)
+}
+
+// SetSnapshotUsed sets the "snapshot_used" field.
+func (m *OrganizationQuotaRequestMutation) SetSnapshotUsed(f float64) {
+	m.snapshot_used = &f
+	m.addsnapshot_used = nil
+}
+
+// SnapshotUsed returns the value of the "snapshot_used" field in the mutation.
+func (m *OrganizationQuotaRequestMutation) SnapshotUsed() (r float64, exists bool) {
+	v := m.snapshot_used
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSnapshotUsed returns the old "snapshot_used" field's value of the OrganizationQuotaRequest entity.
+// If the OrganizationQuotaRequest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrganizationQuotaRequestMutation) OldSnapshotUsed(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSnapshotUsed is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSnapshotUsed requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSnapshotUsed: %w", err)
+	}
+	return oldValue.SnapshotUsed, nil
+}
+
+// AddSnapshotUsed adds f to the "snapshot_used" field.
+func (m *OrganizationQuotaRequestMutation) AddSnapshotUsed(f float64) {
+	if m.addsnapshot_used != nil {
+		*m.addsnapshot_used += f
+	} else {
+		m.addsnapshot_used = &f
+	}
+}
+
+// AddedSnapshotUsed returns the value that was added to the "snapshot_used" field in this mutation.
+func (m *OrganizationQuotaRequestMutation) AddedSnapshotUsed() (r float64, exists bool) {
+	v := m.addsnapshot_used
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSnapshotUsed resets all changes to the "snapshot_used" field.
+func (m *OrganizationQuotaRequestMutation) ResetSnapshotUsed() {
+	m.snapshot_used = nil
+	m.addsnapshot_used = nil
+}
+
+// SetReviewerUserID sets the "reviewer_user_id" field.
+func (m *OrganizationQuotaRequestMutation) SetReviewerUserID(i int64) {
+	m.reviewer_user_id = &i
+	m.addreviewer_user_id = nil
+}
+
+// ReviewerUserID returns the value of the "reviewer_user_id" field in the mutation.
+func (m *OrganizationQuotaRequestMutation) ReviewerUserID() (r int64, exists bool) {
+	v := m.reviewer_user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReviewerUserID returns the old "reviewer_user_id" field's value of the OrganizationQuotaRequest entity.
+// If the OrganizationQuotaRequest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrganizationQuotaRequestMutation) OldReviewerUserID(ctx context.Context) (v *int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReviewerUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReviewerUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReviewerUserID: %w", err)
+	}
+	return oldValue.ReviewerUserID, nil
+}
+
+// AddReviewerUserID adds i to the "reviewer_user_id" field.
+func (m *OrganizationQuotaRequestMutation) AddReviewerUserID(i int64) {
+	if m.addreviewer_user_id != nil {
+		*m.addreviewer_user_id += i
+	} else {
+		m.addreviewer_user_id = &i
+	}
+}
+
+// AddedReviewerUserID returns the value that was added to the "reviewer_user_id" field in this mutation.
+func (m *OrganizationQuotaRequestMutation) AddedReviewerUserID() (r int64, exists bool) {
+	v := m.addreviewer_user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearReviewerUserID clears the value of the "reviewer_user_id" field.
+func (m *OrganizationQuotaRequestMutation) ClearReviewerUserID() {
+	m.reviewer_user_id = nil
+	m.addreviewer_user_id = nil
+	m.clearedFields[organizationquotarequest.FieldReviewerUserID] = struct{}{}
+}
+
+// ReviewerUserIDCleared returns if the "reviewer_user_id" field was cleared in this mutation.
+func (m *OrganizationQuotaRequestMutation) ReviewerUserIDCleared() bool {
+	_, ok := m.clearedFields[organizationquotarequest.FieldReviewerUserID]
+	return ok
+}
+
+// ResetReviewerUserID resets all changes to the "reviewer_user_id" field.
+func (m *OrganizationQuotaRequestMutation) ResetReviewerUserID() {
+	m.reviewer_user_id = nil
+	m.addreviewer_user_id = nil
+	delete(m.clearedFields, organizationquotarequest.FieldReviewerUserID)
+}
+
+// SetReviewedAt sets the "reviewed_at" field.
+func (m *OrganizationQuotaRequestMutation) SetReviewedAt(t time.Time) {
+	m.reviewed_at = &t
+}
+
+// ReviewedAt returns the value of the "reviewed_at" field in the mutation.
+func (m *OrganizationQuotaRequestMutation) ReviewedAt() (r time.Time, exists bool) {
+	v := m.reviewed_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReviewedAt returns the old "reviewed_at" field's value of the OrganizationQuotaRequest entity.
+// If the OrganizationQuotaRequest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrganizationQuotaRequestMutation) OldReviewedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReviewedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReviewedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReviewedAt: %w", err)
+	}
+	return oldValue.ReviewedAt, nil
+}
+
+// ClearReviewedAt clears the value of the "reviewed_at" field.
+func (m *OrganizationQuotaRequestMutation) ClearReviewedAt() {
+	m.reviewed_at = nil
+	m.clearedFields[organizationquotarequest.FieldReviewedAt] = struct{}{}
+}
+
+// ReviewedAtCleared returns if the "reviewed_at" field was cleared in this mutation.
+func (m *OrganizationQuotaRequestMutation) ReviewedAtCleared() bool {
+	_, ok := m.clearedFields[organizationquotarequest.FieldReviewedAt]
+	return ok
+}
+
+// ResetReviewedAt resets all changes to the "reviewed_at" field.
+func (m *OrganizationQuotaRequestMutation) ResetReviewedAt() {
+	m.reviewed_at = nil
+	delete(m.clearedFields, organizationquotarequest.FieldReviewedAt)
+}
+
+// SetReviewNote sets the "review_note" field.
+func (m *OrganizationQuotaRequestMutation) SetReviewNote(s string) {
+	m.review_note = &s
+}
+
+// ReviewNote returns the value of the "review_note" field in the mutation.
+func (m *OrganizationQuotaRequestMutation) ReviewNote() (r string, exists bool) {
+	v := m.review_note
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReviewNote returns the old "review_note" field's value of the OrganizationQuotaRequest entity.
+// If the OrganizationQuotaRequest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrganizationQuotaRequestMutation) OldReviewNote(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReviewNote is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReviewNote requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReviewNote: %w", err)
+	}
+	return oldValue.ReviewNote, nil
+}
+
+// ClearReviewNote clears the value of the "review_note" field.
+func (m *OrganizationQuotaRequestMutation) ClearReviewNote() {
+	m.review_note = nil
+	m.clearedFields[organizationquotarequest.FieldReviewNote] = struct{}{}
+}
+
+// ReviewNoteCleared returns if the "review_note" field was cleared in this mutation.
+func (m *OrganizationQuotaRequestMutation) ReviewNoteCleared() bool {
+	_, ok := m.clearedFields[organizationquotarequest.FieldReviewNote]
+	return ok
+}
+
+// ResetReviewNote resets all changes to the "review_note" field.
+func (m *OrganizationQuotaRequestMutation) ResetReviewNote() {
+	m.review_note = nil
+	delete(m.clearedFields, organizationquotarequest.FieldReviewNote)
+}
+
+// Where appends a list predicates to the OrganizationQuotaRequestMutation builder.
+func (m *OrganizationQuotaRequestMutation) Where(ps ...predicate.OrganizationQuotaRequest) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the OrganizationQuotaRequestMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *OrganizationQuotaRequestMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.OrganizationQuotaRequest, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *OrganizationQuotaRequestMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *OrganizationQuotaRequestMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (OrganizationQuotaRequest).
+func (m *OrganizationQuotaRequestMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *OrganizationQuotaRequestMutation) Fields() []string {
+	fields := make([]string, 0, 15)
+	if m.created_at != nil {
+		fields = append(fields, organizationquotarequest.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, organizationquotarequest.FieldUpdatedAt)
+	}
+	if m.organization_id != nil {
+		fields = append(fields, organizationquotarequest.FieldOrganizationID)
+	}
+	if m.user_id != nil {
+		fields = append(fields, organizationquotarequest.FieldUserID)
+	}
+	if m.amount != nil {
+		fields = append(fields, organizationquotarequest.FieldAmount)
+	}
+	if m.reason != nil {
+		fields = append(fields, organizationquotarequest.FieldReason)
+	}
+	if m.status != nil {
+		fields = append(fields, organizationquotarequest.FieldStatus)
+	}
+	if m.grant_source != nil {
+		fields = append(fields, organizationquotarequest.FieldGrantSource)
+	}
+	if m.granted_amount != nil {
+		fields = append(fields, organizationquotarequest.FieldGrantedAmount)
+	}
+	if m.snapshot_mode != nil {
+		fields = append(fields, organizationquotarequest.FieldSnapshotMode)
+	}
+	if m.snapshot_limit != nil {
+		fields = append(fields, organizationquotarequest.FieldSnapshotLimit)
+	}
+	if m.snapshot_used != nil {
+		fields = append(fields, organizationquotarequest.FieldSnapshotUsed)
+	}
+	if m.reviewer_user_id != nil {
+		fields = append(fields, organizationquotarequest.FieldReviewerUserID)
+	}
+	if m.reviewed_at != nil {
+		fields = append(fields, organizationquotarequest.FieldReviewedAt)
+	}
+	if m.review_note != nil {
+		fields = append(fields, organizationquotarequest.FieldReviewNote)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *OrganizationQuotaRequestMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case organizationquotarequest.FieldCreatedAt:
+		return m.CreatedAt()
+	case organizationquotarequest.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case organizationquotarequest.FieldOrganizationID:
+		return m.OrganizationID()
+	case organizationquotarequest.FieldUserID:
+		return m.UserID()
+	case organizationquotarequest.FieldAmount:
+		return m.Amount()
+	case organizationquotarequest.FieldReason:
+		return m.Reason()
+	case organizationquotarequest.FieldStatus:
+		return m.Status()
+	case organizationquotarequest.FieldGrantSource:
+		return m.GrantSource()
+	case organizationquotarequest.FieldGrantedAmount:
+		return m.GrantedAmount()
+	case organizationquotarequest.FieldSnapshotMode:
+		return m.SnapshotMode()
+	case organizationquotarequest.FieldSnapshotLimit:
+		return m.SnapshotLimit()
+	case organizationquotarequest.FieldSnapshotUsed:
+		return m.SnapshotUsed()
+	case organizationquotarequest.FieldReviewerUserID:
+		return m.ReviewerUserID()
+	case organizationquotarequest.FieldReviewedAt:
+		return m.ReviewedAt()
+	case organizationquotarequest.FieldReviewNote:
+		return m.ReviewNote()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *OrganizationQuotaRequestMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case organizationquotarequest.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case organizationquotarequest.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case organizationquotarequest.FieldOrganizationID:
+		return m.OldOrganizationID(ctx)
+	case organizationquotarequest.FieldUserID:
+		return m.OldUserID(ctx)
+	case organizationquotarequest.FieldAmount:
+		return m.OldAmount(ctx)
+	case organizationquotarequest.FieldReason:
+		return m.OldReason(ctx)
+	case organizationquotarequest.FieldStatus:
+		return m.OldStatus(ctx)
+	case organizationquotarequest.FieldGrantSource:
+		return m.OldGrantSource(ctx)
+	case organizationquotarequest.FieldGrantedAmount:
+		return m.OldGrantedAmount(ctx)
+	case organizationquotarequest.FieldSnapshotMode:
+		return m.OldSnapshotMode(ctx)
+	case organizationquotarequest.FieldSnapshotLimit:
+		return m.OldSnapshotLimit(ctx)
+	case organizationquotarequest.FieldSnapshotUsed:
+		return m.OldSnapshotUsed(ctx)
+	case organizationquotarequest.FieldReviewerUserID:
+		return m.OldReviewerUserID(ctx)
+	case organizationquotarequest.FieldReviewedAt:
+		return m.OldReviewedAt(ctx)
+	case organizationquotarequest.FieldReviewNote:
+		return m.OldReviewNote(ctx)
+	}
+	return nil, fmt.Errorf("unknown OrganizationQuotaRequest field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *OrganizationQuotaRequestMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case organizationquotarequest.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case organizationquotarequest.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case organizationquotarequest.FieldOrganizationID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOrganizationID(v)
+		return nil
+	case organizationquotarequest.FieldUserID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case organizationquotarequest.FieldAmount:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAmount(v)
+		return nil
+	case organizationquotarequest.FieldReason:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReason(v)
+		return nil
+	case organizationquotarequest.FieldStatus:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case organizationquotarequest.FieldGrantSource:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGrantSource(v)
+		return nil
+	case organizationquotarequest.FieldGrantedAmount:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGrantedAmount(v)
+		return nil
+	case organizationquotarequest.FieldSnapshotMode:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSnapshotMode(v)
+		return nil
+	case organizationquotarequest.FieldSnapshotLimit:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSnapshotLimit(v)
+		return nil
+	case organizationquotarequest.FieldSnapshotUsed:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSnapshotUsed(v)
+		return nil
+	case organizationquotarequest.FieldReviewerUserID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReviewerUserID(v)
+		return nil
+	case organizationquotarequest.FieldReviewedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReviewedAt(v)
+		return nil
+	case organizationquotarequest.FieldReviewNote:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReviewNote(v)
+		return nil
+	}
+	return fmt.Errorf("unknown OrganizationQuotaRequest field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *OrganizationQuotaRequestMutation) AddedFields() []string {
+	var fields []string
+	if m.addorganization_id != nil {
+		fields = append(fields, organizationquotarequest.FieldOrganizationID)
+	}
+	if m.adduser_id != nil {
+		fields = append(fields, organizationquotarequest.FieldUserID)
+	}
+	if m.addamount != nil {
+		fields = append(fields, organizationquotarequest.FieldAmount)
+	}
+	if m.addgranted_amount != nil {
+		fields = append(fields, organizationquotarequest.FieldGrantedAmount)
+	}
+	if m.addsnapshot_limit != nil {
+		fields = append(fields, organizationquotarequest.FieldSnapshotLimit)
+	}
+	if m.addsnapshot_used != nil {
+		fields = append(fields, organizationquotarequest.FieldSnapshotUsed)
+	}
+	if m.addreviewer_user_id != nil {
+		fields = append(fields, organizationquotarequest.FieldReviewerUserID)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *OrganizationQuotaRequestMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case organizationquotarequest.FieldOrganizationID:
+		return m.AddedOrganizationID()
+	case organizationquotarequest.FieldUserID:
+		return m.AddedUserID()
+	case organizationquotarequest.FieldAmount:
+		return m.AddedAmount()
+	case organizationquotarequest.FieldGrantedAmount:
+		return m.AddedGrantedAmount()
+	case organizationquotarequest.FieldSnapshotLimit:
+		return m.AddedSnapshotLimit()
+	case organizationquotarequest.FieldSnapshotUsed:
+		return m.AddedSnapshotUsed()
+	case organizationquotarequest.FieldReviewerUserID:
+		return m.AddedReviewerUserID()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *OrganizationQuotaRequestMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case organizationquotarequest.FieldOrganizationID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddOrganizationID(v)
+		return nil
+	case organizationquotarequest.FieldUserID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddUserID(v)
+		return nil
+	case organizationquotarequest.FieldAmount:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAmount(v)
+		return nil
+	case organizationquotarequest.FieldGrantedAmount:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGrantedAmount(v)
+		return nil
+	case organizationquotarequest.FieldSnapshotLimit:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSnapshotLimit(v)
+		return nil
+	case organizationquotarequest.FieldSnapshotUsed:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSnapshotUsed(v)
+		return nil
+	case organizationquotarequest.FieldReviewerUserID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddReviewerUserID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown OrganizationQuotaRequest numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *OrganizationQuotaRequestMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(organizationquotarequest.FieldReason) {
+		fields = append(fields, organizationquotarequest.FieldReason)
+	}
+	if m.FieldCleared(organizationquotarequest.FieldGrantSource) {
+		fields = append(fields, organizationquotarequest.FieldGrantSource)
+	}
+	if m.FieldCleared(organizationquotarequest.FieldGrantedAmount) {
+		fields = append(fields, organizationquotarequest.FieldGrantedAmount)
+	}
+	if m.FieldCleared(organizationquotarequest.FieldSnapshotLimit) {
+		fields = append(fields, organizationquotarequest.FieldSnapshotLimit)
+	}
+	if m.FieldCleared(organizationquotarequest.FieldReviewerUserID) {
+		fields = append(fields, organizationquotarequest.FieldReviewerUserID)
+	}
+	if m.FieldCleared(organizationquotarequest.FieldReviewedAt) {
+		fields = append(fields, organizationquotarequest.FieldReviewedAt)
+	}
+	if m.FieldCleared(organizationquotarequest.FieldReviewNote) {
+		fields = append(fields, organizationquotarequest.FieldReviewNote)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *OrganizationQuotaRequestMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *OrganizationQuotaRequestMutation) ClearField(name string) error {
+	switch name {
+	case organizationquotarequest.FieldReason:
+		m.ClearReason()
+		return nil
+	case organizationquotarequest.FieldGrantSource:
+		m.ClearGrantSource()
+		return nil
+	case organizationquotarequest.FieldGrantedAmount:
+		m.ClearGrantedAmount()
+		return nil
+	case organizationquotarequest.FieldSnapshotLimit:
+		m.ClearSnapshotLimit()
+		return nil
+	case organizationquotarequest.FieldReviewerUserID:
+		m.ClearReviewerUserID()
+		return nil
+	case organizationquotarequest.FieldReviewedAt:
+		m.ClearReviewedAt()
+		return nil
+	case organizationquotarequest.FieldReviewNote:
+		m.ClearReviewNote()
+		return nil
+	}
+	return fmt.Errorf("unknown OrganizationQuotaRequest nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *OrganizationQuotaRequestMutation) ResetField(name string) error {
+	switch name {
+	case organizationquotarequest.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case organizationquotarequest.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case organizationquotarequest.FieldOrganizationID:
+		m.ResetOrganizationID()
+		return nil
+	case organizationquotarequest.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case organizationquotarequest.FieldAmount:
+		m.ResetAmount()
+		return nil
+	case organizationquotarequest.FieldReason:
+		m.ResetReason()
+		return nil
+	case organizationquotarequest.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case organizationquotarequest.FieldGrantSource:
+		m.ResetGrantSource()
+		return nil
+	case organizationquotarequest.FieldGrantedAmount:
+		m.ResetGrantedAmount()
+		return nil
+	case organizationquotarequest.FieldSnapshotMode:
+		m.ResetSnapshotMode()
+		return nil
+	case organizationquotarequest.FieldSnapshotLimit:
+		m.ResetSnapshotLimit()
+		return nil
+	case organizationquotarequest.FieldSnapshotUsed:
+		m.ResetSnapshotUsed()
+		return nil
+	case organizationquotarequest.FieldReviewerUserID:
+		m.ResetReviewerUserID()
+		return nil
+	case organizationquotarequest.FieldReviewedAt:
+		m.ResetReviewedAt()
+		return nil
+	case organizationquotarequest.FieldReviewNote:
+		m.ResetReviewNote()
+		return nil
+	}
+	return fmt.Errorf("unknown OrganizationQuotaRequest field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *OrganizationQuotaRequestMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *OrganizationQuotaRequestMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *OrganizationQuotaRequestMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *OrganizationQuotaRequestMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *OrganizationQuotaRequestMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *OrganizationQuotaRequestMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *OrganizationQuotaRequestMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown OrganizationQuotaRequest unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *OrganizationQuotaRequestMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown OrganizationQuotaRequest edge %s", name)
 }
 
 // PaymentAuditLogMutation represents an operation that mutates the PaymentAuditLog nodes in the graph.

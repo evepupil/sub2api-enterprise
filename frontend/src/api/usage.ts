@@ -16,7 +16,8 @@ import type {
   UserErrorRequest,
   UserErrorRequestDetail,
   UserErrorListParams,
-  OrganizationMemberUsageResponse
+  OrganizationMemberUsageResponse,
+  UserOrganizationQuotaOverview
 } from '@/types'
 
 // ==================== Dashboard Types ====================
@@ -54,6 +55,8 @@ export interface UserDashboardStats {
   rpm: number // 近5分钟平均每分钟请求数
   tpm: number // 近5分钟平均每分钟Token数
   by_platform?: PlatformDashboardStats[]
+  // 组织配额块，仅组织普通成员返回；其余账号为 null。
+  organization_quota?: UserOrganizationQuotaOverview | null
 }
 
 export interface TrendParams {

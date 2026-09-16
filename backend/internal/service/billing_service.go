@@ -67,7 +67,9 @@ type BillingCache interface {
 
 	// 组织成员已占用额度缓存（已消费 + 已冻结）
 	GetOrganizationMemberSpending(ctx context.Context, userID int64) (float64, error)
-	SetOrganizationMemberSpending(ctx context.Context, userID int64, spending float64) error
+	// SetOrganizationMemberSpending 的 windowEnd 非空时（周期配额生效中），
+	// 缓存 TTL 截到本期截止时间，换期那一刻旧缓存最多再活几秒。
+	SetOrganizationMemberSpending(ctx context.Context, userID int64, spending float64, windowEnd *time.Time) error
 	// IncrOrganizationMemberSpending 在缓存命中时累加；未命中（key 不存在）静默返回 nil。
 	IncrOrganizationMemberSpending(ctx context.Context, userID int64, delta float64) error
 	InvalidateOrganizationMemberSpending(ctx context.Context, userID int64) error

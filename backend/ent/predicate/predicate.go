@@ -72,6 +72,9 @@ type OrganizationAllowedGroup func(*sql.Selector)
 // OrganizationMember is the predicate function for organizationmember builders.
 type OrganizationMember func(*sql.Selector)
 
+// OrganizationQuotaRequest is the predicate function for organizationquotarequest builders.
+type OrganizationQuotaRequest func(*sql.Selector)
+
 // PaymentAuditLog is the predicate function for paymentauditlog builders.
 type PaymentAuditLog func(*sql.Selector)
 

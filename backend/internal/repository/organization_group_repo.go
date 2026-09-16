@@ -51,6 +51,11 @@ func (r *organizationGroupRepository) GetMemberScopeByUserID(
 		RestrictPublicGroups: entity.RestrictPublicGroups,
 		AllowedGroupIDs:      groupIDs,
 		SpendingLimit:        membership.SpendingLimit,
+		QuotaAmount:          membership.QuotaAmount,
+		QuotaPeriodDays:      membership.QuotaPeriodDays,
+		QuotaStartAt:         membership.QuotaStartAt,
+		QuotaCycleStart:      membership.QuotaCycleStart,
+		QuotaCycleBonus:      membership.QuotaCycleBonus,
 		Disabled:             entity.Status == service.StatusDisabled,
 	}
 	if !scope.IsOwner {

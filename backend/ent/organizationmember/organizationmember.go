@@ -28,6 +28,16 @@ const (
 	FieldSpendingUsed = "spending_used"
 	// FieldSpendingFrozen holds the string denoting the spending_frozen field in the database.
 	FieldSpendingFrozen = "spending_frozen"
+	// FieldQuotaAmount holds the string denoting the quota_amount field in the database.
+	FieldQuotaAmount = "quota_amount"
+	// FieldQuotaPeriodDays holds the string denoting the quota_period_days field in the database.
+	FieldQuotaPeriodDays = "quota_period_days"
+	// FieldQuotaStartAt holds the string denoting the quota_start_at field in the database.
+	FieldQuotaStartAt = "quota_start_at"
+	// FieldQuotaCycleStart holds the string denoting the quota_cycle_start field in the database.
+	FieldQuotaCycleStart = "quota_cycle_start"
+	// FieldQuotaCycleBonus holds the string denoting the quota_cycle_bonus field in the database.
+	FieldQuotaCycleBonus = "quota_cycle_bonus"
 	// EdgeOrganization holds the string denoting the organization edge name in mutations.
 	EdgeOrganization = "organization"
 	// EdgeUser holds the string denoting the user edge name in mutations.
@@ -60,6 +70,11 @@ var Columns = []string{
 	FieldSpendingLimit,
 	FieldSpendingUsed,
 	FieldSpendingFrozen,
+	FieldQuotaAmount,
+	FieldQuotaPeriodDays,
+	FieldQuotaStartAt,
+	FieldQuotaCycleStart,
+	FieldQuotaCycleBonus,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -83,6 +98,10 @@ var (
 	DefaultSpendingUsed float64
 	// DefaultSpendingFrozen holds the default value on creation for the "spending_frozen" field.
 	DefaultSpendingFrozen float64
+	// QuotaPeriodDaysValidator is a validator for the "quota_period_days" field. It is called by the builders before save.
+	QuotaPeriodDaysValidator func(int) error
+	// DefaultQuotaCycleBonus holds the default value on creation for the "quota_cycle_bonus" field.
+	DefaultQuotaCycleBonus float64
 )
 
 // OrderOption defines the ordering options for the OrganizationMember queries.
@@ -126,6 +145,31 @@ func BySpendingUsed(opts ...sql.OrderTermOption) OrderOption {
 // BySpendingFrozen orders the results by the spending_frozen field.
 func BySpendingFrozen(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSpendingFrozen, opts...).ToFunc()
+}
+
+// ByQuotaAmount orders the results by the quota_amount field.
+func ByQuotaAmount(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldQuotaAmount, opts...).ToFunc()
+}
+
+// ByQuotaPeriodDays orders the results by the quota_period_days field.
+func ByQuotaPeriodDays(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldQuotaPeriodDays, opts...).ToFunc()
+}
+
+// ByQuotaStartAt orders the results by the quota_start_at field.
+func ByQuotaStartAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldQuotaStartAt, opts...).ToFunc()
+}
+
+// ByQuotaCycleStart orders the results by the quota_cycle_start field.
+func ByQuotaCycleStart(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldQuotaCycleStart, opts...).ToFunc()
+}
+
+// ByQuotaCycleBonus orders the results by the quota_cycle_bonus field.
+func ByQuotaCycleBonus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldQuotaCycleBonus, opts...).ToFunc()
 }
 
 // ByOrganizationField orders the results by organization field.

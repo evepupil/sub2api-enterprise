@@ -85,6 +85,21 @@ func Status(v string) predicate.Organization {
 	return predicate.Organization(sql.FieldEQ(FieldStatus, v))
 }
 
+// QuotaRequestMode applies equality check predicate on the "quota_request_mode" field. It's identical to QuotaRequestModeEQ.
+func QuotaRequestMode(v string) predicate.Organization {
+	return predicate.Organization(sql.FieldEQ(FieldQuotaRequestMode, v))
+}
+
+// QuotaRequestMin applies equality check predicate on the "quota_request_min" field. It's identical to QuotaRequestMinEQ.
+func QuotaRequestMin(v float64) predicate.Organization {
+	return predicate.Organization(sql.FieldEQ(FieldQuotaRequestMin, v))
+}
+
+// QuotaRequestMax applies equality check predicate on the "quota_request_max" field. It's identical to QuotaRequestMaxEQ.
+func QuotaRequestMax(v float64) predicate.Organization {
+	return predicate.Organization(sql.FieldEQ(FieldQuotaRequestMax, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Organization {
 	return predicate.Organization(sql.FieldEQ(FieldCreatedAt, v))
@@ -323,6 +338,171 @@ func StatusEqualFold(v string) predicate.Organization {
 // StatusContainsFold applies the ContainsFold predicate on the "status" field.
 func StatusContainsFold(v string) predicate.Organization {
 	return predicate.Organization(sql.FieldContainsFold(FieldStatus, v))
+}
+
+// QuotaRequestModeEQ applies the EQ predicate on the "quota_request_mode" field.
+func QuotaRequestModeEQ(v string) predicate.Organization {
+	return predicate.Organization(sql.FieldEQ(FieldQuotaRequestMode, v))
+}
+
+// QuotaRequestModeNEQ applies the NEQ predicate on the "quota_request_mode" field.
+func QuotaRequestModeNEQ(v string) predicate.Organization {
+	return predicate.Organization(sql.FieldNEQ(FieldQuotaRequestMode, v))
+}
+
+// QuotaRequestModeIn applies the In predicate on the "quota_request_mode" field.
+func QuotaRequestModeIn(vs ...string) predicate.Organization {
+	return predicate.Organization(sql.FieldIn(FieldQuotaRequestMode, vs...))
+}
+
+// QuotaRequestModeNotIn applies the NotIn predicate on the "quota_request_mode" field.
+func QuotaRequestModeNotIn(vs ...string) predicate.Organization {
+	return predicate.Organization(sql.FieldNotIn(FieldQuotaRequestMode, vs...))
+}
+
+// QuotaRequestModeGT applies the GT predicate on the "quota_request_mode" field.
+func QuotaRequestModeGT(v string) predicate.Organization {
+	return predicate.Organization(sql.FieldGT(FieldQuotaRequestMode, v))
+}
+
+// QuotaRequestModeGTE applies the GTE predicate on the "quota_request_mode" field.
+func QuotaRequestModeGTE(v string) predicate.Organization {
+	return predicate.Organization(sql.FieldGTE(FieldQuotaRequestMode, v))
+}
+
+// QuotaRequestModeLT applies the LT predicate on the "quota_request_mode" field.
+func QuotaRequestModeLT(v string) predicate.Organization {
+	return predicate.Organization(sql.FieldLT(FieldQuotaRequestMode, v))
+}
+
+// QuotaRequestModeLTE applies the LTE predicate on the "quota_request_mode" field.
+func QuotaRequestModeLTE(v string) predicate.Organization {
+	return predicate.Organization(sql.FieldLTE(FieldQuotaRequestMode, v))
+}
+
+// QuotaRequestModeContains applies the Contains predicate on the "quota_request_mode" field.
+func QuotaRequestModeContains(v string) predicate.Organization {
+	return predicate.Organization(sql.FieldContains(FieldQuotaRequestMode, v))
+}
+
+// QuotaRequestModeHasPrefix applies the HasPrefix predicate on the "quota_request_mode" field.
+func QuotaRequestModeHasPrefix(v string) predicate.Organization {
+	return predicate.Organization(sql.FieldHasPrefix(FieldQuotaRequestMode, v))
+}
+
+// QuotaRequestModeHasSuffix applies the HasSuffix predicate on the "quota_request_mode" field.
+func QuotaRequestModeHasSuffix(v string) predicate.Organization {
+	return predicate.Organization(sql.FieldHasSuffix(FieldQuotaRequestMode, v))
+}
+
+// QuotaRequestModeEqualFold applies the EqualFold predicate on the "quota_request_mode" field.
+func QuotaRequestModeEqualFold(v string) predicate.Organization {
+	return predicate.Organization(sql.FieldEqualFold(FieldQuotaRequestMode, v))
+}
+
+// QuotaRequestModeContainsFold applies the ContainsFold predicate on the "quota_request_mode" field.
+func QuotaRequestModeContainsFold(v string) predicate.Organization {
+	return predicate.Organization(sql.FieldContainsFold(FieldQuotaRequestMode, v))
+}
+
+// QuotaRequestMinEQ applies the EQ predicate on the "quota_request_min" field.
+func QuotaRequestMinEQ(v float64) predicate.Organization {
+	return predicate.Organization(sql.FieldEQ(FieldQuotaRequestMin, v))
+}
+
+// QuotaRequestMinNEQ applies the NEQ predicate on the "quota_request_min" field.
+func QuotaRequestMinNEQ(v float64) predicate.Organization {
+	return predicate.Organization(sql.FieldNEQ(FieldQuotaRequestMin, v))
+}
+
+// QuotaRequestMinIn applies the In predicate on the "quota_request_min" field.
+func QuotaRequestMinIn(vs ...float64) predicate.Organization {
+	return predicate.Organization(sql.FieldIn(FieldQuotaRequestMin, vs...))
+}
+
+// QuotaRequestMinNotIn applies the NotIn predicate on the "quota_request_min" field.
+func QuotaRequestMinNotIn(vs ...float64) predicate.Organization {
+	return predicate.Organization(sql.FieldNotIn(FieldQuotaRequestMin, vs...))
+}
+
+// QuotaRequestMinGT applies the GT predicate on the "quota_request_min" field.
+func QuotaRequestMinGT(v float64) predicate.Organization {
+	return predicate.Organization(sql.FieldGT(FieldQuotaRequestMin, v))
+}
+
+// QuotaRequestMinGTE applies the GTE predicate on the "quota_request_min" field.
+func QuotaRequestMinGTE(v float64) predicate.Organization {
+	return predicate.Organization(sql.FieldGTE(FieldQuotaRequestMin, v))
+}
+
+// QuotaRequestMinLT applies the LT predicate on the "quota_request_min" field.
+func QuotaRequestMinLT(v float64) predicate.Organization {
+	return predicate.Organization(sql.FieldLT(FieldQuotaRequestMin, v))
+}
+
+// QuotaRequestMinLTE applies the LTE predicate on the "quota_request_min" field.
+func QuotaRequestMinLTE(v float64) predicate.Organization {
+	return predicate.Organization(sql.FieldLTE(FieldQuotaRequestMin, v))
+}
+
+// QuotaRequestMinIsNil applies the IsNil predicate on the "quota_request_min" field.
+func QuotaRequestMinIsNil() predicate.Organization {
+	return predicate.Organization(sql.FieldIsNull(FieldQuotaRequestMin))
+}
+
+// QuotaRequestMinNotNil applies the NotNil predicate on the "quota_request_min" field.
+func QuotaRequestMinNotNil() predicate.Organization {
+	return predicate.Organization(sql.FieldNotNull(FieldQuotaRequestMin))
+}
+
+// QuotaRequestMaxEQ applies the EQ predicate on the "quota_request_max" field.
+func QuotaRequestMaxEQ(v float64) predicate.Organization {
+	return predicate.Organization(sql.FieldEQ(FieldQuotaRequestMax, v))
+}
+
+// QuotaRequestMaxNEQ applies the NEQ predicate on the "quota_request_max" field.
+func QuotaRequestMaxNEQ(v float64) predicate.Organization {
+	return predicate.Organization(sql.FieldNEQ(FieldQuotaRequestMax, v))
+}
+
+// QuotaRequestMaxIn applies the In predicate on the "quota_request_max" field.
+func QuotaRequestMaxIn(vs ...float64) predicate.Organization {
+	return predicate.Organization(sql.FieldIn(FieldQuotaRequestMax, vs...))
+}
+
+// QuotaRequestMaxNotIn applies the NotIn predicate on the "quota_request_max" field.
+func QuotaRequestMaxNotIn(vs ...float64) predicate.Organization {
+	return predicate.Organization(sql.FieldNotIn(FieldQuotaRequestMax, vs...))
+}
+
+// QuotaRequestMaxGT applies the GT predicate on the "quota_request_max" field.
+func QuotaRequestMaxGT(v float64) predicate.Organization {
+	return predicate.Organization(sql.FieldGT(FieldQuotaRequestMax, v))
+}
+
+// QuotaRequestMaxGTE applies the GTE predicate on the "quota_request_max" field.
+func QuotaRequestMaxGTE(v float64) predicate.Organization {
+	return predicate.Organization(sql.FieldGTE(FieldQuotaRequestMax, v))
+}
+
+// QuotaRequestMaxLT applies the LT predicate on the "quota_request_max" field.
+func QuotaRequestMaxLT(v float64) predicate.Organization {
+	return predicate.Organization(sql.FieldLT(FieldQuotaRequestMax, v))
+}
+
+// QuotaRequestMaxLTE applies the LTE predicate on the "quota_request_max" field.
+func QuotaRequestMaxLTE(v float64) predicate.Organization {
+	return predicate.Organization(sql.FieldLTE(FieldQuotaRequestMax, v))
+}
+
+// QuotaRequestMaxIsNil applies the IsNil predicate on the "quota_request_max" field.
+func QuotaRequestMaxIsNil() predicate.Organization {
+	return predicate.Organization(sql.FieldIsNull(FieldQuotaRequestMax))
+}
+
+// QuotaRequestMaxNotNil applies the NotNil predicate on the "quota_request_max" field.
+func QuotaRequestMaxNotNil() predicate.Organization {
+	return predicate.Organization(sql.FieldNotNull(FieldQuotaRequestMax))
 }
 
 // HasOwner applies the HasEdge predicate on the "owner" edge.

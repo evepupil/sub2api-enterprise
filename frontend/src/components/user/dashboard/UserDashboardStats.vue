@@ -1,6 +1,6 @@
 <template>
   <!-- Row 1: Core Stats -->
-  <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+  <div class="grid grid-cols-2 gap-4" :class="orgQuota ? 'lg:grid-cols-5' : 'lg:grid-cols-4'">
     <!-- Balance -->
     <div v-if="!isSimple" class="card p-4">
       <div class="flex items-center gap-3">
@@ -16,6 +16,10 @@
         </div>
       </div>
     </div>
+
+    <!-- Organization quota: only for regular org members; the balance card
+         keeps showing the account's own money and is untouched. -->
+    <OrganizationQuotaCard v-if="orgQuota" :overview="orgQuota" @applied="$emit('quota-applied')" />
 
     <!-- API Keys -->
     <div class="card p-4">
@@ -226,6 +230,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Icon from '@/components/icons/Icon.vue'
+import OrganizationQuotaCard from '@/components/user/dashboard/OrganizationQuotaCard.vue'
 import type { UserDashboardStats as UserStatsType } from '@/api/usage'
 import type { PlatformQuotaItem } from '@/types'
 
@@ -245,7 +250,15 @@ const props = defineProps<{
   isSimple: boolean
   platformQuotas?: PlatformQuotaItem[] | null
 }>()
+
+defineEmits<{
+  (e: 'quota-applied'): void
+}>()
+
 const { t } = useI18n()
+
+// 组织配额块：仅组织普通成员返回，其余账号为 null（不渲染那张卡）。
+const orgQuota = computed(() => props.stats?.organization_quota ?? null)
 
 const PLATFORM_LABELS: Record<string, string> = {
   anthropic: 'Claude',

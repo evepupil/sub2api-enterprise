@@ -170,7 +170,7 @@ func (s *billingCacheMissStub) GetOrganizationMemberSpending(_ context.Context, 
 	return 0, nil
 }
 
-func (s *billingCacheMissStub) SetOrganizationMemberSpending(_ context.Context, _ int64, _ float64) error {
+func (s *billingCacheMissStub) SetOrganizationMemberSpending(_ context.Context, _ int64, _ float64, _ *time.Time) error {
 	return nil
 }
 

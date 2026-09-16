@@ -30,6 +30,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/organization"
 	"github.com/Wei-Shaw/sub2api/ent/organizationallowedgroup"
 	"github.com/Wei-Shaw/sub2api/ent/organizationmember"
+	"github.com/Wei-Shaw/sub2api/ent/organizationquotarequest"
 	"github.com/Wei-Shaw/sub2api/ent/paymentauditlog"
 	"github.com/Wei-Shaw/sub2api/ent/paymentorder"
 	"github.com/Wei-Shaw/sub2api/ent/paymentproviderinstance"
@@ -703,6 +704,33 @@ func (f TraverseOrganizationMember) Traverse(ctx context.Context, q ent.Query) e
 	return fmt.Errorf("unexpected query type %T. expect *ent.OrganizationMemberQuery", q)
 }
 
+// The OrganizationQuotaRequestFunc type is an adapter to allow the use of ordinary function as a Querier.
+type OrganizationQuotaRequestFunc func(context.Context, *ent.OrganizationQuotaRequestQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f OrganizationQuotaRequestFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.OrganizationQuotaRequestQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.OrganizationQuotaRequestQuery", q)
+}
+
+// The TraverseOrganizationQuotaRequest type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseOrganizationQuotaRequest func(context.Context, *ent.OrganizationQuotaRequestQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseOrganizationQuotaRequest) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseOrganizationQuotaRequest) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.OrganizationQuotaRequestQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.OrganizationQuotaRequestQuery", q)
+}
+
 // The PaymentAuditLogFunc type is an adapter to allow the use of ordinary function as a Querier.
 type PaymentAuditLogFunc func(context.Context, *ent.PaymentAuditLogQuery) (ent.Value, error)
 
@@ -1290,6 +1318,8 @@ func NewQuery(q ent.Query) (Query, error) {
 		return &query[*ent.OrganizationAllowedGroupQuery, predicate.OrganizationAllowedGroup, organizationallowedgroup.OrderOption]{typ: ent.TypeOrganizationAllowedGroup, tq: q}, nil
 	case *ent.OrganizationMemberQuery:
 		return &query[*ent.OrganizationMemberQuery, predicate.OrganizationMember, organizationmember.OrderOption]{typ: ent.TypeOrganizationMember, tq: q}, nil
+	case *ent.OrganizationQuotaRequestQuery:
+		return &query[*ent.OrganizationQuotaRequestQuery, predicate.OrganizationQuotaRequest, organizationquotarequest.OrderOption]{typ: ent.TypeOrganizationQuotaRequest, tq: q}, nil
 	case *ent.PaymentAuditLogQuery:
 		return &query[*ent.PaymentAuditLogQuery, predicate.PaymentAuditLog, paymentauditlog.OrderOption]{typ: ent.TypePaymentAuditLog, tq: q}, nil
 	case *ent.PaymentOrderQuery:

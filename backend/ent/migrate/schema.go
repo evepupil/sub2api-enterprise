@@ -1105,6 +1105,9 @@ var (
 		{Name: "name", Type: field.TypeString, Size: 100},
 		{Name: "restrict_public_groups", Type: field.TypeBool, Default: false},
 		{Name: "status", Type: field.TypeString, Size: 20, Default: "active"},
+		{Name: "quota_request_mode", Type: field.TypeString, Size: 20, Default: "off"},
+		{Name: "quota_request_min", Type: field.TypeFloat64, Nullable: true, SchemaType: map[string]string{"postgres": "decimal(20,8)"}},
+		{Name: "quota_request_max", Type: field.TypeFloat64, Nullable: true, SchemaType: map[string]string{"postgres": "decimal(20,8)"}},
 		{Name: "owner_user_id", Type: field.TypeInt64, Unique: true},
 	}
 	// OrganizationsTable holds the schema information for the "organizations" table.
@@ -1115,7 +1118,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "organizations_users_owned_organization",
-				Columns:    []*schema.Column{OrganizationsColumns[6]},
+				Columns:    []*schema.Column{OrganizationsColumns[9]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -1169,6 +1172,11 @@ var (
 		{Name: "spending_limit", Type: field.TypeFloat64, Nullable: true, SchemaType: map[string]string{"postgres": "decimal(20,8)"}},
 		{Name: "spending_used", Type: field.TypeFloat64, Default: 0, SchemaType: map[string]string{"postgres": "decimal(20,8)"}},
 		{Name: "spending_frozen", Type: field.TypeFloat64, Default: 0, SchemaType: map[string]string{"postgres": "decimal(20,8)"}},
+		{Name: "quota_amount", Type: field.TypeFloat64, Nullable: true, SchemaType: map[string]string{"postgres": "decimal(20,8)"}},
+		{Name: "quota_period_days", Type: field.TypeInt, Nullable: true},
+		{Name: "quota_start_at", Type: field.TypeTime, Nullable: true},
+		{Name: "quota_cycle_start", Type: field.TypeTime, Nullable: true},
+		{Name: "quota_cycle_bonus", Type: field.TypeFloat64, Default: 0, SchemaType: map[string]string{"postgres": "decimal(20,8)"}},
 		{Name: "organization_id", Type: field.TypeInt64},
 		{Name: "user_id", Type: field.TypeInt64, Unique: true},
 	}
@@ -1180,13 +1188,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "organization_members_organizations_members",
-				Columns:    []*schema.Column{OrganizationMembersColumns[6]},
+				Columns:    []*schema.Column{OrganizationMembersColumns[11]},
 				RefColumns: []*schema.Column{OrganizationsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "organization_members_users_organization_membership",
-				Columns:    []*schema.Column{OrganizationMembersColumns[7]},
+				Columns:    []*schema.Column{OrganizationMembersColumns[12]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -1195,7 +1203,52 @@ var (
 			{
 				Name:    "organizationmember_organization_id",
 				Unique:  false,
-				Columns: []*schema.Column{OrganizationMembersColumns[6]},
+				Columns: []*schema.Column{OrganizationMembersColumns[11]},
+			},
+		},
+	}
+	// OrganizationQuotaRequestsColumns holds the columns for the "organization_quota_requests" table.
+	OrganizationQuotaRequestsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "organization_id", Type: field.TypeInt64},
+		{Name: "user_id", Type: field.TypeInt64},
+		{Name: "amount", Type: field.TypeFloat64, SchemaType: map[string]string{"postgres": "decimal(20,8)"}},
+		{Name: "reason", Type: field.TypeString, Nullable: true, Size: 500},
+		{Name: "status", Type: field.TypeString, Size: 20, Default: "pending"},
+		{Name: "grant_source", Type: field.TypeString, Nullable: true, Size: 20},
+		{Name: "granted_amount", Type: field.TypeFloat64, Nullable: true, SchemaType: map[string]string{"postgres": "decimal(20,8)"}},
+		{Name: "snapshot_mode", Type: field.TypeString, Size: 20, Default: "static"},
+		{Name: "snapshot_limit", Type: field.TypeFloat64, Nullable: true, SchemaType: map[string]string{"postgres": "decimal(20,8)"}},
+		{Name: "snapshot_used", Type: field.TypeFloat64, Default: 0, SchemaType: map[string]string{"postgres": "decimal(20,8)"}},
+		{Name: "reviewer_user_id", Type: field.TypeInt64, Nullable: true},
+		{Name: "reviewed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "review_note", Type: field.TypeString, Nullable: true, Size: 500},
+	}
+	// OrganizationQuotaRequestsTable holds the schema information for the "organization_quota_requests" table.
+	OrganizationQuotaRequestsTable = &schema.Table{
+		Name:       "organization_quota_requests",
+		Columns:    OrganizationQuotaRequestsColumns,
+		PrimaryKey: []*schema.Column{OrganizationQuotaRequestsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "organizationquotarequest_organization_id_status_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{OrganizationQuotaRequestsColumns[3], OrganizationQuotaRequestsColumns[7], OrganizationQuotaRequestsColumns[1]},
+			},
+			{
+				Name:    "organizationquotarequest_user_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{OrganizationQuotaRequestsColumns[4], OrganizationQuotaRequestsColumns[1]},
+			},
+			{
+				Name:    "uq_organization_quota_requests_pending_per_user",
+				Unique:  true,
+				Columns: []*schema.Column{OrganizationQuotaRequestsColumns[4]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "status = 'pending'",
+				},
 			},
 		},
 	}
@@ -2224,6 +2277,7 @@ var (
 		OrganizationsTable,
 		OrganizationAllowedGroupsTable,
 		OrganizationMembersTable,
+		OrganizationQuotaRequestsTable,
 		PaymentAuditLogsTable,
 		PaymentOrdersTable,
 		PaymentProviderInstancesTable,
@@ -2334,6 +2388,9 @@ func init() {
 	OrganizationMembersTable.ForeignKeys[1].RefTable = UsersTable
 	OrganizationMembersTable.Annotation = &entsql.Annotation{
 		Table: "organization_members",
+	}
+	OrganizationQuotaRequestsTable.Annotation = &entsql.Annotation{
+		Table: "organization_quota_requests",
 	}
 	PaymentAuditLogsTable.Annotation = &entsql.Annotation{
 		Table: "payment_audit_logs",

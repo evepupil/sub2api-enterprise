@@ -106,6 +106,76 @@ func (_c *OrganizationMemberCreate) SetNillableSpendingFrozen(v *float64) *Organ
 	return _c
 }
 
+// SetQuotaAmount sets the "quota_amount" field.
+func (_c *OrganizationMemberCreate) SetQuotaAmount(v float64) *OrganizationMemberCreate {
+	_c.mutation.SetQuotaAmount(v)
+	return _c
+}
+
+// SetNillableQuotaAmount sets the "quota_amount" field if the given value is not nil.
+func (_c *OrganizationMemberCreate) SetNillableQuotaAmount(v *float64) *OrganizationMemberCreate {
+	if v != nil {
+		_c.SetQuotaAmount(*v)
+	}
+	return _c
+}
+
+// SetQuotaPeriodDays sets the "quota_period_days" field.
+func (_c *OrganizationMemberCreate) SetQuotaPeriodDays(v int) *OrganizationMemberCreate {
+	_c.mutation.SetQuotaPeriodDays(v)
+	return _c
+}
+
+// SetNillableQuotaPeriodDays sets the "quota_period_days" field if the given value is not nil.
+func (_c *OrganizationMemberCreate) SetNillableQuotaPeriodDays(v *int) *OrganizationMemberCreate {
+	if v != nil {
+		_c.SetQuotaPeriodDays(*v)
+	}
+	return _c
+}
+
+// SetQuotaStartAt sets the "quota_start_at" field.
+func (_c *OrganizationMemberCreate) SetQuotaStartAt(v time.Time) *OrganizationMemberCreate {
+	_c.mutation.SetQuotaStartAt(v)
+	return _c
+}
+
+// SetNillableQuotaStartAt sets the "quota_start_at" field if the given value is not nil.
+func (_c *OrganizationMemberCreate) SetNillableQuotaStartAt(v *time.Time) *OrganizationMemberCreate {
+	if v != nil {
+		_c.SetQuotaStartAt(*v)
+	}
+	return _c
+}
+
+// SetQuotaCycleStart sets the "quota_cycle_start" field.
+func (_c *OrganizationMemberCreate) SetQuotaCycleStart(v time.Time) *OrganizationMemberCreate {
+	_c.mutation.SetQuotaCycleStart(v)
+	return _c
+}
+
+// SetNillableQuotaCycleStart sets the "quota_cycle_start" field if the given value is not nil.
+func (_c *OrganizationMemberCreate) SetNillableQuotaCycleStart(v *time.Time) *OrganizationMemberCreate {
+	if v != nil {
+		_c.SetQuotaCycleStart(*v)
+	}
+	return _c
+}
+
+// SetQuotaCycleBonus sets the "quota_cycle_bonus" field.
+func (_c *OrganizationMemberCreate) SetQuotaCycleBonus(v float64) *OrganizationMemberCreate {
+	_c.mutation.SetQuotaCycleBonus(v)
+	return _c
+}
+
+// SetNillableQuotaCycleBonus sets the "quota_cycle_bonus" field if the given value is not nil.
+func (_c *OrganizationMemberCreate) SetNillableQuotaCycleBonus(v *float64) *OrganizationMemberCreate {
+	if v != nil {
+		_c.SetQuotaCycleBonus(*v)
+	}
+	return _c
+}
+
 // SetOrganization sets the "organization" edge to the Organization entity.
 func (_c *OrganizationMemberCreate) SetOrganization(v *Organization) *OrganizationMemberCreate {
 	return _c.SetOrganizationID(v.ID)
@@ -167,6 +237,10 @@ func (_c *OrganizationMemberCreate) defaults() {
 		v := organizationmember.DefaultSpendingFrozen
 		_c.mutation.SetSpendingFrozen(v)
 	}
+	if _, ok := _c.mutation.QuotaCycleBonus(); !ok {
+		v := organizationmember.DefaultQuotaCycleBonus
+		_c.mutation.SetQuotaCycleBonus(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -188,6 +262,14 @@ func (_c *OrganizationMemberCreate) check() error {
 	}
 	if _, ok := _c.mutation.SpendingFrozen(); !ok {
 		return &ValidationError{Name: "spending_frozen", err: errors.New(`ent: missing required field "OrganizationMember.spending_frozen"`)}
+	}
+	if v, ok := _c.mutation.QuotaPeriodDays(); ok {
+		if err := organizationmember.QuotaPeriodDaysValidator(v); err != nil {
+			return &ValidationError{Name: "quota_period_days", err: fmt.Errorf(`ent: validator failed for field "OrganizationMember.quota_period_days": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.QuotaCycleBonus(); !ok {
+		return &ValidationError{Name: "quota_cycle_bonus", err: errors.New(`ent: missing required field "OrganizationMember.quota_cycle_bonus"`)}
 	}
 	if len(_c.mutation.OrganizationIDs()) == 0 {
 		return &ValidationError{Name: "organization", err: errors.New(`ent: missing required edge "OrganizationMember.organization"`)}
@@ -241,6 +323,26 @@ func (_c *OrganizationMemberCreate) createSpec() (*OrganizationMember, *sqlgraph
 	if value, ok := _c.mutation.SpendingFrozen(); ok {
 		_spec.SetField(organizationmember.FieldSpendingFrozen, field.TypeFloat64, value)
 		_node.SpendingFrozen = value
+	}
+	if value, ok := _c.mutation.QuotaAmount(); ok {
+		_spec.SetField(organizationmember.FieldQuotaAmount, field.TypeFloat64, value)
+		_node.QuotaAmount = &value
+	}
+	if value, ok := _c.mutation.QuotaPeriodDays(); ok {
+		_spec.SetField(organizationmember.FieldQuotaPeriodDays, field.TypeInt, value)
+		_node.QuotaPeriodDays = &value
+	}
+	if value, ok := _c.mutation.QuotaStartAt(); ok {
+		_spec.SetField(organizationmember.FieldQuotaStartAt, field.TypeTime, value)
+		_node.QuotaStartAt = &value
+	}
+	if value, ok := _c.mutation.QuotaCycleStart(); ok {
+		_spec.SetField(organizationmember.FieldQuotaCycleStart, field.TypeTime, value)
+		_node.QuotaCycleStart = &value
+	}
+	if value, ok := _c.mutation.QuotaCycleBonus(); ok {
+		_spec.SetField(organizationmember.FieldQuotaCycleBonus, field.TypeFloat64, value)
+		_node.QuotaCycleBonus = value
 	}
 	if nodes := _c.mutation.OrganizationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -424,6 +526,108 @@ func (u *OrganizationMemberUpsert) AddSpendingFrozen(v float64) *OrganizationMem
 	return u
 }
 
+// SetQuotaAmount sets the "quota_amount" field.
+func (u *OrganizationMemberUpsert) SetQuotaAmount(v float64) *OrganizationMemberUpsert {
+	u.Set(organizationmember.FieldQuotaAmount, v)
+	return u
+}
+
+// UpdateQuotaAmount sets the "quota_amount" field to the value that was provided on create.
+func (u *OrganizationMemberUpsert) UpdateQuotaAmount() *OrganizationMemberUpsert {
+	u.SetExcluded(organizationmember.FieldQuotaAmount)
+	return u
+}
+
+// AddQuotaAmount adds v to the "quota_amount" field.
+func (u *OrganizationMemberUpsert) AddQuotaAmount(v float64) *OrganizationMemberUpsert {
+	u.Add(organizationmember.FieldQuotaAmount, v)
+	return u
+}
+
+// ClearQuotaAmount clears the value of the "quota_amount" field.
+func (u *OrganizationMemberUpsert) ClearQuotaAmount() *OrganizationMemberUpsert {
+	u.SetNull(organizationmember.FieldQuotaAmount)
+	return u
+}
+
+// SetQuotaPeriodDays sets the "quota_period_days" field.
+func (u *OrganizationMemberUpsert) SetQuotaPeriodDays(v int) *OrganizationMemberUpsert {
+	u.Set(organizationmember.FieldQuotaPeriodDays, v)
+	return u
+}
+
+// UpdateQuotaPeriodDays sets the "quota_period_days" field to the value that was provided on create.
+func (u *OrganizationMemberUpsert) UpdateQuotaPeriodDays() *OrganizationMemberUpsert {
+	u.SetExcluded(organizationmember.FieldQuotaPeriodDays)
+	return u
+}
+
+// AddQuotaPeriodDays adds v to the "quota_period_days" field.
+func (u *OrganizationMemberUpsert) AddQuotaPeriodDays(v int) *OrganizationMemberUpsert {
+	u.Add(organizationmember.FieldQuotaPeriodDays, v)
+	return u
+}
+
+// ClearQuotaPeriodDays clears the value of the "quota_period_days" field.
+func (u *OrganizationMemberUpsert) ClearQuotaPeriodDays() *OrganizationMemberUpsert {
+	u.SetNull(organizationmember.FieldQuotaPeriodDays)
+	return u
+}
+
+// SetQuotaStartAt sets the "quota_start_at" field.
+func (u *OrganizationMemberUpsert) SetQuotaStartAt(v time.Time) *OrganizationMemberUpsert {
+	u.Set(organizationmember.FieldQuotaStartAt, v)
+	return u
+}
+
+// UpdateQuotaStartAt sets the "quota_start_at" field to the value that was provided on create.
+func (u *OrganizationMemberUpsert) UpdateQuotaStartAt() *OrganizationMemberUpsert {
+	u.SetExcluded(organizationmember.FieldQuotaStartAt)
+	return u
+}
+
+// ClearQuotaStartAt clears the value of the "quota_start_at" field.
+func (u *OrganizationMemberUpsert) ClearQuotaStartAt() *OrganizationMemberUpsert {
+	u.SetNull(organizationmember.FieldQuotaStartAt)
+	return u
+}
+
+// SetQuotaCycleStart sets the "quota_cycle_start" field.
+func (u *OrganizationMemberUpsert) SetQuotaCycleStart(v time.Time) *OrganizationMemberUpsert {
+	u.Set(organizationmember.FieldQuotaCycleStart, v)
+	return u
+}
+
+// UpdateQuotaCycleStart sets the "quota_cycle_start" field to the value that was provided on create.
+func (u *OrganizationMemberUpsert) UpdateQuotaCycleStart() *OrganizationMemberUpsert {
+	u.SetExcluded(organizationmember.FieldQuotaCycleStart)
+	return u
+}
+
+// ClearQuotaCycleStart clears the value of the "quota_cycle_start" field.
+func (u *OrganizationMemberUpsert) ClearQuotaCycleStart() *OrganizationMemberUpsert {
+	u.SetNull(organizationmember.FieldQuotaCycleStart)
+	return u
+}
+
+// SetQuotaCycleBonus sets the "quota_cycle_bonus" field.
+func (u *OrganizationMemberUpsert) SetQuotaCycleBonus(v float64) *OrganizationMemberUpsert {
+	u.Set(organizationmember.FieldQuotaCycleBonus, v)
+	return u
+}
+
+// UpdateQuotaCycleBonus sets the "quota_cycle_bonus" field to the value that was provided on create.
+func (u *OrganizationMemberUpsert) UpdateQuotaCycleBonus() *OrganizationMemberUpsert {
+	u.SetExcluded(organizationmember.FieldQuotaCycleBonus)
+	return u
+}
+
+// AddQuotaCycleBonus adds v to the "quota_cycle_bonus" field.
+func (u *OrganizationMemberUpsert) AddQuotaCycleBonus(v float64) *OrganizationMemberUpsert {
+	u.Add(organizationmember.FieldQuotaCycleBonus, v)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -578,6 +782,125 @@ func (u *OrganizationMemberUpsertOne) AddSpendingFrozen(v float64) *Organization
 func (u *OrganizationMemberUpsertOne) UpdateSpendingFrozen() *OrganizationMemberUpsertOne {
 	return u.Update(func(s *OrganizationMemberUpsert) {
 		s.UpdateSpendingFrozen()
+	})
+}
+
+// SetQuotaAmount sets the "quota_amount" field.
+func (u *OrganizationMemberUpsertOne) SetQuotaAmount(v float64) *OrganizationMemberUpsertOne {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.SetQuotaAmount(v)
+	})
+}
+
+// AddQuotaAmount adds v to the "quota_amount" field.
+func (u *OrganizationMemberUpsertOne) AddQuotaAmount(v float64) *OrganizationMemberUpsertOne {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.AddQuotaAmount(v)
+	})
+}
+
+// UpdateQuotaAmount sets the "quota_amount" field to the value that was provided on create.
+func (u *OrganizationMemberUpsertOne) UpdateQuotaAmount() *OrganizationMemberUpsertOne {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.UpdateQuotaAmount()
+	})
+}
+
+// ClearQuotaAmount clears the value of the "quota_amount" field.
+func (u *OrganizationMemberUpsertOne) ClearQuotaAmount() *OrganizationMemberUpsertOne {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.ClearQuotaAmount()
+	})
+}
+
+// SetQuotaPeriodDays sets the "quota_period_days" field.
+func (u *OrganizationMemberUpsertOne) SetQuotaPeriodDays(v int) *OrganizationMemberUpsertOne {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.SetQuotaPeriodDays(v)
+	})
+}
+
+// AddQuotaPeriodDays adds v to the "quota_period_days" field.
+func (u *OrganizationMemberUpsertOne) AddQuotaPeriodDays(v int) *OrganizationMemberUpsertOne {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.AddQuotaPeriodDays(v)
+	})
+}
+
+// UpdateQuotaPeriodDays sets the "quota_period_days" field to the value that was provided on create.
+func (u *OrganizationMemberUpsertOne) UpdateQuotaPeriodDays() *OrganizationMemberUpsertOne {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.UpdateQuotaPeriodDays()
+	})
+}
+
+// ClearQuotaPeriodDays clears the value of the "quota_period_days" field.
+func (u *OrganizationMemberUpsertOne) ClearQuotaPeriodDays() *OrganizationMemberUpsertOne {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.ClearQuotaPeriodDays()
+	})
+}
+
+// SetQuotaStartAt sets the "quota_start_at" field.
+func (u *OrganizationMemberUpsertOne) SetQuotaStartAt(v time.Time) *OrganizationMemberUpsertOne {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.SetQuotaStartAt(v)
+	})
+}
+
+// UpdateQuotaStartAt sets the "quota_start_at" field to the value that was provided on create.
+func (u *OrganizationMemberUpsertOne) UpdateQuotaStartAt() *OrganizationMemberUpsertOne {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.UpdateQuotaStartAt()
+	})
+}
+
+// ClearQuotaStartAt clears the value of the "quota_start_at" field.
+func (u *OrganizationMemberUpsertOne) ClearQuotaStartAt() *OrganizationMemberUpsertOne {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.ClearQuotaStartAt()
+	})
+}
+
+// SetQuotaCycleStart sets the "quota_cycle_start" field.
+func (u *OrganizationMemberUpsertOne) SetQuotaCycleStart(v time.Time) *OrganizationMemberUpsertOne {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.SetQuotaCycleStart(v)
+	})
+}
+
+// UpdateQuotaCycleStart sets the "quota_cycle_start" field to the value that was provided on create.
+func (u *OrganizationMemberUpsertOne) UpdateQuotaCycleStart() *OrganizationMemberUpsertOne {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.UpdateQuotaCycleStart()
+	})
+}
+
+// ClearQuotaCycleStart clears the value of the "quota_cycle_start" field.
+func (u *OrganizationMemberUpsertOne) ClearQuotaCycleStart() *OrganizationMemberUpsertOne {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.ClearQuotaCycleStart()
+	})
+}
+
+// SetQuotaCycleBonus sets the "quota_cycle_bonus" field.
+func (u *OrganizationMemberUpsertOne) SetQuotaCycleBonus(v float64) *OrganizationMemberUpsertOne {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.SetQuotaCycleBonus(v)
+	})
+}
+
+// AddQuotaCycleBonus adds v to the "quota_cycle_bonus" field.
+func (u *OrganizationMemberUpsertOne) AddQuotaCycleBonus(v float64) *OrganizationMemberUpsertOne {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.AddQuotaCycleBonus(v)
+	})
+}
+
+// UpdateQuotaCycleBonus sets the "quota_cycle_bonus" field to the value that was provided on create.
+func (u *OrganizationMemberUpsertOne) UpdateQuotaCycleBonus() *OrganizationMemberUpsertOne {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.UpdateQuotaCycleBonus()
 	})
 }
 
@@ -901,6 +1224,125 @@ func (u *OrganizationMemberUpsertBulk) AddSpendingFrozen(v float64) *Organizatio
 func (u *OrganizationMemberUpsertBulk) UpdateSpendingFrozen() *OrganizationMemberUpsertBulk {
 	return u.Update(func(s *OrganizationMemberUpsert) {
 		s.UpdateSpendingFrozen()
+	})
+}
+
+// SetQuotaAmount sets the "quota_amount" field.
+func (u *OrganizationMemberUpsertBulk) SetQuotaAmount(v float64) *OrganizationMemberUpsertBulk {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.SetQuotaAmount(v)
+	})
+}
+
+// AddQuotaAmount adds v to the "quota_amount" field.
+func (u *OrganizationMemberUpsertBulk) AddQuotaAmount(v float64) *OrganizationMemberUpsertBulk {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.AddQuotaAmount(v)
+	})
+}
+
+// UpdateQuotaAmount sets the "quota_amount" field to the value that was provided on create.
+func (u *OrganizationMemberUpsertBulk) UpdateQuotaAmount() *OrganizationMemberUpsertBulk {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.UpdateQuotaAmount()
+	})
+}
+
+// ClearQuotaAmount clears the value of the "quota_amount" field.
+func (u *OrganizationMemberUpsertBulk) ClearQuotaAmount() *OrganizationMemberUpsertBulk {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.ClearQuotaAmount()
+	})
+}
+
+// SetQuotaPeriodDays sets the "quota_period_days" field.
+func (u *OrganizationMemberUpsertBulk) SetQuotaPeriodDays(v int) *OrganizationMemberUpsertBulk {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.SetQuotaPeriodDays(v)
+	})
+}
+
+// AddQuotaPeriodDays adds v to the "quota_period_days" field.
+func (u *OrganizationMemberUpsertBulk) AddQuotaPeriodDays(v int) *OrganizationMemberUpsertBulk {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.AddQuotaPeriodDays(v)
+	})
+}
+
+// UpdateQuotaPeriodDays sets the "quota_period_days" field to the value that was provided on create.
+func (u *OrganizationMemberUpsertBulk) UpdateQuotaPeriodDays() *OrganizationMemberUpsertBulk {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.UpdateQuotaPeriodDays()
+	})
+}
+
+// ClearQuotaPeriodDays clears the value of the "quota_period_days" field.
+func (u *OrganizationMemberUpsertBulk) ClearQuotaPeriodDays() *OrganizationMemberUpsertBulk {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.ClearQuotaPeriodDays()
+	})
+}
+
+// SetQuotaStartAt sets the "quota_start_at" field.
+func (u *OrganizationMemberUpsertBulk) SetQuotaStartAt(v time.Time) *OrganizationMemberUpsertBulk {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.SetQuotaStartAt(v)
+	})
+}
+
+// UpdateQuotaStartAt sets the "quota_start_at" field to the value that was provided on create.
+func (u *OrganizationMemberUpsertBulk) UpdateQuotaStartAt() *OrganizationMemberUpsertBulk {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.UpdateQuotaStartAt()
+	})
+}
+
+// ClearQuotaStartAt clears the value of the "quota_start_at" field.
+func (u *OrganizationMemberUpsertBulk) ClearQuotaStartAt() *OrganizationMemberUpsertBulk {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.ClearQuotaStartAt()
+	})
+}
+
+// SetQuotaCycleStart sets the "quota_cycle_start" field.
+func (u *OrganizationMemberUpsertBulk) SetQuotaCycleStart(v time.Time) *OrganizationMemberUpsertBulk {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.SetQuotaCycleStart(v)
+	})
+}
+
+// UpdateQuotaCycleStart sets the "quota_cycle_start" field to the value that was provided on create.
+func (u *OrganizationMemberUpsertBulk) UpdateQuotaCycleStart() *OrganizationMemberUpsertBulk {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.UpdateQuotaCycleStart()
+	})
+}
+
+// ClearQuotaCycleStart clears the value of the "quota_cycle_start" field.
+func (u *OrganizationMemberUpsertBulk) ClearQuotaCycleStart() *OrganizationMemberUpsertBulk {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.ClearQuotaCycleStart()
+	})
+}
+
+// SetQuotaCycleBonus sets the "quota_cycle_bonus" field.
+func (u *OrganizationMemberUpsertBulk) SetQuotaCycleBonus(v float64) *OrganizationMemberUpsertBulk {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.SetQuotaCycleBonus(v)
+	})
+}
+
+// AddQuotaCycleBonus adds v to the "quota_cycle_bonus" field.
+func (u *OrganizationMemberUpsertBulk) AddQuotaCycleBonus(v float64) *OrganizationMemberUpsertBulk {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.AddQuotaCycleBonus(v)
+	})
+}
+
+// UpdateQuotaCycleBonus sets the "quota_cycle_bonus" field to the value that was provided on create.
+func (u *OrganizationMemberUpsertBulk) UpdateQuotaCycleBonus() *OrganizationMemberUpsertBulk {
+	return u.Update(func(s *OrganizationMemberUpsert) {
+		s.UpdateQuotaCycleBonus()
 	})
 }
 

@@ -26,6 +26,12 @@ const (
 	FieldRestrictPublicGroups = "restrict_public_groups"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
+	// FieldQuotaRequestMode holds the string denoting the quota_request_mode field in the database.
+	FieldQuotaRequestMode = "quota_request_mode"
+	// FieldQuotaRequestMin holds the string denoting the quota_request_min field in the database.
+	FieldQuotaRequestMin = "quota_request_min"
+	// FieldQuotaRequestMax holds the string denoting the quota_request_max field in the database.
+	FieldQuotaRequestMax = "quota_request_max"
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
 	EdgeOwner = "owner"
 	// EdgeMembers holds the string denoting the members edge name in mutations.
@@ -82,6 +88,9 @@ var Columns = []string{
 	FieldOwnerUserID,
 	FieldRestrictPublicGroups,
 	FieldStatus,
+	FieldQuotaRequestMode,
+	FieldQuotaRequestMin,
+	FieldQuotaRequestMax,
 }
 
 var (
@@ -115,6 +124,10 @@ var (
 	DefaultStatus string
 	// StatusValidator is a validator for the "status" field. It is called by the builders before save.
 	StatusValidator func(string) error
+	// DefaultQuotaRequestMode holds the default value on creation for the "quota_request_mode" field.
+	DefaultQuotaRequestMode string
+	// QuotaRequestModeValidator is a validator for the "quota_request_mode" field. It is called by the builders before save.
+	QuotaRequestModeValidator func(string) error
 )
 
 // OrderOption defines the ordering options for the Organization queries.
@@ -153,6 +166,21 @@ func ByRestrictPublicGroups(opts ...sql.OrderTermOption) OrderOption {
 // ByStatus orders the results by the status field.
 func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStatus, opts...).ToFunc()
+}
+
+// ByQuotaRequestMode orders the results by the quota_request_mode field.
+func ByQuotaRequestMode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldQuotaRequestMode, opts...).ToFunc()
+}
+
+// ByQuotaRequestMin orders the results by the quota_request_min field.
+func ByQuotaRequestMin(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldQuotaRequestMin, opts...).ToFunc()
+}
+
+// ByQuotaRequestMax orders the results by the quota_request_max field.
+func ByQuotaRequestMax(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldQuotaRequestMax, opts...).ToFunc()
 }
 
 // ByOwnerField orders the results by owner field.

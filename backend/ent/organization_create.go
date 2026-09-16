@@ -94,6 +94,48 @@ func (_c *OrganizationCreate) SetNillableStatus(v *string) *OrganizationCreate {
 	return _c
 }
 
+// SetQuotaRequestMode sets the "quota_request_mode" field.
+func (_c *OrganizationCreate) SetQuotaRequestMode(v string) *OrganizationCreate {
+	_c.mutation.SetQuotaRequestMode(v)
+	return _c
+}
+
+// SetNillableQuotaRequestMode sets the "quota_request_mode" field if the given value is not nil.
+func (_c *OrganizationCreate) SetNillableQuotaRequestMode(v *string) *OrganizationCreate {
+	if v != nil {
+		_c.SetQuotaRequestMode(*v)
+	}
+	return _c
+}
+
+// SetQuotaRequestMin sets the "quota_request_min" field.
+func (_c *OrganizationCreate) SetQuotaRequestMin(v float64) *OrganizationCreate {
+	_c.mutation.SetQuotaRequestMin(v)
+	return _c
+}
+
+// SetNillableQuotaRequestMin sets the "quota_request_min" field if the given value is not nil.
+func (_c *OrganizationCreate) SetNillableQuotaRequestMin(v *float64) *OrganizationCreate {
+	if v != nil {
+		_c.SetQuotaRequestMin(*v)
+	}
+	return _c
+}
+
+// SetQuotaRequestMax sets the "quota_request_max" field.
+func (_c *OrganizationCreate) SetQuotaRequestMax(v float64) *OrganizationCreate {
+	_c.mutation.SetQuotaRequestMax(v)
+	return _c
+}
+
+// SetNillableQuotaRequestMax sets the "quota_request_max" field if the given value is not nil.
+func (_c *OrganizationCreate) SetNillableQuotaRequestMax(v *float64) *OrganizationCreate {
+	if v != nil {
+		_c.SetQuotaRequestMax(*v)
+	}
+	return _c
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_c *OrganizationCreate) SetOwnerID(id int64) *OrganizationCreate {
 	_c.mutation.SetOwnerID(id)
@@ -201,6 +243,10 @@ func (_c *OrganizationCreate) defaults() {
 		v := organization.DefaultStatus
 		_c.mutation.SetStatus(v)
 	}
+	if _, ok := _c.mutation.QuotaRequestMode(); !ok {
+		v := organization.DefaultQuotaRequestMode
+		_c.mutation.SetQuotaRequestMode(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -231,6 +277,14 @@ func (_c *OrganizationCreate) check() error {
 	if v, ok := _c.mutation.Status(); ok {
 		if err := organization.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Organization.status": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.QuotaRequestMode(); !ok {
+		return &ValidationError{Name: "quota_request_mode", err: errors.New(`ent: missing required field "Organization.quota_request_mode"`)}
+	}
+	if v, ok := _c.mutation.QuotaRequestMode(); ok {
+		if err := organization.QuotaRequestModeValidator(v); err != nil {
+			return &ValidationError{Name: "quota_request_mode", err: fmt.Errorf(`ent: validator failed for field "Organization.quota_request_mode": %w`, err)}
 		}
 	}
 	if len(_c.mutation.OwnerIDs()) == 0 {
@@ -282,6 +336,18 @@ func (_c *OrganizationCreate) createSpec() (*Organization, *sqlgraph.CreateSpec)
 	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(organization.FieldStatus, field.TypeString, value)
 		_node.Status = value
+	}
+	if value, ok := _c.mutation.QuotaRequestMode(); ok {
+		_spec.SetField(organization.FieldQuotaRequestMode, field.TypeString, value)
+		_node.QuotaRequestMode = value
+	}
+	if value, ok := _c.mutation.QuotaRequestMin(); ok {
+		_spec.SetField(organization.FieldQuotaRequestMin, field.TypeFloat64, value)
+		_node.QuotaRequestMin = &value
+	}
+	if value, ok := _c.mutation.QuotaRequestMax(); ok {
+		_spec.SetField(organization.FieldQuotaRequestMax, field.TypeFloat64, value)
+		_node.QuotaRequestMax = &value
 	}
 	if nodes := _c.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -464,6 +530,66 @@ func (u *OrganizationUpsert) UpdateStatus() *OrganizationUpsert {
 	return u
 }
 
+// SetQuotaRequestMode sets the "quota_request_mode" field.
+func (u *OrganizationUpsert) SetQuotaRequestMode(v string) *OrganizationUpsert {
+	u.Set(organization.FieldQuotaRequestMode, v)
+	return u
+}
+
+// UpdateQuotaRequestMode sets the "quota_request_mode" field to the value that was provided on create.
+func (u *OrganizationUpsert) UpdateQuotaRequestMode() *OrganizationUpsert {
+	u.SetExcluded(organization.FieldQuotaRequestMode)
+	return u
+}
+
+// SetQuotaRequestMin sets the "quota_request_min" field.
+func (u *OrganizationUpsert) SetQuotaRequestMin(v float64) *OrganizationUpsert {
+	u.Set(organization.FieldQuotaRequestMin, v)
+	return u
+}
+
+// UpdateQuotaRequestMin sets the "quota_request_min" field to the value that was provided on create.
+func (u *OrganizationUpsert) UpdateQuotaRequestMin() *OrganizationUpsert {
+	u.SetExcluded(organization.FieldQuotaRequestMin)
+	return u
+}
+
+// AddQuotaRequestMin adds v to the "quota_request_min" field.
+func (u *OrganizationUpsert) AddQuotaRequestMin(v float64) *OrganizationUpsert {
+	u.Add(organization.FieldQuotaRequestMin, v)
+	return u
+}
+
+// ClearQuotaRequestMin clears the value of the "quota_request_min" field.
+func (u *OrganizationUpsert) ClearQuotaRequestMin() *OrganizationUpsert {
+	u.SetNull(organization.FieldQuotaRequestMin)
+	return u
+}
+
+// SetQuotaRequestMax sets the "quota_request_max" field.
+func (u *OrganizationUpsert) SetQuotaRequestMax(v float64) *OrganizationUpsert {
+	u.Set(organization.FieldQuotaRequestMax, v)
+	return u
+}
+
+// UpdateQuotaRequestMax sets the "quota_request_max" field to the value that was provided on create.
+func (u *OrganizationUpsert) UpdateQuotaRequestMax() *OrganizationUpsert {
+	u.SetExcluded(organization.FieldQuotaRequestMax)
+	return u
+}
+
+// AddQuotaRequestMax adds v to the "quota_request_max" field.
+func (u *OrganizationUpsert) AddQuotaRequestMax(v float64) *OrganizationUpsert {
+	u.Add(organization.FieldQuotaRequestMax, v)
+	return u
+}
+
+// ClearQuotaRequestMax clears the value of the "quota_request_max" field.
+func (u *OrganizationUpsert) ClearQuotaRequestMax() *OrganizationUpsert {
+	u.SetNull(organization.FieldQuotaRequestMax)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -576,6 +702,76 @@ func (u *OrganizationUpsertOne) SetStatus(v string) *OrganizationUpsertOne {
 func (u *OrganizationUpsertOne) UpdateStatus() *OrganizationUpsertOne {
 	return u.Update(func(s *OrganizationUpsert) {
 		s.UpdateStatus()
+	})
+}
+
+// SetQuotaRequestMode sets the "quota_request_mode" field.
+func (u *OrganizationUpsertOne) SetQuotaRequestMode(v string) *OrganizationUpsertOne {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.SetQuotaRequestMode(v)
+	})
+}
+
+// UpdateQuotaRequestMode sets the "quota_request_mode" field to the value that was provided on create.
+func (u *OrganizationUpsertOne) UpdateQuotaRequestMode() *OrganizationUpsertOne {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.UpdateQuotaRequestMode()
+	})
+}
+
+// SetQuotaRequestMin sets the "quota_request_min" field.
+func (u *OrganizationUpsertOne) SetQuotaRequestMin(v float64) *OrganizationUpsertOne {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.SetQuotaRequestMin(v)
+	})
+}
+
+// AddQuotaRequestMin adds v to the "quota_request_min" field.
+func (u *OrganizationUpsertOne) AddQuotaRequestMin(v float64) *OrganizationUpsertOne {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.AddQuotaRequestMin(v)
+	})
+}
+
+// UpdateQuotaRequestMin sets the "quota_request_min" field to the value that was provided on create.
+func (u *OrganizationUpsertOne) UpdateQuotaRequestMin() *OrganizationUpsertOne {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.UpdateQuotaRequestMin()
+	})
+}
+
+// ClearQuotaRequestMin clears the value of the "quota_request_min" field.
+func (u *OrganizationUpsertOne) ClearQuotaRequestMin() *OrganizationUpsertOne {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.ClearQuotaRequestMin()
+	})
+}
+
+// SetQuotaRequestMax sets the "quota_request_max" field.
+func (u *OrganizationUpsertOne) SetQuotaRequestMax(v float64) *OrganizationUpsertOne {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.SetQuotaRequestMax(v)
+	})
+}
+
+// AddQuotaRequestMax adds v to the "quota_request_max" field.
+func (u *OrganizationUpsertOne) AddQuotaRequestMax(v float64) *OrganizationUpsertOne {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.AddQuotaRequestMax(v)
+	})
+}
+
+// UpdateQuotaRequestMax sets the "quota_request_max" field to the value that was provided on create.
+func (u *OrganizationUpsertOne) UpdateQuotaRequestMax() *OrganizationUpsertOne {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.UpdateQuotaRequestMax()
+	})
+}
+
+// ClearQuotaRequestMax clears the value of the "quota_request_max" field.
+func (u *OrganizationUpsertOne) ClearQuotaRequestMax() *OrganizationUpsertOne {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.ClearQuotaRequestMax()
 	})
 }
 
@@ -857,6 +1053,76 @@ func (u *OrganizationUpsertBulk) SetStatus(v string) *OrganizationUpsertBulk {
 func (u *OrganizationUpsertBulk) UpdateStatus() *OrganizationUpsertBulk {
 	return u.Update(func(s *OrganizationUpsert) {
 		s.UpdateStatus()
+	})
+}
+
+// SetQuotaRequestMode sets the "quota_request_mode" field.
+func (u *OrganizationUpsertBulk) SetQuotaRequestMode(v string) *OrganizationUpsertBulk {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.SetQuotaRequestMode(v)
+	})
+}
+
+// UpdateQuotaRequestMode sets the "quota_request_mode" field to the value that was provided on create.
+func (u *OrganizationUpsertBulk) UpdateQuotaRequestMode() *OrganizationUpsertBulk {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.UpdateQuotaRequestMode()
+	})
+}
+
+// SetQuotaRequestMin sets the "quota_request_min" field.
+func (u *OrganizationUpsertBulk) SetQuotaRequestMin(v float64) *OrganizationUpsertBulk {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.SetQuotaRequestMin(v)
+	})
+}
+
+// AddQuotaRequestMin adds v to the "quota_request_min" field.
+func (u *OrganizationUpsertBulk) AddQuotaRequestMin(v float64) *OrganizationUpsertBulk {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.AddQuotaRequestMin(v)
+	})
+}
+
+// UpdateQuotaRequestMin sets the "quota_request_min" field to the value that was provided on create.
+func (u *OrganizationUpsertBulk) UpdateQuotaRequestMin() *OrganizationUpsertBulk {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.UpdateQuotaRequestMin()
+	})
+}
+
+// ClearQuotaRequestMin clears the value of the "quota_request_min" field.
+func (u *OrganizationUpsertBulk) ClearQuotaRequestMin() *OrganizationUpsertBulk {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.ClearQuotaRequestMin()
+	})
+}
+
+// SetQuotaRequestMax sets the "quota_request_max" field.
+func (u *OrganizationUpsertBulk) SetQuotaRequestMax(v float64) *OrganizationUpsertBulk {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.SetQuotaRequestMax(v)
+	})
+}
+
+// AddQuotaRequestMax adds v to the "quota_request_max" field.
+func (u *OrganizationUpsertBulk) AddQuotaRequestMax(v float64) *OrganizationUpsertBulk {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.AddQuotaRequestMax(v)
+	})
+}
+
+// UpdateQuotaRequestMax sets the "quota_request_max" field to the value that was provided on create.
+func (u *OrganizationUpsertBulk) UpdateQuotaRequestMax() *OrganizationUpsertBulk {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.UpdateQuotaRequestMax()
+	})
+}
+
+// ClearQuotaRequestMax clears the value of the "quota_request_max" field.
+func (u *OrganizationUpsertBulk) ClearQuotaRequestMax() *OrganizationUpsertBulk {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.ClearQuotaRequestMax()
 	})
 }
 

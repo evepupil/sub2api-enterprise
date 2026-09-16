@@ -273,6 +273,18 @@ func (f OrganizationMemberFunc) Mutate(ctx context.Context, m ent.Mutation) (ent
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.OrganizationMemberMutation", m)
 }
 
+// The OrganizationQuotaRequestFunc type is an adapter to allow the use of ordinary
+// function as OrganizationQuotaRequest mutator.
+type OrganizationQuotaRequestFunc func(context.Context, *ent.OrganizationQuotaRequestMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f OrganizationQuotaRequestFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.OrganizationQuotaRequestMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.OrganizationQuotaRequestMutation", m)
+}
+
 // The PaymentAuditLogFunc type is an adapter to allow the use of ordinary
 // function as PaymentAuditLog mutator.
 type PaymentAuditLogFunc func(context.Context, *ent.PaymentAuditLogMutation) (ent.Value, error)

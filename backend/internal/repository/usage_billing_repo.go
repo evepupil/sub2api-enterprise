@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"strings"
+	"time"
 
 	dbent "github.com/Wei-Shaw/sub2api/ent"
 	"github.com/Wei-Shaw/sub2api/internal/pkg/logger"
@@ -253,29 +254,72 @@ func resolveUsageBillingPayer(ctx context.Context, tx *sql.Tx, userID int64) (pa
 // ensureOrganizationSpendingAllowance 在预扣之前确认成员的额度够不够。
 //
 // 行锁住成员这一行，让同一成员的并发预扣排队，避免两笔任务各自看到旧数字后
-// 一起冻结、加起来超过上限。上限留空表示不限额。
+// 一起冻结、加起来超过上限。锁住后先做周期推进（该换期了就把当期起点推进、
+// 当期已消费清零、本期一次性加成清零），再按生效上限比较：周期生效中取
+// 每期金额加本期一次性加成，其余（没配周期或锚点在未来）取静态上限，
+// 留空表示不限额。
 func ensureOrganizationSpendingAllowance(ctx context.Context, tx *sql.Tx, userID int64, holdAmount float64) error {
 	if userID <= 0 || holdAmount <= 0 {
 		return nil
 	}
 	var limit sql.NullFloat64
-	var used, frozen float64
+	var quotaAmount sql.NullFloat64
+	var quotaPeriodDays sql.NullInt64
+	var quotaStartAt, quotaCycleStart sql.NullTime
+	var used, frozen, cycleBonus float64
 	err := tx.QueryRowContext(ctx, `
-		SELECT spending_limit, spending_used, spending_frozen
+		SELECT spending_limit, spending_used, spending_frozen,
+		       quota_amount, quota_period_days, quota_start_at, quota_cycle_start,
+		       quota_cycle_bonus
 		FROM organization_members
 		WHERE user_id = $1
 		FOR UPDATE
-	`, userID).Scan(&limit, &used, &frozen)
+	`, userID).Scan(&limit, &used, &frozen, &quotaAmount, &quotaPeriodDays, &quotaStartAt, &quotaCycleStart, &cycleBonus)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil
 	}
 	if err != nil {
 		return err
 	}
-	if !limit.Valid {
+
+	var effectiveLimit *float64
+	if quotaAmount.Valid {
+		periodDays := int(quotaPeriodDays.Int64)
+		startAt := quotaStartAt.Time
+		var storedCycleStart *time.Time
+		if quotaCycleStart.Valid {
+			stored := quotaCycleStart.Time
+			storedCycleStart = &stored
+		}
+		state := service.ResolveMemberQuotaState(&quotaAmount.Float64, &periodDays, &startAt, storedCycleStart, time.Now())
+		if state.Mode == service.QuotaModeActive {
+			if state.NeedsAdvance && state.CycleStart != nil {
+				// 惰性推进在权威路径上落库：起点对齐、当期已消费清零、一次性加成清零。
+				// 冻结金额不清，带进新期继续占新期的额度。
+				if _, err := tx.ExecContext(ctx, `
+					UPDATE organization_members
+					SET quota_cycle_start = $2, spending_used = 0, quota_cycle_bonus = 0, updated_at = NOW()
+					WHERE user_id = $1
+				`, userID, *state.CycleStart); err != nil {
+					return err
+				}
+				used = 0
+				cycleBonus = 0
+			}
+			// 生效上限 = 每期金额 + 本期一次性加成。换期后加成已清，不能把上期补给带进新期。
+			withBonus := service.QuantizeUsageBillingAmount(*state.Amount + cycleBonus)
+			effectiveLimit = &withBonus
+		} else {
+			effectiveLimit = nullFloat64Ptr(limit)
+		}
+	} else {
+		effectiveLimit = nullFloat64Ptr(limit)
+	}
+
+	if effectiveLimit == nil {
 		return nil
 	}
-	if used+frozen+holdAmount > limit.Float64+usageBillingAmountEpsilon {
+	if used+frozen+holdAmount > *effectiveLimit+usageBillingAmountEpsilon {
 		return service.ErrOrganizationSpendingLimitExhausted
 	}
 	return nil

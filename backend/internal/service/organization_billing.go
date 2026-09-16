@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"time"
 
 	infraerrors "github.com/Wei-Shaw/sub2api/internal/pkg/errors"
 	"github.com/Wei-Shaw/sub2api/internal/pkg/logger"
@@ -26,8 +27,10 @@ var (
 
 // OrganizationSpendingRepository 读取组织成员已经占用掉的额度。
 type OrganizationSpendingRepository interface {
-	// GetMemberSpending 返回该成员的已消费金额加已冻结金额；不是组织成员时返回 0。
-	GetMemberSpending(ctx context.Context, userID int64) (float64, error)
+	// GetMemberSpending 返回该成员的已消费金额加已冻结金额，以及周期配额的
+	// 本期截止时间（未配周期为 nil，供缓存层截 TTL）。不是组织成员时返回 0。
+	// 周期到期时先在行锁内推进再读，保证返回的数字属于当前期。
+	GetMemberSpending(ctx context.Context, userID int64) (float64, *time.Time, error)
 }
 
 // SetOrganizationSpendingRepo 注入组织成员额度读取，构造后设置以避免循环依赖。
@@ -81,12 +84,12 @@ func (s *BillingCacheService) GetOrganizationMemberSpending(ctx context.Context,
 		loadCtx, cancel := context.WithTimeout(context.Background(), balanceLoadTimeout)
 		defer cancel()
 
-		spending, err := s.organizationSpendingRepo.GetMemberSpending(loadCtx, userID)
+		spending, windowEnd, err := s.organizationSpendingRepo.GetMemberSpending(loadCtx, userID)
 		if err != nil {
 			return nil, fmt.Errorf("get organization member spending: %w", err)
 		}
 		if s.cache != nil {
-			if setErr := s.cache.SetOrganizationMemberSpending(context.WithoutCancel(loadCtx), userID, spending); setErr != nil {
+			if setErr := s.cache.SetOrganizationMemberSpending(context.WithoutCancel(loadCtx), userID, spending, windowEnd); setErr != nil {
 				logger.LegacyPrintf("service.billing_cache",
 					"warning: set organization member spending cache failed user=%d: %v", userID, setErr)
 			}

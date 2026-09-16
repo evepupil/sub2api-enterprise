@@ -5,6 +5,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/internal/domain"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
@@ -45,6 +46,21 @@ func (Organization) Fields() []ent.Field {
 		field.String("status").
 			MaxLen(20).
 			Default(domain.StatusActive),
+
+		// 配额申请策略：off 关闭（默认，成员不能申请）、approve 先批后加、
+		// auto 即申即加。打开后单次最低、最高必填且最低 > 0、最高 >= 最低，
+		// 由服务层校验；off 时两项为空。
+		field.String("quota_request_mode").
+			MaxLen(20).
+			Default("off"),
+		field.Float("quota_request_min").
+			Optional().
+			Nillable().
+			SchemaType(map[string]string{dialect.Postgres: "decimal(20,8)"}),
+		field.Float("quota_request_max").
+			Optional().
+			Nillable().
+			SchemaType(map[string]string{dialect.Postgres: "decimal(20,8)"}),
 	}
 }
 
