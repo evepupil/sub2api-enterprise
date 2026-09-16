@@ -60,7 +60,6 @@ func (r *organizationQuotaRequestRepoStub) Create(_ context.Context, request *Or
 func (r *organizationQuotaRequestRepoStub) CreateAutoGranted(
 	ctx context.Context,
 	request *OrganizationQuotaRequest,
-	_ *OrganizationMember,
 ) error {
 	if err := r.Create(ctx, request); err != nil {
 		return err

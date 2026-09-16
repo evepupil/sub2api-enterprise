@@ -143,7 +143,7 @@ type OrganizationQuotaRequestRepository interface {
 	HasPending(ctx context.Context, organizationID int64, userID int64) (bool, error)
 	// CreateAutoGranted 即申即加：同一事务里写已发放流水（来源=auto）
 	// 并把金额加到成员身上（周期生效加 quota_cycle_bonus，其余加静态上限）。
-	CreateAutoGranted(ctx context.Context, request *OrganizationQuotaRequest, member *OrganizationMember) error
+	CreateAutoGranted(ctx context.Context, request *OrganizationQuotaRequest) error
 	// Review 在一笔事务里处理一个待处理申请：先批后加的「通过」在这里把金额
 	// 加到成员身上（周期生效加 quota_cycle_bonus，其余加静态上限），
 	// 再把申请状态写成入参的终态。返回更新后的申请与成员。
@@ -256,9 +256,7 @@ func (s *OrganizationMemberService) SubmitQuotaRequest(
 	snapshot := snapshotFromMember(member, state)
 
 	if policy.Mode == QuotaRequestModeAuto {
-		// 即申即加：先在内存里套用加成（周期生效进当期，其余进静态上限），
-		// 落库和记流水放在同一笔事务里，由仓储保证原子性。
-		applyQuotaTopUp(member, normalizedAmount, now)
+		// 即申即加：发放只在仓储事务里做一次（锁成员行后按库里的当前数字加）。
 		request := &OrganizationQuotaRequest{
 			OrganizationID: member.OrganizationID,
 			UserID:         actorUserID,
@@ -272,7 +270,7 @@ func (s *OrganizationMemberService) SubmitQuotaRequest(
 			SnapshotUsed:   snapshot.used,
 			CreatedAt:      now,
 		}
-		if err := s.quotaRequests.CreateAutoGranted(ctx, request, member); err != nil {
+		if err := s.quotaRequests.CreateAutoGranted(ctx, request); err != nil {
 			return nil, err
 		}
 		s.invalidateSpendingCaches(ctx, actorUserID)

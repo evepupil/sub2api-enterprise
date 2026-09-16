@@ -99,7 +99,6 @@ func (r *organizationQuotaRequestRepository) Create(
 func (r *organizationQuotaRequestRepository) CreateAutoGranted(
 	ctx context.Context,
 	request *service.OrganizationQuotaRequest,
-	member *service.OrganizationMember,
 ) error {
 	tx, err := r.client.Tx(ctx)
 	if err != nil {
@@ -108,7 +107,14 @@ func (r *organizationQuotaRequestRepository) CreateAutoGranted(
 	defer func() { _ = tx.Rollback() }()
 
 	client := tx.Client()
-	if err := applyTopUpToMember(ctx, client, member, request.Amount); err != nil {
+	locked, err := loadMemberForTopUp(ctx, client, request.UserID)
+	if err != nil {
+		return err
+	}
+	if locked == nil || locked.EffectiveSpendingLimit(time.Now()) == nil {
+		return service.ErrOrganizationQuotaRequestMemberIneligible
+	}
+	if err := applyTopUpToMember(ctx, client, locked, request.Amount); err != nil {
 		return err
 	}
 
