@@ -107,7 +107,8 @@ import { FeatureFlags, isFeatureFlagEnabled } from '@/utils/featureFlags'
 /**
  * 首页有三种形态，这里只负责挑一种：
  * 管理员自定义内容 → 紧凑首页 → 默认官网首页。
- * 默认官网那一版内容多，单独放在 landing/HomeLanding.vue。
+ * 默认官网那一版内容多，单独放在 landing/HomeLanding.vue；
+ * 该形态已被路由守卫屏蔽（未配置前两种时 /home 直接分流），保留代码待产品页改造。
  */
 const { t } = useI18n()
 

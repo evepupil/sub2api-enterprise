@@ -31,6 +31,7 @@ const routes: RouteRecordRaw[] = [
 
   // ==================== Public Routes ====================
   {
+    // 默认营销页已在前置守卫屏蔽：未配置自定义内容/紧凑首页时访问会被分流到登录页或控制台。
     path: '/home',
     name: 'Home',
     component: () => import('@/views/HomeView.vue'),
@@ -210,8 +211,10 @@ const routes: RouteRecordRaw[] = [
 
   // ==================== User Routes ====================
   {
+    // 官网首页暂不下线但不再作为落地页：根路径直接进登录页，
+    // 已登录用户由导航守卫转送到控制台/管理后台。后续产品页上线后再指回。
     path: '/',
-    redirect: '/home'
+    redirect: '/login'
   },
   {
     path: '/dashboard',
@@ -906,7 +909,7 @@ router.beforeEach(async (to, _from, next) => {
             ? authStore.isAdmin
               ? '/admin/dashboard'
               : '/dashboard'
-            : '/home'
+            : '/login'
         )
         return
       }
@@ -917,6 +920,24 @@ router.beforeEach(async (to, _from, next) => {
       // Backend mode:登录的非管理员也不可见(匿名由下方公共拦截处理,广场不在白名单)
       if (appStore.backendModeEnabled && authStore.isAuthenticated && !authStore.isAdmin) {
         next('/login')
+        return
+      }
+    }
+    // 默认官网首页已下线：运营者配置了自定义首页内容或紧凑首页时 /home 才放行，
+    // 否则按登录态分流（与根路径同口径）。设置加载失败视为未配置，宁可拦错不可漏出。
+    if (to.path === '/home') {
+      if (!appStore.publicSettingsLoaded) {
+        try {
+          await appStore.fetchPublicSettings()
+        } catch (error) {
+          console.warn('Failed to load public settings in route guard', error)
+        }
+      }
+      const homeSettings = appStore.cachedPublicSettings
+      const hasCustomHome = (homeSettings?.home_content ?? '').trim().length > 0
+      const compactHomeEnabled = homeSettings?.compact_home_enabled === true
+      if (!hasCustomHome && !compactHomeEnabled) {
+        next(authStore.isAuthenticated ? (authStore.isAdmin ? '/admin/dashboard' : '/dashboard') : '/login')
         return
       }
     }

@@ -55,6 +55,8 @@ interface MockAuthState {
   backendModeEnabled: boolean
   hasPendingAuthSession: boolean
   setupNeedsSetup?: boolean
+  /** 运营者配置了自定义首页内容或紧凑首页时为 true，此时 /home 才放行 */
+  homePageEnabled?: boolean
 }
 
 /**
@@ -82,6 +84,14 @@ function simulateGuard(
         return null
       }
       return authState.isAdmin ? '/admin/dashboard' : '/dashboard'
+    }
+    // 默认官网首页已下线：未配置自定义内容/紧凑首页时按登录态分流
+    if (toPath === '/home' && !authState.homePageEnabled) {
+      return authState.isAuthenticated
+        ? authState.isAdmin
+          ? '/admin/dashboard'
+          : '/dashboard'
+        : '/login'
     }
     if (authState.backendModeEnabled && !authState.isAuthenticated) {
       const allowed = ['/login', '/key-usage', '/setup', '/payment/result']
@@ -184,8 +194,13 @@ describe('路由守卫逻辑', () => {
       expect(redirect).toBeNull()
     })
 
-    it('访问 /home 公开页面允许通过', () => {
+    it('访问 /home 默认被屏蔽，重定向到 /login', () => {
       const redirect = simulateGuard('/home', { requiresAuth: false }, authState)
+      expect(redirect).toBe('/login')
+    })
+
+    it('配置了自定义首页内容时 /home 允许通过', () => {
+      const redirect = simulateGuard('/home', { requiresAuth: false }, { ...authState, homePageEnabled: true })
       expect(redirect).toBeNull()
     })
   })
@@ -208,6 +223,11 @@ describe('路由守卫逻辑', () => {
 
     it('访问 /register 重定向到 /dashboard', () => {
       const redirect = simulateGuard('/register', { requiresAuth: false }, authState)
+      expect(redirect).toBe('/dashboard')
+    })
+
+    it('访问 /home 默认被屏蔽，重定向到 /dashboard', () => {
+      const redirect = simulateGuard('/home', { requiresAuth: false }, authState)
       expect(redirect).toBe('/dashboard')
     })
 
@@ -240,6 +260,11 @@ describe('路由守卫逻辑', () => {
 
     it('访问 /login 重定向到 /admin/dashboard', () => {
       const redirect = simulateGuard('/login', { requiresAuth: false }, authState)
+      expect(redirect).toBe('/admin/dashboard')
+    })
+
+    it('访问 /home 默认被屏蔽，重定向到 /admin/dashboard', () => {
+      const redirect = simulateGuard('/home', { requiresAuth: false }, authState)
       expect(redirect).toBe('/admin/dashboard')
     })
 
