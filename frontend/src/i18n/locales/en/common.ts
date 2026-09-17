@@ -179,6 +179,7 @@ export default {
     profile: 'Profile',
     users: 'Users',
     organization: 'Organization',
+    securityProtection: 'Security Protection',
     organizations: 'Organizations',
     groups: 'Groups',
     channels: 'Channels',

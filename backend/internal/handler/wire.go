@@ -201,6 +201,7 @@ func ProvideHandlers(
 	organizationMemberHandler *OrganizationMemberHandler,
 	organizationQuotaRequestHandler *OrganizationQuotaRequestHandler,
 	identityResolutionHandler *IdentityResolutionHandler,
+	acfPluginHandler *ACFPluginHandler,
 	_ *service.IdempotencyCoordinator,
 	_ *service.IdempotencyCleanupService,
 	_ *service.OpenAIQuotaAutoResetService,
@@ -232,6 +233,7 @@ func ProvideHandlers(
 		OrganizationMember:       organizationMemberHandler,
 		OrganizationQuotaRequest: organizationQuotaRequestHandler,
 		IdentityResolution:       identityResolutionHandler,
+		ACFPlugin:                acfPluginHandler,
 	}
 }
 
@@ -263,6 +265,7 @@ var ProviderSet = wire.NewSet(
 	NewOrganizationMemberHandler,
 	NewOrganizationQuotaRequestHandler,
 	NewIdentityResolutionHandler,
+	NewACFPluginHandler,
 
 	// Admin handlers
 	admin.NewDashboardHandler,

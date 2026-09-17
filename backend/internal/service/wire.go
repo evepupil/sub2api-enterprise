@@ -845,6 +845,7 @@ var ProviderSet = wire.NewSet(
 	NewIdentityResolutionService,
 	ProvideIdentityKeyLookup,
 	ProvideIdentityOrganizationLookup,
+	ProvideACFPluginService,
 	NewAdminOrganizationService,
 	NewPromoService,
 	NewUsageService,

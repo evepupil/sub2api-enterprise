@@ -939,6 +939,28 @@ acf:
   # Bearer 认证）用的服务凭证。留空表示接口关闭（整组路由不注册）。
   # 生成命令: openssl rand -hex 32
   identity_credential: ""
+  # Organization protection plugin page (read-only ACF data for org admins).
+  # 组织防护只读插件页：向组织管理员展示 ACF 防护数据。
+  plugin:
+    # Root URL of the ACF plugin read-only API. Leave empty to disable the
+    # page and its proxy routes.
+    # ACF 插件只读接口的根地址。留空表示功能关闭（代理路由不注册）。
+    base_url: ""
+    # Optional external Ed25519 private key (PKCS8 PEM). Leave empty to
+    # auto-generate on first start and persist under DATA_DIR
+    # (acf_plugin_ed25519_key.pem). The matching public key (PKIX PEM) must
+    # be pinned in the ACF endpoint configuration.
+    # 可选的外部 Ed25519 私钥（PKCS8 PEM）。留空则首次启动自动生成并
+    # 持久化到 DATA_DIR（acf_plugin_ed25519_key.pem）。配套公钥（PKIX PEM）
+    # 需贴进 ACF 侧端点配置。
+    private_key: ""
+    # Key file path override. Empty = DATA_DIR (or ./data) default file name.
+    # 私钥文件路径；留空用 DATA_DIR（或 ./data）下的默认文件名。
+    key_file: ""
+    # Assertion constants; must match the ACF-side verification config.
+    # 断言常量，必须与 ACF 侧验签配置一致。
+    issuer: "sub2api"
+    audience: "acf-plugin"
 
 # =============================================================================
 # LinuxDo Connect OAuth Login (SSO)

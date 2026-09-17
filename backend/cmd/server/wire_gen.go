@@ -338,10 +338,15 @@ func initializeApplication(buildInfo handler.BuildInfo) (*Application, error) {
 	identityOrganizationLookup := service.ProvideIdentityOrganizationLookup(organizationService)
 	identityResolutionService := service.NewIdentityResolutionService(identityKeyLookup, identityOrganizationLookup)
 	identityResolutionHandler := handler.NewIdentityResolutionHandler(identityResolutionService)
+	acfPluginService, err := service.ProvideACFPluginService(configConfig, identityOrganizationLookup, organizationRepository)
+	if err != nil {
+		return nil, err
+	}
+	acfPluginHandler := handler.NewACFPluginHandler(acfPluginService)
 	idempotencyCoordinator := service.ProvideIdempotencyCoordinator(idempotencyRepository, configConfig)
 	idempotencyCleanupService := service.ProvideIdempotencyCleanupService(idempotencyRepository, configConfig)
 	openAIQuotaAutoResetService := service.ProvideOpenAIQuotaAutoResetService(accountRepository, openAIQuotaService, rateLimitService, idempotencyCoordinator, auditLogService, settingService, leaderLockCache)
-	handlers := handler.ProvideHandlers(authHandler, userHandler, apiKeyHandler, usageHandler, redeemHandler, subscriptionHandler, announcementHandler, channelMonitorUserHandler, channelMonitorV2Handler, adminHandlers, gatewayHandler, openAIGatewayHandler, handlerSettingHandler, totpHandler, passkeyHandler, handlerPaymentHandler, paymentWebhookHandler, availableChannelHandler, modelPlazaHandler, publicStatusHandler, asyncImageHandler, batchImageHandler, handlerOrganizationHandler, organizationMemberHandler, organizationQuotaRequestHandler, identityResolutionHandler, idempotencyCoordinator, idempotencyCleanupService, openAIQuotaAutoResetService)
+	handlers := handler.ProvideHandlers(authHandler, userHandler, apiKeyHandler, usageHandler, redeemHandler, subscriptionHandler, announcementHandler, channelMonitorUserHandler, channelMonitorV2Handler, adminHandlers, gatewayHandler, openAIGatewayHandler, handlerSettingHandler, totpHandler, passkeyHandler, handlerPaymentHandler, paymentWebhookHandler, availableChannelHandler, modelPlazaHandler, publicStatusHandler, asyncImageHandler, batchImageHandler, handlerOrganizationHandler, organizationMemberHandler, organizationQuotaRequestHandler, identityResolutionHandler, acfPluginHandler, idempotencyCoordinator, idempotencyCleanupService, openAIQuotaAutoResetService)
 	jwtAuthMiddleware := middleware.NewJWTAuthMiddleware(authService, userService, settingService, auditLogService)
 	optionalJWTAuthMiddleware := middleware.NewOptionalJWTAuthMiddleware(authService, userService, settingService, auditLogService)
 	adminAuthMiddleware := middleware.NewAdminAuthMiddleware(authService, userService, settingService, auditLogService)

@@ -74,6 +74,7 @@ type Handlers struct {
 	OrganizationMember       *OrganizationMemberHandler
 	OrganizationQuotaRequest *OrganizationQuotaRequestHandler
 	IdentityResolution       *IdentityResolutionHandler
+	ACFPlugin                *ACFPluginHandler
 }
 
 // BuildInfo contains build-time information

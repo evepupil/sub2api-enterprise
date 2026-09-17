@@ -110,10 +110,25 @@ type Config struct {
 // ACFConfig 承载与 ACF 安全网关对接的配置。
 type ACFConfig struct {
 	// IdentityCredential 是 ACF 网关调用内部身份解析接口时携带的 Bearer
-	// 服务凭证。为空表示整个内部接口不注册。这是服务间秘密，与 JWT 密钥
-	// 同级别：只从配置文件或环境变量（ACF_IDENTITY_CREDENTIAL）提供，
-	// 不进数据库、不进管理界面。
-	IdentityCredential string `mapstructure:"identity_credential"`
+	// 服务凭证。为空表示该接口不注册。服务间秘密，与 JWT 密钥同级别。
+	IdentityCredential string          `mapstructure:"identity_credential"`
+	Plugin             ACFPluginConfig `mapstructure:"plugin"`
+}
+
+// ACFPluginConfig 承载组织防护只读插件页的对接配置（M3 模块 3）。
+type ACFPluginConfig struct {
+	// BaseURL 是 ACF 侧插件只读接口的根地址（如 https://acf.example.com）。
+	// 为空表示整个插件页功能关闭，代理路由不注册。
+	BaseURL string `mapstructure:"base_url"`
+	// PrivateKey 可选：外部提供的 Ed25519 私钥（PKCS8 PEM）。为空则首次
+	// 启动自动生成并持久化到密钥文件。
+	PrivateKey string `mapstructure:"private_key"`
+	// KeyFile 私钥文件路径；为空时取 DATA_DIR（或 ./data）下的
+	// acf_plugin_ed25519_key.pem。
+	KeyFile string `mapstructure:"key_file"`
+	// Issuer / Audience 断言常量，必须与 ACF 侧验签配置一致。
+	Issuer   string `mapstructure:"issuer"`
+	Audience string `mapstructure:"audience"`
 }
 
 // PluginConfig 控制管理员手动上传的本地进程插件。
@@ -2258,6 +2273,13 @@ func setDefaults() {
 	// ACF_IDENTITY_CREDENTIAL 环境变量提供，没有默认键 viper 会把它丢掉，
 	// 接口静默关闭还查不出原因。
 	viper.SetDefault("acf.identity_credential", "")
+	// 插件只读数据对接：地址为空则代理路由不注册；iss/aud 有默认值，
+	// 必须与 ACF 侧验签配置一致。
+	viper.SetDefault("acf.plugin.base_url", "")
+	viper.SetDefault("acf.plugin.private_key", "")
+	viper.SetDefault("acf.plugin.key_file", "")
+	viper.SetDefault("acf.plugin.issuer", "sub2api")
+	viper.SetDefault("acf.plugin.audience", "acf-plugin")
 
 	// Ops (vNext)
 	viper.SetDefault("ops.enabled", true)

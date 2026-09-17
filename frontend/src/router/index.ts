@@ -252,6 +252,17 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/security-protection',
+    name: 'SecurityProtection',
+    component: () => import('@/views/user/SecurityProtectionView.vue'),
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: false,
+      title: 'Security Protection',
+      titleKey: 'securityProtection.title'
+    }
+  },
+  {
     path: '/batch-image',
     name: 'BatchImageGuide',
     alias: '/docs/batch-image',
