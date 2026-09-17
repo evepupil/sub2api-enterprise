@@ -1338,6 +1338,10 @@ func init() {
 	organization.DefaultQuotaRequestMode = organizationDescQuotaRequestMode.Default.(string)
 	// organization.QuotaRequestModeValidator is a validator for the "quota_request_mode" field. It is called by the builders before save.
 	organization.QuotaRequestModeValidator = organizationDescQuotaRequestMode.Validators[0].(func(string) error)
+	// organizationDescDefaultQuotaEnabled is the schema descriptor for default_quota_enabled field.
+	organizationDescDefaultQuotaEnabled := organizationFields[7].Descriptor()
+	// organization.DefaultDefaultQuotaEnabled holds the default value on creation for the default_quota_enabled field.
+	organization.DefaultDefaultQuotaEnabled = organizationDescDefaultQuotaEnabled.Default.(bool)
 	organizationallowedgroupFields := schema.OrganizationAllowedGroup{}.Fields()
 	_ = organizationallowedgroupFields
 	// organizationallowedgroupDescCreatedAt is the schema descriptor for created_at field.

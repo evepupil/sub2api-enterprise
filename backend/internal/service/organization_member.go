@@ -129,6 +129,15 @@ type OrganizationMemberRepository interface {
 	AdvanceDueQuota(ctx context.Context, userID int64, now time.Time) (*OrganizationMember, error)
 	// ListUserIDs 返回组织全部成员的账号标识，含组织创建者本人。
 	ListUserIDs(ctx context.Context, organizationID int64) ([]int64, error)
+	// GetDefaultQuota 读取组织的默认周期配额配置。
+	GetDefaultQuota(ctx context.Context, organizationID int64) (*OrganizationDefaultQuota, error)
+	// UpdateDefaultQuota 保存默认周期配额，并在同一事务里按开关同步存量成员，
+	// 返回这次被换新的成员账号列表。
+	UpdateDefaultQuota(
+		ctx context.Context,
+		organizationID int64,
+		update OrganizationDefaultQuotaUpdate,
+	) (*OrganizationDefaultQuotaSynced, error)
 }
 
 // OrganizationMemberService 提供组织管理员对本组织成员的查看、启停和消费上限管理，

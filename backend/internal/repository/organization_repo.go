@@ -46,6 +46,14 @@ func (r *organizationRepository) CreateMember(ctx context.Context, value *servic
 	if value.DisplayName != "" {
 		create = create.SetDisplayName(value.DisplayName)
 	}
+	// 组织默认配额的入组拷贝走这里：四列齐全时新成员当场进入周期模式第一期。
+	if value.QuotaAmount != nil && value.QuotaPeriodDays != nil &&
+		value.QuotaStartAt != nil && value.QuotaCycleStart != nil {
+		create = create.SetQuotaAmount(*value.QuotaAmount).
+			SetQuotaPeriodDays(*value.QuotaPeriodDays).
+			SetQuotaStartAt(*value.QuotaStartAt).
+			SetQuotaCycleStart(*value.QuotaCycleStart)
+	}
 	created, err := create.Save(ctx)
 	if err != nil {
 		if isUniqueConstraintViolation(err) {
@@ -144,6 +152,10 @@ func organizationEntityToService(entity *dbent.Organization) *service.Organizati
 		Status:      entity.Status,
 		CreatedAt:   entity.CreatedAt,
 		UpdatedAt:   entity.UpdatedAt,
+
+		DefaultQuotaEnabled:    entity.DefaultQuotaEnabled,
+		DefaultQuotaAmount:     entity.DefaultQuotaAmount,
+		DefaultQuotaPeriodDays: entity.DefaultQuotaPeriodDays,
 	}
 }
 

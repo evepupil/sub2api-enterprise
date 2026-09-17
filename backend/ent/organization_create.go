@@ -136,6 +136,48 @@ func (_c *OrganizationCreate) SetNillableQuotaRequestMax(v *float64) *Organizati
 	return _c
 }
 
+// SetDefaultQuotaEnabled sets the "default_quota_enabled" field.
+func (_c *OrganizationCreate) SetDefaultQuotaEnabled(v bool) *OrganizationCreate {
+	_c.mutation.SetDefaultQuotaEnabled(v)
+	return _c
+}
+
+// SetNillableDefaultQuotaEnabled sets the "default_quota_enabled" field if the given value is not nil.
+func (_c *OrganizationCreate) SetNillableDefaultQuotaEnabled(v *bool) *OrganizationCreate {
+	if v != nil {
+		_c.SetDefaultQuotaEnabled(*v)
+	}
+	return _c
+}
+
+// SetDefaultQuotaAmount sets the "default_quota_amount" field.
+func (_c *OrganizationCreate) SetDefaultQuotaAmount(v float64) *OrganizationCreate {
+	_c.mutation.SetDefaultQuotaAmount(v)
+	return _c
+}
+
+// SetNillableDefaultQuotaAmount sets the "default_quota_amount" field if the given value is not nil.
+func (_c *OrganizationCreate) SetNillableDefaultQuotaAmount(v *float64) *OrganizationCreate {
+	if v != nil {
+		_c.SetDefaultQuotaAmount(*v)
+	}
+	return _c
+}
+
+// SetDefaultQuotaPeriodDays sets the "default_quota_period_days" field.
+func (_c *OrganizationCreate) SetDefaultQuotaPeriodDays(v int) *OrganizationCreate {
+	_c.mutation.SetDefaultQuotaPeriodDays(v)
+	return _c
+}
+
+// SetNillableDefaultQuotaPeriodDays sets the "default_quota_period_days" field if the given value is not nil.
+func (_c *OrganizationCreate) SetNillableDefaultQuotaPeriodDays(v *int) *OrganizationCreate {
+	if v != nil {
+		_c.SetDefaultQuotaPeriodDays(*v)
+	}
+	return _c
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_c *OrganizationCreate) SetOwnerID(id int64) *OrganizationCreate {
 	_c.mutation.SetOwnerID(id)
@@ -247,6 +289,10 @@ func (_c *OrganizationCreate) defaults() {
 		v := organization.DefaultQuotaRequestMode
 		_c.mutation.SetQuotaRequestMode(v)
 	}
+	if _, ok := _c.mutation.DefaultQuotaEnabled(); !ok {
+		v := organization.DefaultDefaultQuotaEnabled
+		_c.mutation.SetDefaultQuotaEnabled(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -286,6 +332,9 @@ func (_c *OrganizationCreate) check() error {
 		if err := organization.QuotaRequestModeValidator(v); err != nil {
 			return &ValidationError{Name: "quota_request_mode", err: fmt.Errorf(`ent: validator failed for field "Organization.quota_request_mode": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.DefaultQuotaEnabled(); !ok {
+		return &ValidationError{Name: "default_quota_enabled", err: errors.New(`ent: missing required field "Organization.default_quota_enabled"`)}
 	}
 	if len(_c.mutation.OwnerIDs()) == 0 {
 		return &ValidationError{Name: "owner", err: errors.New(`ent: missing required edge "Organization.owner"`)}
@@ -348,6 +397,18 @@ func (_c *OrganizationCreate) createSpec() (*Organization, *sqlgraph.CreateSpec)
 	if value, ok := _c.mutation.QuotaRequestMax(); ok {
 		_spec.SetField(organization.FieldQuotaRequestMax, field.TypeFloat64, value)
 		_node.QuotaRequestMax = &value
+	}
+	if value, ok := _c.mutation.DefaultQuotaEnabled(); ok {
+		_spec.SetField(organization.FieldDefaultQuotaEnabled, field.TypeBool, value)
+		_node.DefaultQuotaEnabled = value
+	}
+	if value, ok := _c.mutation.DefaultQuotaAmount(); ok {
+		_spec.SetField(organization.FieldDefaultQuotaAmount, field.TypeFloat64, value)
+		_node.DefaultQuotaAmount = &value
+	}
+	if value, ok := _c.mutation.DefaultQuotaPeriodDays(); ok {
+		_spec.SetField(organization.FieldDefaultQuotaPeriodDays, field.TypeInt, value)
+		_node.DefaultQuotaPeriodDays = &value
 	}
 	if nodes := _c.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -590,6 +651,66 @@ func (u *OrganizationUpsert) ClearQuotaRequestMax() *OrganizationUpsert {
 	return u
 }
 
+// SetDefaultQuotaEnabled sets the "default_quota_enabled" field.
+func (u *OrganizationUpsert) SetDefaultQuotaEnabled(v bool) *OrganizationUpsert {
+	u.Set(organization.FieldDefaultQuotaEnabled, v)
+	return u
+}
+
+// UpdateDefaultQuotaEnabled sets the "default_quota_enabled" field to the value that was provided on create.
+func (u *OrganizationUpsert) UpdateDefaultQuotaEnabled() *OrganizationUpsert {
+	u.SetExcluded(organization.FieldDefaultQuotaEnabled)
+	return u
+}
+
+// SetDefaultQuotaAmount sets the "default_quota_amount" field.
+func (u *OrganizationUpsert) SetDefaultQuotaAmount(v float64) *OrganizationUpsert {
+	u.Set(organization.FieldDefaultQuotaAmount, v)
+	return u
+}
+
+// UpdateDefaultQuotaAmount sets the "default_quota_amount" field to the value that was provided on create.
+func (u *OrganizationUpsert) UpdateDefaultQuotaAmount() *OrganizationUpsert {
+	u.SetExcluded(organization.FieldDefaultQuotaAmount)
+	return u
+}
+
+// AddDefaultQuotaAmount adds v to the "default_quota_amount" field.
+func (u *OrganizationUpsert) AddDefaultQuotaAmount(v float64) *OrganizationUpsert {
+	u.Add(organization.FieldDefaultQuotaAmount, v)
+	return u
+}
+
+// ClearDefaultQuotaAmount clears the value of the "default_quota_amount" field.
+func (u *OrganizationUpsert) ClearDefaultQuotaAmount() *OrganizationUpsert {
+	u.SetNull(organization.FieldDefaultQuotaAmount)
+	return u
+}
+
+// SetDefaultQuotaPeriodDays sets the "default_quota_period_days" field.
+func (u *OrganizationUpsert) SetDefaultQuotaPeriodDays(v int) *OrganizationUpsert {
+	u.Set(organization.FieldDefaultQuotaPeriodDays, v)
+	return u
+}
+
+// UpdateDefaultQuotaPeriodDays sets the "default_quota_period_days" field to the value that was provided on create.
+func (u *OrganizationUpsert) UpdateDefaultQuotaPeriodDays() *OrganizationUpsert {
+	u.SetExcluded(organization.FieldDefaultQuotaPeriodDays)
+	return u
+}
+
+// AddDefaultQuotaPeriodDays adds v to the "default_quota_period_days" field.
+func (u *OrganizationUpsert) AddDefaultQuotaPeriodDays(v int) *OrganizationUpsert {
+	u.Add(organization.FieldDefaultQuotaPeriodDays, v)
+	return u
+}
+
+// ClearDefaultQuotaPeriodDays clears the value of the "default_quota_period_days" field.
+func (u *OrganizationUpsert) ClearDefaultQuotaPeriodDays() *OrganizationUpsert {
+	u.SetNull(organization.FieldDefaultQuotaPeriodDays)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -772,6 +893,76 @@ func (u *OrganizationUpsertOne) UpdateQuotaRequestMax() *OrganizationUpsertOne {
 func (u *OrganizationUpsertOne) ClearQuotaRequestMax() *OrganizationUpsertOne {
 	return u.Update(func(s *OrganizationUpsert) {
 		s.ClearQuotaRequestMax()
+	})
+}
+
+// SetDefaultQuotaEnabled sets the "default_quota_enabled" field.
+func (u *OrganizationUpsertOne) SetDefaultQuotaEnabled(v bool) *OrganizationUpsertOne {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.SetDefaultQuotaEnabled(v)
+	})
+}
+
+// UpdateDefaultQuotaEnabled sets the "default_quota_enabled" field to the value that was provided on create.
+func (u *OrganizationUpsertOne) UpdateDefaultQuotaEnabled() *OrganizationUpsertOne {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.UpdateDefaultQuotaEnabled()
+	})
+}
+
+// SetDefaultQuotaAmount sets the "default_quota_amount" field.
+func (u *OrganizationUpsertOne) SetDefaultQuotaAmount(v float64) *OrganizationUpsertOne {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.SetDefaultQuotaAmount(v)
+	})
+}
+
+// AddDefaultQuotaAmount adds v to the "default_quota_amount" field.
+func (u *OrganizationUpsertOne) AddDefaultQuotaAmount(v float64) *OrganizationUpsertOne {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.AddDefaultQuotaAmount(v)
+	})
+}
+
+// UpdateDefaultQuotaAmount sets the "default_quota_amount" field to the value that was provided on create.
+func (u *OrganizationUpsertOne) UpdateDefaultQuotaAmount() *OrganizationUpsertOne {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.UpdateDefaultQuotaAmount()
+	})
+}
+
+// ClearDefaultQuotaAmount clears the value of the "default_quota_amount" field.
+func (u *OrganizationUpsertOne) ClearDefaultQuotaAmount() *OrganizationUpsertOne {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.ClearDefaultQuotaAmount()
+	})
+}
+
+// SetDefaultQuotaPeriodDays sets the "default_quota_period_days" field.
+func (u *OrganizationUpsertOne) SetDefaultQuotaPeriodDays(v int) *OrganizationUpsertOne {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.SetDefaultQuotaPeriodDays(v)
+	})
+}
+
+// AddDefaultQuotaPeriodDays adds v to the "default_quota_period_days" field.
+func (u *OrganizationUpsertOne) AddDefaultQuotaPeriodDays(v int) *OrganizationUpsertOne {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.AddDefaultQuotaPeriodDays(v)
+	})
+}
+
+// UpdateDefaultQuotaPeriodDays sets the "default_quota_period_days" field to the value that was provided on create.
+func (u *OrganizationUpsertOne) UpdateDefaultQuotaPeriodDays() *OrganizationUpsertOne {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.UpdateDefaultQuotaPeriodDays()
+	})
+}
+
+// ClearDefaultQuotaPeriodDays clears the value of the "default_quota_period_days" field.
+func (u *OrganizationUpsertOne) ClearDefaultQuotaPeriodDays() *OrganizationUpsertOne {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.ClearDefaultQuotaPeriodDays()
 	})
 }
 
@@ -1123,6 +1314,76 @@ func (u *OrganizationUpsertBulk) UpdateQuotaRequestMax() *OrganizationUpsertBulk
 func (u *OrganizationUpsertBulk) ClearQuotaRequestMax() *OrganizationUpsertBulk {
 	return u.Update(func(s *OrganizationUpsert) {
 		s.ClearQuotaRequestMax()
+	})
+}
+
+// SetDefaultQuotaEnabled sets the "default_quota_enabled" field.
+func (u *OrganizationUpsertBulk) SetDefaultQuotaEnabled(v bool) *OrganizationUpsertBulk {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.SetDefaultQuotaEnabled(v)
+	})
+}
+
+// UpdateDefaultQuotaEnabled sets the "default_quota_enabled" field to the value that was provided on create.
+func (u *OrganizationUpsertBulk) UpdateDefaultQuotaEnabled() *OrganizationUpsertBulk {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.UpdateDefaultQuotaEnabled()
+	})
+}
+
+// SetDefaultQuotaAmount sets the "default_quota_amount" field.
+func (u *OrganizationUpsertBulk) SetDefaultQuotaAmount(v float64) *OrganizationUpsertBulk {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.SetDefaultQuotaAmount(v)
+	})
+}
+
+// AddDefaultQuotaAmount adds v to the "default_quota_amount" field.
+func (u *OrganizationUpsertBulk) AddDefaultQuotaAmount(v float64) *OrganizationUpsertBulk {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.AddDefaultQuotaAmount(v)
+	})
+}
+
+// UpdateDefaultQuotaAmount sets the "default_quota_amount" field to the value that was provided on create.
+func (u *OrganizationUpsertBulk) UpdateDefaultQuotaAmount() *OrganizationUpsertBulk {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.UpdateDefaultQuotaAmount()
+	})
+}
+
+// ClearDefaultQuotaAmount clears the value of the "default_quota_amount" field.
+func (u *OrganizationUpsertBulk) ClearDefaultQuotaAmount() *OrganizationUpsertBulk {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.ClearDefaultQuotaAmount()
+	})
+}
+
+// SetDefaultQuotaPeriodDays sets the "default_quota_period_days" field.
+func (u *OrganizationUpsertBulk) SetDefaultQuotaPeriodDays(v int) *OrganizationUpsertBulk {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.SetDefaultQuotaPeriodDays(v)
+	})
+}
+
+// AddDefaultQuotaPeriodDays adds v to the "default_quota_period_days" field.
+func (u *OrganizationUpsertBulk) AddDefaultQuotaPeriodDays(v int) *OrganizationUpsertBulk {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.AddDefaultQuotaPeriodDays(v)
+	})
+}
+
+// UpdateDefaultQuotaPeriodDays sets the "default_quota_period_days" field to the value that was provided on create.
+func (u *OrganizationUpsertBulk) UpdateDefaultQuotaPeriodDays() *OrganizationUpsertBulk {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.UpdateDefaultQuotaPeriodDays()
+	})
+}
+
+// ClearDefaultQuotaPeriodDays clears the value of the "default_quota_period_days" field.
+func (u *OrganizationUpsertBulk) ClearDefaultQuotaPeriodDays() *OrganizationUpsertBulk {
+	return u.Update(func(s *OrganizationUpsert) {
+		s.ClearDefaultQuotaPeriodDays()
 	})
 }
 

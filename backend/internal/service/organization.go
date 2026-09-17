@@ -55,6 +55,12 @@ type Organization struct {
 	Status      string
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
+
+	// 组织默认周期配额：开启后新成员完成加入时自动抄入这份配置。
+	// Amount / PeriodDays 仅在 DefaultQuotaEnabled 时非空。
+	DefaultQuotaEnabled    bool
+	DefaultQuotaAmount     *float64
+	DefaultQuotaPeriodDays *int
 }
 
 // IsDisabled 表示整个组织已停止服务。
@@ -67,10 +73,16 @@ type OrganizationMembership struct {
 	OrganizationID int64
 	UserID         int64
 	// DisplayName 是本人在组织中的名称，注册时填写、管理员可改；组织侧展示优先它。
-	DisplayName  string
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
-	Organization *Organization
+	DisplayName string
+	// 周期配额四列：组织开启默认配额时，注册入组路径在此抄入默认值，
+	// 周期从加入时刻起算；其余路径保持为空（静态模式）。
+	QuotaAmount     *float64
+	QuotaPeriodDays *int
+	QuotaStartAt    *time.Time
+	QuotaCycleStart *time.Time
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
+	Organization    *Organization
 }
 
 type OrganizationSummary struct {
@@ -244,11 +256,22 @@ func (s *OrganizationService) CompleteRegistration(
 			return nil, ErrInvitationCodeInvalid
 		}
 		organization = intent.Organization
-		if err := s.repo.CreateMember(ctx, &OrganizationMembership{
+		membership := &OrganizationMembership{
 			OrganizationID: organization.ID,
 			UserID:         userID,
 			DisplayName:    intent.MemberName,
-		}); err != nil {
+		}
+		// 组织开启了默认周期配额：入组即抄入，周期从加入时刻起算，
+		// 当期当场开始，新人不用等管理员手工再配一遍。
+		if quota, cycleStart, ok := joinDefaultQuotaCopy(organization, time.Now()); ok {
+			amount, periodDays := quota.Amount, quota.PeriodDays
+			startAt := quota.StartAt
+			membership.QuotaAmount = &amount
+			membership.QuotaPeriodDays = &periodDays
+			membership.QuotaStartAt = &startAt
+			membership.QuotaCycleStart = &cycleStart
+		}
+		if err := s.repo.CreateMember(ctx, membership); err != nil {
 			return nil, err
 		}
 	default:

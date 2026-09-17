@@ -146,6 +146,13 @@ export interface OrganizationQuotaRequestPolicy {
   max_amount: number | null
 }
 
+// 组织默认周期配额：开启后新成员完成加入时自动获得，周期从加入时刻起算。
+export interface OrganizationDefaultQuota {
+  enabled: boolean
+  amount: number | null
+  period_days: number | null
+}
+
 // 一条配额申请流水。grant_source 仅已发放时有值（manual 人工通过 / auto 提交即发）。
 export interface OrganizationQuotaRequest {
   id: number

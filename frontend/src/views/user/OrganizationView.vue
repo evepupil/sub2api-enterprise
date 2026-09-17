@@ -99,6 +99,30 @@
             </div>
           </div>
 
+          <!-- 组织默认配额：开启后新成员入组自动获得，团队扩张不用逐个手工配 -->
+          <div
+            class="flex flex-col gap-2 border-b border-gray-200 px-5 py-3 dark:border-dark-700 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <p class="text-sm text-content-muted">
+              <template v-if="defaultQuota?.enabled">
+                {{
+                  t('organization.defaultQuotaOn', {
+                    amount: formatCurrency(defaultQuota.amount ?? 0),
+                    days: defaultQuota.period_days ?? 0
+                  })
+                }}
+              </template>
+              <template v-else>{{ t('organization.defaultQuotaOff') }}</template>
+            </p>
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm shrink-0"
+              @click="openDefaultQuotaDialog"
+            >
+              {{ defaultQuota?.enabled ? t('organization.defaultQuotaEdit') : t('organization.defaultQuotaEnable') }}
+            </button>
+          </div>
+
           <DataTable
             :columns="memberColumns"
             :data="members"
@@ -571,6 +595,85 @@
       @cancel="dismissMemberStatusConfirm(false)"
     />
 
+    <BaseDialog
+      :show="defaultQuotaDialog.show"
+      :title="t('organization.defaultQuotaTitle')"
+      width="narrow"
+      @close="closeDefaultQuotaDialog"
+    >
+      <div class="space-y-3">
+        <input
+          v-model="defaultQuotaDialog.amount"
+          type="number"
+          min="0"
+          step="0.01"
+          class="input"
+          :placeholder="t('organization.quotaPerPeriodAmount')"
+        />
+        <input
+          v-model="defaultQuotaDialog.periodDays"
+          type="number"
+          min="1"
+          max="3650"
+          step="1"
+          class="input"
+          :placeholder="t('organization.quotaPeriodDays')"
+        />
+        <p class="text-xs text-content-muted">{{ t('organization.defaultQuotaHint') }}</p>
+        <label class="flex items-start gap-2 text-sm text-content">
+          <input
+            v-model="defaultQuotaDialog.syncUnconfigured"
+            type="checkbox"
+            class="mt-0.5 h-4 w-4 cursor-pointer rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+          />
+          <span>{{ t('organization.defaultQuotaSyncUnconfigured') }}</span>
+        </label>
+        <label class="flex items-start gap-2 text-sm text-content">
+          <input
+            v-model="defaultQuotaDialog.syncConfigured"
+            type="checkbox"
+            class="mt-0.5 h-4 w-4 cursor-pointer rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+          />
+          <span>{{ t('organization.defaultQuotaSyncConfigured') }}</span>
+        </label>
+        <p v-if="defaultQuotaDialog.error" class="text-sm text-red-600 dark:text-red-400">
+          {{ defaultQuotaDialog.error }}
+        </p>
+      </div>
+      <template #footer>
+        <button
+          v-if="defaultQuota?.enabled"
+          type="button"
+          class="btn btn-danger mr-auto"
+          :disabled="defaultQuotaDialog.saving"
+          @click="defaultQuotaCloseConfirm.show = true"
+        >
+          {{ t('organization.defaultQuotaDisable') }}
+        </button>
+        <button type="button" class="btn btn-secondary" @click="closeDefaultQuotaDialog">
+          {{ t('common.cancel') }}
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          :disabled="defaultQuotaDialog.saving"
+          @click="saveDefaultQuota"
+        >
+          {{ t('common.save') }}
+        </button>
+      </template>
+    </BaseDialog>
+
+    <ConfirmDialog
+      :show="defaultQuotaCloseConfirm.show"
+      :title="t('organization.defaultQuotaDisable')"
+      :message="t('organization.defaultQuotaDisableConfirm')"
+      :confirm-text="t('common.confirm')"
+      danger
+      @confirm="dismissDefaultQuotaCloseConfirm(true)"
+      @cancel="dismissDefaultQuotaCloseConfirm(false)"
+    />
+
     <ConfirmDialog
       :show="invitationConfirm.show"
       :title="t('organization.disableInvitation')"
@@ -599,7 +702,12 @@ import type { Column } from '@/components/common/types'
 import OrganizationQuotaRequestsCard from '@/components/user/organization/OrganizationQuotaRequestsCard.vue'
 import OrganizationMyQuotaRequestsCard from '@/components/user/organization/OrganizationMyQuotaRequestsCard.vue'
 import organizationAPI from '@/api/organization'
-import type { OrganizationInvitation, OrganizationMember, OrganizationSummary } from '@/types'
+import type {
+  OrganizationDefaultQuota,
+  OrganizationInvitation,
+  OrganizationMember,
+  OrganizationSummary
+} from '@/types'
 import { useAppStore } from '@/stores/app'
 import { useClipboard } from '@/composables/useClipboard'
 import { extractApiErrorMessage } from '@/utils/apiError'
@@ -730,6 +838,21 @@ const quotaGrantDialog = reactive({
   saving: false
 })
 
+// 组织默认周期配额：新成员入组自动抄入；两个同步开关决定存量成员是否一起换。
+const defaultQuota = ref<OrganizationDefaultQuota | null>(null)
+
+const defaultQuotaDialog = reactive({
+  show: false,
+  amount: '',
+  periodDays: '',
+  syncUnconfigured: true,
+  syncConfigured: false,
+  error: '',
+  saving: false
+})
+
+const defaultQuotaCloseConfirm = reactive({ show: false })
+
 const statusOptions = computed(() => [
   { value: '', label: t('common.all') },
   { value: 'active', label: t('common.enabled') },
@@ -797,7 +920,7 @@ async function loadOrganization(): Promise<void> {
     organization.value = await organizationAPI.getCurrentOrganization()
     if (organization.value?.is_owner) {
       invitations.value = await organizationAPI.listOrganizationInvitations()
-      await loadMembers()
+      await Promise.all([loadMembers(), loadDefaultQuota()])
     } else {
       invitations.value = []
       members.value = []
@@ -1033,6 +1156,92 @@ function openQuotaGrantDialog(): void {
 
 function closeQuotaGrantDialog(): void {
   quotaGrantDialog.show = false
+}
+
+async function loadDefaultQuota(): Promise<void> {
+  try {
+    defaultQuota.value = await organizationAPI.getOrganizationDefaultQuota()
+  } catch {
+    // 配置读不到时状态条按未开启展示，不阻塞成员列表。
+    defaultQuota.value = null
+  }
+}
+
+function openDefaultQuotaDialog(): void {
+  defaultQuotaDialog.show = true
+  if (defaultQuota.value?.enabled) {
+    defaultQuotaDialog.amount = String(defaultQuota.value.amount ?? '')
+    defaultQuotaDialog.periodDays = String(defaultQuota.value.period_days ?? '')
+  } else {
+    defaultQuotaDialog.amount = ''
+    defaultQuotaDialog.periodDays = ''
+  }
+  // 每次打开都回到保守组合：先补没配的人，不动手工调过的。
+  defaultQuotaDialog.syncUnconfigured = true
+  defaultQuotaDialog.syncConfigured = false
+  defaultQuotaDialog.error = ''
+}
+
+function closeDefaultQuotaDialog(): void {
+  defaultQuotaDialog.show = false
+}
+
+async function saveDefaultQuota(): Promise<void> {
+  const periodic = validatePeriodicInput(defaultQuotaDialog.amount, defaultQuotaDialog.periodDays)
+  if (periodic === 'amount') {
+    defaultQuotaDialog.error = t('organization.invalidAmount')
+    return
+  }
+  if (periodic === 'period') {
+    defaultQuotaDialog.error = t('organization.invalidPeriodDays')
+    return
+  }
+
+  defaultQuotaDialog.saving = true
+  defaultQuotaDialog.error = ''
+  try {
+    const result = await organizationAPI.updateOrganizationDefaultQuota({
+      enabled: true,
+      amount: periodic.amount,
+      period_days: periodic.periodDays,
+      sync_unconfigured: defaultQuotaDialog.syncUnconfigured,
+      sync_configured: defaultQuotaDialog.syncConfigured
+    })
+    defaultQuota.value = result.quota
+    if (result.synced_users > 0) {
+      // 存量成员额度变了，刷新列表里的本期剩余与重置时间。
+      void loadMembers()
+    }
+    defaultQuotaDialog.show = false
+    appStore.showSuccess(
+      result.synced_users > 0
+        ? t('organization.defaultQuotaSavedWithCount', { count: result.synced_users })
+        : t('organization.defaultQuotaSaved')
+    )
+  } catch (error) {
+    defaultQuotaDialog.error = extractApiErrorMessage(error, t('organization.memberUpdateFailed'))
+  } finally {
+    defaultQuotaDialog.saving = false
+  }
+}
+
+// confirmed=true 表示确认关闭：配置清空，只影响之后加入的成员，存量配额保留。
+function dismissDefaultQuotaCloseConfirm(confirmed: boolean): void {
+  defaultQuotaCloseConfirm.show = false
+  if (!confirmed) return
+  void (async () => {
+    defaultQuotaDialog.saving = true
+    try {
+      const result = await organizationAPI.updateOrganizationDefaultQuota({ enabled: false })
+      defaultQuota.value = result.quota
+      defaultQuotaDialog.show = false
+      appStore.showSuccess(t('organization.defaultQuotaDisabled'))
+    } catch (error) {
+      defaultQuotaDialog.error = extractApiErrorMessage(error, t('organization.memberUpdateFailed'))
+    } finally {
+      defaultQuotaDialog.saving = false
+    }
+  })()
 }
 
 async function submitQuotaGrant(): Promise<void> {

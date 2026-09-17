@@ -29650,34 +29650,39 @@ func (m *IdentityAdoptionDecisionMutation) ResetEdge(name string) error {
 // OrganizationMutation represents an operation that mutates the Organization nodes in the graph.
 type OrganizationMutation struct {
 	config
-	op                     Op
-	typ                    string
-	id                     *int64
-	created_at             *time.Time
-	updated_at             *time.Time
-	name                   *string
-	restrict_public_groups *bool
-	status                 *string
-	quota_request_mode     *string
-	quota_request_min      *float64
-	addquota_request_min   *float64
-	quota_request_max      *float64
-	addquota_request_max   *float64
-	clearedFields          map[string]struct{}
-	owner                  *int64
-	clearedowner           bool
-	members                map[int64]struct{}
-	removedmembers         map[int64]struct{}
-	clearedmembers         bool
-	invitations            map[int64]struct{}
-	removedinvitations     map[int64]struct{}
-	clearedinvitations     bool
-	allowed_groups         map[int64]struct{}
-	removedallowed_groups  map[int64]struct{}
-	clearedallowed_groups  bool
-	done                   bool
-	oldValue               func(context.Context) (*Organization, error)
-	predicates             []predicate.Organization
+	op                           Op
+	typ                          string
+	id                           *int64
+	created_at                   *time.Time
+	updated_at                   *time.Time
+	name                         *string
+	restrict_public_groups       *bool
+	status                       *string
+	quota_request_mode           *string
+	quota_request_min            *float64
+	addquota_request_min         *float64
+	quota_request_max            *float64
+	addquota_request_max         *float64
+	default_quota_enabled        *bool
+	default_quota_amount         *float64
+	adddefault_quota_amount      *float64
+	default_quota_period_days    *int
+	adddefault_quota_period_days *int
+	clearedFields                map[string]struct{}
+	owner                        *int64
+	clearedowner                 bool
+	members                      map[int64]struct{}
+	removedmembers               map[int64]struct{}
+	clearedmembers               bool
+	invitations                  map[int64]struct{}
+	removedinvitations           map[int64]struct{}
+	clearedinvitations           bool
+	allowed_groups               map[int64]struct{}
+	removedallowed_groups        map[int64]struct{}
+	clearedallowed_groups        bool
+	done                         bool
+	oldValue                     func(context.Context) (*Organization, error)
+	predicates                   []predicate.Organization
 }
 
 var _ ent.Mutation = (*OrganizationMutation)(nil)
@@ -30170,6 +30175,182 @@ func (m *OrganizationMutation) ResetQuotaRequestMax() {
 	delete(m.clearedFields, organization.FieldQuotaRequestMax)
 }
 
+// SetDefaultQuotaEnabled sets the "default_quota_enabled" field.
+func (m *OrganizationMutation) SetDefaultQuotaEnabled(b bool) {
+	m.default_quota_enabled = &b
+}
+
+// DefaultQuotaEnabled returns the value of the "default_quota_enabled" field in the mutation.
+func (m *OrganizationMutation) DefaultQuotaEnabled() (r bool, exists bool) {
+	v := m.default_quota_enabled
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDefaultQuotaEnabled returns the old "default_quota_enabled" field's value of the Organization entity.
+// If the Organization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrganizationMutation) OldDefaultQuotaEnabled(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDefaultQuotaEnabled is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDefaultQuotaEnabled requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDefaultQuotaEnabled: %w", err)
+	}
+	return oldValue.DefaultQuotaEnabled, nil
+}
+
+// ResetDefaultQuotaEnabled resets all changes to the "default_quota_enabled" field.
+func (m *OrganizationMutation) ResetDefaultQuotaEnabled() {
+	m.default_quota_enabled = nil
+}
+
+// SetDefaultQuotaAmount sets the "default_quota_amount" field.
+func (m *OrganizationMutation) SetDefaultQuotaAmount(f float64) {
+	m.default_quota_amount = &f
+	m.adddefault_quota_amount = nil
+}
+
+// DefaultQuotaAmount returns the value of the "default_quota_amount" field in the mutation.
+func (m *OrganizationMutation) DefaultQuotaAmount() (r float64, exists bool) {
+	v := m.default_quota_amount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDefaultQuotaAmount returns the old "default_quota_amount" field's value of the Organization entity.
+// If the Organization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrganizationMutation) OldDefaultQuotaAmount(ctx context.Context) (v *float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDefaultQuotaAmount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDefaultQuotaAmount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDefaultQuotaAmount: %w", err)
+	}
+	return oldValue.DefaultQuotaAmount, nil
+}
+
+// AddDefaultQuotaAmount adds f to the "default_quota_amount" field.
+func (m *OrganizationMutation) AddDefaultQuotaAmount(f float64) {
+	if m.adddefault_quota_amount != nil {
+		*m.adddefault_quota_amount += f
+	} else {
+		m.adddefault_quota_amount = &f
+	}
+}
+
+// AddedDefaultQuotaAmount returns the value that was added to the "default_quota_amount" field in this mutation.
+func (m *OrganizationMutation) AddedDefaultQuotaAmount() (r float64, exists bool) {
+	v := m.adddefault_quota_amount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearDefaultQuotaAmount clears the value of the "default_quota_amount" field.
+func (m *OrganizationMutation) ClearDefaultQuotaAmount() {
+	m.default_quota_amount = nil
+	m.adddefault_quota_amount = nil
+	m.clearedFields[organization.FieldDefaultQuotaAmount] = struct{}{}
+}
+
+// DefaultQuotaAmountCleared returns if the "default_quota_amount" field was cleared in this mutation.
+func (m *OrganizationMutation) DefaultQuotaAmountCleared() bool {
+	_, ok := m.clearedFields[organization.FieldDefaultQuotaAmount]
+	return ok
+}
+
+// ResetDefaultQuotaAmount resets all changes to the "default_quota_amount" field.
+func (m *OrganizationMutation) ResetDefaultQuotaAmount() {
+	m.default_quota_amount = nil
+	m.adddefault_quota_amount = nil
+	delete(m.clearedFields, organization.FieldDefaultQuotaAmount)
+}
+
+// SetDefaultQuotaPeriodDays sets the "default_quota_period_days" field.
+func (m *OrganizationMutation) SetDefaultQuotaPeriodDays(i int) {
+	m.default_quota_period_days = &i
+	m.adddefault_quota_period_days = nil
+}
+
+// DefaultQuotaPeriodDays returns the value of the "default_quota_period_days" field in the mutation.
+func (m *OrganizationMutation) DefaultQuotaPeriodDays() (r int, exists bool) {
+	v := m.default_quota_period_days
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDefaultQuotaPeriodDays returns the old "default_quota_period_days" field's value of the Organization entity.
+// If the Organization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrganizationMutation) OldDefaultQuotaPeriodDays(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDefaultQuotaPeriodDays is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDefaultQuotaPeriodDays requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDefaultQuotaPeriodDays: %w", err)
+	}
+	return oldValue.DefaultQuotaPeriodDays, nil
+}
+
+// AddDefaultQuotaPeriodDays adds i to the "default_quota_period_days" field.
+func (m *OrganizationMutation) AddDefaultQuotaPeriodDays(i int) {
+	if m.adddefault_quota_period_days != nil {
+		*m.adddefault_quota_period_days += i
+	} else {
+		m.adddefault_quota_period_days = &i
+	}
+}
+
+// AddedDefaultQuotaPeriodDays returns the value that was added to the "default_quota_period_days" field in this mutation.
+func (m *OrganizationMutation) AddedDefaultQuotaPeriodDays() (r int, exists bool) {
+	v := m.adddefault_quota_period_days
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearDefaultQuotaPeriodDays clears the value of the "default_quota_period_days" field.
+func (m *OrganizationMutation) ClearDefaultQuotaPeriodDays() {
+	m.default_quota_period_days = nil
+	m.adddefault_quota_period_days = nil
+	m.clearedFields[organization.FieldDefaultQuotaPeriodDays] = struct{}{}
+}
+
+// DefaultQuotaPeriodDaysCleared returns if the "default_quota_period_days" field was cleared in this mutation.
+func (m *OrganizationMutation) DefaultQuotaPeriodDaysCleared() bool {
+	_, ok := m.clearedFields[organization.FieldDefaultQuotaPeriodDays]
+	return ok
+}
+
+// ResetDefaultQuotaPeriodDays resets all changes to the "default_quota_period_days" field.
+func (m *OrganizationMutation) ResetDefaultQuotaPeriodDays() {
+	m.default_quota_period_days = nil
+	m.adddefault_quota_period_days = nil
+	delete(m.clearedFields, organization.FieldDefaultQuotaPeriodDays)
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by id.
 func (m *OrganizationMutation) SetOwnerID(id int64) {
 	m.owner = &id
@@ -30406,7 +30587,7 @@ func (m *OrganizationMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *OrganizationMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 12)
 	if m.created_at != nil {
 		fields = append(fields, organization.FieldCreatedAt)
 	}
@@ -30434,6 +30615,15 @@ func (m *OrganizationMutation) Fields() []string {
 	if m.quota_request_max != nil {
 		fields = append(fields, organization.FieldQuotaRequestMax)
 	}
+	if m.default_quota_enabled != nil {
+		fields = append(fields, organization.FieldDefaultQuotaEnabled)
+	}
+	if m.default_quota_amount != nil {
+		fields = append(fields, organization.FieldDefaultQuotaAmount)
+	}
+	if m.default_quota_period_days != nil {
+		fields = append(fields, organization.FieldDefaultQuotaPeriodDays)
+	}
 	return fields
 }
 
@@ -30460,6 +30650,12 @@ func (m *OrganizationMutation) Field(name string) (ent.Value, bool) {
 		return m.QuotaRequestMin()
 	case organization.FieldQuotaRequestMax:
 		return m.QuotaRequestMax()
+	case organization.FieldDefaultQuotaEnabled:
+		return m.DefaultQuotaEnabled()
+	case organization.FieldDefaultQuotaAmount:
+		return m.DefaultQuotaAmount()
+	case organization.FieldDefaultQuotaPeriodDays:
+		return m.DefaultQuotaPeriodDays()
 	}
 	return nil, false
 }
@@ -30487,6 +30683,12 @@ func (m *OrganizationMutation) OldField(ctx context.Context, name string) (ent.V
 		return m.OldQuotaRequestMin(ctx)
 	case organization.FieldQuotaRequestMax:
 		return m.OldQuotaRequestMax(ctx)
+	case organization.FieldDefaultQuotaEnabled:
+		return m.OldDefaultQuotaEnabled(ctx)
+	case organization.FieldDefaultQuotaAmount:
+		return m.OldDefaultQuotaAmount(ctx)
+	case organization.FieldDefaultQuotaPeriodDays:
+		return m.OldDefaultQuotaPeriodDays(ctx)
 	}
 	return nil, fmt.Errorf("unknown Organization field %s", name)
 }
@@ -30559,6 +30761,27 @@ func (m *OrganizationMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetQuotaRequestMax(v)
 		return nil
+	case organization.FieldDefaultQuotaEnabled:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDefaultQuotaEnabled(v)
+		return nil
+	case organization.FieldDefaultQuotaAmount:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDefaultQuotaAmount(v)
+		return nil
+	case organization.FieldDefaultQuotaPeriodDays:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDefaultQuotaPeriodDays(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Organization field %s", name)
 }
@@ -30573,6 +30796,12 @@ func (m *OrganizationMutation) AddedFields() []string {
 	if m.addquota_request_max != nil {
 		fields = append(fields, organization.FieldQuotaRequestMax)
 	}
+	if m.adddefault_quota_amount != nil {
+		fields = append(fields, organization.FieldDefaultQuotaAmount)
+	}
+	if m.adddefault_quota_period_days != nil {
+		fields = append(fields, organization.FieldDefaultQuotaPeriodDays)
+	}
 	return fields
 }
 
@@ -30585,6 +30814,10 @@ func (m *OrganizationMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedQuotaRequestMin()
 	case organization.FieldQuotaRequestMax:
 		return m.AddedQuotaRequestMax()
+	case organization.FieldDefaultQuotaAmount:
+		return m.AddedDefaultQuotaAmount()
+	case organization.FieldDefaultQuotaPeriodDays:
+		return m.AddedDefaultQuotaPeriodDays()
 	}
 	return nil, false
 }
@@ -30608,6 +30841,20 @@ func (m *OrganizationMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddQuotaRequestMax(v)
 		return nil
+	case organization.FieldDefaultQuotaAmount:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDefaultQuotaAmount(v)
+		return nil
+	case organization.FieldDefaultQuotaPeriodDays:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDefaultQuotaPeriodDays(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Organization numeric field %s", name)
 }
@@ -30621,6 +30868,12 @@ func (m *OrganizationMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(organization.FieldQuotaRequestMax) {
 		fields = append(fields, organization.FieldQuotaRequestMax)
+	}
+	if m.FieldCleared(organization.FieldDefaultQuotaAmount) {
+		fields = append(fields, organization.FieldDefaultQuotaAmount)
+	}
+	if m.FieldCleared(organization.FieldDefaultQuotaPeriodDays) {
+		fields = append(fields, organization.FieldDefaultQuotaPeriodDays)
 	}
 	return fields
 }
@@ -30641,6 +30894,12 @@ func (m *OrganizationMutation) ClearField(name string) error {
 		return nil
 	case organization.FieldQuotaRequestMax:
 		m.ClearQuotaRequestMax()
+		return nil
+	case organization.FieldDefaultQuotaAmount:
+		m.ClearDefaultQuotaAmount()
+		return nil
+	case organization.FieldDefaultQuotaPeriodDays:
+		m.ClearDefaultQuotaPeriodDays()
 		return nil
 	}
 	return fmt.Errorf("unknown Organization nullable field %s", name)
@@ -30676,6 +30935,15 @@ func (m *OrganizationMutation) ResetField(name string) error {
 		return nil
 	case organization.FieldQuotaRequestMax:
 		m.ResetQuotaRequestMax()
+		return nil
+	case organization.FieldDefaultQuotaEnabled:
+		m.ResetDefaultQuotaEnabled()
+		return nil
+	case organization.FieldDefaultQuotaAmount:
+		m.ResetDefaultQuotaAmount()
+		return nil
+	case organization.FieldDefaultQuotaPeriodDays:
+		m.ResetDefaultQuotaPeriodDays()
 		return nil
 	}
 	return fmt.Errorf("unknown Organization field %s", name)

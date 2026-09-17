@@ -32,6 +32,12 @@ const (
 	FieldQuotaRequestMin = "quota_request_min"
 	// FieldQuotaRequestMax holds the string denoting the quota_request_max field in the database.
 	FieldQuotaRequestMax = "quota_request_max"
+	// FieldDefaultQuotaEnabled holds the string denoting the default_quota_enabled field in the database.
+	FieldDefaultQuotaEnabled = "default_quota_enabled"
+	// FieldDefaultQuotaAmount holds the string denoting the default_quota_amount field in the database.
+	FieldDefaultQuotaAmount = "default_quota_amount"
+	// FieldDefaultQuotaPeriodDays holds the string denoting the default_quota_period_days field in the database.
+	FieldDefaultQuotaPeriodDays = "default_quota_period_days"
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
 	EdgeOwner = "owner"
 	// EdgeMembers holds the string denoting the members edge name in mutations.
@@ -91,6 +97,9 @@ var Columns = []string{
 	FieldQuotaRequestMode,
 	FieldQuotaRequestMin,
 	FieldQuotaRequestMax,
+	FieldDefaultQuotaEnabled,
+	FieldDefaultQuotaAmount,
+	FieldDefaultQuotaPeriodDays,
 }
 
 var (
@@ -128,6 +137,8 @@ var (
 	DefaultQuotaRequestMode string
 	// QuotaRequestModeValidator is a validator for the "quota_request_mode" field. It is called by the builders before save.
 	QuotaRequestModeValidator func(string) error
+	// DefaultDefaultQuotaEnabled holds the default value on creation for the "default_quota_enabled" field.
+	DefaultDefaultQuotaEnabled bool
 )
 
 // OrderOption defines the ordering options for the Organization queries.
@@ -181,6 +192,21 @@ func ByQuotaRequestMin(opts ...sql.OrderTermOption) OrderOption {
 // ByQuotaRequestMax orders the results by the quota_request_max field.
 func ByQuotaRequestMax(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldQuotaRequestMax, opts...).ToFunc()
+}
+
+// ByDefaultQuotaEnabled orders the results by the default_quota_enabled field.
+func ByDefaultQuotaEnabled(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDefaultQuotaEnabled, opts...).ToFunc()
+}
+
+// ByDefaultQuotaAmount orders the results by the default_quota_amount field.
+func ByDefaultQuotaAmount(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDefaultQuotaAmount, opts...).ToFunc()
+}
+
+// ByDefaultQuotaPeriodDays orders the results by the default_quota_period_days field.
+func ByDefaultQuotaPeriodDays(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDefaultQuotaPeriodDays, opts...).ToFunc()
 }
 
 // ByOwnerField orders the results by owner field.

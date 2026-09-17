@@ -36,6 +36,12 @@ type Organization struct {
 	QuotaRequestMin *float64 `json:"quota_request_min,omitempty"`
 	// QuotaRequestMax holds the value of the "quota_request_max" field.
 	QuotaRequestMax *float64 `json:"quota_request_max,omitempty"`
+	// DefaultQuotaEnabled holds the value of the "default_quota_enabled" field.
+	DefaultQuotaEnabled bool `json:"default_quota_enabled,omitempty"`
+	// DefaultQuotaAmount holds the value of the "default_quota_amount" field.
+	DefaultQuotaAmount *float64 `json:"default_quota_amount,omitempty"`
+	// DefaultQuotaPeriodDays holds the value of the "default_quota_period_days" field.
+	DefaultQuotaPeriodDays *int `json:"default_quota_period_days,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the OrganizationQuery when eager-loading is set.
 	Edges        OrganizationEdges `json:"edges"`
@@ -111,11 +117,11 @@ func (*Organization) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case organization.FieldRestrictPublicGroups:
+		case organization.FieldRestrictPublicGroups, organization.FieldDefaultQuotaEnabled:
 			values[i] = new(sql.NullBool)
-		case organization.FieldQuotaRequestMin, organization.FieldQuotaRequestMax:
+		case organization.FieldQuotaRequestMin, organization.FieldQuotaRequestMax, organization.FieldDefaultQuotaAmount:
 			values[i] = new(sql.NullFloat64)
-		case organization.FieldID, organization.FieldOwnerUserID:
+		case organization.FieldID, organization.FieldOwnerUserID, organization.FieldDefaultQuotaPeriodDays:
 			values[i] = new(sql.NullInt64)
 		case organization.FieldName, organization.FieldStatus, organization.FieldQuotaRequestMode:
 			values[i] = new(sql.NullString)
@@ -197,6 +203,26 @@ func (_m *Organization) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.QuotaRequestMax = new(float64)
 				*_m.QuotaRequestMax = value.Float64
+			}
+		case organization.FieldDefaultQuotaEnabled:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field default_quota_enabled", values[i])
+			} else if value.Valid {
+				_m.DefaultQuotaEnabled = value.Bool
+			}
+		case organization.FieldDefaultQuotaAmount:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field default_quota_amount", values[i])
+			} else if value.Valid {
+				_m.DefaultQuotaAmount = new(float64)
+				*_m.DefaultQuotaAmount = value.Float64
+			}
+		case organization.FieldDefaultQuotaPeriodDays:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field default_quota_period_days", values[i])
+			} else if value.Valid {
+				_m.DefaultQuotaPeriodDays = new(int)
+				*_m.DefaultQuotaPeriodDays = int(value.Int64)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -287,6 +313,19 @@ func (_m *Organization) String() string {
 	builder.WriteString(", ")
 	if v := _m.QuotaRequestMax; v != nil {
 		builder.WriteString("quota_request_max=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("default_quota_enabled=")
+	builder.WriteString(fmt.Sprintf("%v", _m.DefaultQuotaEnabled))
+	builder.WriteString(", ")
+	if v := _m.DefaultQuotaAmount; v != nil {
+		builder.WriteString("default_quota_amount=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.DefaultQuotaPeriodDays; v != nil {
+		builder.WriteString("default_quota_period_days=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteByte(')')

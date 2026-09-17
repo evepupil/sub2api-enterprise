@@ -9,6 +9,8 @@ const {
   createOrganizationInvitationMock,
   listOrganizationMembersMock,
   updateOrganizationMemberQuotaMock,
+  getOrganizationDefaultQuotaMock,
+  updateOrganizationDefaultQuotaMock,
   copyToClipboardMock
 } = vi.hoisted(() => ({
   getCurrentOrganizationMock: vi.fn(),
@@ -16,6 +18,8 @@ const {
   createOrganizationInvitationMock: vi.fn(),
   listOrganizationMembersMock: vi.fn(),
   updateOrganizationMemberQuotaMock: vi.fn(),
+  getOrganizationDefaultQuotaMock: vi.fn(),
+  updateOrganizationDefaultQuotaMock: vi.fn(),
   copyToClipboardMock: vi.fn()
 }))
 
@@ -33,7 +37,11 @@ vi.mock('@/api/organization', () => ({
     createOrganizationInvitation: (...args: unknown[]) => createOrganizationInvitationMock(...args),
     listOrganizationMembers: (...args: unknown[]) => listOrganizationMembersMock(...args),
     updateOrganizationMemberQuota: (...args: unknown[]) =>
-      updateOrganizationMemberQuotaMock(...args)
+      updateOrganizationMemberQuotaMock(...args),
+    getOrganizationDefaultQuota: (...args: unknown[]) =>
+      getOrganizationDefaultQuotaMock(...args),
+    updateOrganizationDefaultQuota: (...args: unknown[]) =>
+      updateOrganizationDefaultQuotaMock(...args)
   },
   getQuotaRequestPolicy: vi.fn(() =>
     Promise.resolve({ mode: 'off', min_amount: null, max_amount: null })
@@ -122,7 +130,14 @@ describe('OrganizationView', () => {
     createOrganizationInvitationMock.mockReset()
     listOrganizationMembersMock.mockReset()
     updateOrganizationMemberQuotaMock.mockReset()
+    getOrganizationDefaultQuotaMock.mockReset()
+    updateOrganizationDefaultQuotaMock.mockReset()
     copyToClipboardMock.mockReset()
+    getOrganizationDefaultQuotaMock.mockResolvedValue({
+      enabled: false,
+      amount: null,
+      period_days: null
+    })
     getCurrentOrganizationMock.mockResolvedValue({
       id: 1,
       name: 'Example Team',
@@ -236,6 +251,89 @@ describe('OrganizationView', () => {
       expect(updateOrganizationMemberQuotaMock).toHaveBeenCalledOnce()
       const payload = updateOrganizationMemberQuotaMock.mock.calls[0][1] as Record<string, unknown>
       expect(payload.start_at).toBe(new Date('2026-10-01T09:00').toISOString())
+    })
+  })
+
+  describe('organization default quota', () => {
+    it('shows the disabled bar and enables with sync flags from the dialog', async () => {
+      const wrapper = await mountWithMembers([])
+      expect(wrapper.text()).toContain('organization.defaultQuotaOff')
+
+      const editButton = wrapper
+        .findAll('button')
+        .find(button => button.text().includes('organization.defaultQuotaEnable'))
+      expect(editButton).toBeDefined()
+      await editButton!.trigger('click')
+      await flushPromises()
+
+      const dialog = wrapper.find('.dialog-stub')
+      const numberInputs = dialog.findAll('input[type="number"]')
+      await numberInputs[0].setValue('20')
+      await numberInputs[1].setValue('30')
+      const checkboxes = dialog.findAll('input[type="checkbox"]')
+      expect((checkboxes[0].element as HTMLInputElement).checked).toBe(true)
+      await checkboxes[1].setValue(true)
+
+      updateOrganizationDefaultQuotaMock.mockResolvedValue({
+        quota: { enabled: true, amount: 20, period_days: 30 },
+        synced_users: 2
+      })
+      const saveButton = dialog
+        .findAll('button')
+        .find(button => button.text().includes('common.save'))
+      await saveButton!.trigger('click')
+      await flushPromises()
+
+      expect(updateOrganizationDefaultQuotaMock).toHaveBeenCalledOnce()
+      const payload = updateOrganizationDefaultQuotaMock.mock.calls[0][0] as Record<string, unknown>
+      expect(payload).toMatchObject({
+        enabled: true,
+        amount: 20,
+        period_days: 30,
+        sync_unconfigured: true,
+        sync_configured: true
+      })
+      expect(wrapper.text()).toContain('organization.defaultQuotaOn')
+    })
+
+    it('offers a disabled action with confirm when the quota is on', async () => {
+      getOrganizationDefaultQuotaMock.mockResolvedValue({
+        enabled: true,
+        amount: 20,
+        period_days: 30
+      })
+      const wrapper = await mountWithMembers([])
+      expect(wrapper.text()).toContain('organization.defaultQuotaOn')
+
+      const editButton = wrapper
+        .findAll('button')
+        .find(button => button.text().includes('organization.defaultQuotaEdit'))
+      await editButton!.trigger('click')
+      await flushPromises()
+
+      const dialog = wrapper.find('.dialog-stub')
+      const closeButton = dialog
+        .findAll('button')
+        .find(button => button.text().includes('organization.defaultQuotaDisable'))
+      expect(closeButton).toBeDefined()
+      await closeButton!.trigger('click')
+      await flushPromises()
+
+      // 确认弹窗出现并确认后，走关闭请求且不带任何同步与金额参数。
+      updateOrganizationDefaultQuotaMock.mockResolvedValue({
+        quota: { enabled: false, amount: null, period_days: null },
+        synced_users: 0
+      })
+      const confirmButton = wrapper
+        .findAll('button')
+        .find(button => button.text() === 'common.confirm')
+      expect(confirmButton).toBeDefined()
+      await confirmButton!.trigger('click')
+      await flushPromises()
+
+      expect(updateOrganizationDefaultQuotaMock).toHaveBeenCalledOnce()
+      expect(updateOrganizationDefaultQuotaMock.mock.calls[0][0]).toEqual({ enabled: false })
+      expect(wrapper.text()).toContain('organization.defaultQuotaOff')
     })
   })
 })

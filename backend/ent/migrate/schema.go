@@ -1108,6 +1108,9 @@ var (
 		{Name: "quota_request_mode", Type: field.TypeString, Size: 20, Default: "off"},
 		{Name: "quota_request_min", Type: field.TypeFloat64, Nullable: true, SchemaType: map[string]string{"postgres": "decimal(20,8)"}},
 		{Name: "quota_request_max", Type: field.TypeFloat64, Nullable: true, SchemaType: map[string]string{"postgres": "decimal(20,8)"}},
+		{Name: "default_quota_enabled", Type: field.TypeBool, Default: false},
+		{Name: "default_quota_amount", Type: field.TypeFloat64, Nullable: true, SchemaType: map[string]string{"postgres": "decimal(20,8)"}},
+		{Name: "default_quota_period_days", Type: field.TypeInt, Nullable: true},
 		{Name: "owner_user_id", Type: field.TypeInt64, Unique: true},
 	}
 	// OrganizationsTable holds the schema information for the "organizations" table.
@@ -1118,7 +1121,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "organizations_users_owned_organization",
-				Columns:    []*schema.Column{OrganizationsColumns[9]},
+				Columns:    []*schema.Column{OrganizationsColumns[12]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},

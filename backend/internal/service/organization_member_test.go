@@ -20,6 +20,7 @@ type organizationMemberRepoStub struct {
 	quotaWrites    [][]OrganizationMemberQuotaWrite
 	advanceCalls   []int64
 	listFilters    []OrganizationMemberListFilters
+	defaultQuota   OrganizationDefaultQuota
 }
 
 func (r *organizationMemberRepoStub) List(
@@ -170,6 +171,69 @@ func (r *organizationMemberRepoStub) ListUserIDs(_ context.Context, organization
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i] < out[j] })
 	return out, nil
+}
+
+func (r *organizationMemberRepoStub) GetDefaultQuota(
+	_ context.Context,
+	organizationID int64,
+) (*OrganizationDefaultQuota, error) {
+	if organizationID != r.organizationID {
+		return nil, ErrOrganizationNotFound
+	}
+	copyValue := r.defaultQuota
+	return &copyValue, nil
+}
+
+// UpdateDefaultQuota 与真实落库同构：先写组织配置，再按开关挑选普通成员
+// （排除创建者、按周期配额有无分流）当场换新一期。
+func (r *organizationMemberRepoStub) UpdateDefaultQuota(
+	_ context.Context,
+	organizationID int64,
+	update OrganizationDefaultQuotaUpdate,
+) (*OrganizationDefaultQuotaSynced, error) {
+	if organizationID != r.organizationID {
+		return nil, ErrOrganizationNotFound
+	}
+	if update.Enabled {
+		amount := update.Amount
+		periodDays := update.PeriodDays
+		r.defaultQuota = OrganizationDefaultQuota{Enabled: true, Amount: &amount, PeriodDays: &periodDays}
+	} else {
+		r.defaultQuota = OrganizationDefaultQuota{}
+	}
+	if !update.Enabled || (!update.SyncUnconfigured && !update.SyncConfigured) {
+		return &OrganizationDefaultQuotaSynced{Quota: r.defaultQuota}, nil
+	}
+
+	now := time.Now()
+	synced := make([]int64, 0)
+	for _, member := range r.members {
+		if member.IsOwner {
+			continue
+		}
+		if update.SyncUnconfigured != update.SyncConfigured {
+			hasQuota := member.QuotaAmount != nil
+			if update.SyncUnconfigured && hasQuota {
+				continue
+			}
+			if update.SyncConfigured && !hasQuota {
+				continue
+			}
+		}
+		amount := update.Amount
+		periodDays := update.PeriodDays
+		startAt := now
+		cycleStart := now
+		member.QuotaAmount = &amount
+		member.QuotaPeriodDays = &periodDays
+		member.QuotaStartAt = &startAt
+		member.QuotaCycleStart = &cycleStart
+		member.QuotaCycleBonus = 0
+		member.SpendingUsed = 0
+		synced = append(synced, member.UserID)
+	}
+	sort.Slice(synced, func(i, j int) bool { return synced[i] < synced[j] })
+	return &OrganizationDefaultQuotaSynced{Quota: r.defaultQuota, SyncedUserIDs: synced}, nil
 }
 
 type organizationMemberUserRepoStub struct {

@@ -162,6 +162,74 @@ func (_u *OrganizationUpdate) ClearQuotaRequestMax() *OrganizationUpdate {
 	return _u
 }
 
+// SetDefaultQuotaEnabled sets the "default_quota_enabled" field.
+func (_u *OrganizationUpdate) SetDefaultQuotaEnabled(v bool) *OrganizationUpdate {
+	_u.mutation.SetDefaultQuotaEnabled(v)
+	return _u
+}
+
+// SetNillableDefaultQuotaEnabled sets the "default_quota_enabled" field if the given value is not nil.
+func (_u *OrganizationUpdate) SetNillableDefaultQuotaEnabled(v *bool) *OrganizationUpdate {
+	if v != nil {
+		_u.SetDefaultQuotaEnabled(*v)
+	}
+	return _u
+}
+
+// SetDefaultQuotaAmount sets the "default_quota_amount" field.
+func (_u *OrganizationUpdate) SetDefaultQuotaAmount(v float64) *OrganizationUpdate {
+	_u.mutation.ResetDefaultQuotaAmount()
+	_u.mutation.SetDefaultQuotaAmount(v)
+	return _u
+}
+
+// SetNillableDefaultQuotaAmount sets the "default_quota_amount" field if the given value is not nil.
+func (_u *OrganizationUpdate) SetNillableDefaultQuotaAmount(v *float64) *OrganizationUpdate {
+	if v != nil {
+		_u.SetDefaultQuotaAmount(*v)
+	}
+	return _u
+}
+
+// AddDefaultQuotaAmount adds value to the "default_quota_amount" field.
+func (_u *OrganizationUpdate) AddDefaultQuotaAmount(v float64) *OrganizationUpdate {
+	_u.mutation.AddDefaultQuotaAmount(v)
+	return _u
+}
+
+// ClearDefaultQuotaAmount clears the value of the "default_quota_amount" field.
+func (_u *OrganizationUpdate) ClearDefaultQuotaAmount() *OrganizationUpdate {
+	_u.mutation.ClearDefaultQuotaAmount()
+	return _u
+}
+
+// SetDefaultQuotaPeriodDays sets the "default_quota_period_days" field.
+func (_u *OrganizationUpdate) SetDefaultQuotaPeriodDays(v int) *OrganizationUpdate {
+	_u.mutation.ResetDefaultQuotaPeriodDays()
+	_u.mutation.SetDefaultQuotaPeriodDays(v)
+	return _u
+}
+
+// SetNillableDefaultQuotaPeriodDays sets the "default_quota_period_days" field if the given value is not nil.
+func (_u *OrganizationUpdate) SetNillableDefaultQuotaPeriodDays(v *int) *OrganizationUpdate {
+	if v != nil {
+		_u.SetDefaultQuotaPeriodDays(*v)
+	}
+	return _u
+}
+
+// AddDefaultQuotaPeriodDays adds value to the "default_quota_period_days" field.
+func (_u *OrganizationUpdate) AddDefaultQuotaPeriodDays(v int) *OrganizationUpdate {
+	_u.mutation.AddDefaultQuotaPeriodDays(v)
+	return _u
+}
+
+// ClearDefaultQuotaPeriodDays clears the value of the "default_quota_period_days" field.
+func (_u *OrganizationUpdate) ClearDefaultQuotaPeriodDays() *OrganizationUpdate {
+	_u.mutation.ClearDefaultQuotaPeriodDays()
+	return _u
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *OrganizationUpdate) SetOwnerID(id int64) *OrganizationUpdate {
 	_u.mutation.SetOwnerID(id)
@@ -395,6 +463,27 @@ func (_u *OrganizationUpdate) sqlSave(ctx context.Context) (_node int, err error
 	}
 	if _u.mutation.QuotaRequestMaxCleared() {
 		_spec.ClearField(organization.FieldQuotaRequestMax, field.TypeFloat64)
+	}
+	if value, ok := _u.mutation.DefaultQuotaEnabled(); ok {
+		_spec.SetField(organization.FieldDefaultQuotaEnabled, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.DefaultQuotaAmount(); ok {
+		_spec.SetField(organization.FieldDefaultQuotaAmount, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedDefaultQuotaAmount(); ok {
+		_spec.AddField(organization.FieldDefaultQuotaAmount, field.TypeFloat64, value)
+	}
+	if _u.mutation.DefaultQuotaAmountCleared() {
+		_spec.ClearField(organization.FieldDefaultQuotaAmount, field.TypeFloat64)
+	}
+	if value, ok := _u.mutation.DefaultQuotaPeriodDays(); ok {
+		_spec.SetField(organization.FieldDefaultQuotaPeriodDays, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedDefaultQuotaPeriodDays(); ok {
+		_spec.AddField(organization.FieldDefaultQuotaPeriodDays, field.TypeInt, value)
+	}
+	if _u.mutation.DefaultQuotaPeriodDaysCleared() {
+		_spec.ClearField(organization.FieldDefaultQuotaPeriodDays, field.TypeInt)
 	}
 	if _u.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -722,6 +811,74 @@ func (_u *OrganizationUpdateOne) ClearQuotaRequestMax() *OrganizationUpdateOne {
 	return _u
 }
 
+// SetDefaultQuotaEnabled sets the "default_quota_enabled" field.
+func (_u *OrganizationUpdateOne) SetDefaultQuotaEnabled(v bool) *OrganizationUpdateOne {
+	_u.mutation.SetDefaultQuotaEnabled(v)
+	return _u
+}
+
+// SetNillableDefaultQuotaEnabled sets the "default_quota_enabled" field if the given value is not nil.
+func (_u *OrganizationUpdateOne) SetNillableDefaultQuotaEnabled(v *bool) *OrganizationUpdateOne {
+	if v != nil {
+		_u.SetDefaultQuotaEnabled(*v)
+	}
+	return _u
+}
+
+// SetDefaultQuotaAmount sets the "default_quota_amount" field.
+func (_u *OrganizationUpdateOne) SetDefaultQuotaAmount(v float64) *OrganizationUpdateOne {
+	_u.mutation.ResetDefaultQuotaAmount()
+	_u.mutation.SetDefaultQuotaAmount(v)
+	return _u
+}
+
+// SetNillableDefaultQuotaAmount sets the "default_quota_amount" field if the given value is not nil.
+func (_u *OrganizationUpdateOne) SetNillableDefaultQuotaAmount(v *float64) *OrganizationUpdateOne {
+	if v != nil {
+		_u.SetDefaultQuotaAmount(*v)
+	}
+	return _u
+}
+
+// AddDefaultQuotaAmount adds value to the "default_quota_amount" field.
+func (_u *OrganizationUpdateOne) AddDefaultQuotaAmount(v float64) *OrganizationUpdateOne {
+	_u.mutation.AddDefaultQuotaAmount(v)
+	return _u
+}
+
+// ClearDefaultQuotaAmount clears the value of the "default_quota_amount" field.
+func (_u *OrganizationUpdateOne) ClearDefaultQuotaAmount() *OrganizationUpdateOne {
+	_u.mutation.ClearDefaultQuotaAmount()
+	return _u
+}
+
+// SetDefaultQuotaPeriodDays sets the "default_quota_period_days" field.
+func (_u *OrganizationUpdateOne) SetDefaultQuotaPeriodDays(v int) *OrganizationUpdateOne {
+	_u.mutation.ResetDefaultQuotaPeriodDays()
+	_u.mutation.SetDefaultQuotaPeriodDays(v)
+	return _u
+}
+
+// SetNillableDefaultQuotaPeriodDays sets the "default_quota_period_days" field if the given value is not nil.
+func (_u *OrganizationUpdateOne) SetNillableDefaultQuotaPeriodDays(v *int) *OrganizationUpdateOne {
+	if v != nil {
+		_u.SetDefaultQuotaPeriodDays(*v)
+	}
+	return _u
+}
+
+// AddDefaultQuotaPeriodDays adds value to the "default_quota_period_days" field.
+func (_u *OrganizationUpdateOne) AddDefaultQuotaPeriodDays(v int) *OrganizationUpdateOne {
+	_u.mutation.AddDefaultQuotaPeriodDays(v)
+	return _u
+}
+
+// ClearDefaultQuotaPeriodDays clears the value of the "default_quota_period_days" field.
+func (_u *OrganizationUpdateOne) ClearDefaultQuotaPeriodDays() *OrganizationUpdateOne {
+	_u.mutation.ClearDefaultQuotaPeriodDays()
+	return _u
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *OrganizationUpdateOne) SetOwnerID(id int64) *OrganizationUpdateOne {
 	_u.mutation.SetOwnerID(id)
@@ -985,6 +1142,27 @@ func (_u *OrganizationUpdateOne) sqlSave(ctx context.Context) (_node *Organizati
 	}
 	if _u.mutation.QuotaRequestMaxCleared() {
 		_spec.ClearField(organization.FieldQuotaRequestMax, field.TypeFloat64)
+	}
+	if value, ok := _u.mutation.DefaultQuotaEnabled(); ok {
+		_spec.SetField(organization.FieldDefaultQuotaEnabled, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.DefaultQuotaAmount(); ok {
+		_spec.SetField(organization.FieldDefaultQuotaAmount, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedDefaultQuotaAmount(); ok {
+		_spec.AddField(organization.FieldDefaultQuotaAmount, field.TypeFloat64, value)
+	}
+	if _u.mutation.DefaultQuotaAmountCleared() {
+		_spec.ClearField(organization.FieldDefaultQuotaAmount, field.TypeFloat64)
+	}
+	if value, ok := _u.mutation.DefaultQuotaPeriodDays(); ok {
+		_spec.SetField(organization.FieldDefaultQuotaPeriodDays, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedDefaultQuotaPeriodDays(); ok {
+		_spec.AddField(organization.FieldDefaultQuotaPeriodDays, field.TypeInt, value)
+	}
+	if _u.mutation.DefaultQuotaPeriodDaysCleared() {
+		_spec.ClearField(organization.FieldDefaultQuotaPeriodDays, field.TypeInt)
 	}
 	if _u.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{

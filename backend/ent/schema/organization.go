@@ -61,6 +61,18 @@ func (Organization) Fields() []ent.Field {
 			Optional().
 			Nillable().
 			SchemaType(map[string]string{dialect.Postgres: "decimal(20,8)"}),
+
+		// 组织默认周期配额：开启后新成员完成加入时自动抄入这份配置，
+		// 周期从加入时刻起算。关闭时金额与天数为空，由数据库 CHECK 兜底。
+		field.Bool("default_quota_enabled").
+			Default(false),
+		field.Float("default_quota_amount").
+			Optional().
+			Nillable().
+			SchemaType(map[string]string{dialect.Postgres: "decimal(20,8)"}),
+		field.Int("default_quota_period_days").
+			Optional().
+			Nillable(),
 	}
 }
 

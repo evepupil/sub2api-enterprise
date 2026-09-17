@@ -26,6 +26,10 @@ func registerOrganizationRoutes(authenticated *gin.RouterGroup, h *handler.Handl
 		organization.POST("/members/spending-limit-split", h.OrganizationMember.SplitSpendingLimit)
 		organization.POST("/members/quota-batch", h.OrganizationMember.BatchSetQuota)
 
+		// 组织默认周期配额：开启后新成员入组自动获得，可按开关同步存量成员。
+		organization.GET("/default-quota", h.OrganizationMember.GetDefaultQuota)
+		organization.PUT("/default-quota", h.OrganizationMember.UpdateDefaultQuota)
+
 		// 配额申请：策略只有组织创建者能配；提交、撤回由成员本人发起；
 		// 列表按身份分流（创建者看本组织，成员只看自己）。
 		organization.GET("/quota-request-policy", h.OrganizationQuotaRequest.GetPolicy)

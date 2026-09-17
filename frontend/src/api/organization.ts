@@ -1,5 +1,6 @@
 import { apiClient } from './client'
 import type {
+  OrganizationDefaultQuota,
   OrganizationInvitation,
   OrganizationMember,
   OrganizationQuotaRequest,
@@ -126,6 +127,34 @@ export async function batchSetOrganizationMemberQuota(
   return data
 }
 
+// 组织默认周期配额：开启后新成员完成加入时自动获得，周期从加入时刻起算。
+export async function getOrganizationDefaultQuota(): Promise<OrganizationDefaultQuota> {
+  const { data } = await apiClient.get<OrganizationDefaultQuota>('/organization/default-quota')
+  return data
+}
+
+// sync_unconfigured 只补没配周期配额的成员，sync_configured 只覆盖已配的成员，
+// 都传 true 等于全员统一立即重置，都不传则只影响之后加入的成员。
+export async function updateOrganizationDefaultQuota(payload: {
+  enabled: boolean
+  amount?: number
+  period_days?: number
+  sync_unconfigured?: boolean
+  sync_configured?: boolean
+}): Promise<{ quota: OrganizationDefaultQuota; synced_users: number }> {
+  const { data } = await apiClient.put<{
+    quota: OrganizationDefaultQuota
+    synced_users: number
+  }>('/organization/default-quota', {
+    enabled: payload.enabled,
+    amount: payload.enabled ? payload.amount : undefined,
+    period_days: payload.enabled ? payload.period_days : undefined,
+    sync_unconfigured: payload.enabled ? (payload.sync_unconfigured ?? false) : false,
+    sync_configured: payload.enabled ? (payload.sync_configured ?? false) : false
+  })
+  return data
+}
+
 export async function getQuotaRequestPolicy(): Promise<OrganizationQuotaRequestPolicy> {
   const { data } = await apiClient.get<OrganizationQuotaRequestPolicy>(
     '/organization/quota-request-policy'
@@ -208,6 +237,8 @@ export default {
   splitOrganizationMemberSpendingLimit,
   updateOrganizationMemberQuota,
   batchSetOrganizationMemberQuota,
+  getOrganizationDefaultQuota,
+  updateOrganizationDefaultQuota,
   getQuotaRequestPolicy,
   updateQuotaRequestPolicy,
   listQuotaRequests,

@@ -100,6 +100,21 @@ func QuotaRequestMax(v float64) predicate.Organization {
 	return predicate.Organization(sql.FieldEQ(FieldQuotaRequestMax, v))
 }
 
+// DefaultQuotaEnabled applies equality check predicate on the "default_quota_enabled" field. It's identical to DefaultQuotaEnabledEQ.
+func DefaultQuotaEnabled(v bool) predicate.Organization {
+	return predicate.Organization(sql.FieldEQ(FieldDefaultQuotaEnabled, v))
+}
+
+// DefaultQuotaAmount applies equality check predicate on the "default_quota_amount" field. It's identical to DefaultQuotaAmountEQ.
+func DefaultQuotaAmount(v float64) predicate.Organization {
+	return predicate.Organization(sql.FieldEQ(FieldDefaultQuotaAmount, v))
+}
+
+// DefaultQuotaPeriodDays applies equality check predicate on the "default_quota_period_days" field. It's identical to DefaultQuotaPeriodDaysEQ.
+func DefaultQuotaPeriodDays(v int) predicate.Organization {
+	return predicate.Organization(sql.FieldEQ(FieldDefaultQuotaPeriodDays, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Organization {
 	return predicate.Organization(sql.FieldEQ(FieldCreatedAt, v))
@@ -503,6 +518,116 @@ func QuotaRequestMaxIsNil() predicate.Organization {
 // QuotaRequestMaxNotNil applies the NotNil predicate on the "quota_request_max" field.
 func QuotaRequestMaxNotNil() predicate.Organization {
 	return predicate.Organization(sql.FieldNotNull(FieldQuotaRequestMax))
+}
+
+// DefaultQuotaEnabledEQ applies the EQ predicate on the "default_quota_enabled" field.
+func DefaultQuotaEnabledEQ(v bool) predicate.Organization {
+	return predicate.Organization(sql.FieldEQ(FieldDefaultQuotaEnabled, v))
+}
+
+// DefaultQuotaEnabledNEQ applies the NEQ predicate on the "default_quota_enabled" field.
+func DefaultQuotaEnabledNEQ(v bool) predicate.Organization {
+	return predicate.Organization(sql.FieldNEQ(FieldDefaultQuotaEnabled, v))
+}
+
+// DefaultQuotaAmountEQ applies the EQ predicate on the "default_quota_amount" field.
+func DefaultQuotaAmountEQ(v float64) predicate.Organization {
+	return predicate.Organization(sql.FieldEQ(FieldDefaultQuotaAmount, v))
+}
+
+// DefaultQuotaAmountNEQ applies the NEQ predicate on the "default_quota_amount" field.
+func DefaultQuotaAmountNEQ(v float64) predicate.Organization {
+	return predicate.Organization(sql.FieldNEQ(FieldDefaultQuotaAmount, v))
+}
+
+// DefaultQuotaAmountIn applies the In predicate on the "default_quota_amount" field.
+func DefaultQuotaAmountIn(vs ...float64) predicate.Organization {
+	return predicate.Organization(sql.FieldIn(FieldDefaultQuotaAmount, vs...))
+}
+
+// DefaultQuotaAmountNotIn applies the NotIn predicate on the "default_quota_amount" field.
+func DefaultQuotaAmountNotIn(vs ...float64) predicate.Organization {
+	return predicate.Organization(sql.FieldNotIn(FieldDefaultQuotaAmount, vs...))
+}
+
+// DefaultQuotaAmountGT applies the GT predicate on the "default_quota_amount" field.
+func DefaultQuotaAmountGT(v float64) predicate.Organization {
+	return predicate.Organization(sql.FieldGT(FieldDefaultQuotaAmount, v))
+}
+
+// DefaultQuotaAmountGTE applies the GTE predicate on the "default_quota_amount" field.
+func DefaultQuotaAmountGTE(v float64) predicate.Organization {
+	return predicate.Organization(sql.FieldGTE(FieldDefaultQuotaAmount, v))
+}
+
+// DefaultQuotaAmountLT applies the LT predicate on the "default_quota_amount" field.
+func DefaultQuotaAmountLT(v float64) predicate.Organization {
+	return predicate.Organization(sql.FieldLT(FieldDefaultQuotaAmount, v))
+}
+
+// DefaultQuotaAmountLTE applies the LTE predicate on the "default_quota_amount" field.
+func DefaultQuotaAmountLTE(v float64) predicate.Organization {
+	return predicate.Organization(sql.FieldLTE(FieldDefaultQuotaAmount, v))
+}
+
+// DefaultQuotaAmountIsNil applies the IsNil predicate on the "default_quota_amount" field.
+func DefaultQuotaAmountIsNil() predicate.Organization {
+	return predicate.Organization(sql.FieldIsNull(FieldDefaultQuotaAmount))
+}
+
+// DefaultQuotaAmountNotNil applies the NotNil predicate on the "default_quota_amount" field.
+func DefaultQuotaAmountNotNil() predicate.Organization {
+	return predicate.Organization(sql.FieldNotNull(FieldDefaultQuotaAmount))
+}
+
+// DefaultQuotaPeriodDaysEQ applies the EQ predicate on the "default_quota_period_days" field.
+func DefaultQuotaPeriodDaysEQ(v int) predicate.Organization {
+	return predicate.Organization(sql.FieldEQ(FieldDefaultQuotaPeriodDays, v))
+}
+
+// DefaultQuotaPeriodDaysNEQ applies the NEQ predicate on the "default_quota_period_days" field.
+func DefaultQuotaPeriodDaysNEQ(v int) predicate.Organization {
+	return predicate.Organization(sql.FieldNEQ(FieldDefaultQuotaPeriodDays, v))
+}
+
+// DefaultQuotaPeriodDaysIn applies the In predicate on the "default_quota_period_days" field.
+func DefaultQuotaPeriodDaysIn(vs ...int) predicate.Organization {
+	return predicate.Organization(sql.FieldIn(FieldDefaultQuotaPeriodDays, vs...))
+}
+
+// DefaultQuotaPeriodDaysNotIn applies the NotIn predicate on the "default_quota_period_days" field.
+func DefaultQuotaPeriodDaysNotIn(vs ...int) predicate.Organization {
+	return predicate.Organization(sql.FieldNotIn(FieldDefaultQuotaPeriodDays, vs...))
+}
+
+// DefaultQuotaPeriodDaysGT applies the GT predicate on the "default_quota_period_days" field.
+func DefaultQuotaPeriodDaysGT(v int) predicate.Organization {
+	return predicate.Organization(sql.FieldGT(FieldDefaultQuotaPeriodDays, v))
+}
+
+// DefaultQuotaPeriodDaysGTE applies the GTE predicate on the "default_quota_period_days" field.
+func DefaultQuotaPeriodDaysGTE(v int) predicate.Organization {
+	return predicate.Organization(sql.FieldGTE(FieldDefaultQuotaPeriodDays, v))
+}
+
+// DefaultQuotaPeriodDaysLT applies the LT predicate on the "default_quota_period_days" field.
+func DefaultQuotaPeriodDaysLT(v int) predicate.Organization {
+	return predicate.Organization(sql.FieldLT(FieldDefaultQuotaPeriodDays, v))
+}
+
+// DefaultQuotaPeriodDaysLTE applies the LTE predicate on the "default_quota_period_days" field.
+func DefaultQuotaPeriodDaysLTE(v int) predicate.Organization {
+	return predicate.Organization(sql.FieldLTE(FieldDefaultQuotaPeriodDays, v))
+}
+
+// DefaultQuotaPeriodDaysIsNil applies the IsNil predicate on the "default_quota_period_days" field.
+func DefaultQuotaPeriodDaysIsNil() predicate.Organization {
+	return predicate.Organization(sql.FieldIsNull(FieldDefaultQuotaPeriodDays))
+}
+
+// DefaultQuotaPeriodDaysNotNil applies the NotNil predicate on the "default_quota_period_days" field.
+func DefaultQuotaPeriodDaysNotNil() predicate.Organization {
+	return predicate.Organization(sql.FieldNotNull(FieldDefaultQuotaPeriodDays))
 }
 
 // HasOwner applies the HasEdge predicate on the "owner" edge.
