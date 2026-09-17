@@ -447,7 +447,16 @@
             class="input"
             :placeholder="t('organization.quotaPeriodDays')"
           />
-          <div>
+          <label class="flex items-center gap-2 text-sm text-content">
+            <input
+              v-model="limitDialog.immediate"
+              type="checkbox"
+              data-testid="quota-immediate"
+              class="h-4 w-4 cursor-pointer rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+            />
+            <span>{{ t('organization.quotaImmediate') }}</span>
+          </label>
+          <div v-if="!limitDialog.immediate">
             <input
               v-model="limitDialog.startAt"
               type="datetime-local"
@@ -520,7 +529,16 @@
           class="input"
           :placeholder="t('organization.quotaPeriodDays')"
         />
-        <div>
+        <label class="flex items-center gap-2 text-sm text-content">
+          <input
+            v-model="quotaGrantDialog.immediate"
+            type="checkbox"
+            data-testid="quota-immediate"
+            class="h-4 w-4 cursor-pointer rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+          />
+          <span>{{ t('organization.quotaImmediate') }}</span>
+        </label>
+        <div v-if="!quotaGrantDialog.immediate">
           <input
             v-model="quotaGrantDialog.startAt"
             type="datetime-local"
@@ -587,7 +605,7 @@ import { useClipboard } from '@/composables/useClipboard'
 import { extractApiErrorMessage } from '@/utils/apiError'
 import { formatCurrency, formatDateTime } from '@/utils/format'
 import { previewSpendingSplit } from '@/utils/organizationSpending'
-import { datetimeLocalToISO, toDatetimeLocalValue } from '@/utils/quotaTime'
+import { datetimeLocalToISO } from '@/utils/quotaTime'
 
 const { t } = useI18n()
 const appStore = useAppStore()
@@ -686,6 +704,8 @@ const limitDialog = reactive({
   hadQuota: false,
   amount: '',
   periodDays: '',
+  // 立即生效默认勾上：设了就当场换一期；取消勾选才展开定时生效的时间输入
+  immediate: true,
   startAt: '',
   error: '',
   saving: false
@@ -703,6 +723,8 @@ const quotaGrantDialog = reactive({
   show: false,
   amount: '',
   periodDays: '',
+  // 与单人设置同一条规则：默认立即生效，取消勾选才定时。
+  immediate: true,
   startAt: '',
   error: '',
   saving: false
@@ -896,21 +918,20 @@ function openLimitDialog(member: OrganizationMember): void {
   limitDialog.show = true
   limitDialog.userId = member.user_id
   limitDialog.email = member.email
+  limitDialog.immediate = true
+  limitDialog.startAt = ''
   if (member.quota) {
     limitDialog.mode = 'periodic'
     limitDialog.amount = String(member.quota.amount)
     limitDialog.periodDays = String(member.quota.period_days)
-    limitDialog.startAt = toDatetimeLocalValue(member.quota.start_at)
   } else if (member.spending_limit === null) {
     limitDialog.mode = 'unlimited'
     limitDialog.amount = ''
     limitDialog.periodDays = ''
-    limitDialog.startAt = ''
   } else {
     limitDialog.mode = 'fixed'
     limitDialog.amount = String(member.spending_limit)
     limitDialog.periodDays = ''
-    limitDialog.startAt = ''
   }
   limitDialog.hadQuota = Boolean(member.quota)
   limitDialog.error = ''
@@ -959,6 +980,11 @@ async function saveLimit(): Promise<void> {
     limitDialog.error = t('organization.invalidPeriodDays')
     return
   }
+  // 定时生效必须给出时间；立即生效不带 start_at，由服务端取当前时刻。
+  if (!limitDialog.immediate && !datetimeLocalToISO(limitDialog.startAt)) {
+    limitDialog.error = t('organization.quotaStartTimeRequired')
+    return
+  }
 
   limitDialog.saving = true
   limitDialog.error = ''
@@ -966,7 +992,9 @@ async function saveLimit(): Promise<void> {
     const updated = await organizationAPI.updateOrganizationMemberQuota(limitDialog.userId, {
       amount: periodic.amount,
       period_days: periodic.periodDays,
-      start_at: datetimeLocalToISO(limitDialog.startAt)
+      ...(limitDialog.immediate
+        ? {}
+        : { start_at: datetimeLocalToISO(limitDialog.startAt) })
     })
     replaceMember(updated)
     limitDialog.show = false
@@ -998,6 +1026,7 @@ function openQuotaGrantDialog(): void {
   quotaGrantDialog.show = true
   quotaGrantDialog.amount = ''
   quotaGrantDialog.periodDays = ''
+  quotaGrantDialog.immediate = true
   quotaGrantDialog.startAt = ''
   quotaGrantDialog.error = ''
 }
@@ -1016,6 +1045,10 @@ async function submitQuotaGrant(): Promise<void> {
     quotaGrantDialog.error = t('organization.invalidPeriodDays')
     return
   }
+  if (!quotaGrantDialog.immediate && !datetimeLocalToISO(quotaGrantDialog.startAt)) {
+    quotaGrantDialog.error = t('organization.quotaStartTimeRequired')
+    return
+  }
 
   quotaGrantDialog.saving = true
   quotaGrantDialog.error = ''
@@ -1025,7 +1058,9 @@ async function submitQuotaGrant(): Promise<void> {
       {
         amount: periodic.amount,
         period_days: periodic.periodDays,
-        start_at: datetimeLocalToISO(quotaGrantDialog.startAt)
+        ...(quotaGrantDialog.immediate
+          ? {}
+          : { start_at: datetimeLocalToISO(quotaGrantDialog.startAt) })
       }
     )
     updated.forEach(replaceMember)
