@@ -91,6 +91,8 @@ type OrganizationSummary struct {
 	IsOwner   bool
 	Status    string
 	CreatedAt time.Time
+	// DisplayName 是本人在组织中的备注名；身份解析对外返回人名时优先用它。
+	DisplayName string
 }
 
 type OrganizationRegistrationIntent struct {
@@ -290,11 +292,12 @@ func (s *OrganizationService) CompleteRegistration(
 		return nil, nil
 	}
 	return &OrganizationSummary{
-		ID:        organization.ID,
-		Name:      organization.Name,
-		IsOwner:   organization.OwnerUserID == userID,
-		Status:    organization.Status,
-		CreatedAt: organization.CreatedAt,
+		ID:          organization.ID,
+		Name:        organization.Name,
+		IsOwner:     organization.OwnerUserID == userID,
+		Status:      organization.Status,
+		CreatedAt:   organization.CreatedAt,
+		DisplayName: intent.MemberName,
 	}, nil
 }
 
@@ -314,11 +317,12 @@ func (s *OrganizationService) GetSummaryByUserID(ctx context.Context, userID int
 	}
 	organization := membership.Organization
 	return &OrganizationSummary{
-		ID:        organization.ID,
-		Name:      organization.Name,
-		IsOwner:   organization.OwnerUserID == userID,
-		Status:    organization.Status,
-		CreatedAt: organization.CreatedAt,
+		ID:          organization.ID,
+		Name:        organization.Name,
+		IsOwner:     organization.OwnerUserID == userID,
+		Status:      organization.Status,
+		CreatedAt:   organization.CreatedAt,
+		DisplayName: membership.DisplayName,
 	}, nil
 }
 

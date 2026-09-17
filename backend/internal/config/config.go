@@ -104,6 +104,16 @@ type Config struct {
 	BatchImage              BatchImageConfig              `mapstructure:"batch_image"`
 	ImageStorage            ImageStorageConfig            `mapstructure:"image_storage"`
 	Plugins                 PluginConfig                  `mapstructure:"plugins"`
+	ACF                     ACFConfig                     `mapstructure:"acf"`
+}
+
+// ACFConfig 承载与 ACF 安全网关对接的配置。
+type ACFConfig struct {
+	// IdentityCredential 是 ACF 网关调用内部身份解析接口时携带的 Bearer
+	// 服务凭证。为空表示整个内部接口不注册。这是服务间秘密，与 JWT 密钥
+	// 同级别：只从配置文件或环境变量（ACF_IDENTITY_CREDENTIAL）提供，
+	// 不进数据库、不进管理界面。
+	IdentityCredential string `mapstructure:"identity_credential"`
 }
 
 // PluginConfig 控制管理员手动上传的本地进程插件。
@@ -2243,6 +2253,11 @@ func setDefaults() {
 	viper.SetDefault("image_storage.access_key_id", "")
 	viper.SetDefault("image_storage.secret_access_key", "")
 	viper.SetDefault("image_storage.public_base_url", "")
+
+	// ACF 网关对接。默认留空的原因同 image_storage：凭证可能只通过
+	// ACF_IDENTITY_CREDENTIAL 环境变量提供，没有默认键 viper 会把它丢掉，
+	// 接口静默关闭还查不出原因。
+	viper.SetDefault("acf.identity_credential", "")
 
 	// Ops (vNext)
 	viper.SetDefault("ops.enabled", true)

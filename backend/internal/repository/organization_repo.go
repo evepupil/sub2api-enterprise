@@ -95,6 +95,7 @@ func (r *organizationRepository) GetMembershipByUserID(ctx context.Context, user
 		ID:             entity.ID,
 		OrganizationID: entity.OrganizationID,
 		UserID:         entity.UserID,
+		DisplayName:    entity.DisplayName,
 		CreatedAt:      entity.CreatedAt,
 		UpdatedAt:      entity.UpdatedAt,
 	}

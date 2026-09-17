@@ -73,6 +73,7 @@ type Handlers struct {
 	Organization             *OrganizationHandler
 	OrganizationMember       *OrganizationMemberHandler
 	OrganizationQuotaRequest *OrganizationQuotaRequestHandler
+	IdentityResolution       *IdentityResolutionHandler
 }
 
 // BuildInfo contains build-time information
