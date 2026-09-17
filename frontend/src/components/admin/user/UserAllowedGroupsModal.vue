@@ -12,177 +12,15 @@
         </div>
       </div>
 
-      <!-- 加载状态 -->
-      <div v-if="loading" class="flex justify-center py-12">
-        <svg class="h-10 w-10 animate-spin text-primary-500" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-      </div>
-
-      <div v-else class="space-y-6">
-        <!-- 专属分组区域 -->
-        <div v-if="exclusiveGroups.length > 0">
-          <div class="mb-3 flex items-center gap-2">
-            <div class="h-1.5 w-1.5 rounded-full bg-purple-500"></div>
-            <h4 class="text-sm font-semibold text-content">{{ t('admin.users.exclusiveGroups') }}</h4>
-            <span class="text-xs text-gray-400">({{ exclusiveGroupConfigs.filter(c => c.isSelected).length }}/{{ exclusiveGroupConfigs.length }})</span>
-          </div>
-          <div class="grid gap-3">
-            <div
-              v-for="config in exclusiveGroupConfigs"
-              :key="config.groupId"
-              class="group relative overflow-hidden rounded-xl border-2 p-4 transition-all duration-200"
-              :class="config.isSelected
-                ? 'border-primary-400 bg-primary-50/50 shadow-sm dark:border-primary-500 dark:bg-primary-900/20'
-                : 'border-gray-200 bg-white hover:border-line-strong dark:bg-dark-800 dark:hover:border-dark-500'"
-            >
-              <div class="flex items-center gap-4">
-                <!-- 复选框 -->
-                <div class="flex-shrink-0">
-                  <label class="relative flex h-6 w-6 cursor-pointer items-center justify-center">
-                    <input
-                      type="checkbox"
-                      :checked="config.isSelected"
-                      @change="toggleExclusiveGroup(config.groupId)"
-                      class="peer sr-only"
-                    />
-                    <div class="h-5 w-5 rounded-md border-2 border-gray-300 transition-all peer-checked:border-primary-500 peer-checked:bg-primary-500 dark:border-dark-500 peer-checked:dark:border-primary-500">
-                      <svg v-if="config.isSelected" class="h-full w-full text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                  </label>
-                </div>
-
-                <!-- 分组信息 -->
-                <div class="min-w-0 flex-1">
-                  <div class="flex items-center gap-2">
-                    <span class="text-base font-semibold text-content-strong">{{ config.groupName }}</span>
-                    <span class="inline-flex items-center rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700 dark:bg-purple-900/40 dark:text-purple-300">
-                      {{ t('admin.groups.exclusive') }}
-                    </span>
-                  </div>
-                  <div class="mt-1.5 flex items-center gap-3 text-sm">
-                    <span class="inline-flex items-center gap-1 text-content-muted">
-                      <PlatformIcon :platform="config.platform" size="xs" />
-                      <span>{{ config.platform }}</span>
-                    </span>
-                    <span class="text-gray-300 dark:text-dark-500">•</span>
-                    <span class="text-content-muted">
-                      {{ t('admin.users.defaultRate') }}: <span class="font-medium text-content">{{ config.defaultRate }}x</span>
-                    </span>
-                  </div>
-                </div>
-
-                <!-- 专属倍率输入 -->
-                <div class="flex flex-shrink-0 items-center gap-3">
-                  <label class="text-sm font-medium text-content-muted">{{ t('admin.users.customRate') }}</label>
-                  <input
-                    type="number"
-                    step="0.001"
-                    min="0.001"
-                    :value="config.customRate ?? ''"
-                    @input="updateCustomRate(config.groupId, ($event.target as HTMLInputElement).value)"
-                    :placeholder="String(config.defaultRate)"
-                    class="hide-spinner w-24 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-dark-500 dark:bg-dark-700 dark:focus:border-primary-500"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 公开分组区域 -->
-        <div v-if="publicGroups.length > 0">
-          <div class="mb-3 flex flex-wrap items-center gap-2">
-            <div class="h-1.5 w-1.5 rounded-full bg-green-500"></div>
-            <h4 class="text-sm font-semibold text-content">
-              {{ restrictPublicGroups ? t('admin.users.publicGroupsRestricted') : t('admin.users.publicGroups') }}
-            </h4>
-            <span class="text-xs text-gray-400">({{ publicGroupConfigs.length }})</span>
-            <label class="ml-auto flex cursor-pointer items-center gap-2 text-sm text-content-muted">
-              <input
-                type="checkbox"
-                :checked="restrictPublicGroups"
-                @change="toggleRestrictPublicGroups"
-                class="h-4 w-4 cursor-pointer rounded border-gray-300 text-primary-600 focus:ring-primary-500 dark:border-dark-500"
-              />
-              {{ t('admin.users.restrictPublicGroups') }}
-            </label>
-          </div>
-          <p class="mb-3 text-xs text-content-muted">{{ t('admin.users.restrictPublicGroupsHint') }}</p>
-          <div class="grid gap-3">
-            <div
-              v-for="config in publicGroupConfigs"
-              :key="config.groupId"
-              class="relative overflow-hidden rounded-xl border-2 border-green-200 bg-green-50/50 p-4 dark:border-green-800/50 dark:bg-green-900/10"
-            >
-              <div class="flex items-center gap-4">
-                <!-- 未开启限制时公开分组恒可用，此处仅作展示；开启后才是真实开关 -->
-                <div class="flex-shrink-0">
-                  <input
-                    v-if="restrictPublicGroups"
-                    type="checkbox"
-                    :checked="config.isSelected"
-                    @change="togglePublicGroup(config.groupId)"
-                    class="h-5 w-5 cursor-pointer rounded-md border-2 border-green-400 text-green-600 focus:ring-green-500 dark:border-green-600"
-                  />
-                  <div
-                    v-else
-                    class="flex h-5 w-5 items-center justify-center rounded-md border-2 border-green-400 bg-green-500 dark:border-green-600 dark:bg-green-600"
-                  >
-                    <svg class="h-full w-full text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                </div>
-
-                <!-- 分组信息 -->
-                <div class="min-w-0 flex-1">
-                  <div class="flex items-center gap-2">
-                    <span class="text-base font-semibold text-content-strong">{{ config.groupName }}</span>
-                  </div>
-                  <div class="mt-1.5 flex items-center gap-3 text-sm">
-                    <span class="inline-flex items-center gap-1 text-content-muted">
-                      <PlatformIcon :platform="config.platform" size="xs" />
-                      <span>{{ config.platform }}</span>
-                    </span>
-                    <span class="text-gray-300 dark:text-dark-500">•</span>
-                    <span class="text-content-muted">
-                      {{ t('admin.users.defaultRate') }}: <span class="font-medium text-content">{{ config.defaultRate }}x</span>
-                    </span>
-                  </div>
-                </div>
-
-                <!-- 专属倍率输入 -->
-                <div class="flex flex-shrink-0 items-center gap-3">
-                  <label class="text-sm font-medium text-content-muted">{{ t('admin.users.customRate') }}</label>
-                  <input
-                    type="number"
-                    step="0.001"
-                    min="0.001"
-                    :value="config.customRate ?? ''"
-                    @input="updateCustomRate(config.groupId, ($event.target as HTMLInputElement).value)"
-                    :placeholder="String(config.defaultRate)"
-                    class="hide-spinner w-24 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-dark-500 dark:bg-dark-700 dark:focus:border-primary-500"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 无分组提示 -->
-        <div v-if="groups.length === 0" class="flex flex-col items-center justify-center py-12 text-center">
-          <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-surface-sunken">
-            <svg class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-            </svg>
-          </div>
-          <p class="text-content-muted">{{ t('common.noGroupsAvailable') }}</p>
-        </div>
-      </div>
+      <!-- 分组范围选择区（与组织管理共用） -->
+      <GroupScopePicker
+        v-model:selected-ids="selectedGroupIds"
+        v-model:restrict-public-groups="restrictPublicGroups"
+        v-model:group-rates="groupRates"
+        :groups="groups"
+        :loading="loading"
+        show-rate-editor
+      />
     </div>
 
     <template #footer>
@@ -201,23 +39,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores/app'
 import { adminAPI } from '@/api/admin'
-import type { AdminUser, Group, GroupPlatform } from '@/types'
+import type { AdminUser, Group } from '@/types'
 import BaseDialog from '@/components/common/BaseDialog.vue'
-import PlatformIcon from '@/components/common/PlatformIcon.vue'
-
-interface GroupRateConfig {
-  groupId: number
-  groupName: string
-  platform: GroupPlatform
-  isExclusive: boolean
-  defaultRate: number
-  customRate: number | null
-  isSelected: boolean
-}
+import GroupScopePicker from '@/components/admin/group/GroupScopePicker.vue'
 
 const props = defineProps<{ show: boolean; user: AdminUser | null }>()
 const emit = defineEmits(['close', 'success'])
@@ -225,18 +53,12 @@ const { t } = useI18n()
 const appStore = useAppStore()
 
 const groups = ref<Group[]>([])
-const groupConfigs = ref<GroupRateConfig[]>([])
+const selectedGroupIds = ref<number[]>([])
+const groupRates = ref<Record<number, number | null>>({})
 const originalGroupRates = ref<Record<number, number>>({}) // 记录原始专属倍率，用于检测删除
 const loading = ref(false)
 const submitting = ref(false)
 const restrictPublicGroups = ref(false)
-
-// 分离专属分组和公开分组
-const exclusiveGroups = computed(() => groups.value.filter((g) => g.is_exclusive))
-const publicGroups = computed(() => groups.value.filter((g) => !g.is_exclusive))
-
-const exclusiveGroupConfigs = computed(() => groupConfigs.value.filter((c) => c.isExclusive))
-const publicGroupConfigs = computed(() => groupConfigs.value.filter((c) => !c.isExclusive))
 
 watch(
   () => props.show,
@@ -254,7 +76,6 @@ const load = async () => {
     // 只显示标准类型且活跃的分组
     groups.value = res.items.filter((g) => g.subscription_type === 'standard' && g.status === 'active')
 
-    // 初始化配置
     const userAllowedGroups = props.user?.allowed_groups || []
     const userGroupRates = props.user?.group_rates || {}
     restrictPublicGroups.value = props.user?.restrict_public_groups ?? false
@@ -262,58 +83,12 @@ const load = async () => {
     // 保存原始专属倍率，用于检测删除操作
     originalGroupRates.value = { ...userGroupRates }
 
-    groupConfigs.value = groups.value.map((g) => ({
-      groupId: g.id,
-      groupName: g.name,
-      platform: g.platform,
-      isExclusive: g.is_exclusive,
-      defaultRate: g.rate_multiplier,
-      customRate: userGroupRates[g.id] ?? null,
-      // 专属分组：检查是否在 allowed_groups 中
-      // 公开分组：未开启限制时恒可用；开启后同样以 allowed_groups 为准
-      isSelected:
-        g.is_exclusive || restrictPublicGroups.value ? userAllowedGroups.includes(g.id) : true,
-    }))
+    selectedGroupIds.value = [...userAllowedGroups]
+    groupRates.value = { ...userGroupRates }
   } catch (error) {
     console.error('Failed to load groups:', error)
   } finally {
     loading.value = false
-  }
-}
-
-const toggleExclusiveGroup = (groupId: number) => {
-  const config = groupConfigs.value.find((c) => c.groupId === groupId)
-  if (config && config.isExclusive) {
-    config.isSelected = !config.isSelected
-  }
-}
-
-const togglePublicGroup = (groupId: number) => {
-  const config = groupConfigs.value.find((c) => c.groupId === groupId)
-  if (config && !config.isExclusive) {
-    config.isSelected = !config.isSelected
-  }
-}
-
-// 关闭限制时把公开分组全部勾回，避免保存出一份"限制已关但只勾了两个"的误导状态。
-const toggleRestrictPublicGroups = () => {
-  restrictPublicGroups.value = !restrictPublicGroups.value
-  if (!restrictPublicGroups.value) {
-    for (const config of groupConfigs.value) {
-      if (!config.isExclusive) config.isSelected = true
-    }
-  }
-}
-
-const updateCustomRate = (groupId: number, value: string) => {
-  const config = groupConfigs.value.find((c) => c.groupId === groupId)
-  if (config) {
-    if (value === '' || value === null || value === undefined) {
-      config.customRate = null
-    } else {
-      const numValue = parseFloat(value)
-      config.customRate = isNaN(numValue) ? null : numValue
-    }
   }
 }
 
@@ -324,30 +99,29 @@ const handleSave = async () => {
   try {
     // 构建 allowed_groups：专属分组中被勾选的，以及开启限制后被勾选的公开分组。
     // 未开启限制时不写入公开分组，保持该表"额外授予"的原有语义。
-    const allowedGroups = groupConfigs.value
-      .filter((c) => c.isSelected && (c.isExclusive || restrictPublicGroups.value))
-      .map((c) => c.groupId)
+    const exclusiveIds = groups.value.filter((g) => g.is_exclusive).map((g) => g.id)
+    const allowedGroups = selectedGroupIds.value.filter(
+      (id) => exclusiveIds.includes(id) || restrictPublicGroups.value
+    )
 
     // 构建 group_rates
     // - 有新专属倍率: 设置为该值
     // - 原本有专属倍率但现在被清空: 设置为 null（表示删除）
-    const groupRates: Record<number, number | null> = {}
-    for (const c of groupConfigs.value) {
-      const hadOriginalRate = originalGroupRates.value[c.groupId] !== undefined
-
-      if (c.customRate !== null) {
-        // 有专属倍率
-        groupRates[c.groupId] = c.customRate
+    const groupRatesToSave: Record<number, number | null> = {}
+    for (const [idText, rate] of Object.entries(groupRates.value)) {
+      const groupId = Number(idText)
+      const hadOriginalRate = originalGroupRates.value[groupId] !== undefined
+      if (rate !== null && rate !== undefined) {
+        groupRatesToSave[groupId] = rate
       } else if (hadOriginalRate) {
-        // 原本有专属倍率，现在被清空，需要显式删除
-        groupRates[c.groupId] = null
+        groupRatesToSave[groupId] = null
       }
     }
 
     await adminAPI.users.update(props.user.id, {
       allowed_groups: allowedGroups,
       restrict_public_groups: restrictPublicGroups.value,
-      group_rates: Object.keys(groupRates).length > 0 ? groupRates : undefined,
+      group_rates: Object.keys(groupRatesToSave).length > 0 ? groupRatesToSave : undefined,
     })
 
     appStore.showSuccess(t('admin.users.groupConfigUpdated'))
@@ -360,15 +134,3 @@ const handleSave = async () => {
   }
 }
 </script>
-
-<style scoped>
-/* 隐藏数字输入框的箭头按钮 */
-.hide-spinner::-webkit-outer-spin-button,
-.hide-spinner::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-.hide-spinner {
-  -moz-appearance: textfield;
-}
-</style>

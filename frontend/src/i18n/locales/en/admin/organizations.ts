@@ -8,6 +8,7 @@ export default {
     owner: 'Owner',
     memberCount: 'Members',
     groupScope: 'Group scope',
+    groupScopeHint: 'This organization has {count} members; the selected groups define what they can use',
     createdAt: 'Created',
     configureGroups: 'Configure groups',
     disable: 'Suspend',

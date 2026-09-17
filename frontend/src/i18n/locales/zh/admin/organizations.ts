@@ -8,6 +8,7 @@ export default {
     owner: '组织管理员',
     memberCount: '成员数',
     groupScope: '分组范围',
+    groupScopeHint: '该组织现有 {count} 名成员，此处勾选决定成员可用的分组范围',
     createdAt: '创建时间',
     configureGroups: '配置分组',
     disable: '停用',

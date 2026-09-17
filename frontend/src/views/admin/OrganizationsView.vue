@@ -107,42 +107,28 @@
     <BaseDialog
       :show="scopeDialog.show"
       :title="t('admin.organizations.configureGroups')"
+      width="wide"
       @close="closeScopeDialog"
     >
-      <div class="space-y-4">
-        <p class="truncate text-sm font-medium text-content-strong" :title="scopeDialog.name">{{ scopeDialog.name }}</p>
-
-        <label class="flex items-start gap-2 text-sm text-content">
-          <input
-            v-model="scopeDialog.restrictPublicGroups"
-            type="checkbox"
-            class="mt-0.5 h-4 w-4 cursor-pointer rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-          />
-          <span>{{ t('admin.organizations.restrictPublicGroups') }}</span>
-        </label>
-
-        <div v-if="groupsLoading" class="flex justify-center py-8">
-          <div class="h-6 w-6 animate-spin rounded-full border-2 border-primary-500 border-t-transparent"></div>
+      <div class="space-y-6">
+        <!-- 组织信息头部 -->
+        <div class="flex items-center gap-4 rounded-2xl bg-gradient-to-r from-primary-50 to-primary-100 p-5 dark:from-primary-900/30 dark:to-primary-800/20">
+          <div class="flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-sm dark:bg-dark-700">
+            <span class="text-2xl font-semibold text-primary-600 dark:text-primary-400">{{ scopeDialog.name.charAt(0).toUpperCase() }}</span>
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="truncate text-lg font-semibold text-content-strong" :title="scopeDialog.name">{{ scopeDialog.name }}</p>
+            <p class="mt-1 text-sm text-content-muted">{{ t('admin.organizations.groupScopeHint', { count: scopeDialog.memberCount }) }}</p>
+          </div>
         </div>
-        <ul v-else class="max-h-72 space-y-1 overflow-y-auto">
-          <li v-for="group in groups" :key="group.id">
-            <label class="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-surface-sunken">
-              <input
-                type="checkbox"
-                class="h-4 w-4 cursor-pointer rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                :checked="scopeDialog.allowedGroupIds.includes(group.id)"
-                @change="toggleGroup(group.id)"
-              />
-              <span class="text-content-strong">{{ group.name }}</span>
-              <span
-                v-if="group.is_exclusive"
-                class="rounded-full bg-amber-50 px-2 py-0.5 text-xs text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"
-              >
-                {{ t('admin.organizations.exclusive') }}
-              </span>
-            </label>
-          </li>
-        </ul>
+
+        <!-- 分组范围选择区（与用户管理共用） -->
+        <GroupScopePicker
+          v-model:selected-ids="scopeDialog.allowedGroupIds"
+          v-model:restrict-public-groups="scopeDialog.restrictPublicGroups"
+          :groups="groups"
+          :loading="groupsLoading"
+        />
 
         <p v-if="scopeDialog.error" class="text-sm text-red-600 dark:text-red-400">{{ scopeDialog.error }}</p>
       </div>
@@ -174,6 +160,7 @@ import BaseDialog from '@/components/common/BaseDialog.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import DataTable from '@/components/common/DataTable.vue'
 import TableActionButton from '@/components/common/TableActionButton.vue'
+import GroupScopePicker from '@/components/admin/group/GroupScopePicker.vue'
 import Pagination from '@/components/common/Pagination.vue'
 import SearchInput from '@/components/common/SearchInput.vue'
 import Icon from '@/components/icons/Icon.vue'
@@ -221,6 +208,7 @@ const scopeDialog = reactive({
   show: false,
   organizationId: 0,
   name: '',
+  memberCount: 0,
   restrictPublicGroups: false,
   allowedGroupIds: [] as number[],
   error: '',
@@ -256,8 +244,9 @@ async function loadGroups(): Promise<void> {
   if (groups.value.length > 0) return
   groupsLoading.value = true
   try {
-    const result = await adminAPI.groups.list(1, 200, { status: 'active' })
-    groups.value = result.items || []
+    // 与用户管理的分组配置同源：只展示标准类型且活跃的分组
+    const result = await adminAPI.groups.list(1, 1000)
+    groups.value = result.items.filter((g) => g.subscription_type === 'standard' && g.status === 'active')
   } catch (error) {
     appStore.showError(extractApiErrorMessage(error, t('admin.organizations.loadGroupsFailed')))
   } finally {
@@ -326,6 +315,7 @@ function openScopeDialog(organization: AdminOrganization): void {
   scopeDialog.show = true
   scopeDialog.organizationId = organization.id
   scopeDialog.name = organization.name
+  scopeDialog.memberCount = organization.member_count
   scopeDialog.restrictPublicGroups = organization.restrict_public_groups
   scopeDialog.allowedGroupIds = [...organization.allowed_group_ids]
   scopeDialog.error = ''
@@ -336,28 +326,26 @@ function closeScopeDialog(): void {
   scopeDialog.show = false
 }
 
-function toggleGroup(groupId: number): void {
-  const index = scopeDialog.allowedGroupIds.indexOf(groupId)
-  if (index >= 0) {
-    scopeDialog.allowedGroupIds.splice(index, 1)
-    return
-  }
-  scopeDialog.allowedGroupIds.push(groupId)
-}
-
 async function saveScope(): Promise<void> {
   scopeDialog.saving = true
   scopeDialog.error = ''
   try {
+    // 与用户管理的分组配置同语义：未开启限制时 allowed_group_ids 只承载专属分组，
+    // 公开分组勾选不写入；开启限制后勾选的公开分组一并写入。
+    const exclusiveIds = new Set(groups.value.filter((g) => g.is_exclusive).map((g) => g.id))
+    const allowedGroupIds = scopeDialog.allowedGroupIds.filter(
+      (id) => exclusiveIds.has(id) || scopeDialog.restrictPublicGroups
+    )
     const updated = await adminAPI.organizations.updateGroups(
       scopeDialog.organizationId,
       scopeDialog.restrictPublicGroups,
-      [...scopeDialog.allowedGroupIds]
+      allowedGroupIds
     )
     const index = organizations.value.findIndex((item) => item.id === updated.id)
     if (index >= 0) {
       organizations.value.splice(index, 1, updated)
     }
+    appStore.showSuccess(t('common.saved'))
     scopeDialog.show = false
   } catch (error) {
     scopeDialog.error = extractApiErrorMessage(error, t('admin.organizations.saveFailed'))
