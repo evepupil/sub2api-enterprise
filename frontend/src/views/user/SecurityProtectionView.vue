@@ -71,37 +71,32 @@
 
         <div class="card p-4">
           <h3 class="mb-4 text-sm font-semibold text-content-strong">{{ t('securityProtection.recentTitle') }}</h3>
-          <div v-if="recentEvents.length" class="overflow-x-auto">
-            <table class="w-full text-sm">
-              <thead>
-                <tr class="text-content-muted">
-                  <th class="pb-2 text-left">{{ t('securityProtection.colTime') }}</th>
-                  <th class="pb-2 text-left">{{ t('securityProtection.colUser') }}</th>
-                  <th class="pb-2 text-left">{{ t('securityProtection.colType') }}</th>
-                  <th class="pb-2 text-left">{{ t('securityProtection.colAction') }}</th>
-                  <th class="pb-2 text-left">{{ t('securityProtection.colValue') }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="event in recentEvents" :key="event.id" class="border-t border-line-subtle">
-                  <td class="py-2 text-content-muted">{{ formatTime(event.created_at) }}</td>
-                  <td class="max-w-[160px] truncate py-2 text-content-strong" :title="event.user_name || event.external_user_id">
-                    {{ event.user_name || event.external_user_id }}
-                  </td>
-                  <td class="py-2 text-content">{{ capabilityLabel(event.capability) }}</td>
-                  <td class="py-2">
-                    <span class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium" :style="actionBadgeStyle(event.action)">
-                      {{ actionLabel(event.action) }}
-                    </span>
-                  </td>
-                  <td class="max-w-[220px] truncate py-2 font-mono text-xs text-content-muted" :title="event.masked_value">
-                    {{ event.masked_value || '-' }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div v-else class="py-8 text-center text-sm text-content-muted">{{ t('securityProtection.noData') }}</div>
+          <DataTable :columns="recentEventColumns" :data="recentEvents" row-key="id">
+            <template #cell-created_at="{ value }">
+              <span class="text-content-muted">{{ formatTime(value) }}</span>
+            </template>
+            <template #cell-user_name="{ row }">
+              <span
+                class="inline-block max-w-[160px] truncate align-middle font-medium text-content-strong"
+                :title="row.user_name || row.external_user_id"
+              >
+                {{ row.user_name || row.external_user_id }}
+              </span>
+            </template>
+            <template #cell-capability="{ value }">
+              {{ capabilityLabel(value) }}
+            </template>
+            <template #cell-action="{ value }">
+              <span class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium" :style="actionBadgeStyle(value)">
+                {{ actionLabel(value) }}
+              </span>
+            </template>
+            <template #cell-masked_value="{ value }">
+              <span class="inline-block max-w-[220px] truncate align-middle font-mono text-xs text-content-muted" :title="value">
+                {{ value || '-' }}
+              </span>
+            </template>
+          </DataTable>
         </div>
       </template>
     </div>
@@ -126,6 +121,8 @@ import {
 } from 'chart.js'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import Select from '@/components/common/Select.vue'
+import DataTable from '@/components/common/DataTable.vue'
+import type { Column } from '@/components/common/types'
 import { useAuthStore } from '@/stores/auth'
 import { list as listAdminOrganizations } from '@/api/admin/organizations'
 import {
@@ -281,6 +278,14 @@ const trendData = computed(() => {
     ],
   }
 })
+
+const recentEventColumns = computed<Column[]>(() => [
+  { key: 'created_at', label: t('securityProtection.colTime') },
+  { key: 'user_name', label: t('securityProtection.colUser') },
+  { key: 'capability', label: t('securityProtection.colType') },
+  { key: 'action', label: t('securityProtection.colAction') },
+  { key: 'masked_value', label: t('securityProtection.colValue') },
+])
 
 const doughnutOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' as const } } }
 const lineOptions = { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index' as const, intersect: false } }
