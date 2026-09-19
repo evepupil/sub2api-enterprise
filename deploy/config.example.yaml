@@ -932,10 +932,10 @@ totp:
 # =============================================================================
 acf:
   # Service credential for the identity resolution endpoint that the ACF
-  # gateway calls (POST /api/internal/identity/resolve, Bearer auth).
+  # gateway calls (POST /api/v1/identity/resolve, Bearer auth).
   # Leave empty to keep the endpoint disabled (the route group is not even
   # registered). Provide via config or the ACF_IDENTITY_CREDENTIAL env var.
-  # ACF 网关调用内部身份解析接口（POST /api/internal/identity/resolve，
+  # ACF 网关调用内部身份解析接口（POST /api/v1/identity/resolve，
   # Bearer 认证）用的服务凭证。留空表示接口关闭（整组路由不注册）。
   # 生成命令: openssl rand -hex 32
   identity_credential: ""

@@ -39,12 +39,12 @@ func newIdentityResolutionTestRouter(keys map[string]*service.APIKey, summaries 
 		&fakeIdentityResolutionOrgs{summaries: summaries},
 	))
 	router := gin.New()
-	router.POST("/api/internal/identity/resolve", handler.Resolve)
+	router.POST("/api/v1/identity/resolve", handler.Resolve)
 	return router
 }
 
 func postIdentityResolve(router *gin.Engine, body string) *httptest.ResponseRecorder {
-	req := httptest.NewRequest(http.MethodPost, "/api/internal/identity/resolve", strings.NewReader(body))
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/identity/resolve", strings.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)

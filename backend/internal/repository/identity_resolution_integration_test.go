@@ -100,12 +100,12 @@ func newIdentityContractFixture(t *testing.T) *identityContractFixture {
 
 	const credential = "integration-acf-credential"
 	router := gin.New()
-	internal := router.Group("/api/internal",
+	identity := router.Group("/api/v1/identity",
 		gin.HandlerFunc(middleware.NewServiceCredentialAuthMiddleware(credential)),
 		middleware.NewServiceRateLimitMiddleware(),
 		middleware.RequestBodyLimit(8<<10),
 	)
-	internal.POST("/identity/resolve", identityHandler.Resolve)
+	identity.POST("/resolve", identityHandler.Resolve)
 
 	fixture := &identityContractFixture{
 		router:        router,
@@ -128,7 +128,7 @@ func newIdentityContractFixture(t *testing.T) *identityContractFixture {
 }
 
 func performIdentityResolve(f *identityContractFixture, credential, body string) *httptest.ResponseRecorder {
-	req := httptest.NewRequest(http.MethodPost, "/api/internal/identity/resolve", strings.NewReader(body))
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/identity/resolve", strings.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	if credential != "" {
 		req.Header.Set("Authorization", "Bearer "+credential)

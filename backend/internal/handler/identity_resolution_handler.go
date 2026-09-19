@@ -2,7 +2,7 @@ package handler
 
 // ACF 安全网关的身份解析接口。
 //
-// 契约：POST /api/internal/identity/resolve，请求体 {"api_key": "..."}，
+// 契约：POST /api/v1/identity/resolve，请求体 {"api_key": "..."}，
 // 服务凭证以 Bearer 方式放在请求头（由凭证中间件校验）。200 返回组织、
 // 用户、密钥三级归属，编号一律是字符串；个人用户组织为 null；查无此密钥
 // 返回 404 {"error":{"code":"key_not_found"}}，密钥「格式不对」按契约也归
