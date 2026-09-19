@@ -44,6 +44,13 @@ services:
       - UPDATE_GITHUB_TOKEN=${UPDATE_GITHUB_TOKEN:-}
 
       # =======================================================================
+      # ACF Gateway Integration / ACF 安全网关对接
+      # =======================================================================
+      # 身份解析接口凭证留空则整组路由不注册；插件地址留空则插件页关闭。
+      - ACF_IDENTITY_CREDENTIAL=${ACF_IDENTITY_CREDENTIAL:-}
+      - ACF_PLUGIN_BASE_URL=${ACF_PLUGIN_BASE_URL:-}
+
+      # =======================================================================
       # Database Configuration (PostgreSQL) - Required
       # =======================================================================
       - DATABASE_HOST=${DATABASE_HOST:?DATABASE_HOST is required}

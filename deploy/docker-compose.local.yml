@@ -159,6 +159,17 @@ services:
       - UPDATE_PROXY_URL=${UPDATE_PROXY_URL:-}
 
       # =======================================================================
+      # ACF Gateway Integration / ACF 安全网关对接
+      # =======================================================================
+      # Identity resolution endpoint credential. Empty = route group is not
+      # registered at all.
+      # 身份解析接口的服务凭证。留空则整组路由不注册。
+      - ACF_IDENTITY_CREDENTIAL=${ACF_IDENTITY_CREDENTIAL:-}
+      # Organization protection plugin page data source. Empty = feature off.
+      # 组织防护插件页的数据来源地址。留空则功能关闭。
+      - ACF_PLUGIN_BASE_URL=${ACF_PLUGIN_BASE_URL:-}
+
+      # =======================================================================
       # Gateway Upstream, Scheduling & Image Configuration
       # =======================================================================
       # Gateway values come from Compose .env or the shell.
