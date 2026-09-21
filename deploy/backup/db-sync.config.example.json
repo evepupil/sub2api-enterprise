@@ -1,0 +1,22 @@
+{
+  "destinationRoot": "%USERPROFILE%\\backups\\db-sync",
+  "retainSnapshots": 2,
+  "sources": [
+    {
+      "name": "prod",
+      "enabled": true,
+      "sshHost": "替换成 ~/.ssh/config 里的主机别名，或直接写 IP",
+      "containerName": "sub2api-postgres",
+      "databaseUser": "sub2api",
+      "databaseName": "sub2api"
+    },
+    {
+      "name": "box",
+      "enabled": true,
+      "sshHost": "替换成另一台机器的主机别名",
+      "containerName": "sub2api-postgres",
+      "databaseUser": "sub2api",
+      "databaseName": "sub2api"
+    }
+  ]
+}
