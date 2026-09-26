@@ -25,4 +25,7 @@ Dockerfile text eol=lf
 /frontend-portal/**/*.md text eol=lf
 /frontend-portal/**/*.json text eol=lf
 /frontend-portal/**/*.html text eol=lf
+/frontend-portal/**/*.css text eol=lf
+/frontend-portal/**/*.mjs text eol=lf
+/frontend-portal/**/*.yaml text eol=lf
 /docs/调研/2026-09-26-AI-API服务站/**/*.json text eol=lf

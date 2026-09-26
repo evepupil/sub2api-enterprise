@@ -1,0 +1,70 @@
+/*
+ * 主题令牌：颜色、字体、字号、间距、圆角、尺寸与阴影的唯一数值来源。
+ * 这里只声明原始值，globals.css 通过 @theme inline 映射成 Tailwind 工具类。
+ * 首版只提供浅色主题；深色对应关系尚未成为独立主题。
+ */
+:root {
+  color-scheme: light;
+
+  /* 语义颜色 */
+  --background: #f7f8fa;
+  --foreground: #17191d;
+  --card: #ffffff;
+  --card-foreground: #17191d;
+  --primary: #17191d;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f3f5;
+  --secondary-foreground: #17191d;
+  --muted: #f1f3f5;
+  --muted-foreground: #68717d;
+  --border: #e2e5e9;
+  --input: #e2e5e9;
+  --ring: #17191d;
+  --destructive: #b42318;
+  --success: #18794e;
+  --warning: #8a6100;
+  --popover: #ffffff;
+  --popover-foreground: #17191d;
+
+  /* 数据分类色，同一分类在图表与相邻数值表中保持一致 */
+  --chart-1: #4263eb;
+  --chart-2: #0f8b8d;
+  --chart-3: #8b5cf6;
+  --chart-4: #e49b3b;
+  --chart-5: #64748b;
+  --chart-6: #c76a77;
+
+  /* 字体与行高：只用系统可用字族，不下载远程字体 */
+  --font-family-sans:
+    Inter, 'Noto Sans SC', 'Microsoft YaHei', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --line-height-body: 1.5;
+  --line-height-heading: 1.2;
+
+  /* 字号 */
+  --font-size-xs: 12px;
+  --font-size-table: 13px;
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-page: 28px;
+  --font-size-hero: 48px;
+
+  /* 圆角 */
+  --control-radius: 6px;
+  --card-radius: 8px;
+  --dialog-radius: 10px;
+
+  /* 尺寸 */
+  --control-height: 36px;
+  --touch-height: 44px;
+  --header-height: 64px;
+  --sidebar-width: 216px;
+  --site-max-width: 1408px;
+  --dialog-max-width: 480px;
+  --table-min-width: 680px;
+
+  /* 动效与阴影 */
+  --transition-duration: 150ms;
+  --overlay-shadow: 0 10px 30px -12px rgb(23 25 29 / 0.18), 0 2px 8px rgb(23 25 29 / 0.08);
+}
