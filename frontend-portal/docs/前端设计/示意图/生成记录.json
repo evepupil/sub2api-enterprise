@@ -1,0 +1,38 @@
+{
+  "date": "2026-09-26",
+  "model": "gpt-image-2.5",
+  "credits": 19.2,
+  "status": "awaiting visual preference",
+  "images": [
+    {
+      "name": "A  灰白黑",
+      "file": "01-灰白黑.png",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "sha256": "bb913f50b825eca6672d6c0c3d66b6edcc4e651f402e5d2a5082a0b21964464f",
+      "review": "viewed by main session; complete model cards present; concept image only"
+    },
+    {
+      "name": "B  暖白深绿",
+      "file": "02-暖白深绿.png",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "sha256": "cced5593d9390d8f17f1873167ac0c9ec8948d8754a0f51828967c444059c769",
+      "review": "viewed by main session; complete model cards present; concept image only"
+    },
+    {
+      "name": "C  深色青蓝",
+      "file": "03-深色青蓝.png",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "sha256": "b5b27628820648bf139fdcd468766b3b04018e6544c485894584ea14f0c8e267",
+      "review": "viewed by main session; complete model cards present; concept image only"
+    }
+  ]
+}

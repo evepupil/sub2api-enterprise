@@ -1,0 +1,50 @@
+{
+  "date": "2026-09-26",
+  "model": "gpt-image-2.5",
+  "credits": 25.6,
+  "status": "concepts ready for joint review; not browser screenshots",
+  "images": [
+    {
+      "file": "08-A首页效果修订.png",
+      "size": [
+        1536,
+        1024
+      ],
+      "credits": 6.4,
+      "sha256": "494d9647ee588c454c386de454b08cd8d33df205ffeb3b05d9ba3309b88886aa",
+      "status": "current concept"
+    },
+    {
+      "file": "09-A统计总览修订.png",
+      "size": [
+        1536,
+        1024
+      ],
+      "credits": 6.4,
+      "sha256": "8c8a65e0d487235f2be349e03108da4c22bb0400a34b3548a2310c4bc16d24a3",
+      "status": "current concept"
+    },
+    {
+      "file": "10-A时间范围展开.png",
+      "size": [
+        1536,
+        1024
+      ],
+      "credits": 6.4,
+      "sha256": "27188507a85193155d428fded5ba31eea141009d75da91bd1b4faa48fba69e56",
+      "status": "superseded by 11"
+    },
+    {
+      "file": "11-A时间范围展开校正.png",
+      "size": [
+        1536,
+        1024
+      ],
+      "credits": 6.4,
+      "sha256": "ee509d75019929b351ed372539d076520fa6e2cfc962b99ea0fade4b9474a1d6",
+      "status": "current concept"
+    }
+  ],
+  "review": "Main session viewed 08, 09 and 11; calendar range endpoint correction checked. Chart data and account values are constructed samples.",
+  "montage": "A首页与统计修订对比.png"
+}

@@ -166,3 +166,6 @@ output/
 /plugins/
 # 本地设计评审归档（impeccable）不进入仓库
 /.impeccable/
+
+# 本地调研任务书与抓取素材
+/.fleet/

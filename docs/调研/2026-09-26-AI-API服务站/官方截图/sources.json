@@ -1,0 +1,82 @@
+[
+  {
+    "file": "request-details-light.png",
+    "source_page": "https://vercel.com/docs/ai-gateway/observability-and-spend/logs",
+    "image_url": "https://7nyt0uhk7sse4zvn.public.blob.vercel-storage.com/docs-assets/static/docs/ai-gateway/logs/request-details-light.png",
+    "date": "2026-09-26",
+    "kind": "official documentation screenshot; not captured from a live account",
+    "width": 3010,
+    "height": 1434,
+    "download_sha256": "775aab9302699e542dc099bb830c91cfd3d4a0f9dfb622d939998845db6d4ec4"
+  },
+  {
+    "file": "request-details-dark.png",
+    "source_page": "https://vercel.com/docs/ai-gateway/observability-and-spend/logs",
+    "image_url": "https://7nyt0uhk7sse4zvn.public.blob.vercel-storage.com/docs-assets/static/docs/ai-gateway/logs/request-details-dark.png",
+    "date": "2026-09-26",
+    "kind": "official documentation screenshot; not captured from a live account",
+    "width": 3012,
+    "height": 1432,
+    "download_sha256": "55f150baa38838d726f235ca2081f963767971bd8b526fc522e1f46513ba058e"
+  },
+  {
+    "file": "portkey-product-2.png",
+    "source_page": "https://portkey.ai/docs/product/observability/logs",
+    "image_url": "https://mintcdn.com/portkey-docs/EKxolPDRqqOR-ZgU/images/product/product-2.avif?fit=max&auto=format&n=EKxolPDRqqOR-ZgU&q=85&s=d2cdbc73191427821886c4870eed20df",
+    "date": "2026-09-26",
+    "kind": "official documentation screenshot; not captured from a live account",
+    "width": 2544,
+    "height": 1602,
+    "download_sha256": "64869c538a4d0b00384f21a3804a884ed8ecedd0c9a3284717f0c60d57833e71"
+  },
+  {
+    "file": "portkey-product-3.png",
+    "source_page": "https://portkey.ai/docs/product/observability/logs",
+    "image_url": "https://mintcdn.com/portkey-docs/_Cb_bj7tVjxcfwsu/images/product/product-3.avif?fit=max&auto=format&n=_Cb_bj7tVjxcfwsu&q=85&s=47bb08ef14ca9168f30d9d8bd8a6aece",
+    "date": "2026-09-26",
+    "kind": "official documentation screenshot; not captured from a live account",
+    "width": 800,
+    "height": 419,
+    "download_sha256": "bedc177812899d9af8fcffd50452e2211dd97753bbe949c88abfec7cd2d5708c"
+  },
+  {
+    "file": "siliconflow-recharge.png",
+    "source_page": "https://docs.siliconflow.cn/cn/userguide/faqs/misc_finance",
+    "image_url": "https://sf-maas-uat-prod.oss-cn-shanghai.aliyuncs.com/doc-resources/images/faqs/mic/image_recharge_online.webp",
+    "date": "2026-09-26",
+    "kind": "official documentation screenshot",
+    "width": 2910,
+    "height": 1796,
+    "download_sha256": "02f819ce79818ed589e3a575c757b1ca4b85f5dedd7b04d77a4ef1c5bc937f7f"
+  },
+  {
+    "file": "novita-budgets.png",
+    "source_page": "https://docs.novita.ai/guides/budgets.md",
+    "image_url": "https://mintcdn.com/novitaai/H3Kjvdvlhgt0Aohj/guides/images/Budges01.png",
+    "date": "2026-09-26",
+    "kind": "official documentation screenshot",
+    "width": 1280,
+    "height": 829,
+    "download_sha256": "e0403c9e541d179726405edd65e4310ac01ae45c12c9ca59c7c31d61a966cf5a"
+  },
+  {
+    "file": "together-model-marketing.png",
+    "source_page": "https://www.together.ai/provisioned-throughput",
+    "image_url": "https://cdn.prod.website-files.com/69654e88dce9154b5f1206dd/6a42bd48f7e69e5b82f181df_provisioned-throughput_hero.avif",
+    "date": "2026-09-26",
+    "kind": "official marketing illustration of model interface; not verified as live UI",
+    "width": 2832,
+    "height": 1368,
+    "download_sha256": "5cebf27fa383ece8a726eb702d9146945b2faf5768f10fcd3f865157226be789"
+  },
+  {
+    "file": "shenwen-create-api-key.png",
+    "source_page": "https://shenwenai.com/docs/codex",
+    "image_url": "https://shenwenai.com/_next/image?url=%2Fcreate-apikey.png&w=3840&q=75",
+    "date": "2026-09-26",
+    "kind": "official documentation screenshot; not captured from a live account",
+    "width": 896,
+    "height": 1124,
+    "download_sha256": "1c8389def5ca3d233e92a553a764251ee98cc392a470b576f018f3e0b1356278"
+  }
+]
