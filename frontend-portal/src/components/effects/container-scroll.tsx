@@ -1,11 +1,22 @@
 'use client';
 
 import { useRef, useSyncExternalStore, type ReactNode } from 'react';
-import { motion, useReducedMotion, useScroll, useTransform, type MotionValue } from 'motion/react';
+import { motion, useScroll, useTransform, type MotionValue } from 'motion/react';
 
 type ContainerScrollProps = { titleComponent: ReactNode; children: ReactNode };
 
 const MOBILE_QUERY = '(max-width: 767px)';
+const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
+
+function subscribeToReducedMotion(onStoreChange: () => void) {
+  const query = window.matchMedia(REDUCED_MOTION_QUERY);
+  query.addEventListener('change', onStoreChange);
+  return () => query.removeEventListener('change', onStoreChange);
+}
+
+function getReducedMotionSnapshot() {
+  return window.matchMedia(REDUCED_MOTION_QUERY).matches;
+}
 
 function getMobileSnapshot() {
   return typeof window !== 'undefined' && window.matchMedia(MOBILE_QUERY).matches;
@@ -34,7 +45,12 @@ export function ContainerScroll({ titleComponent, children }: ContainerScrollPro
     getMobileSnapshot,
     getMobileServerSnapshot,
   );
-  const reducedMotion = useReducedMotion();
+  // Use the same first snapshot on server and client; media preference applies after hydration.
+  const reducedMotion = useSyncExternalStore(
+    subscribeToReducedMotion,
+    getReducedMotionSnapshot,
+    getMobileServerSnapshot,
+  );
   const rotate = useTransform(scrollYProgress, [0, 1], [isMobile ? 8 : 20, 0]);
   const scale = useTransform(scrollYProgress, [0, 1], isMobile ? [0.96, 1] : [1.035, 1]);
   const translate = useTransform(scrollYProgress, [0, 1], [0, -12]);

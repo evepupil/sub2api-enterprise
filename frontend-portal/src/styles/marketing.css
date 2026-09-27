@@ -342,6 +342,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .scroll-card,
+  .preview-caption {
+    transform: none !important;
+  }
+
   .marketing-page *,
   .marketing-page *::before,
   .marketing-page *::after {

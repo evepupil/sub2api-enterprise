@@ -36,6 +36,19 @@ export interface ButtonProps extends React.ComponentProps<'button'> {
   loading?: boolean;
 }
 
+function isStreamedChild(value: unknown): value is { _payload: Promise<React.ReactNode> } {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    '$$typeof' in value &&
+    value.$$typeof === Symbol.for('react.lazy') &&
+    '_payload' in value &&
+    typeof value._payload === 'object' &&
+    value._payload !== null &&
+    'then' in value._payload
+  );
+}
+
 export function Button({
   className,
   variant = 'default',
@@ -63,7 +76,10 @@ export function Button({
   );
 
   if (asChild) {
-    const child = React.Children.only(children) as React.ReactElement<
+    // React 19 can stream an RSC child as a lazy thenable. Radix Slot resolves the
+    // same shape; resolve before attaching our disabled-event guard as well.
+    const resolvedChildren = isStreamedChild(children) ? React.use(children._payload) : children;
+    const child = React.Children.only(resolvedChildren) as React.ReactElement<
       React.HTMLAttributes<HTMLElement>
     >;
     // Slot 会先执行子元素的同名事件。把守卫放到子元素的捕获阶段，
