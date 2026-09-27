@@ -1,0 +1,43 @@
+services:
+  portal:
+    image: ${PORTAL_IMAGE:?set PORTAL_IMAGE to an immutable portal image tag}
+    environment:
+      SUB2API_INTERNAL_URL: ${PORTAL_BACKEND_URL:?set PORTAL_BACKEND_URL to the existing backend URL}
+      PORTAL_PUBLIC_URL: ${PORTAL_PUBLIC_URL:?set PORTAL_PUBLIC_URL to the public portal URL}
+    expose:
+      - '3000'
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    networks:
+      - portal_edge
+    restart: unless-stopped
+
+  edge:
+    image: nginx:stable-alpine
+    depends_on:
+      portal:
+        condition: service_healthy
+    environment:
+      PORTAL_UPSTREAM: portal:3000
+      GO_UPSTREAM: ${GO_UPSTREAM:?set GO_UPSTREAM to an internal HTTP host:port}
+      NGINX_ENVSUBST_FILTER: '^(PORTAL_UPSTREAM|GO_UPSTREAM)$$'
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    ports:
+      - '${PORTAL_BIND_ADDRESS:-127.0.0.1}:${PORTAL_HTTP_PORT:-8088}:8080'
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/portal.conf.template:/etc/nginx/templates/portal.conf.template:ro
+    networks:
+      - portal_edge
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1:8080/api/health']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+networks:
+  portal_edge:
+    driver: bridge
