@@ -15,6 +15,17 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
   const params = await searchParams;
   const rawNext = params['next'];
   const nextPath = Array.isArray(rawNext) ? rawNext[0] : rawNext;
+  const invitationCode =
+    typeof params.invitation_code === 'string' && params.invitation_code.length <= 256
+      ? params.invitation_code.trim()
+      : undefined;
 
-  return <AuthScreen mode="register" nextPath={nextPath} />;
+  return (
+    <AuthScreen
+      key={invitationCode ?? 'personal'}
+      mode="register"
+      nextPath={nextPath}
+      invitationCode={invitationCode}
+    />
+  );
 }

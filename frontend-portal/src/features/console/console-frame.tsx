@@ -23,9 +23,6 @@ import type { PortalUser } from '../auth/types';
  * - 导航只影响展示；真实权限仍由后端核对，这里不代替鉴权。
  */
 
-/** M4 团队管理不在本轮实施：产品控制台固定隐藏这两个入口，导航函数契约保持原样。 */
-const HIDDEN_PATHS: readonly string[] = ['/console/team', '/console/team/usage'];
-
 export interface ConsoleFrameProps {
   children?: React.ReactNode;
 }
@@ -183,7 +180,6 @@ function ConsoleGuard({ children }: ConsoleFrameProps) {
       audience={audienceFor(user)}
       activePath={pathname}
       accountLabel={accountLabelFor(user)}
-      hiddenPaths={HIDDEN_PATHS}
       onNavigate={handleNavigate}
       accountActions={
         <Button

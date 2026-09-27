@@ -19,6 +19,7 @@ import { PageHeader } from '../../components/layout/page-header';
 import { LineChart } from '../../components/charts/line-chart';
 import { useAuth } from '../auth/auth-provider';
 import { usePortalQuery } from '../console/use-portal-query';
+import { MemberQuotaPanel } from '../organization/member-quota-panel';
 import { fetchCurrentFunds, fetchUsageOverview } from './api';
 import { BreakdownCard } from './breakdown-card';
 import type { CurrentFunds, DateRange, TrendGranularity, UsageOverview } from './types';
@@ -186,7 +187,10 @@ export function OverviewView() {
   const fundsError = funds.isError ? '当前余额暂时无法加载' : null;
   const fundsAction = useMemo(
     () => (
-      <FundsAction funds={funds.data} loading={funds.isLoading || status !== 'authenticated'} />
+      <div className="flex flex-wrap items-center gap-3">
+        <FundsAction funds={funds.data} loading={funds.isLoading || status !== 'authenticated'} />
+        <MemberQuotaPanel />
+      </div>
     ),
     [funds.data, funds.isLoading, status],
   );

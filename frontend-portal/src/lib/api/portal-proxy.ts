@@ -36,6 +36,12 @@ const GET_PATHS = new Set([
   'payment/limits',
   'payment/orders/my',
   'organization',
+  'organization/members',
+  'organization/invitations',
+  'organization/default-quota',
+  'organization/quota-request-policy',
+  'organization/quota-requests',
+  'usage/organization/members',
 ]);
 
 const POST_PATHS = new Set([
@@ -61,9 +67,18 @@ const POST_PATHS = new Set([
   'user/totp/step-up',
   'payment/orders',
   'payment/orders/verify',
+  'organization/invitations',
+  'organization/members/quota-batch',
+  'organization/members/spending-limit-split',
+  'organization/quota-requests',
 ]);
 
-const PUT_PATHS = new Set(['user', 'user/password']);
+const PUT_PATHS = new Set([
+  'user',
+  'user/password',
+  'organization/default-quota',
+  'organization/quota-request-policy',
+]);
 
 class RequestBodyTooLargeError extends Error {
   constructor() {
@@ -137,6 +152,11 @@ function matchesMethodSpecificPath(method: string, pathSegments: string[]): bool
   if (method === 'POST') {
     return (
       POST_PATHS.has(path) ||
+      (first === 'organization' &&
+        second === 'quota-requests' &&
+        isPositiveIntegerSegment(third) &&
+        pathSegments.length === 4 &&
+        (fourth === 'withdraw' || fourth === 'approve' || fourth === 'reject')) ||
       (first === 'auth' &&
         second === 'passkey' &&
         third === 'login' &&
@@ -165,12 +185,26 @@ function matchesMethodSpecificPath(method: string, pathSegments: string[]): bool
   if (method === 'PUT') {
     return (
       PUT_PATHS.has(path) ||
+      (first === 'organization' &&
+        second === 'members' &&
+        isPositiveIntegerSegment(third) &&
+        pathSegments.length === 4 &&
+        (fourth === 'status' ||
+          fourth === 'display-name' ||
+          fourth === 'spending-limit' ||
+          fourth === 'quota')) ||
       (first === 'keys' && isPositiveIntegerSegment(second) && pathSegments.length === 2)
     );
   }
 
   if (method === 'DELETE') {
-    return first === 'keys' && isPositiveIntegerSegment(second) && pathSegments.length === 2;
+    return (
+      (first === 'keys' && isPositiveIntegerSegment(second) && pathSegments.length === 2) ||
+      (first === 'organization' &&
+        second === 'invitations' &&
+        isPositiveIntegerSegment(third) &&
+        pathSegments.length === 3)
+    );
   }
 
   return false;

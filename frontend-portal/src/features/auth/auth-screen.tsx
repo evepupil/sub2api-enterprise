@@ -19,6 +19,7 @@ export interface AuthScreenProps {
   nextPath?: string;
   email?: string;
   token?: string;
+  invitationCode?: string;
   children?: ReactNode;
 }
 
@@ -35,7 +36,14 @@ const TITLES = {
   reset: '重置密码',
 } as const;
 
-export function AuthScreen({ mode, nextPath, email, token, children }: AuthScreenProps) {
+export function AuthScreen({
+  mode,
+  nextPath,
+  email,
+  token,
+  invitationCode,
+  children,
+}: AuthScreenProps) {
   const { data: settings, isLoading, isError, refetch } = useAuthSettings();
   const currentMode = normalizedMode(mode);
 
@@ -79,7 +87,7 @@ export function AuthScreen({ mode, nextPath, email, token, children }: AuthScree
         <>
           {currentMode === 'login' ? <LoginForm settings={settings} nextPath={nextPath} /> : null}
           {currentMode === 'register' ? (
-            <RegisterForm settings={settings} nextPath={nextPath} />
+            <RegisterForm settings={settings} nextPath={nextPath} invitationCode={invitationCode} />
           ) : null}
           {currentMode === 'forgot' || currentMode === 'reset' ? (
             <PasswordRecoveryForm

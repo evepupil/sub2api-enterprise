@@ -44,18 +44,23 @@ function loginHref(nextPath: string | undefined): string {
 export interface RegisterFormProps {
   settings: AuthSettings;
   nextPath?: string;
+  invitationCode?: string;
 }
 
-export function RegisterForm({ settings, nextPath }: RegisterFormProps) {
+export function RegisterForm({
+  settings,
+  nextPath,
+  invitationCode: initialInvitationCode,
+}: RegisterFormProps) {
   const router = useRouter();
   const { register, request } = useAuth();
-  const [mode, setMode] = useState<RegistrationMode>('personal');
+  const [mode, setMode] = useState<RegistrationMode>(initialInvitationCode ? 'join' : 'personal');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [organizationName, setOrganizationName] = useState('');
   const [memberName, setMemberName] = useState('');
-  const [invitationCode, setInvitationCode] = useState('');
+  const [invitationCode, setInvitationCode] = useState(initialInvitationCode ?? '');
   const [verifyCode, setVerifyCode] = useState('');
   const [proof, setProof] = useState<CaptchaProof | undefined>();
   const [captchaResetKey, setCaptchaResetKey] = useState(0);
@@ -230,6 +235,7 @@ export function RegisterForm({ settings, nextPath }: RegisterFormProps) {
               aria-pressed={mode === option.value}
               onClick={() => {
                 setMode(option.value);
+                if (option.value !== 'join') setInvitationCode('');
                 setError(null);
               }}
             >
