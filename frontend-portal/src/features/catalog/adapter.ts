@@ -19,6 +19,7 @@ interface ParsedGroup {
   subscriptionType: string;
   isExclusive: boolean;
   rateMultiplier: number;
+  userRateMultiplier: number | null;
   models: readonly ParsedModel[];
 }
 
@@ -258,9 +259,9 @@ function parseGroup(value: unknown, index: number): ParsedGroup {
   const subscriptionType = requiredString(value, 'subscription_type');
   const isExclusive = requiredBoolean(value, 'is_exclusive');
   const rateMultiplier = requiredFiniteNumber(value, 'rate_multiplier');
-  optionalFiniteNumber(value, 'user_rate_multiplier');
+  const userRateMultiplier = optionalFiniteNumber(value, 'user_rate_multiplier');
   const models = requiredArray(value, 'models').map(parseModel);
-  return { subscriptionType, isExclusive, rateMultiplier, models };
+  return { subscriptionType, isExclusive, rateMultiplier, userRateMultiplier, models };
 }
 
 function appendRanges(target: Record<PriceKey, number[]>, ranges: CatalogModel['prices']): void {
@@ -272,20 +273,27 @@ function appendRanges(target: Record<PriceKey, number[]>, ranges: CatalogModel['
   }
 }
 
-export function parseCatalog(value: unknown): CatalogData {
+export interface ParseCatalogOptions {
+  authenticated?: boolean;
+}
+
+export function parseCatalog(value: unknown, options: ParseCatalogOptions = {}): CatalogData {
   if (!isRecord(value)) {
     throw invalid('root');
   }
   const groups = requiredArray(value, 'groups').map(parseGroup);
+  const authenticated = options.authenticated === true;
   const aggregates = new Map<string, AggregateModel>();
 
   for (const group of groups) {
-    if (
-      group.isExclusive ||
-      (group.subscriptionType !== '' && group.subscriptionType !== 'standard')
-    ) {
+    const isBalanceGroup = group.subscriptionType === '' || group.subscriptionType === 'standard';
+    if (!isBalanceGroup || (!authenticated && group.isExclusive)) {
       continue;
     }
+
+    const rateMultiplier = authenticated
+      ? (group.userRateMultiplier ?? group.rateMultiplier)
+      : group.rateMultiplier;
 
     for (const model of group.models) {
       const provider = identifyProvider(model.name, model.platform);
@@ -306,7 +314,7 @@ export function parseCatalog(value: unknown): CatalogData {
       }
       appendRanges(
         aggregate.prices,
-        resolveCatalogPrices(model.pricing, group.rateMultiplier, model.timePricing.factors),
+        resolveCatalogPrices(model.pricing, rateMultiplier, model.timePricing.factors),
       );
     }
   }

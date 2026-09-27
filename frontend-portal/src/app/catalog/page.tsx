@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-import { CatalogView } from '@/features/catalog/catalog-view';
+import { SessionCatalog } from '@/features/catalog/session-catalog';
 import { PublicFrame } from '@/features/public/public-frame';
 import { getPublicCatalog, getPublicSite } from '@/lib/api/public-server';
 
@@ -17,7 +17,7 @@ export default async function CatalogPage() {
   return (
     <PublicFrame site={site} activePath="/catalog">
       <div className="py-8">
-        <CatalogView result={catalog} />
+        <SessionCatalog result={catalog} />
       </div>
     </PublicFrame>
   );

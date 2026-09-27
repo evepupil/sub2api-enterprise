@@ -62,7 +62,14 @@ export function CatalogView({ result }: CatalogViewProps) {
       {result.kind === 'disabled' ? (
         <EmptyState title="模型目录尚未开放" />
       ) : result.kind === 'authentication-required' ? (
-        <EmptyState title="请登录后查看模型" />
+        <EmptyState
+          title="请登录后查看模型"
+          action={
+            <Button asChild>
+              <a href="/login?next=/catalog">登录</a>
+            </Button>
+          }
+        />
       ) : result.kind === 'unavailable' ? (
         <Alert
           variant="destructive"

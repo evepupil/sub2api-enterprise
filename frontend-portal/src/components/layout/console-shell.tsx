@@ -33,6 +33,10 @@ export interface ConsoleShellProps extends Omit<React.ComponentProps<'div'>, 'ti
   accountLabel: string;
   /** 传入时拦截导航点击（预览本地切换）；未传时为正常链接。 */
   onNavigate?: (href: string) => void;
+  /** 账户操作（如退出登录）；未传时不渲染。 */
+  accountActions?: React.ReactNode;
+  /** 需要隐藏的导航路径；只影响展示，不改动 lib/navigation 的函数契约。 */
+  hiddenPaths?: readonly string[];
 }
 
 /**
@@ -46,11 +50,19 @@ export function ConsoleShell({
   activePath,
   accountLabel,
   onNavigate,
+  accountActions,
+  hiddenPaths,
   className,
   ...props
 }: ConsoleShellProps) {
   const [mobileOpen, setMobileOpen] = React.useState(false);
-  const items = React.useMemo(() => getConsoleNavigation(audience), [audience]);
+  const items = React.useMemo(
+    () =>
+      getConsoleNavigation(audience).filter(
+        (item) => hiddenPaths === undefined || !hiddenPaths.includes(item.href),
+      ),
+    [audience, hiddenPaths],
+  );
 
   /**
    * 当前项：在命中项里取最长 href，保证 `/console/team/usage` 命中组织用量
@@ -73,9 +85,9 @@ export function ConsoleShell({
     setMobileOpen(false);
   };
 
-  const renderNavItem = (item: NavigationItem, current: NavigationItem) => {
+  const renderNavItem = (item: NavigationItem, current: NavigationItem | null) => {
     const Icon = NAVIGATION_ICONS[item.icon];
-    const active = item.href === current.href;
+    const active = current !== null && item.href === current.href;
     return (
       <a
         key={item.href}
@@ -95,7 +107,7 @@ export function ConsoleShell({
     );
   };
 
-  const current = resolveCurrent(items);
+  const current = items.length > 0 ? resolveCurrent(items) : null;
 
   const sidebarBody = (
     <nav aria-label="控制台导航" className="flex flex-col gap-1">
@@ -128,12 +140,17 @@ export function ConsoleShell({
           </DialogContent>
         </Dialog>
         <Brand className="min-w-0" />
-        <span
-          className="ml-auto min-w-0 truncate rounded-control bg-secondary px-2 py-1 text-xs text-secondary-foreground"
-          title={accountLabel}
-        >
-          {accountLabel}
-        </span>
+        <div className="ml-auto flex min-w-0 items-center gap-2">
+          <span
+            className="min-w-0 truncate rounded-control bg-secondary px-2 py-1 text-xs text-secondary-foreground"
+            title={accountLabel}
+          >
+            {accountLabel}
+          </span>
+          {accountActions !== undefined ? (
+            <div className="flex shrink-0 items-center gap-2">{accountActions}</div>
+          ) : null}
+        </div>
       </header>
 
       {/* 桌面侧栏：216px 白底右边框 */}
@@ -149,6 +166,9 @@ export function ConsoleShell({
             <span className="px-3 text-xs text-muted-foreground">{accountLabel}</span>
             {sidebarBody}
           </div>
+          {accountActions !== undefined ? (
+            <div className="flex flex-col gap-2 border-t border-border pt-4">{accountActions}</div>
+          ) : null}
         </div>
       </aside>
 

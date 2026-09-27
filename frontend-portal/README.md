@@ -1,6 +1,6 @@
 # 独立客户前端
 
-基于既有 Sub2API 业务的新官网与客户控制台。开发顺序见 [路线图](docs/roadmap.md)，目前已建立共享工程并实现 M1 官网四页。
+基于既有 Sub2API 业务的新官网与客户控制台。开发顺序见 [路线图](docs/roadmap.md)，已接入官网、账号、密钥、统计与余额订单，当前验收边界见模块文档。
 
 ## 本机要求
 
@@ -11,7 +11,7 @@ pnpm install --frozen-lockfile
 pnpm check
 ```
 
-检查包括格式、静态分析、严格类型、导航规则测试和生产构建。页面外观与实际交互需另做浏览器验收。
+检查包括格式、静态分析、严格类型、核心业务测试和生产构建。开发输出 `.next` 与生产输出 `.next-build` 分离。页面外观与实际交互需另做浏览器验收。
 
 ## 组件预览
 
@@ -36,7 +36,7 @@ pnpm preview:public
 正式路由为 `/`、`/catalog`、`/status` 和 `/help`。服务端配置说明见 [.env.example](.env.example)：
 
 - `SUB2API_INTERNAL_URL`：固定的 Sub2API origin，例如部署内可访问的后端地址，不包含 `/api/v1`、查询或凭证。未配置时，模型和状态显示暂时不可用。
-- `PORTAL_ACCOUNT_URL`：M2 账号接入前可连接已有客户网站。配置后显示其登录和控制台入口，未配置则隐藏账号操作。
+- `PORTAL_PUBLIC_URL`：浏览器实际访问的门户 origin，用于同源与付款回跳检查。本地示例 `http://127.0.0.1:3000`，生产填写正式 HTTPS 域名。
 
 只调用公开设置、模型广场和状态接口，不转发用户凭证。数据请求包含五秒总超时，不使用旧价格或示例数据兜底。帮助正文采用已核对的本地内容，公开客服文本和文档链接取后端配置；受保护的公告接口不向匿名访客请求。
 
@@ -51,3 +51,11 @@ pnpm preview:public
 - 官网首页效果：`src/components/effects/`、`src/styles/marketing.css`，来源见 [素材记录](docs/前端设计/官网素材与动效来源.md)。
 
 实施契约见 [DESIGN.md](DESIGN.md)，组件预览规格见 [页面规格](design/foundation-preview.md)。
+
+## 客户控制台
+
+本站提供登录、注册、邮件恢复和 `/console` 下的概览、密钥、用量、余额订单、账号设置。客户请求通过 `/api/portal/` 固定代理，组织成员仅使用配额。付款回跳兼容底座的 `/payment/result`，只查询真实订单状态。
+
+底座 `frontend_url` 指向门户公开地址。启用 OAuth 时，供应商登记和底座 redirect URL 均填写 `https://门户域名/api/portal/auth/oauth/<provider>/callback`，provider 支持 github/google/linuxdo/wechat/dingtalk/oidc；前端回调 URL 指向门户 `/auth/.../callback`。供应商回调不要指向另一后端域名，以免 Cookie 断开。通行密钥 RP ID 与站点来源匹配门户域名。
+
+外部登录、验证码、Stripe、Airwallex、微信及支付通知须在对应测试配置中联调后启用。业务实现与本地验证分别见[账号模块](docs/模块设计/账号与密钥.md)、[统计模块](docs/模块设计/用量统计.md)、[余额模块](docs/模块设计/余额与订单.md)。
