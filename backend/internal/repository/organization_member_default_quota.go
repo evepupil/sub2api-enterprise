@@ -41,6 +41,7 @@ func (r *organizationMemberRepository) UpdateDefaultQuota(
 	organizationID int64,
 	update service.OrganizationDefaultQuotaUpdate,
 ) (*service.OrganizationDefaultQuotaSynced, error) {
+	var savedQuota service.OrganizationDefaultQuota
 	apply := func(ctx context.Context, client *dbent.Client) ([]int64, error) {
 		entity, err := client.Organization.Query().
 			Where(organization.IDEQ(organizationID)).
@@ -62,8 +63,15 @@ func (r *organizationMemberRepository) UpdateDefaultQuota(
 				ClearDefaultQuotaAmount().
 				ClearDefaultQuotaPeriodDays()
 		}
-		if _, err := orgUpdate.Save(ctx); err != nil {
+		saved, err := orgUpdate.Save(ctx)
+		if err != nil {
 			return nil, err
+		}
+		// 返回实际落库的配置，包含关闭后已清空的金额和周期。
+		savedQuota = service.OrganizationDefaultQuota{
+			Enabled:    saved.DefaultQuotaEnabled,
+			Amount:     saved.DefaultQuotaAmount,
+			PeriodDays: saved.DefaultQuotaPeriodDays,
 		}
 
 		if !update.Enabled || (!update.SyncUnconfigured && !update.SyncConfigured) {
@@ -118,7 +126,7 @@ func (r *organizationMemberRepository) UpdateDefaultQuota(
 		if err != nil {
 			return nil, err
 		}
-		return &service.OrganizationDefaultQuotaSynced{SyncedUserIDs: synced}, nil
+		return &service.OrganizationDefaultQuotaSynced{Quota: savedQuota, SyncedUserIDs: synced}, nil
 	}
 
 	tx, err := r.client.Tx(ctx)
@@ -136,5 +144,5 @@ func (r *organizationMemberRepository) UpdateDefaultQuota(
 	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
-	return &service.OrganizationDefaultQuotaSynced{SyncedUserIDs: synced}, nil
+	return &service.OrganizationDefaultQuotaSynced{Quota: savedQuota, SyncedUserIDs: synced}, nil
 }
