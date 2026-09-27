@@ -15,6 +15,8 @@ import { createSessionManager } from './session-manager';
 import type { ApiRequester, AuthOperations, LoginChallenge, SessionSnapshot } from './types';
 
 export interface AuthContextValue extends SessionSnapshot, AuthOperations {
+  /** Browser session recovery has settled; public server rendering remains anonymous. */
+  initialized: boolean;
   request: ApiRequester;
   acceptLogin(value: unknown): Promise<void>;
   getIdentityKey(): string;
@@ -44,6 +46,7 @@ function parseChallenge(value: unknown): LoginChallenge | null {
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [manager] = useState(() => createSessionManager());
+  const [initialized, setInitialized] = useState(false);
   const snapshot = useSyncExternalStore(
     manager.subscribe,
     manager.getSnapshot,
@@ -53,10 +56,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const attempt = useRef(0);
 
   useEffect(() => {
-    void manager.start().catch(() => {
-      /* The session snapshot holds the recoverable error. */
-    });
+    let active = true;
+    void manager
+      .start()
+      .catch(() => {
+        /* The session snapshot holds the recoverable error. */
+      })
+      .finally(() => {
+        if (active) setInitialized(true);
+      });
     return () => {
+      active = false;
       attempt.current += 1;
       manager.dispose();
     };
@@ -107,7 +117,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [manager]);
 
   return (
-    <AuthContext.Provider value={{ ...snapshot, ...operations }}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ ...snapshot, initialized, ...operations }}>
+      {children}
+    </AuthContext.Provider>
   );
 }
 

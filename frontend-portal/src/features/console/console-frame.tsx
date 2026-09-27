@@ -101,7 +101,7 @@ export function ConsoleFrame({ children }: ConsoleFrameProps) {
 }
 
 function ConsoleGuard({ children }: ConsoleFrameProps) {
-  const { status, user, identityKey, refreshUser, logout } = useAuth();
+  const { initialized, status, user, identityKey, refreshUser, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -112,11 +112,11 @@ function ConsoleGuard({ children }: ConsoleFrameProps) {
   const nextPath = query === '' ? pathname : `${pathname}?${query}`;
 
   React.useEffect(() => {
-    if (status !== 'anonymous') {
+    if (!initialized || status !== 'anonymous') {
       return;
     }
     router.replace(`/login?next=${encodeURIComponent(nextPath)}`);
-  }, [status, router, nextPath]);
+  }, [initialized, status, router, nextPath]);
 
   const handleNavigate = React.useCallback(
     (href: string) => {
