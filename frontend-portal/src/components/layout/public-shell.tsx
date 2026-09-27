@@ -8,6 +8,7 @@ import { cn } from '../../lib/utils';
 import { Button } from '../ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '../ui/dialog';
 
+import type { PublicAction } from '../../features/public/types';
 import { Brand } from './brand';
 
 /** 官网固定导航：桌面与手机共用这一组链接与匹配规则。 */
@@ -18,11 +19,14 @@ const PUBLIC_NAVIGATION = [
   { href: '/help', label: '帮助' },
 ] as const;
 
-/** 导航右侧固定操作入口。 */
-const PUBLIC_ACTIONS = [
+/**
+ * M0 预览默认操作入口：未传 actions 时保留旧行为。
+ * 正式路由由 PublicFrame 传入配置解析出的 actions；空数组表示隐藏账号操作。
+ */
+const DEFAULT_ACTIONS: readonly PublicAction[] = [
   { href: '/login', label: '登录' },
-  { href: '/console', label: '进入控制台' },
-] as const;
+  { href: '/console', label: '进入控制台', primary: true },
+];
 
 function isItemActive(item: { href: string }, activePath: string): boolean {
   return isNavigationActive(activePath, item.href);
@@ -37,6 +41,12 @@ export interface PublicShellProps extends React.ComponentProps<'div'> {
    * 并负责更新 activePath。未传时渲染正常链接，站内导航。
    */
   onNavigate?: (href: string) => void;
+  /** 品牌站名纯文本；未传保留默认“模型服务”。 */
+  siteName?: string;
+  /** 导航右侧操作入口；未传保留 M0 预览默认，传空数组则隐藏整块。 */
+  actions?: readonly PublicAction[];
+  /** 内容区铺满宽度（首页 hero 用），不套 max-w-site 与左右边距。 */
+  fullWidth?: boolean;
 }
 
 /**
@@ -48,6 +58,9 @@ export function PublicShell({
   children,
   activePath = '/',
   onNavigate,
+  siteName,
+  actions = DEFAULT_ACTIONS,
+  fullWidth = false,
   className,
   ...props
 }: PublicShellProps) {
@@ -82,6 +95,33 @@ export function PublicShell({
     );
   };
 
+  const renderAction = (action: PublicAction, variant: 'button' | 'menu') => {
+    if (variant === 'button') {
+      return (
+        <Button key={action.href} variant={action.primary === true ? 'default' : 'ghost'} asChild>
+          <a href={action.href} onClick={handleNavClick(action.href)}>
+            {action.label}
+          </a>
+        </Button>
+      );
+    }
+    return (
+      <a
+        key={action.href}
+        href={action.href}
+        onClick={handleNavClick(action.href)}
+        className={cn(
+          'flex h-touch items-center rounded-control px-3 text-base font-medium outline-none',
+          'focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ring',
+          'hover:bg-muted',
+          action.primary === true ? 'text-foreground' : 'text-muted-foreground',
+        )}
+      >
+        {action.label}
+      </a>
+    );
+  };
+
   return (
     <div className={cn('flex min-h-dvh flex-col bg-background', className)} {...props}>
       <header
@@ -89,7 +129,12 @@ export function PublicShell({
         className="sticky top-0 z-40 border-b border-border bg-card"
       >
         <div className="mx-auto flex h-header w-full max-w-site items-center gap-6 px-4 md:px-8 xl:px-16">
-          <Brand href="/" onClick={handleNavClick('/')} className="shrink-0" />
+          <Brand
+            href="/"
+            name={siteName}
+            onClick={handleNavClick('/')}
+            className="min-w-0 shrink"
+          />
 
           {/* 桌面中部导航 */}
           <nav aria-label="站内导航" className="hidden flex-1 md:block">
@@ -98,19 +143,12 @@ export function PublicShell({
             </div>
           </nav>
 
-          {/* 桌面右侧操作 */}
-          <div className="hidden shrink-0 items-center gap-2 md:flex">
-            {PUBLIC_ACTIONS.map((action) => {
-              const isPrimary = action.href === '/console';
-              return (
-                <Button key={action.href} variant={isPrimary ? 'default' : 'ghost'} asChild>
-                  <a href={action.href} onClick={handleNavClick(action.href)}>
-                    {action.label}
-                  </a>
-                </Button>
-              );
-            })}
-          </div>
+          {/* 桌面右侧操作：actions 为空数组时不渲染 */}
+          {actions.length > 0 ? (
+            <div className="hidden shrink-0 items-center gap-2 md:flex">
+              {actions.map((action) => renderAction(action, 'button'))}
+            </div>
+          ) : null}
 
           {/* 手机菜单按钮：44px 触控，打开 Dialog 侧向菜单 */}
           <Dialog open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -153,30 +191,20 @@ export function PublicShell({
                   );
                 })}
                 <div className="my-2 border-t border-border" />
-                {PUBLIC_ACTIONS.map((action) => {
-                  const isPrimary = action.href === '/console';
-                  return (
-                    <a
-                      key={action.href}
-                      href={action.href}
-                      onClick={handleNavClick(action.href)}
-                      className={cn(
-                        'flex h-touch items-center rounded-control px-3 text-base font-medium outline-none',
-                        'focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ring',
-                        'hover:bg-muted',
-                        isPrimary ? 'text-foreground' : 'text-muted-foreground',
-                      )}
-                    >
-                      {action.label}
-                    </a>
-                  );
-                })}
+                {actions.map((action) => renderAction(action, 'menu'))}
               </nav>
             </DialogContent>
           </Dialog>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-site flex-1 px-4 md:px-8 xl:px-16">{children}</main>
+      <main
+        className={cn(
+          'w-full flex-1',
+          fullWidth ? 'min-w-0' : 'mx-auto max-w-site px-4 md:px-8 xl:px-16',
+        )}
+      >
+        {children}
+      </main>
     </div>
   );
 }

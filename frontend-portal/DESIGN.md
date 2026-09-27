@@ -1,5 +1,7 @@
 # M0 工程与共享界面实施规格
 
+M1 官网实现补充见 [官网实施规格](design/public-site.md) 及其四份页面规格；M0 主题和组件契约继续作为基础。
+
 状态：实施规格 · 最近更新：2026-09-27
 
 依据：[视觉基线](docs/前端设计.md) · [模块归档](docs/模块设计/工程与共享界面.md) · [M0](docs/roadmap.md#m0) · [预览页面规格](design/foundation-preview.md)

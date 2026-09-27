@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import './tokens.css';
+@import './marketing.css';
 
 /* 显式声明扫描根目录，避免依赖自动探测结果 */
 @source '../';
