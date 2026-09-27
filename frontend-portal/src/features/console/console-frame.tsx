@@ -35,19 +35,6 @@ function audienceFor(user: PortalUser): Audience {
   return user.organization.isOwner ? 'owner' : 'member';
 }
 
-/** 身份标识：优先组织名，其次用户名，最后邮箱；空字符串按缺省处理。 */
-function accountLabelFor(user: PortalUser): string {
-  const organizationName = user.organization?.name.trim();
-  if (organizationName !== undefined && organizationName !== '') {
-    return organizationName;
-  }
-  const username = user.username.trim();
-  if (username !== '') {
-    return username;
-  }
-  return user.email;
-}
-
 /** 身份核实期间的占位：不给私有页渲染任何内容，避免用旧账号数据闪屏。 */
 function VerificationPlaceholder() {
   return (
@@ -100,7 +87,7 @@ function VerificationError({ onRetry, onLogout, retrying, loggingOut }: Verifica
 
 /**
  * 控制台身份守卫与外壳：加载中占位、核实失败可重试/退出、匿名跳登录、
- * 已登录按组织身份渲染 ConsoleShell，并把退出登录作为账户操作。
+ * 已登录按组织身份渲染 ConsoleShell；账号设置页承担退出，外壳不再额外放退出按钮。
  *
  * 读取路径与查询参数的实现放在 Suspense 边界内，这样静态路由预渲染时
  * 仍能输出验证占位，不会因客户端 URL 钩子阻塞构建。
@@ -176,24 +163,7 @@ function ConsoleGuard({ children }: ConsoleFrameProps) {
   }
 
   return (
-    <ConsoleShell
-      audience={audienceFor(user)}
-      activePath={pathname}
-      accountLabel={accountLabelFor(user)}
-      onNavigate={handleNavigate}
-      accountActions={
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="w-full"
-          onClick={handleLogout}
-          loading={loggingOut}
-        >
-          退出登录
-        </Button>
-      }
-    >
+    <ConsoleShell audience={audienceFor(user)} activePath={pathname} onNavigate={handleNavigate}>
       {/* 换号时按 identityKey 重新挂载，清空旧账号的表单与临时 secret。 */}
       <React.Fragment key={identityKey}>{children}</React.Fragment>
     </ConsoleShell>

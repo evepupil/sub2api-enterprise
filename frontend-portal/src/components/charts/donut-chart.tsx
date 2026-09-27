@@ -2,6 +2,7 @@
 
 import type { EChartsOption } from 'echarts';
 import { Chart } from './chart';
+import { cn } from '../../lib/utils';
 
 export interface DonutChartItem {
   name: string;
@@ -12,11 +13,28 @@ export interface DonutChartProps {
   data: readonly DonutChartItem[];
   ariaLabel: string;
   className?: string;
+  centerValue?: string;
+  centerLabel?: string;
+  centerTitle?: string;
 }
 
-export function DonutChart({ data, ariaLabel, className = 'h-56 w-full' }: DonutChartProps) {
+const EMPTY_CHART_ITEM = '__empty_donut__';
+
+export function DonutChart({
+  data,
+  ariaLabel,
+  className = 'h-56 w-full',
+  centerValue,
+  centerLabel,
+  centerTitle,
+}: DonutChartProps) {
+  const hasPositiveValue = data.some((item) => item.value > 0);
+  const chartData = hasPositiveValue
+    ? data.map((item) => ({ name: item.name, value: item.value }))
+    : [{ name: EMPTY_CHART_ITEM, value: 1, itemStyle: { color: 'var(--border)' } }];
   const option: EChartsOption = {
     tooltip: {
+      show: hasPositiveValue,
       trigger: 'item',
       renderMode: 'richText',
       formatter: (params) => {
@@ -33,9 +51,30 @@ export function DonutChart({ data, ariaLabel, className = 'h-56 w-full' }: Donut
         itemStyle: { borderColor: 'var(--card)', borderWidth: 2 },
         label: { show: false },
         emphasis: { label: { show: false } },
-        data: data.map((item) => ({ name: item.name, value: item.value })),
+        data: chartData,
       },
     ],
   };
-  return <Chart option={option} ariaLabel={ariaLabel} className={className} />;
+  const showCenter = centerValue !== undefined || centerLabel !== undefined;
+
+  return (
+    <div className={cn('relative', className)}>
+      <Chart option={option} ariaLabel={ariaLabel} className="h-full w-full" />
+      {showCenter ? (
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-3 text-center">
+          {centerValue !== undefined ? (
+            <p
+              className="pointer-events-auto max-w-full break-all text-base font-semibold tabular-nums text-foreground"
+              title={centerTitle}
+            >
+              {centerValue}
+            </p>
+          ) : null}
+          {centerLabel !== undefined ? (
+            <p className="text-xs text-muted-foreground">{centerLabel}</p>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
+  );
 }

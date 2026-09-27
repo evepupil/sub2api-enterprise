@@ -132,9 +132,7 @@ export function QuotaPeriodicFields({
               disabled={disabled}
               onChange={(event) => onChange({ startDate: event.currentTarget.value })}
             />
-            <p className="text-xs text-muted-foreground">
-              只选择日期，按浏览器本地时间 00:00 生效。
-            </p>
+            <p className="text-xs text-muted-foreground">按本地时间 00:00 生效。</p>
           </div>
         ) : null}
       </fieldset>

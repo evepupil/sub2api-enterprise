@@ -96,7 +96,7 @@ export function UsageRecordDetail({ record, timeZone, onOpenChange }: UsageRecor
           <>
             <DialogHeader>
               <DialogTitle>调用明细</DialogTitle>
-              <DialogDescription>记录 #{record.id}，不含任何密钥秘密。</DialogDescription>
+              <DialogDescription>记录 #{record.id}</DialogDescription>
             </DialogHeader>
             <dl className="mt-6 grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2">
               {rows.map((row) => (

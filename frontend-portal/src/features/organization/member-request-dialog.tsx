@@ -179,9 +179,7 @@ export function MemberRequestDialog({ onClose }: MemberRequestDialogProps) {
       <DialogContent className="max-w-dialog">
         <DialogHeader>
           <DialogTitle>配额申请</DialogTitle>
-          <DialogDescription>
-            申请通过后配额发放到本人账户；审批结果以服务端为准。
-          </DialogDescription>
+          <DialogDescription>申请通过后，将增加你的可用配额。</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">

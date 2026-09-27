@@ -132,7 +132,7 @@ export function RechargeForm({
         <CardContent>
           <EmptyState
             title="当前没有可用的支付方式"
-            description="后台尚未开放任何充值通道，请稍后再试或联系管理员。"
+            description="暂无可用支付方式，请稍后重试或联系管理员。"
           />
         </CardContent>
       </Card>
@@ -296,7 +296,7 @@ export function RechargeForm({
               </p>
             ) : null}
             <p className="text-xs text-muted-foreground">
-              手续费与应付金额为预估，最终以后端订单返回为准。
+              手续费与应付金额为预估，最终以订单为准。
             </p>
           </dl>
 

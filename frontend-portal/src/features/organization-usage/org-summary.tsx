@@ -11,11 +11,11 @@
  * - 加载与错误状态由父组件负责，这里只渲染成功数据。
  */
 
-import * as React from 'react';
-
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import { MetricCard } from '../../components/console/metric-card';
 import { Skeleton } from '../../components/ui/skeleton';
 import { LineChart } from '../../components/charts/line-chart';
+import { CircleDollarSign, Clock3, Database, MessagesSquare } from 'lucide-react';
 import type { UsageOverview } from '../usage/types';
 import {
   formatUsageDateLabel,
@@ -24,26 +24,14 @@ import {
   formatUsageUsd,
 } from '../usage/usage-format';
 
-interface SummaryCardProps {
-  label: string;
-  value: string;
-  detail?: React.ReactNode;
-}
+const compactTokenFormatter = new Intl.NumberFormat('en-US', {
+  notation: 'compact',
+  maximumFractionDigits: 2,
+});
 
-function SummaryCard({ label, value, detail }: SummaryCardProps) {
-  return (
-    <Card className="min-w-0 gap-3">
-      <CardHeader className="pb-0">
-        <p className="text-sm text-muted-foreground">{label}</p>
-      </CardHeader>
-      <CardContent>
-        <p className="text-2xl font-semibold tabular-nums">{value}</p>
-        {detail !== undefined ? (
-          <div className="mt-3 space-y-1 text-xs text-muted-foreground">{detail}</div>
-        ) : null}
-      </CardContent>
-    </Card>
-  );
+function formatCompactToken(value: number): string {
+  if (!Number.isFinite(value)) return '—';
+  return Math.abs(value) < 1000 ? formatUsageNumber(value) : compactTokenFormatter.format(value);
 }
 
 /**
@@ -54,37 +42,53 @@ export function OrganizationSummaryCards({ overview }: { overview: UsageOverview
   const summary = overview.summary;
   return (
     <div
-      className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-4"
+      className="grid min-w-0 gap-4 md:auto-rows-fr md:grid-cols-2 xl:grid-cols-4"
       role="group"
       aria-label="组织用量摘要"
     >
-      <SummaryCard label="总请求" value={formatUsageNumber(summary.requests)} />
-      <SummaryCard
-        label="总 Token"
-        value={formatUsageNumber(summary.tokens.total)}
-        detail={
-          <>
-            <p className="flex justify-between gap-3">
-              <span>输入</span>
-              <span className="tabular-nums">{formatUsageNumber(summary.tokens.input)}</span>
-            </p>
-            <p className="flex justify-between gap-3">
-              <span>输出</span>
-              <span className="tabular-nums">{formatUsageNumber(summary.tokens.output)}</span>
-            </p>
-            <p className="flex justify-between gap-3">
-              <span>缓存写入</span>
-              <span className="tabular-nums">{formatUsageNumber(summary.tokens.cacheWrite)}</span>
-            </p>
-            <p className="flex justify-between gap-3">
-              <span>缓存读取</span>
-              <span className="tabular-nums">{formatUsageNumber(summary.tokens.cacheRead)}</span>
-            </p>
-          </>
-        }
+      <MetricCard
+        label="总请求数"
+        value={formatUsageNumber(summary.requests)}
+        icon={MessagesSquare}
       />
-      <SummaryCard label="实际消费（USD）" value={formatUsageUsd(summary.actualCost)} />
-      <SummaryCard label="平均耗时" value={formatUsageSeconds(summary.averageDurationMs)} />
+      <MetricCard label="总 Token" value={formatCompactToken(summary.tokens.total)} icon={Database}>
+        <>
+          <p className="flex justify-between gap-3">
+            <span>输入</span>
+            <span className="tabular-nums" title={formatUsageNumber(summary.tokens.input)}>
+              {formatCompactToken(summary.tokens.input)}
+            </span>
+          </p>
+          <p className="flex justify-between gap-3">
+            <span>输出</span>
+            <span className="tabular-nums" title={formatUsageNumber(summary.tokens.output)}>
+              {formatCompactToken(summary.tokens.output)}
+            </span>
+          </p>
+          <p className="flex justify-between gap-3">
+            <span>缓存写入</span>
+            <span className="tabular-nums" title={formatUsageNumber(summary.tokens.cacheWrite)}>
+              {formatCompactToken(summary.tokens.cacheWrite)}
+            </span>
+          </p>
+          <p className="flex justify-between gap-3">
+            <span>缓存读取</span>
+            <span className="tabular-nums" title={formatUsageNumber(summary.tokens.cacheRead)}>
+              {formatCompactToken(summary.tokens.cacheRead)}
+            </span>
+          </p>
+        </>
+      </MetricCard>
+      <MetricCard
+        label="总消费"
+        value={`$${formatUsageUsd(summary.actualCost)}`}
+        icon={CircleDollarSign}
+      />
+      <MetricCard
+        label="平均耗时"
+        value={formatUsageSeconds(summary.averageDurationMs)}
+        icon={Clock3}
+      />
     </div>
   );
 }
@@ -92,10 +96,13 @@ export function OrganizationSummaryCards({ overview }: { overview: UsageOverview
 /** 概览加载占位：与摘要卡同布局，避免内容跳动。 */
 export function OrganizationSummarySkeleton() {
   return (
-    <div className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-4" aria-busy="true">
+    <div
+      className="grid min-w-0 gap-4 md:auto-rows-fr md:grid-cols-2 xl:grid-cols-4"
+      aria-busy="true"
+    >
       {Array.from({ length: 4 }, (_, index) => (
-        <Card key={index} className="gap-4">
-          <CardContent className="space-y-4 pt-6">
+        <Card key={index} className="h-full gap-4 py-4">
+          <CardContent className="space-y-4 px-5 pt-5">
             <Skeleton className="h-4 w-24" />
             <Skeleton className="h-8 w-32" />
             <Skeleton className="h-3 w-full" />
@@ -116,11 +123,11 @@ export function OrganizationTrendCard({ overview }: { overview: UsageOverview })
     { name: '缓存读取', values: overview.trend.map((point) => point.tokens.cacheRead) },
   ];
   return (
-    <Card className="min-w-0 gap-4">
-      <CardHeader>
+    <Card className="min-w-0 gap-3 py-4">
+      <CardHeader className="px-5">
         <CardTitle>Token 使用趋势</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="min-w-0 px-5 [&>div]:h-48">
         {overview.trend.length === 0 ? (
           <p className="py-16 text-center text-sm text-muted-foreground">所选日期没有用量</p>
         ) : (

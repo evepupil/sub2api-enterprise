@@ -185,7 +185,6 @@ function TeamWorkspace() {
             <Alert
               variant="destructive"
               title={organizationErrorText(countQuery.error, '成员总数加载失败')}
-              description="成员总数需要单独重试；不要用当前页条数代替。"
               action={
                 <Button
                   type="button"

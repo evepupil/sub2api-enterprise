@@ -305,10 +305,7 @@ export function BillingView({ initialOrderId }: BillingViewProps) {
             <CardTitle>余额充值</CardTitle>
           </CardHeader>
           <CardContent>
-            <EmptyState
-              title="当前站点暂未开通充值"
-              description="已创建的订单和余额仍然可以查看。"
-            />
+            <EmptyState title="暂未开通充值" description="已创建的订单和余额仍然可以查看。" />
           </CardContent>
         </Card>
       );

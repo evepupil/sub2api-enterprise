@@ -19,6 +19,7 @@ import { Calendar } from '../ui/calendar';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 /** 八种预选的中文文案，顺序与 DATE_PRESETS 一致。 */
 const PRESET_LABELS: Record<DatePreset, string> = {
@@ -54,6 +55,8 @@ export interface DateRangeControlProps {
   onChange: (range: DateRange) => void;
   /** 触发器附加类名。 */
   className?: string;
+  /** split 将预选下拉、日期文字与日历按钮并排展示；默认保留合并触发器。 */
+  presentation?: 'combined' | 'split';
 }
 
 interface Draft {
@@ -70,8 +73,14 @@ interface Draft {
  * - 草稿非法（非法日历日或 start > end）时禁用「应用」并给出明确原因。
  * - 起止日期与 Calendar 的本地 Date 转换只用 lib/time/date-range 的纯函数。
  */
-export function DateRangeControl({ value, onChange, className }: DateRangeControlProps) {
+export function DateRangeControl({
+  value,
+  onChange,
+  className,
+  presentation = 'combined',
+}: DateRangeControlProps) {
   const [open, setOpen] = React.useState(false);
+  const openCalendarAfterPreset = React.useRef(false);
   const [draft, setDraft] = React.useState<Draft>({ start: value.start, end: value.end });
   const twoMonths = React.useSyncExternalStore(
     subscribeTwoMonth,
@@ -83,12 +92,12 @@ export function DateRangeControl({ value, onChange, className }: DateRangeContro
   const endId = React.useId();
 
   /** 当前范围命中的预选名；都不是则为自定义。 */
-  const presetLabel = React.useMemo(() => {
+  const selectedPreset = React.useMemo<DatePreset | null>(() => {
     for (const preset of DATE_PRESETS) {
       try {
         const presetRange = getPresetRange(preset, new Date(), value.timeZone);
         if (presetRange.start === value.start && presetRange.end === value.end) {
-          return PRESET_LABELS[preset];
+          return preset;
         }
       } catch {
         return null;
@@ -143,88 +152,154 @@ export function DateRangeControl({ value, onChange, className }: DateRangeContro
         ? '开始日期不能晚于结束日期'
         : null;
 
-  return (
+  const handlePresetChange = (next: string): void => {
+    const preset = DATE_PRESETS.find((candidate) => candidate === next);
+    if (preset !== undefined) {
+      applyPreset(preset);
+      return;
+    }
+    if (next === 'custom') openCalendarAfterPreset.current = true;
+  };
+
+  const calendarContent = (
+    <div className={cn('flex flex-col gap-4', presentation === 'combined' && 'md:flex-row')}>
+      {presentation === 'combined' ? (
+        <div className="flex min-w-0 flex-col gap-2 md:w-40">
+          <p className="text-xs font-medium text-muted-foreground">预选范围</p>
+          <div className="grid grid-cols-2 gap-1 md:grid-cols-1">
+            {DATE_PRESETS.map((preset) => (
+              <Button
+                key={preset}
+                variant="ghost"
+                size="sm"
+                className="justify-start font-normal"
+                onClick={() => applyPreset(preset)}
+              >
+                {PRESET_LABELS[preset]}
+              </Button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+      <div
+        className={cn(
+          'flex min-w-0 flex-col gap-3',
+          presentation === 'combined' &&
+            'border-t border-border pt-4 md:border-t-0 md:border-l md:pt-0 md:pl-4',
+        )}
+      >
+        <div className="flex flex-col gap-2">
+          <Label htmlFor={startId} className="text-xs text-muted-foreground">
+            开始日期
+          </Label>
+          <Input
+            id={startId}
+            type="date"
+            value={draft.start}
+            aria-invalid={!draftStartValid || undefined}
+            onChange={(event) => setDraft((prev) => ({ ...prev, start: event.target.value }))}
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor={endId} className="text-xs text-muted-foreground">
+            结束日期
+          </Label>
+          <Input
+            id={endId}
+            type="date"
+            value={draft.end}
+            aria-invalid={!draftEndValid || undefined}
+            onChange={(event) => setDraft((prev) => ({ ...prev, end: event.target.value }))}
+          />
+        </div>
+        <Calendar
+          mode="range"
+          numberOfMonths={twoMonths ? 2 : 1}
+          defaultMonth={draftStartValid ? toCalendarDate(draft.start) : undefined}
+          selected={selectedRange}
+          onSelect={handleSelect}
+        />
+        {draftError !== null ? (
+          <p role="alert" className="text-xs text-destructive">
+            {draftError}
+          </p>
+        ) : null}
+        <p className="text-xs text-muted-foreground">统一时区：{value.timeZone}</p>
+        <div className="flex items-center justify-end gap-2">
+          <Button variant="ghost" size="sm" onClick={() => setOpen(false)}>
+            取消
+          </Button>
+          <Button size="sm" disabled={!draftValid} onClick={applyDraft}>
+            应用
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+
+  const calendarPicker = (
     <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
+          size="default"
           aria-haspopup="dialog"
           aria-expanded={open}
-          className={cn('justify-start gap-2', className)}
+          aria-label={
+            presentation === 'split'
+              ? `选择起止日期，当前范围：${formatDateRange(value)}`
+              : undefined
+          }
+          className={
+            presentation === 'split'
+              ? 'min-w-0 flex-1 justify-start gap-2'
+              : cn('justify-start gap-2', className)
+          }
         >
           <CalendarDays className="size-4 text-muted-foreground" aria-hidden="true" />
-          <span className="truncate">
-            {presetLabel ?? '自定义'} · {formatDateRange(value)}
-          </span>
+          {presentation === 'combined' ? (
+            <span className="truncate">
+              {selectedPreset === null ? '自定义' : PRESET_LABELS[selectedPreset]} ·{' '}
+              {formatDateRange(value)}
+            </span>
+          ) : (
+            <span className="truncate">{formatDateRange(value)}</span>
+          )}
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-auto">
-        <div className="flex flex-col gap-4 md:flex-row">
-          <div className="flex min-w-0 flex-col gap-2 md:w-40">
-            <p className="text-xs font-medium text-muted-foreground">预选范围</p>
-            <div className="grid grid-cols-2 gap-1 md:grid-cols-1">
-              {DATE_PRESETS.map((preset) => (
-                <Button
-                  key={preset}
-                  variant="ghost"
-                  size="sm"
-                  className="justify-start font-normal"
-                  onClick={() => applyPreset(preset)}
-                >
-                  {PRESET_LABELS[preset]}
-                </Button>
-              ))}
-            </div>
-          </div>
-          <div className="flex min-w-0 flex-col gap-3 border-t border-border pt-4 md:border-t-0 md:border-l md:pt-0 md:pl-4">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor={startId} className="text-xs text-muted-foreground">
-                开始日期
-              </Label>
-              <Input
-                id={startId}
-                type="date"
-                value={draft.start}
-                aria-invalid={!draftStartValid || undefined}
-                onChange={(event) => setDraft((prev) => ({ ...prev, start: event.target.value }))}
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor={endId} className="text-xs text-muted-foreground">
-                结束日期
-              </Label>
-              <Input
-                id={endId}
-                type="date"
-                value={draft.end}
-                aria-invalid={!draftEndValid || undefined}
-                onChange={(event) => setDraft((prev) => ({ ...prev, end: event.target.value }))}
-              />
-            </div>
-            <Calendar
-              mode="range"
-              numberOfMonths={twoMonths ? 2 : 1}
-              defaultMonth={draftStartValid ? toCalendarDate(draft.start) : undefined}
-              selected={selectedRange}
-              onSelect={handleSelect}
-            />
-            {draftError !== null ? (
-              <p role="alert" className="text-xs text-destructive">
-                {draftError}
-              </p>
-            ) : null}
-            <p className="text-xs text-muted-foreground">统一时区：{value.timeZone}</p>
-            <div className="flex items-center justify-end gap-2">
-              <Button variant="ghost" size="sm" onClick={() => setOpen(false)}>
-                取消
-              </Button>
-              <Button size="sm" disabled={!draftValid} onClick={applyDraft}>
-                应用
-              </Button>
-            </div>
-          </div>
-        </div>
+        {calendarContent}
       </PopoverContent>
     </Popover>
   );
+
+  if (presentation === 'split') {
+    return (
+      <div className={cn('flex min-w-0 items-center gap-2', className)}>
+        <Select value={selectedPreset ?? 'custom'} onValueChange={handlePresetChange}>
+          <SelectTrigger aria-label="预选范围" className="w-28 shrink-0">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent
+            onCloseAutoFocus={(event) => {
+              if (!openCalendarAfterPreset.current) return;
+              event.preventDefault();
+              openCalendarAfterPreset.current = false;
+              handleOpenChange(true);
+            }}
+          >
+            {DATE_PRESETS.map((preset) => (
+              <SelectItem key={preset} value={preset}>
+                {PRESET_LABELS[preset]}
+              </SelectItem>
+            ))}
+            <SelectItem value="custom">自定义</SelectItem>
+          </SelectContent>
+        </Select>
+        {calendarPicker}
+      </div>
+    );
+  }
+
+  return calendarPicker;
 }

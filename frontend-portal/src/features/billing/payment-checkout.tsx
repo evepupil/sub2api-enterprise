@@ -322,16 +322,16 @@ export function PaymentCheckout({ launch, stripePublicKey, onCheck }: PaymentChe
     entry = (
       <Alert
         variant="destructive"
-        title="Airwallex 支付参数不完整"
-        description="缺少 intent_id 或 client_secret，无法发起付款，请稍后重试或改用其他付款方式。"
+        title="支付暂不可用"
+        description="支付配置不完整，请稍后重试或选择其他支付方式。"
       />
     );
   } else if (launch.clientSecret !== null) {
     entry = (
       <Alert
         variant="destructive"
-        title="缺少 Stripe 可公开密钥"
-        description="当前支付配置不完整，无法发起银行卡付款，请稍后重试或改用其他付款方式。"
+        title="支付暂不可用"
+        description="支付配置不完整，请稍后重试或选择其他支付方式。"
       />
     );
   } else if (payUrl !== null) {

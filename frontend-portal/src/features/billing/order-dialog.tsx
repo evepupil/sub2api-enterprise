@@ -323,7 +323,7 @@ function OrderDialogBody({
                     {order.status === 'PENDING' ? (
                       <Alert
                         title="请按原支付渠道完成付款"
-                        description="本页面没有保存本次付款入口，可在此查询状态；如仍需付款，请回到原支付页面完成。"
+                        description="请回到原支付页面完成付款，再返回此处查询状态。"
                       />
                     ) : null}
                     <Button

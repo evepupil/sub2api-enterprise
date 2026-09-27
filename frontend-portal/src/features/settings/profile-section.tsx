@@ -4,13 +4,7 @@ import { useState, type FormEvent } from 'react';
 
 import { Alert } from '../../components/ui/alert';
 import { Button } from '../../components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '../../components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import type { ApiRequester, PortalUser } from '../auth/types';
@@ -47,7 +41,7 @@ export function ProfileSection({ user, request, refreshUser }: ProfileSectionPro
     }
     if (trimmed.length === 0) {
       setSaved(false);
-      setError('姓名不能为空');
+      setError('请输入显示名称');
       return;
     }
     if (unchanged) {
@@ -71,12 +65,11 @@ export function ProfileSection({ user, request, refreshUser }: ProfileSectionPro
     <Card>
       <CardHeader>
         <CardTitle>个人资料</CardTitle>
-        <CardDescription>修改显示名称，邮箱用于登录与通知。</CardDescription>
       </CardHeader>
       <CardContent>
         <form className="space-y-4" onSubmit={handleSubmit} noValidate>
           <div className="space-y-2">
-            <Label htmlFor="settings-username">姓名</Label>
+            <Label htmlFor="settings-username">显示名称</Label>
             <Input
               id="settings-username"
               name="username"

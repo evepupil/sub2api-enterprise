@@ -1,5 +1,6 @@
 'use client';
 
+import { CircleDollarSign, Clock3, Database, MessagesSquare } from 'lucide-react';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
@@ -15,6 +16,7 @@ import {
   SelectValue,
 } from '../../components/ui/select';
 import { DateRangeControl } from '../../components/console/date-range-control';
+import { MetricCard } from '../../components/console/metric-card';
 import { PageHeader } from '../../components/layout/page-header';
 import { LineChart } from '../../components/charts/line-chart';
 import { useAuth } from '../auth/auth-provider';
@@ -32,6 +34,16 @@ import {
 } from './usage-format';
 import { DEFAULT_TIME_ZONE, getPresetRange } from '../../lib/time/date-range';
 
+const compactTokenFormatter = new Intl.NumberFormat('en-US', {
+  notation: 'compact',
+  maximumFractionDigits: 2,
+});
+
+function formatCompactToken(value: number): string {
+  if (!Number.isFinite(value)) return '—';
+  return Math.abs(value) < 1000 ? formatUsageNumber(value) : compactTokenFormatter.format(value);
+}
+
 function initialRange(): DateRange {
   return getPresetRange('last7', new Date(), DEFAULT_TIME_ZONE);
 }
@@ -44,16 +56,20 @@ function FundsAction({ funds, loading }: { funds: CurrentFunds | undefined; load
     return (
       <div className="min-w-32 text-right">
         <p className="text-xs text-muted-foreground">可用配额</p>
-        <p className="font-semibold tabular-nums">{formatQuotaAmount(funds.amount)}</p>
+        <p className="font-semibold tabular-nums">
+          {funds.amount === null ? '不限' : `$${formatQuotaAmount(funds.amount)}`}
+        </p>
       </div>
     );
   }
   return (
     <div className="flex items-center gap-3">
       <div className="text-right">
-        <p className="text-xs text-muted-foreground">当前余额（USD）</p>
-        <p className="font-semibold tabular-nums">{formatUsageUsd(funds.amount)}</p>
-        <p className="text-xs text-muted-foreground">冻结 {formatUsageUsd(funds.frozen)}</p>
+        <p className="text-xs text-muted-foreground">余额</p>
+        <p className="font-semibold tabular-nums">${formatUsageUsd(funds.amount)}</p>
+        {funds.frozen > 0 ? (
+          <p className="text-xs text-muted-foreground">冻结 ${formatUsageUsd(funds.frozen)}</p>
+        ) : null}
       </div>
       <Button asChild size="sm">
         <Link href="/console/billing">充值</Link>
@@ -62,71 +78,63 @@ function FundsAction({ funds, loading }: { funds: CurrentFunds | undefined; load
   );
 }
 
-function SummaryCard({
-  label,
-  value,
-  detail,
-}: {
-  label: string;
-  value: string;
-  detail?: React.ReactNode;
-}) {
-  return (
-    <Card className="min-w-0 gap-3">
-      <CardHeader className="pb-0">
-        <p className="text-sm text-muted-foreground">{label}</p>
-      </CardHeader>
-      <CardContent>
-        <p className="text-2xl font-semibold tabular-nums">{value}</p>
-        {detail !== undefined ? (
-          <div className="mt-3 space-y-1 text-xs text-muted-foreground">{detail}</div>
-        ) : null}
-      </CardContent>
-    </Card>
-  );
-}
-
 function SummaryCards({ overview }: { overview: UsageOverview }) {
   const summary = overview.summary;
   return (
-    <div className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-4">
-      <SummaryCard label="总请求" value={formatUsageNumber(summary.requests)} />
-      <SummaryCard
-        label="总 Token"
-        value={formatUsageNumber(summary.tokens.total)}
-        detail={
-          <>
-            <p className="flex justify-between gap-3">
-              <span>输入</span>
-              <span className="tabular-nums">{formatUsageNumber(summary.tokens.input)}</span>
-            </p>
-            <p className="flex justify-between gap-3">
-              <span>输出</span>
-              <span className="tabular-nums">{formatUsageNumber(summary.tokens.output)}</span>
-            </p>
-            <p className="flex justify-between gap-3">
-              <span>缓存写入</span>
-              <span className="tabular-nums">{formatUsageNumber(summary.tokens.cacheWrite)}</span>
-            </p>
-            <p className="flex justify-between gap-3">
-              <span>缓存读取</span>
-              <span className="tabular-nums">{formatUsageNumber(summary.tokens.cacheRead)}</span>
-            </p>
-          </>
-        }
+    <div className="grid min-w-0 gap-4 md:auto-rows-fr md:grid-cols-2 xl:grid-cols-4">
+      <MetricCard
+        label="总请求数"
+        value={formatUsageNumber(summary.requests)}
+        icon={MessagesSquare}
       />
-      <SummaryCard label="实际消费（USD）" value={formatUsageUsd(summary.actualCost)} />
-      <SummaryCard label="平均耗时" value={formatUsageSeconds(summary.averageDurationMs)} />
+      <MetricCard label="总 Token" value={formatCompactToken(summary.tokens.total)} icon={Database}>
+        <>
+          <p className="flex justify-between gap-3">
+            <span>输入</span>
+            <span className="tabular-nums" title={formatUsageNumber(summary.tokens.input)}>
+              {formatCompactToken(summary.tokens.input)}
+            </span>
+          </p>
+          <p className="flex justify-between gap-3">
+            <span>输出</span>
+            <span className="tabular-nums" title={formatUsageNumber(summary.tokens.output)}>
+              {formatCompactToken(summary.tokens.output)}
+            </span>
+          </p>
+          <p className="flex justify-between gap-3">
+            <span>缓存写入</span>
+            <span className="tabular-nums" title={formatUsageNumber(summary.tokens.cacheWrite)}>
+              {formatCompactToken(summary.tokens.cacheWrite)}
+            </span>
+          </p>
+          <p className="flex justify-between gap-3">
+            <span>缓存读取</span>
+            <span className="tabular-nums" title={formatUsageNumber(summary.tokens.cacheRead)}>
+              {formatCompactToken(summary.tokens.cacheRead)}
+            </span>
+          </p>
+        </>
+      </MetricCard>
+      <MetricCard
+        label="总消费"
+        value={`$${formatUsageUsd(summary.actualCost)}`}
+        icon={CircleDollarSign}
+      />
+      <MetricCard
+        label="平均耗时"
+        value={formatUsageSeconds(summary.averageDurationMs)}
+        icon={Clock3}
+      />
     </div>
   );
 }
 
 function SummarySkeleton() {
   return (
-    <div className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <div className="grid min-w-0 gap-4 md:auto-rows-fr md:grid-cols-2 xl:grid-cols-4">
       {Array.from({ length: 4 }, (_, index) => (
-        <Card key={index} className="gap-4">
-          <CardContent className="space-y-4 pt-6">
+        <Card key={index} className="h-full gap-4 py-4">
+          <CardContent className="space-y-4 px-5 pt-5">
             <Skeleton className="h-4 w-24" />
             <Skeleton className="h-8 w-32" />
             <Skeleton className="h-3 w-full" />
@@ -146,11 +154,11 @@ function TrendCard({ overview }: { overview: UsageOverview }) {
     { name: '缓存读取', values: overview.trend.map((point) => point.tokens.cacheRead) },
   ];
   return (
-    <Card className="min-w-0 gap-4">
-      <CardHeader>
+    <Card className="min-w-0 gap-3 py-4">
+      <CardHeader className="px-5">
         <CardTitle>Token 使用趋势</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="min-w-0 px-5 [&>div]:h-48">
         {overview.trend.length === 0 ? (
           <p className="py-16 text-center text-sm text-muted-foreground">所选日期没有用量</p>
         ) : (
@@ -196,7 +204,7 @@ export function OverviewView() {
   );
 
   return (
-    <div className="space-y-6 pb-10">
+    <div className="space-y-4 pb-10">
       <PageHeader title="概览" actions={fundsAction} />
 
       {fundsError !== null ? (
@@ -211,15 +219,20 @@ export function OverviewView() {
         />
       ) : null}
 
-      <Card className="min-w-0 gap-4">
-        <CardHeader>
-          <CardTitle>统计范围</CardTitle>
-        </CardHeader>
-        <CardContent className="flex min-w-0 flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <DateRangeControl value={range} onChange={setRange} className="min-w-0 md:min-w-72" />
-          <div className="flex items-center gap-3">
+      <Card className="min-w-0 gap-0">
+        <CardContent className="flex min-w-0 flex-wrap items-center gap-3 md:justify-between">
+          <div className="flex min-w-0 flex-1 items-center gap-3 md:min-w-72">
+            <span className="shrink-0 text-sm text-muted-foreground">时间范围</span>
+            <DateRangeControl
+              value={range}
+              onChange={setRange}
+              presentation="split"
+              className="min-w-0 flex-1"
+            />
+          </div>
+          <div className="flex shrink-0 items-center gap-3">
             <label htmlFor="overview-granularity" className="text-sm text-muted-foreground">
-              趋势粒度
+              粒度
             </label>
             <Select
               value={granularity}
@@ -256,7 +269,7 @@ export function OverviewView() {
       )}
 
       {overview.data !== undefined && !overviewError ? (
-        <div className="grid min-w-0 gap-6 lg:grid-cols-2">
+        <div className="grid min-w-0 gap-4 lg:grid-cols-2">
           <BreakdownCard title="模型分布" rows={overview.data.models} />
           <BreakdownCard title="分组分布" rows={overview.data.groups} />
           <BreakdownCard title="接口分布" rows={overview.data.endpoints} />

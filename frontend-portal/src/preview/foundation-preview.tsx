@@ -147,12 +147,7 @@ export function FoundationPreview() {
       ) : null}
 
       {view === 'console' ? (
-        <ConsoleShell
-          audience={audience}
-          activePath={consolePath}
-          accountLabel={audience === 'personal' ? '个人账户' : '组织账户'}
-          onNavigate={setConsolePath}
-        >
+        <ConsoleShell audience={audience} activePath={consolePath} onNavigate={setConsolePath}>
           <div className="space-y-6">
             <PageHeader
               title={consoleItem?.label ?? '概览'}
