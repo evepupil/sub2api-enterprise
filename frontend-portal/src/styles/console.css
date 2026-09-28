@@ -1,32 +1,23 @@
 /*
  * 控制台质感改版（2026-09-28，规格见 design/console-refresh.md）。
  * 作用域：控制台外壳及其弹层上的 [data-surface='console']；官网、帮助与登录注册不受影响。
- * 颜色、阴影与圆角全部取自 tokens.css 的 --console-* 令牌。
+ * 颜色与阴影取自 tokens.css 的 --console-* 令牌；圆角沿用全站令牌，不单独改。
  * 本文件不放进层叠层，规则会压过组件自带的工具类；需要按页微调的尺寸走变量或 data 属性。
  */
 
-/* 页面底与侧栏、手机顶栏同一底色；侧栏右侧与手机顶栏底部的分界线保留，标出侧栏边界。 */
+/*
+ * 页面底：内容区用控制台底色；侧栏与手机顶栏保留自己的卡片色和分界线。
+ * 圆角沿用全站令牌：按钮、输入框、下拉触发器 8px（与官网按钮一致），卡片 16px。
+ */
 [data-slot='console-shell'] {
-  background: var(--console-canvas);
-}
-
-[data-slot='console-shell']
-  :is([data-slot='console-sidebar'], [data-slot='console-mobile-header']) {
   background: var(--console-canvas);
 }
 
 /* 卡片：表面浮在底色上，靠阴影区分层次，不靠描边分块。 */
 [data-surface='console'] [data-slot='card'] {
   border-color: var(--console-surface-border);
-  border-radius: var(--console-card-radius);
   background: var(--console-surface);
   box-shadow: var(--console-shadow);
-}
-
-/* 控件：按钮、输入框、下拉触发器统一胶囊形；文本域与日历格不在此列。 */
-[data-surface='console']
-  :is([data-slot='button'], [data-slot='input'], [data-slot='select-trigger']) {
-  border-radius: var(--pill-radius);
 }
 
 /* 分段切换：底槽换成控制台底槽色，选中块换成浮起的表面（基础样式见 segmented-control.css）。 */

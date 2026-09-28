@@ -127,11 +127,11 @@ export function ConsoleShell({
         aria-current={active ? 'page' : undefined}
         onClick={handleNavClick(item.href)}
         className={cn(
-          'flex h-touch items-center gap-3 rounded-full px-3 text-sm font-medium transition-colors duration-150 outline-none',
+          // 手机菜单保留 44px 触控高度，桌面侧栏收成 36px
+          'flex h-touch items-center gap-3 rounded-control px-3 text-sm font-medium transition-colors duration-150 outline-none md:h-control',
           'focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-card focus-visible:ring-ring',
-          active
-            ? 'bg-[var(--console-surface)] text-foreground shadow-[var(--console-shadow-raised)]'
-            : 'text-muted-foreground hover:bg-foreground/5 hover:text-foreground',
+          'hover:bg-secondary hover:text-foreground',
+          active ? 'bg-secondary text-primary' : 'text-muted-foreground',
         )}
       >
         <Icon className="size-[18px] shrink-0" aria-hidden="true" />
@@ -190,7 +190,7 @@ export function ConsoleShell({
           <ThemeSwitcher className="ml-auto" />
         </header>
 
-        {/* 桌面侧栏：216px，右侧分界线，固定在视口内 */}
+        {/* 桌面侧栏：216px 卡片色，右侧分界线，固定在视口内 */}
         <aside
           data-slot="console-sidebar"
           className="sticky top-0 hidden h-dvh w-sidebar shrink-0 flex-col border-r border-border bg-card md:flex"
