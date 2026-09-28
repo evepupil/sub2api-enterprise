@@ -16,6 +16,10 @@
 
 import { useMemo, useState } from 'react';
 
+import {
+  SlidingIndicator,
+  useSlidingIndicatorId,
+} from '../../components/effects/sliding-indicator';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import {
@@ -27,6 +31,7 @@ import {
   TableRow,
 } from '../../components/ui/table';
 import { DonutChart } from '../../components/charts/donut-chart';
+import { cn } from '../../lib/utils';
 import type { MemberUsageRow } from './types';
 import { formatUsageNumber, formatUsageUsd } from '../usage/usage-format';
 
@@ -52,6 +57,7 @@ export function MemberDistributionCard({
   onSelectMember,
 }: MemberDistributionCardProps) {
   const [metric, setMetric] = useState<MemberMetric>('tokens');
+  const indicatorId = useSlidingIndicatorId();
   const chartRows = useMemo(
     () =>
       rows.map((row) => ({
@@ -66,24 +72,38 @@ export function MemberDistributionCard({
     <Card className="min-w-0 gap-4">
       <CardHeader className="flex-row flex-wrap items-center justify-between gap-3">
         <CardTitle>全组织成员分布</CardTitle>
-        <div className="flex shrink-0 gap-1" role="group" aria-label="全组织成员分布统计维度">
+        <div
+          className="flex shrink-0 gap-1 isolate"
+          role="group"
+          aria-label="全组织成员分布统计维度"
+        >
           <Button
             type="button"
             size="sm"
-            variant={metric === 'tokens' ? 'default' : 'outline'}
+            variant="outline"
             aria-pressed={metric === 'tokens'}
+            className={cn(
+              'relative',
+              metric === 'tokens' && 'border-transparent text-primary-foreground',
+            )}
             onClick={() => setMetric('tokens')}
           >
-            Token
+            {metric === 'tokens' ? <SlidingIndicator layoutId={indicatorId} pace="quick" /> : null}
+            <span className="sliding-indicator-label">Token</span>
           </Button>
           <Button
             type="button"
             size="sm"
-            variant={metric === 'cost' ? 'default' : 'outline'}
+            variant="outline"
             aria-pressed={metric === 'cost'}
+            className={cn(
+              'relative',
+              metric === 'cost' && 'border-transparent text-primary-foreground',
+            )}
             onClick={() => setMetric('cost')}
           >
-            消费
+            {metric === 'cost' ? <SlidingIndicator layoutId={indicatorId} pace="quick" /> : null}
+            <span className="sliding-indicator-label">消费</span>
           </Button>
         </div>
       </CardHeader>

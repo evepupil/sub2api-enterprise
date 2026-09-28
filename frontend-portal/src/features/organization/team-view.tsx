@@ -20,6 +20,10 @@
 import Link from 'next/link';
 import { useState } from 'react';
 
+import {
+  SlidingIndicator,
+  useSlidingIndicatorId,
+} from '../../components/effects/sliding-indicator';
 import { Alert } from '../../components/ui/alert';
 import { Button } from '../../components/ui/button';
 import {
@@ -32,6 +36,7 @@ import {
 import { EmptyState } from '../../components/ui/empty-state';
 import { PageHeader } from '../../components/layout/page-header';
 import { Skeleton } from '../../components/ui/skeleton';
+import { cn } from '../../lib/utils';
 import { useAuth } from '../auth/auth-provider';
 import { usePortalQuery } from '../console/use-portal-query';
 import { fetchMembers, fetchOrganization } from './api';
@@ -93,6 +98,7 @@ export function TeamView() {
 function TeamWorkspace() {
   const [tab, setTab] = useState<TeamTab>('members');
   const [defaultQuotaOpen, setDefaultQuotaOpen] = useState(false);
+  const indicatorId = useSlidingIndicatorId();
   const refreshOrganization = useOrganizationRefresh();
 
   // 组织摘要：名称、状态与创建时间；失败时给出可重试错误。
@@ -204,16 +210,27 @@ function TeamWorkspace() {
 
       <Card className="min-w-0">
         <CardContent className="space-y-4">
-          <div className="flex flex-wrap items-center gap-2" role="group" aria-label="组织成员页签">
+          <div
+            className="flex flex-wrap items-center gap-2 isolate"
+            role="group"
+            aria-label="组织成员页签"
+          >
             {TABS.map((item) => (
               <Button
                 key={item.value}
                 type="button"
-                variant={tab === item.value ? 'default' : 'outline'}
+                variant="outline"
+                className={cn(
+                  'relative',
+                  tab === item.value && 'border-transparent text-primary-foreground',
+                )}
                 aria-pressed={tab === item.value}
                 onClick={() => setTab(item.value)}
               >
-                {item.label}
+                {tab === item.value ? (
+                  <SlidingIndicator layoutId={indicatorId} pace="quick" />
+                ) : null}
+                <span className="sliding-indicator-label">{item.label}</span>
               </Button>
             ))}
           </div>
