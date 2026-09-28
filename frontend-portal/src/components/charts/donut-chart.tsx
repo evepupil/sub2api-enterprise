@@ -3,6 +3,7 @@
 import type { EChartsOption } from 'echarts';
 import type { ChartTheme } from './chart-theme';
 import { Chart } from './chart';
+import { escapeHtml } from '../../lib/html';
 import { cn } from '../../lib/utils';
 
 export interface DonutChartItem {
@@ -21,6 +22,10 @@ export interface DonutChartProps {
 
 const EMPTY_CHART_ITEM = '__empty_donut__';
 
+/** 分段缝隙用表面色描边模拟：无论切片多细都不会被裁没，比角度缝（padAngle）更贴合长尾小占比明细行。 */
+const SEGMENT_GAP_WIDTH = 2;
+const SEGMENT_CORNER_RADIUS = 6;
+
 export function DonutChart({
   data,
   ariaLabel,
@@ -34,14 +39,15 @@ export function DonutChart({
     tooltip: {
       show: hasPositiveValue,
       trigger: 'item',
-      renderMode: 'richText',
-      backgroundColor: theme.card,
-      borderColor: theme.border,
-      borderWidth: 1,
+      confine: true,
+      backgroundColor: theme.surface,
+      borderWidth: 0,
+      borderRadius: 12,
+      extraCssText: `box-shadow: ${theme.raisedShadow};`,
       textStyle: { color: theme.foreground },
       formatter: (params) => {
         if (Array.isArray(params)) return '';
-        return `${params.name}\n${params.value}`;
+        return `${escapeHtml(String(params.name))}<br/>${escapeHtml(String(params.value))}`;
       },
     },
     series: [
@@ -50,7 +56,11 @@ export function DonutChart({
         radius: ['48%', '72%'],
         center: ['50%', '50%'],
         avoidLabelOverlap: true,
-        itemStyle: { borderColor: theme.card, borderWidth: 2 },
+        itemStyle: {
+          borderColor: theme.surface,
+          borderWidth: SEGMENT_GAP_WIDTH,
+          borderRadius: SEGMENT_CORNER_RADIUS,
+        },
         label: { show: false },
         emphasis: { label: { show: false } },
         data: hasPositiveValue
