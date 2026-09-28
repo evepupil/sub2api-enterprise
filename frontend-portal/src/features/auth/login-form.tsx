@@ -6,8 +6,8 @@ import { useState, type FormEvent } from 'react';
 
 import { Alert } from '../../components/ui/alert';
 import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
+import { AuthInput } from './auth-input';
 import { useAuth } from './auth-provider';
 import { CaptchaChallenge } from './captcha-challenge';
 import { OptionalSignIn } from './optional-sign-in';
@@ -124,7 +124,7 @@ export function LoginForm({ settings, nextPath }: LoginFormProps) {
         {error !== null ? <Alert variant="destructive" title={error} /> : null}
         <div className="space-y-2">
           <Label htmlFor="login-totp">6位验证码</Label>
-          <Input
+          <AuthInput
             id="login-totp"
             value={totpCode}
             onChange={(event) => setTotpCode(event.target.value.replace(/\D/gu, '').slice(0, 6))}
@@ -164,7 +164,7 @@ export function LoginForm({ settings, nextPath }: LoginFormProps) {
         {error !== null ? <Alert variant="destructive" title={error} /> : null}
         <div className="space-y-2">
           <Label htmlFor="login-email">邮箱</Label>
-          <Input
+          <AuthInput
             id="login-email"
             type="email"
             value={email}
@@ -187,7 +187,7 @@ export function LoginForm({ settings, nextPath }: LoginFormProps) {
             ) : null}
           </div>
           <div className="relative">
-            <Input
+            <AuthInput
               id="login-password"
               type={showPassword ? 'text' : 'password'}
               value={password}

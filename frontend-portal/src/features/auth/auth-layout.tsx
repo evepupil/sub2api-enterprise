@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 
+import { Spotlight } from '../../components/effects/spotlight';
 import { Brand } from '../../components/layout/brand';
 import { Card, CardContent, CardHeader } from '../../components/ui/card';
 import { marketingContent } from '../../content/marketing';
@@ -34,6 +35,15 @@ export function AuthLayout({ title, description, children }: AuthLayoutProps) {
       </header>
       <main className="auth-layout-shell">
         <aside className="auth-showcase">
+          {/* 复用首页聚光灯；展示区比首屏小，光束随之缩短、摆幅减小。 */}
+          <Spotlight
+            translateY={-300}
+            width={480}
+            height={1100}
+            smallWidth={200}
+            duration={12}
+            xOffset={48}
+          />
           <Brand href="/" name={marketingContent.brand.name} />
           <p className="auth-showcase-eyebrow">你的 AI 工作空间</p>
           <h2>让每一次模型调用，都有清晰的起点。</h2>

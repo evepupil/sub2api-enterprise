@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { AuthInput } from './auth-input';
 
 export function OAuthRegistrationForms({ state }: { state: OAuthCallbackState }) {
   const {
@@ -51,7 +51,7 @@ export function OAuthRegistrationForms({ state }: { state: OAuthCallbackState })
     <>
       {mode === 'create-account' || mode === 'email-completion' ? (
         <form className="space-y-3" onSubmit={(event) => void submitCreateAccount(event)}>
-          <Input
+          <AuthInput
             type="email"
             aria-label="邮箱"
             autoComplete="email"
@@ -64,7 +64,7 @@ export function OAuthRegistrationForms({ state }: { state: OAuthCallbackState })
           {mode === 'email-completion' ? (
             <p className="text-xs text-muted-foreground">请补充邮箱地址以继续登录。</p>
           ) : null}
-          <Input
+          <AuthInput
             type="password"
             aria-label="密码"
             autoComplete="new-password"
@@ -74,7 +74,7 @@ export function OAuthRegistrationForms({ state }: { state: OAuthCallbackState })
             required
             disabled={busy}
           />
-          <Input
+          <AuthInput
             type="password"
             aria-label="确认密码"
             autoComplete="new-password"
@@ -86,13 +86,14 @@ export function OAuthRegistrationForms({ state }: { state: OAuthCallbackState })
           />
           {registrationNeedsEmailCode ? (
             <div className="flex gap-2">
-              <Input
+              <AuthInput
                 aria-label="邮箱验证码"
                 inputMode="numeric"
                 placeholder="邮箱验证码"
                 value={verifyCode}
                 onChange={(event) => setVerifyCode(event.target.value)}
                 disabled={busy}
+                glowClassName="min-w-0 w-full"
               />
               <Button
                 type="button"
@@ -115,7 +116,7 @@ export function OAuthRegistrationForms({ state }: { state: OAuthCallbackState })
               onProof={(nextProof) => setProof(nextProof ?? undefined)}
             />
           ) : null}
-          <Input
+          <AuthInput
             aria-label="邀请码"
             autoComplete="off"
             placeholder="邀请码（如需要）"
@@ -167,7 +168,7 @@ export function OAuthRegistrationForms({ state }: { state: OAuthCallbackState })
 
       {mode === 'bind-login' ? (
         <form className="space-y-3" onSubmit={(event) => void submitBindLogin(event)}>
-          <Input
+          <AuthInput
             type="email"
             aria-label="已有账号邮箱"
             autoComplete="email"
@@ -177,7 +178,7 @@ export function OAuthRegistrationForms({ state }: { state: OAuthCallbackState })
             required
             disabled={busy}
           />
-          <Input
+          <AuthInput
             type="password"
             aria-label="已有账号密码"
             autoComplete="current-password"

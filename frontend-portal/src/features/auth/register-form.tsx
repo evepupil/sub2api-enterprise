@@ -11,8 +11,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../../components/ui/dialog';
-import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
+import { AuthInput } from './auth-input';
 import { useAuth } from './auth-provider';
 import { CaptchaChallenge } from './captcha-challenge';
 import { safeReturnPath } from './redirect';
@@ -249,7 +249,7 @@ export function RegisterForm({
         {error !== null ? <Alert variant="destructive" title={error} /> : null}
         <div className="space-y-2">
           <Label htmlFor="register-email">邮箱</Label>
-          <Input
+          <AuthInput
             id="register-email"
             type="email"
             value={email}
@@ -266,7 +266,7 @@ export function RegisterForm({
         </div>
         <div className="space-y-2">
           <Label htmlFor="register-password">密码</Label>
-          <Input
+          <AuthInput
             id="register-password"
             type="password"
             value={password}
@@ -278,7 +278,7 @@ export function RegisterForm({
         </div>
         <div className="space-y-2">
           <Label htmlFor="register-confirm-password">确认密码</Label>
-          <Input
+          <AuthInput
             id="register-confirm-password"
             type="password"
             value={confirmPassword}
@@ -293,7 +293,7 @@ export function RegisterForm({
           <>
             <div className="space-y-2">
               <Label htmlFor="register-organization-name">组织名称</Label>
-              <Input
+              <AuthInput
                 id="register-organization-name"
                 value={organizationName}
                 onChange={(event) => setOrganizationName(event.target.value)}
@@ -303,7 +303,7 @@ export function RegisterForm({
             </div>
             <div className="space-y-2">
               <Label htmlFor="register-member-name">成员名称</Label>
-              <Input
+              <AuthInput
                 id="register-member-name"
                 value={memberName}
                 onChange={(event) => setMemberName(event.target.value)}
@@ -317,7 +317,7 @@ export function RegisterForm({
           <>
             <div className="space-y-2">
               <Label htmlFor="register-invitation-code">邀请码</Label>
-              <Input
+              <AuthInput
                 id="register-invitation-code"
                 value={invitationCode}
                 onChange={(event) => setInvitationCode(event.target.value)}
@@ -327,7 +327,7 @@ export function RegisterForm({
             </div>
             <div className="space-y-2">
               <Label htmlFor="register-member-name">成员名称</Label>
-              <Input
+              <AuthInput
                 id="register-member-name"
                 value={memberName}
                 onChange={(event) => setMemberName(event.target.value)}
@@ -340,7 +340,7 @@ export function RegisterForm({
         {mode === 'personal' && settings.invitationCodeEnabled ? (
           <div className="space-y-2">
             <Label htmlFor="register-personal-invitation-code">邀请码</Label>
-            <Input
+            <AuthInput
               id="register-personal-invitation-code"
               value={invitationCode}
               onChange={(event) => setInvitationCode(event.target.value)}
@@ -354,7 +354,7 @@ export function RegisterForm({
           <div className="space-y-2">
             <Label htmlFor="register-verify-code">邮箱验证码</Label>
             <div className="flex items-start gap-2">
-              <Input
+              <AuthInput
                 id="register-verify-code"
                 value={verifyCode}
                 onChange={(event) =>
@@ -362,7 +362,7 @@ export function RegisterForm({
                 }
                 inputMode="numeric"
                 autoComplete="one-time-code"
-                className="min-w-0 flex-1"
+                glowClassName="min-w-0 flex-1"
                 required
               />
               <Button

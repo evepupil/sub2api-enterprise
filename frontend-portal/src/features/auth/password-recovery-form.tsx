@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 
 import { Alert } from '../../components/ui/alert';
 import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
+import { AuthInput } from './auth-input';
 import { useAuth } from './auth-provider';
 import { CaptchaChallenge } from './captcha-challenge';
 import type { AuthSettings, CaptchaProof } from './types';
@@ -178,7 +178,7 @@ export function PasswordRecoveryForm({
       {error !== null ? <Alert variant="destructive" title={error} /> : null}
       <div className="space-y-2">
         <Label htmlFor="recovery-email">邮箱</Label>
-        <Input
+        <AuthInput
           id="recovery-email"
           type="email"
           value={email}
@@ -196,7 +196,7 @@ export function PasswordRecoveryForm({
         <>
           <div className="space-y-2">
             <Label htmlFor="reset-new-password">新密码</Label>
-            <Input
+            <AuthInput
               id="reset-new-password"
               type="password"
               value={newPassword}
@@ -208,7 +208,7 @@ export function PasswordRecoveryForm({
           </div>
           <div className="space-y-2">
             <Label htmlFor="reset-confirm-password">确认新密码</Label>
-            <Input
+            <AuthInput
               id="reset-confirm-password"
               type="password"
               value={confirmPassword}

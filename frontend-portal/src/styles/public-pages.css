@@ -683,11 +683,19 @@
 }
 
 .auth-showcase {
+  position: relative;
+  isolation: isolate;
   display: grid;
   min-width: 0;
   gap: 20px;
   align-content: center;
   max-width: 620px;
+}
+
+/* 复用首页聚光灯：向外延伸到版心留白，垫在展示文字下方。 */
+.auth-showcase .spotlight {
+  inset: -64px -48px;
+  z-index: -1;
 }
 
 .auth-showcase-eyebrow {
