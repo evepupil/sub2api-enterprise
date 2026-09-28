@@ -1,4 +1,5 @@
 import { forwardPortalRequest } from '@/lib/api/portal-proxy';
+import { portalRequestOrigin } from '../../../../../config/development-origins.mjs';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,7 +11,11 @@ async function delegate(request: Request, context: PortalRouteContext): Promise<
   const { path } = await context.params;
   return forwardPortalRequest(request, path, {
     baseUrl: process.env.SUB2API_INTERNAL_URL,
-    publicOrigin: process.env.PORTAL_PUBLIC_URL,
+    publicOrigin: portalRequestOrigin(request, {
+      NODE_ENV: process.env.NODE_ENV,
+      PORTAL_PUBLIC_URL: process.env.PORTAL_PUBLIC_URL,
+      PORTAL_DEV_ORIGINS: process.env.PORTAL_DEV_ORIGINS,
+    }),
   });
 }
 

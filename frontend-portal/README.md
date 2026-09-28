@@ -22,9 +22,29 @@ Invoke-WebRequest http://127.0.0.1:8080/health | Select-Object StatusCode
 pnpm dev
 ```
 
-默认开发命令使用与已验证构建一致的 Webpack，并绑定 `127.0.0.1`。浏览器访问 `http://127.0.0.1:3000`，与 `PORTAL_PUBLIC_URL` 保持一致。开发资源仅额外允许 `127.0.0.1` 与 `localhost` 两个本机来源。
+默认开发命令使用与已验证构建一致的 Webpack，并绑定 `127.0.0.1`。本机访问 `http://127.0.0.1:3000`；开发资源与接口共用下面的访问地址配置，本机两个入口同时保留。
 
 前端开发命令不会代替独立后端服务。登录接口返回 502 时，应先检查后端进程、数据库和内部地址；不要通过清空账号资料或关闭身份校验处理连接问题。前端开发服务与后端都应在各自终端或后台运行，关闭对应进程会中断联调。
+
+### 通过 Cloudflare Tunnel 访问 dev
+
+同机运行的 cloudflared 将服务地址指向 `http://127.0.0.1:3000`，HTTP Host Header 保持默认，让请求携带浏览器访问的域名。
+
+在 `.env.local` 填写实际隧道地址后重启 `pnpm dev`：
+
+```dotenv
+PORTAL_PUBLIC_URL=https://dev.example.com
+```
+
+这一个地址会同时用于开发资源、热更新连接和接口来源检查。本机 `http://127.0.0.1:3000`、`http://localhost:3000` 仍可使用。第三方登录供应商的回调应配置为这个实际对外地址。
+
+需要增加另一个开发入口时，使用完整 origin（协议、域名及非默认端口），多个用逗号分隔：
+
+```dotenv
+PORTAL_DEV_ORIGINS=https://another-dev.example.com,https://your-tunnel.trycloudflare.com
+```
+
+额外入口只对开发服务生效；生产接口继续按固定对外地址校验。后端内部地址与隧道无关，继续填写实际可连接的 Sub2API 地址。
 
 ## 组件预览
 
