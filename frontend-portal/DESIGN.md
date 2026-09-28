@@ -62,7 +62,7 @@ M0 建立 Next.js 独立工程、统一主题、基础控件、官网外壳与�
 ```text
 src/
   app/                 Next 路由、元数据和入口
-  styles/              tokens.css、globals.css
+  styles/              tokens.css、globals.css；共享组件样式（effects.css、segmented-control.css）；控制台专属 console.css；官网页面样式
   components/ui/       共享基础控件
   components/layout/   Brand、PublicShell、ConsoleShell、PageHeader
   lib/utils.ts         cn，服务端也可使用
@@ -86,13 +86,15 @@ tests/                 导航规则测试
 | `ui/label.tsx` | `Label` 接收原生 label 属性，可配 htmlFor |
 | `ui/badge.tsx` | `Badge` 接收 span 属性和 `variant?: neutral/success/warning/destructive`，不能只靠颜色表达含义 |
 | `ui/card.tsx` | `Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter`，原生 div/heading 属性；Description 按需要选用 |
-| `ui/table.tsx` | `Table, TableHeader, TableBody, TableRow, TableHead, TableCell, TableCaption`，语义 table 元素与横向滚动容器，外层 min-w-0 |
+| `ui/table.tsx` | `Table, TableHeader, TableBody, TableRow, TableHead, TableCell, TableCaption`，语义 table 元素与横向滚动容器，外层 min-w-0；组件只带通用外观，控制台外观在 `styles/console.css` 的控制台区域内套上；选中行写 `data-state="selected"`，紧凑表格写 `data-density="compact"` |
 | `ui/skeleton.tsx` | `Skeleton` 接收 div 属性，aria-hidden；减少动态偏好停闪动 |
 | `ui/empty-state.tsx` | `EmptyState({title,description?,action?})`，不默认填说明；action 是可用的 ReactNode |
 | `ui/alert.tsx` | `Alert({title,description?,action?,variant?: default/destructive})`，错误反馈 role=alert |
 | `ui/select.tsx` | `Select, SelectTrigger, SelectValue, SelectContent, SelectItem`，shadcn/Radix 组合接口，content 使用 Portal |
 | `ui/dialog.tsx` | `Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose`，Radix 组合接口；portal、遮罩、Esc、焦点归还，标题必须可关联 |
 | `ui/popover.tsx` | `Popover, PopoverTrigger, PopoverContent`，Radix组合接口 |
+| `ui/surface.tsx` | `SurfaceProvider({area:'console'})`、`useSurfaceArea()`；控制台外壳提供区域，弹窗、下拉、气泡层内容据此写入 `data-surface`，让控制台样式覆盖到 Portal 内（2026-09-28） |
+| `ui/segmented-control.tsx` | `SegmentedControl({options,value,onValueChange,aria-label,pace?,size?,disabled?})`；底槽 + 滑动的选中块，role=group + aria-pressed，用于两到四个互斥选项；基础样式在 `styles/segmented-control.css`，控制台内换成浮起配色（2026-09-28） |
 | `ui/calendar.tsx` | `Calendar` 为 DayPicker 9 的包装，接受其原属性；默认简中、周一开始、range 模式由调用者指定。仅日期，无时分或预选业务规则 |
 | `lib/navigation.ts` | `type Audience='personal'|'owner'|'member'`；`type NavigationItem={href:string;label:string;icon:'overview'|'key'|'usage'|'wallet'|'team'|'settings'|'help'}`；`getConsoleNavigation(audience):NavigationItem[]`；`isNavigationActive(pathname,href):boolean` |
 | `layout/brand.tsx` | `Brand({href?:string})`，临时菱形SVG + “模型服务” |

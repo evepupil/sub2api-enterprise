@@ -16,7 +16,7 @@
 
 ## 总览
 
-- 总览区块之间改为 16px，删除“统计范围”这一独立卡标题。日期工具栏只有一行：时间范围、预选下拉、日历日期按钮；右侧粒度选择。手机自然换行。
+- 总览区块之间改为 16px，删除“统计范围”这一独立卡标题。日期工具栏只有一行：时间范围、预选下拉、日历日期按钮；右侧粒度选择。手机自然换行。2026-09-28 起按[控制台质感改版](console-refresh.md)改为页头下方右对齐的一排胶囊控件，不设筛选卡片与可见字段名。
 - 日期控件增加 `presentation?: 'combined' | 'split'`，默认保留合并模式给已有调用；总览使用 split。预选和日历操作复用现有状态与日期规则，仍只有日历日期，不能增加时分和近24小时。预选含自定义入口，自定义仍在弹层统一应用。
 - 四张卡片依次为总请求数、总 Token、总消费、平均耗时。每张标题左侧有 16px 单色 Lucide 图标，依次用 MessagesSquare、Database、CircleDollarSign、Clock3。大屏四列、窄屏两列、手机一列，数据来自原接口。
 - 统一 `components/console/metric-card.tsx`：`MetricCard({label:string,value:string,icon:LucideIcon,children?:ReactNode})`。标题 14px、数值 24px，使用已有字号和间距；四卡拉齐高度。组织用量的四卡也复用，避免另一套样式再次漂移。
