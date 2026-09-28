@@ -17,6 +17,10 @@
 
 import { useState, type FormEvent } from 'react';
 
+import {
+  SlidingIndicator,
+  useSlidingIndicatorId,
+} from '../../components/effects/sliding-indicator';
 import { Alert } from '../../components/ui/alert';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
@@ -30,6 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../components/ui/select';
+import { cn } from '../../lib/utils';
 import type { BillingConfig, PaymentMethod } from './types';
 import {
   calculatePaymentTotal,
@@ -121,6 +126,7 @@ export function RechargeForm({
     return preset === undefined ? '' : String(preset);
   });
   const [formError, setFormError] = useState<string | null>(null);
+  const presetIndicatorId = useSlidingIndicatorId();
 
   const candidate = usable.find((item) => item.id === methodId) ?? usable[0] ?? null;
   if (candidate === null) {
@@ -190,22 +196,31 @@ export function RechargeForm({
           <fieldset className="flex flex-col gap-3" disabled={submitting || config.balanceDisabled}>
             <legend className="text-sm font-medium text-foreground">充值金额</legend>
             {presets.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 isolate">
                 {presets.map((preset) => {
                   const selected = amountText.trim() === String(preset);
                   return (
                     <Button
                       key={preset}
                       type="button"
-                      variant={selected ? 'default' : 'outline'}
+                      variant="outline"
                       size="sm"
+                      className={cn(
+                        'relative',
+                        selected && 'border-transparent text-primary-foreground',
+                      )}
                       aria-pressed={selected}
                       onClick={() => {
                         setAmountText(String(preset));
                         setFormError(null);
                       }}
                     >
-                      {formatBillingMoney(preset, method.currency)}
+                      {selected ? (
+                        <SlidingIndicator layoutId={presetIndicatorId} pace="quick" />
+                      ) : null}
+                      <span className="sliding-indicator-label">
+                        {formatBillingMoney(preset, method.currency)}
+                      </span>
                     </Button>
                   );
                 })}

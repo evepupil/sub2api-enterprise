@@ -2,6 +2,10 @@
 
 import { Check, Monitor, Moon, Sun } from 'lucide-react';
 import { useState } from 'react';
+import {
+  SlidingIndicator,
+  useSlidingIndicatorId,
+} from '../../components/effects/sliding-indicator';
 import { Button } from '../../components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '../../components/ui/popover';
 import { cn } from '../../lib/utils';
@@ -22,6 +26,7 @@ export function ThemeSwitcher({
 }) {
   const { preference, setPreference } = useTheme();
   const [open, setOpen] = useState(false);
+  const themeIndicatorId = useSlidingIndicatorId();
   const current = OPTIONS.find((option) => option.value === preference) ?? OPTIONS[1];
   const Icon = current.icon;
 
@@ -45,21 +50,34 @@ export function ThemeSwitcher({
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-44 p-1" aria-label="选择主题">
-        <div role="group" aria-label="主题外观" className="flex flex-col gap-1">
+        <div role="group" aria-label="主题外观" className="flex flex-col gap-1 isolate">
           {OPTIONS.map(({ value, label, icon: OptionIcon }) => (
             <Button
               key={value}
               variant="ghost"
-              className={cn('w-full justify-start gap-3', preference === value && 'bg-muted')}
+              className={cn(
+                'relative w-full justify-start gap-3',
+                preference === value && 'hover:bg-transparent',
+              )}
               aria-pressed={preference === value}
               onClick={() => {
                 setPreference(value);
                 setOpen(false);
               }}
             >
-              <OptionIcon className="size-4 shrink-0" aria-hidden="true" />
-              <span className="flex-1 text-left">{label}</span>
-              {preference === value ? <Check className="size-4" aria-hidden="true" /> : null}
+              {/* 菜单沿用原来的浅灰选中底色，只增加滑动，不改成醒目的主色。 */}
+              {preference === value ? (
+                <SlidingIndicator
+                  layoutId={themeIndicatorId}
+                  pace="quick"
+                  className="[--sliding-indicator-background:var(--muted)]"
+                />
+              ) : null}
+              <span className="sliding-indicator-label flex flex-1 items-center gap-3">
+                <OptionIcon className="size-4 shrink-0" aria-hidden="true" />
+                <span className="flex-1 text-left">{label}</span>
+                {preference === value ? <Check className="size-4" aria-hidden="true" /> : null}
+              </span>
             </Button>
           ))}
         </div>

@@ -18,6 +18,10 @@
 
 import { useState, type FormEvent } from 'react';
 
+import {
+  SlidingIndicator,
+  useSlidingIndicatorId,
+} from '../../components/effects/sliding-indicator';
 import { Alert } from '../../components/ui/alert';
 import { Button } from '../../components/ui/button';
 import {
@@ -30,6 +34,7 @@ import {
 } from '../../components/ui/dialog';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
+import { cn } from '../../lib/utils';
 import type { ApiRequester } from '../auth/types';
 import { saveMemberQuota } from './api';
 import { organizationErrorText } from './errors';
@@ -49,6 +54,7 @@ export function QuotaEditor({ member, request, onClose, onSaved }: QuotaEditorPr
   const [draft, setDraft] = useState<QuotaDraft>(() => createQuotaDraft(member));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const quotaModeIndicatorId = useSlidingIndicatorId();
 
   function patchDraft(patch: Partial<QuotaDraft>) {
     setDraft((previous) => ({ ...previous, ...patch }));
@@ -108,10 +114,14 @@ export function QuotaEditor({ member, request, onClose, onSaved }: QuotaEditorPr
           <div className="space-y-5 py-5">
             <div className="space-y-2">
               <Label htmlFor="quota-mode">额度模式</Label>
-              <div className="flex flex-wrap gap-2" role="group" aria-label="额度模式">
+              <div className="flex flex-wrap gap-2 isolate" role="group" aria-label="额度模式">
                 <Button
                   type="button"
-                  variant={draft.mode === 'static' ? 'default' : 'outline'}
+                  variant="outline"
+                  className={cn(
+                    'relative',
+                    draft.mode === 'static' && 'border-transparent text-primary-foreground',
+                  )}
                   aria-pressed={draft.mode === 'static'}
                   disabled={saving}
                   onClick={() =>
@@ -122,11 +132,18 @@ export function QuotaEditor({ member, request, onClose, onSaved }: QuotaEditorPr
                     )
                   }
                 >
-                  固定总上限
+                  {draft.mode === 'static' ? (
+                    <SlidingIndicator layoutId={quotaModeIndicatorId} pace="quick" />
+                  ) : null}
+                  <span className="sliding-indicator-label">固定总上限</span>
                 </Button>
                 <Button
                   type="button"
-                  variant={draft.mode === 'periodic' ? 'default' : 'outline'}
+                  variant="outline"
+                  className={cn(
+                    'relative',
+                    draft.mode === 'periodic' && 'border-transparent text-primary-foreground',
+                  )}
                   aria-pressed={draft.mode === 'periodic'}
                   disabled={saving}
                   onClick={() =>
@@ -137,7 +154,10 @@ export function QuotaEditor({ member, request, onClose, onSaved }: QuotaEditorPr
                     )
                   }
                 >
-                  周期额度
+                  {draft.mode === 'periodic' ? (
+                    <SlidingIndicator layoutId={quotaModeIndicatorId} pace="quick" />
+                  ) : null}
+                  <span className="sliding-indicator-label">周期额度</span>
                 </Button>
               </div>
             </div>

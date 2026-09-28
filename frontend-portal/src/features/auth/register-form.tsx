@@ -2,6 +2,10 @@
 
 import { useEffect, useState, type FormEvent } from 'react';
 
+import {
+  SlidingIndicator,
+  useSlidingIndicatorId,
+} from '../../components/effects/sliding-indicator';
 import { Alert } from '../../components/ui/alert';
 import { Button } from '../../components/ui/button';
 import {
@@ -12,6 +16,7 @@ import {
   DialogTitle,
 } from '../../components/ui/dialog';
 import { Label } from '../../components/ui/label';
+import { cn } from '../../lib/utils';
 import { AuthInput } from './auth-input';
 import { useAuth } from './auth-provider';
 import { CaptchaChallenge } from './captcha-challenge';
@@ -55,6 +60,7 @@ export function RegisterForm({
   const router = useRouter();
   const { register, request } = useAuth();
   const [mode, setMode] = useState<RegistrationMode>(initialInvitationCode ? 'join' : 'personal');
+  const modeIndicatorId = useSlidingIndicatorId();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -225,13 +231,16 @@ export function RegisterForm({
     <div className="space-y-5">
       <fieldset className="space-y-2">
         <legend className="text-sm font-medium">注册方式</legend>
-        <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="注册方式">
+        <div className="grid grid-cols-3 gap-2 isolate" role="radiogroup" aria-label="注册方式">
           {modeOptions.map((option) => (
             <Button
               key={option.value}
               type="button"
-              variant={mode === option.value ? 'default' : 'outline'}
-              className="min-w-0 px-2"
+              variant="outline"
+              className={cn(
+                'relative min-w-0 px-2',
+                mode === option.value && 'border-transparent text-primary-foreground',
+              )}
               aria-pressed={mode === option.value}
               onClick={() => {
                 setMode(option.value);
@@ -239,7 +248,8 @@ export function RegisterForm({
                 setError(null);
               }}
             >
-              {option.label}
+              {mode === option.value ? <SlidingIndicator layoutId={modeIndicatorId} /> : null}
+              <span className="sliding-indicator-label">{option.label}</span>
             </Button>
           ))}
         </div>

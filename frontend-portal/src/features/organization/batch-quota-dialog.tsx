@@ -18,6 +18,10 @@
 
 import { useState, type FormEvent } from 'react';
 
+import {
+  SlidingIndicator,
+  useSlidingIndicatorId,
+} from '../../components/effects/sliding-indicator';
 import { Alert } from '../../components/ui/alert';
 import { Button } from '../../components/ui/button';
 import {
@@ -30,6 +34,7 @@ import {
 } from '../../components/ui/dialog';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
+import { cn } from '../../lib/utils';
 import type { ApiRequester } from '../auth/types';
 import { saveBatchQuota, splitMemberLimits } from './api';
 import { organizationErrorText } from './errors';
@@ -59,6 +64,7 @@ export interface BatchQuotaDialogProps {
 
 export function BatchQuotaDialog({ members, request, onClose, onSaved }: BatchQuotaDialogProps) {
   const [mode, setMode] = useState<'split' | 'periodic'>('split');
+  const modeIndicatorId = useSlidingIndicatorId();
   const [splitTotal, setSplitTotal] = useState('');
   const [draft, setDraft] = useState<QuotaDraft>(BATCH_DRAFT);
   const [saving, setSaving] = useState(false);
@@ -128,10 +134,14 @@ export function BatchQuotaDialog({ members, request, onClose, onSaved }: BatchQu
           <div className="space-y-5 py-5">
             <div className="space-y-2">
               <Label htmlFor="batch-mode">操作方式</Label>
-              <div className="flex flex-wrap gap-2" role="group" aria-label="批量操作方式">
+              <div className="flex flex-wrap gap-2 isolate" role="group" aria-label="批量操作方式">
                 <Button
                   type="button"
-                  variant={mode === 'split' ? 'default' : 'outline'}
+                  variant="outline"
+                  className={cn(
+                    'relative',
+                    mode === 'split' && 'border-transparent text-primary-foreground',
+                  )}
                   aria-pressed={mode === 'split'}
                   disabled={saving}
                   onClick={() => {
@@ -139,11 +149,18 @@ export function BatchQuotaDialog({ members, request, onClose, onSaved }: BatchQu
                     setError(null);
                   }}
                 >
-                  均分总上限
+                  {mode === 'split' ? (
+                    <SlidingIndicator layoutId={modeIndicatorId} pace="quick" />
+                  ) : null}
+                  <span className="sliding-indicator-label">均分总上限</span>
                 </Button>
                 <Button
                   type="button"
-                  variant={mode === 'periodic' ? 'default' : 'outline'}
+                  variant="outline"
+                  className={cn(
+                    'relative',
+                    mode === 'periodic' && 'border-transparent text-primary-foreground',
+                  )}
                   aria-pressed={mode === 'periodic'}
                   disabled={saving}
                   onClick={() => {
@@ -151,7 +168,10 @@ export function BatchQuotaDialog({ members, request, onClose, onSaved }: BatchQu
                     setError(null);
                   }}
                 >
-                  批量设置周期额度
+                  {mode === 'periodic' ? (
+                    <SlidingIndicator layoutId={modeIndicatorId} pace="quick" />
+                  ) : null}
+                  <span className="sliding-indicator-label">批量设置周期额度</span>
                 </Button>
               </div>
             </div>
