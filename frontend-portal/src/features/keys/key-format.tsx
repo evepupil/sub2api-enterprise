@@ -10,14 +10,8 @@
  */
 
 import type { BadgeVariant } from '../../components/ui/badge';
+import { formatUsd as formatUsdAmount } from '../../lib/money';
 import type { KeyRecord } from './types';
-
-const usdFormatter = new Intl.NumberFormat('zh-CN', {
-  style: 'currency',
-  currency: 'USD',
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-});
 
 const dateTimeFormatter = new Intl.DateTimeFormat('zh-CN', {
   dateStyle: 'medium',
@@ -28,8 +22,9 @@ const dateFormatter = new Intl.DateTimeFormat('zh-CN', { dateStyle: 'medium' });
 
 const numberFormatter = new Intl.NumberFormat('zh-CN', { maximumFractionDigits: 0 });
 
+/** 金额：统一走 lib/money 的两位小数格式。 */
 export function formatUsd(value: number): string {
-  return Number.isFinite(value) ? usdFormatter.format(value) : '—';
+  return formatUsdAmount(value);
 }
 
 export function formatCount(value: number): string {

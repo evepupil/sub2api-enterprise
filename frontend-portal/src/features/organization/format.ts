@@ -1,11 +1,8 @@
-const money = new Intl.NumberFormat('zh-CN', {
-  style: 'currency',
-  currency: 'USD',
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 8,
-});
+import { formatUsd } from '../../lib/money';
+
+/** 组织金额：统一走 lib/money 的两位小数格式。 */
 export function formatOrganizationMoney(value: number | null | undefined): string {
-  return typeof value === 'number' && Number.isFinite(value) ? money.format(value) : '—';
+  return formatUsd(value);
 }
 export function formatOrganizationDate(value: string | null | undefined): string {
   if (!value) return '—';

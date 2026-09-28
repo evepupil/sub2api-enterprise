@@ -14,15 +14,9 @@
 
 import { Badge } from '../../components/ui/badge';
 import type { BadgeVariant } from '../../components/ui/badge';
+import { formatUsd } from '../../lib/money';
 import type { OrderStatus, PaymentMethod, PaymentOrder } from './types';
 import { orderStatusLabel } from './validation';
-
-const usdFormatter = new Intl.NumberFormat('zh-CN', {
-  style: 'currency',
-  currency: 'USD',
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-});
 
 const dateTimeFormatter = new Intl.DateTimeFormat('zh-CN', {
   dateStyle: 'medium',
@@ -31,9 +25,9 @@ const dateTimeFormatter = new Intl.DateTimeFormat('zh-CN', {
 
 const rateFormatter = new Intl.NumberFormat('zh-CN', { maximumFractionDigits: 2 });
 
-/** 到账金额（USD）：后端已换算，缺失或非法显示占位而不是 0。 */
+/** 到账金额（USD）：后端已换算，统一走 lib/money 的两位小数格式；缺失或非法显示占位而不是 0。 */
 export function formatOrderUsd(value: number): string {
-  return Number.isFinite(value) ? usdFormatter.format(value) : '—';
+  return formatUsd(value);
 }
 
 /** 后端 ISO 时间：按本地时区展示；缺失或无法解析显示占位。 */
