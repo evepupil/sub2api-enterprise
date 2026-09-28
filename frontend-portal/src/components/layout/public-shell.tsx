@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } 
 
 import type { PublicAction } from '../../features/public/types';
 import { Brand } from './brand';
+import { ThemeSwitcher } from '../../features/theme/theme-switcher';
 
 /**
  * 官网固定导航：桌面与手机共用这一组链接与匹配规则。
@@ -180,6 +181,8 @@ export function PublicShell({
             </div>
           </nav>
 
+          <ThemeSwitcher className="ml-auto lg:ml-0" />
+
           {/* 桌面右侧操作：actions 为空数组时不渲染 */}
           {actions.length > 0 ? (
             <div className="hidden shrink-0 items-center gap-2 lg:flex">
@@ -190,12 +193,7 @@ export function PublicShell({
           {/* 手机菜单按钮：44px 触控，打开 Radix Dialog 侧向菜单 */}
           <Dialog open={mobileOpen} onOpenChange={setMobileOpen}>
             <DialogTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="打开导航菜单"
-                className="ml-auto lg:hidden"
-              >
+              <Button variant="ghost" size="icon" aria-label="打开导航菜单" className="lg:hidden">
                 <Menu className="size-5" aria-hidden="true" />
               </Button>
             </DialogTrigger>

@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import * as React from 'react';
+import { ThemeSwitcher } from '../../features/theme/theme-switcher';
 
 import { getConsoleNavigation, isNavigationActive } from '../../lib/navigation';
 import type { Audience, NavigationItem } from '../../lib/navigation';
@@ -73,7 +74,7 @@ function AccountIdentity({ audience, className }: { audience: Audience; classNam
 }
 
 /**
- * 控制台外壳：桌面 216px 白底右侧边框侧栏固定在视口内，业务导航滚动、
+ * 控制台外壳：桌面 216px 侧栏固定在视口内，业务导航滚动、
  * 帮助与账号设置在底部固定区；手机收进 44px 按钮打开的 Dialog。
  * 导航项与可见性完全来自 lib/navigation；最长匹配项作为唯一当前项，
  * 父子同时命中时在 resolveCurrent 中裁决。
@@ -199,7 +200,8 @@ export function ConsoleShell({
           </DialogContent>
         </Dialog>
         <Brand className="min-w-0" />
-        <AccountIdentity audience={audience} className="ml-auto text-xs" />
+        <AccountIdentity audience={audience} className="ml-auto hidden text-xs sm:flex" />
+        <ThemeSwitcher className="ml-auto sm:ml-0" />
       </header>
 
       {/* 桌面侧栏：216px 深色卡片右边框，固定在视口内 */}
@@ -215,6 +217,9 @@ export function ConsoleShell({
           {renderNavGroup(mainItems, '控制台导航')}
         </div>
         <div className="shrink-0 border-t border-border p-4">
+          <div className="mb-2">
+            <ThemeSwitcher compact={false} />
+          </div>
           {accountActions !== undefined ? (
             <div className="mb-2 flex flex-col gap-2">{accountActions}</div>
           ) : null}

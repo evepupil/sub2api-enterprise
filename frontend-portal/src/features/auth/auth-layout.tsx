@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Brand } from '../../components/layout/brand';
 import { Card, CardContent, CardHeader } from '../../components/ui/card';
 import { marketingContent } from '../../content/marketing';
+import { ThemeSwitcher } from '../theme/theme-switcher';
 
 export interface AuthLayoutProps {
   title: string;
@@ -20,12 +21,15 @@ export function AuthLayout({ title, description, children }: AuthLayoutProps) {
       <header className="auth-header">
         <div className="auth-header-inner">
           <Brand href="/" name={marketingContent.brand.name} className="auth-mobile-brand" />
-          <Link
-            href="/"
-            className="auth-home-link inline-flex h-touch items-center rounded-control px-3 text-sm text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 md:h-control"
-          >
-            返回首页
-          </Link>
+          <div className="ml-auto flex items-center gap-2">
+            <ThemeSwitcher />
+            <Link
+              href="/"
+              className="auth-home-link inline-flex h-touch items-center rounded-control px-3 text-sm text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 md:h-control"
+            >
+              返回首页
+            </Link>
+          </div>
         </div>
       </header>
       <main className="auth-layout-shell">

@@ -6,6 +6,7 @@ import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
 import type { ChartTheme } from './chart-theme';
 import { readChartTheme } from './chart-theme';
+import { themeStore } from '../../features/theme/theme-store';
 
 type EChartsCore = typeof import('echarts/core');
 type EChartsInstance = ReturnType<EChartsCore['init']>;
@@ -75,11 +76,21 @@ export function Chart({ option, ariaLabel, className }: ChartProps) {
     const element = elementRef.current;
     if (element === null) return undefined;
 
-    const theme = readChartTheme(element);
-    themeRef.current = theme;
     let disposed = false;
     let resizeObserver: ResizeObserver | null = null;
     let removeWindowResize: (() => void) | null = null;
+
+    const updateTheme = () => {
+      const theme = readChartTheme(element);
+      themeRef.current = theme;
+      // Merge palette changes so hidden legend series and other chart interactions survive.
+      chartRef.current?.setOption(
+        { ...resolveOption(optionRef.current, theme), animation: false },
+        { notMerge: false },
+      );
+    };
+    const stopTheme = themeStore.subscribe(updateTheme);
+    updateTheme();
 
     void loadEcharts()
       .then((core) => {
@@ -95,6 +106,7 @@ export function Chart({ option, ariaLabel, className }: ChartProps) {
           removeWindowResize = () => window.removeEventListener('resize', onResize);
         }
         const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const theme = themeRef.current ?? readChartTheme(element);
         chart.setOption(
           { ...resolveOption(optionRef.current, theme), animation: !reducedMotion },
           { notMerge: true },
@@ -108,6 +120,7 @@ export function Chart({ option, ariaLabel, className }: ChartProps) {
 
     return () => {
       disposed = true;
+      stopTheme();
       resizeObserver?.disconnect();
       removeWindowResize?.();
       chartRef.current?.dispose();

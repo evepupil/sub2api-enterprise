@@ -124,6 +124,11 @@
 }
 
 @layer base {
+  img[src$='/providers/openai.svg'],
+  img[src$='/providers/anthropic.svg'] {
+    filter: var(--monochrome-logo-filter);
+  }
+
   * {
     border-color: var(--border);
   }

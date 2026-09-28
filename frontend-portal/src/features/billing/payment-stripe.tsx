@@ -1,12 +1,14 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import type { Appearance, Stripe, StripeElements, StripePaymentElement } from '@stripe/stripe-js';
+import type { Stripe, StripeElements, StripePaymentElement } from '@stripe/stripe-js';
 
 import { Alert } from '../../components/ui/alert';
 import { Button } from '../../components/ui/button';
 import { Skeleton } from '../../components/ui/skeleton';
 import { paymentReturnUrl } from './payment-redirect';
+import { readStripeAppearance } from './stripe-appearance';
+import { themeStore } from '../theme/theme-store';
 
 /** 单次 Stripe 会话状态；key 变化表示换了一组 client_secret/key/订单，需要重新初始化。 */
 interface StripeSession {
@@ -78,6 +80,7 @@ export function StripePaymentInline({
   useEffect(() => {
     let cancelled = false;
     let localElement: StripePaymentElement | null = null;
+    let stopTheme: (() => void) | undefined;
     // 本次 effect 独有的 token：即使之后又挂载出同样 key 的会话，旧 token 也永远不会再有效。
     const token = { key: sessionKey };
     liveRef.current = token;
@@ -100,33 +103,10 @@ export function StripePaymentInline({
           return;
         }
 
-        const container = mountRef.current;
-        const computedStyle = container === null ? null : window.getComputedStyle(container);
-        const readVariable = (...names: string[]): string | undefined => {
-          for (const name of names) {
-            const value = computedStyle?.getPropertyValue(name).trim();
-            if (value) return value;
-          }
-          return undefined;
-        };
-        const variables: NonNullable<Appearance['variables']> = {};
-        const colorPrimary = readVariable('--primary');
-        const colorBackground = readVariable('--card', '--background');
-        const colorText = readVariable('--foreground');
-        const colorDanger = readVariable('--destructive');
-        const fontFamily = readVariable('--font-family-sans');
-        const borderRadius = readVariable('--control-radius');
-        if (colorPrimary !== undefined) variables.colorPrimary = colorPrimary;
-        if (colorBackground !== undefined) variables.colorBackground = colorBackground;
-        if (colorText !== undefined) variables.colorText = colorText;
-        if (colorDanger !== undefined) variables.colorDanger = colorDanger;
-        if (fontFamily !== undefined) variables.fontFamily = fontFamily;
-        if (borderRadius !== undefined) variables.borderRadius = borderRadius;
-
         const elements = stripe.elements({
           clientSecret,
           locale: 'zh',
-          appearance: { theme: 'night', variables },
+          appearance: readStripeAppearance(mountRef.current),
         });
         const element = elements.create('payment', { layout: 'tabs' });
         localElement = element;
@@ -143,6 +123,16 @@ export function StripePaymentInline({
         if (mountRef.current !== null) {
           element.mount(mountRef.current);
         }
+        const updateAppearance = () => {
+          if (!isCurrent()) return;
+          try {
+            elements.update({ appearance: readStripeAppearance(mountRef.current) });
+          } catch {
+            // A cosmetic SDK update must not interrupt an in-progress payment.
+          }
+        };
+        stopTheme = themeStore.subscribe(updateAppearance);
+        updateAppearance();
       } catch {
         if (isCurrent()) {
           patchSession(token.key, {
@@ -155,6 +145,7 @@ export function StripePaymentInline({
 
     return () => {
       cancelled = true;
+      stopTheme?.();
       if (liveRef.current === token) {
         liveRef.current = null;
       }
