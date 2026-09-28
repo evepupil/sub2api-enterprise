@@ -7,7 +7,6 @@ import {
   KeyRound,
   Menu,
   Settings,
-  UserRound,
   Users,
   Wallet,
 } from 'lucide-react';
@@ -34,13 +33,6 @@ const NAVIGATION_ICONS: Record<NavigationItem['icon'], LucideIcon> = {
   help: CircleHelp,
 };
 
-/** 账户标识按门户身份固定文案，不展示昵称、邮箱或组织名。 */
-const ACCOUNT_LABELS: Record<Audience, string> = {
-  personal: '个人账户',
-  owner: '组织管理员',
-  member: '组织成员',
-};
-
 /** 固定在侧栏底部的入口：账号设置与帮助从主导航分离。 */
 const FOOTER_ICONS: ReadonlySet<NavigationItem['icon']> = new Set(['settings', 'help']);
 
@@ -49,7 +41,7 @@ const FOOTER_ORDER: readonly NavigationItem['icon'][] = ['help', 'settings'];
 
 export interface ConsoleShellProps extends Omit<React.ComponentProps<'div'>, 'title'> {
   children?: React.ReactNode;
-  /** 门户身份，只决定显示哪些导航入口与账户文案，不承担鉴权。 */
+  /** 门户身份，只决定显示哪些导航入口，不承担鉴权。 */
   audience: Audience;
   /** 当前路径，用于唯一 aria-current 判断与路径行当前页文案。 */
   activePath: string;
@@ -59,18 +51,6 @@ export interface ConsoleShellProps extends Omit<React.ComponentProps<'div'>, 'ti
   accountActions?: React.ReactNode;
   /** 需要隐藏的导航路径；只影响展示，不改动 lib/navigation 的函数契约。 */
   hiddenPaths?: readonly string[];
-}
-
-/** 账户标识行：用户图标 + 按身份固定的文案。 */
-function AccountIdentity({ audience, className }: { audience: Audience; className?: string }) {
-  return (
-    <span
-      className={cn('flex min-w-0 items-center gap-3 text-sm text-muted-foreground', className)}
-    >
-      <UserRound className="size-4 shrink-0" aria-hidden="true" />
-      <span className="min-w-0 truncate">{ACCOUNT_LABELS[audience]}</span>
-    </span>
-  );
 }
 
 /**
@@ -186,8 +166,7 @@ export function ConsoleShell({
               选择要访问的页面，点击后菜单会关闭。
             </DialogDescription>
             <div className="flex min-h-0 flex-1 flex-col">
-              <AccountIdentity audience={audience} className="h-touch px-3" />
-              <div className="mt-2 flex min-h-0 flex-1 flex-col overflow-y-auto">
+              <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
                 {renderNavGroup(mainItems, '控制台导航')}
               </div>
               <div className="mt-4 flex shrink-0 flex-col gap-1 border-t border-border pt-4">
@@ -200,8 +179,7 @@ export function ConsoleShell({
           </DialogContent>
         </Dialog>
         <Brand className="min-w-0" />
-        <AccountIdentity audience={audience} className="ml-auto hidden text-xs sm:flex" />
-        <ThemeSwitcher className="ml-auto sm:ml-0" />
+        <ThemeSwitcher className="ml-auto" />
       </header>
 
       {/* 桌面侧栏：216px 深色卡片右边框，固定在视口内 */}
@@ -212,7 +190,6 @@ export function ConsoleShell({
         <div className="flex h-header shrink-0 items-center px-4">
           <Brand href="/console" onClick={handleNavClick('/console')} />
         </div>
-        <AccountIdentity audience={audience} className="h-touch shrink-0 px-7" />
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pt-2 pb-4">
           {renderNavGroup(mainItems, '控制台导航')}
         </div>

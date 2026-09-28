@@ -6,7 +6,7 @@
 
 M1 官网实现补充见 [官网实施规格](design/public-site.md) 及其四份页面规格；M0 主题和组件契约继续作为基础。
 
-控制台最新对齐要求见[控制台示意图对齐修正](design/console-alignment.md)：带图标的统计卡、底部账号设置、按业务身份显示账户、紧凑时间栏与带中心合计的环图。该修正优先于早期规格中较粗略的布局描述。
+控制台最新对齐要求见[控制台示意图对齐修正](design/console-alignment.md)：带图标的统计卡、底部账号设置、紧凑时间栏与带中心合计的环图。该修正优先于早期规格中较粗略的布局描述。
 
 状态：实施规格 · 最近更新：2026-09-28
 
@@ -97,7 +97,7 @@ tests/                 导航规则测试
 | `lib/navigation.ts` | `type Audience='personal'|'owner'|'member'`；`type NavigationItem={href:string;label:string;icon:'overview'|'key'|'usage'|'wallet'|'team'|'settings'|'help'}`；`getConsoleNavigation(audience):NavigationItem[]`；`isNavigationActive(pathname,href):boolean` |
 | `layout/brand.tsx` | `Brand({href?:string})`，临时菱形SVG + “模型服务” |
 | `layout/public-shell.tsx` | `PublicShell({children,activePath?:string,onNavigate?:(href:string)=>void})`；首页 `/`、模型 `/catalog`、服务状态 `/status`、帮助 `/help`，登录 `/login`、进入控制台 `/console`；传 onNavigate 时预览拦截到本地状态，未传时为正常链接 |
-| `layout/console-shell.tsx` | `ConsoleShell({children,audience,activePath,onNavigate?})`；身份只影响导航，不承担鉴权；账户标识按身份显示个人账户/组织管理员/组织成员，帮助与设置固定到底部区域 |
+| `layout/console-shell.tsx` | `ConsoleShell({children,audience,activePath,onNavigate?})`；身份只影响导航，不承担鉴权；侧栏不显示身份标签（2026-09-28 按用户反馈去掉），帮助与设置固定到底部区域 |
 | `layout/page-header.tsx` | `PageHeader({title,actions?:ReactNode})`，长标题换行，移动端操作另起一行 |
 | `preview/foundation-preview.tsx` | `FoundationPreview()`，无网络、无业务 side effect，读下面页面规格 |
 
