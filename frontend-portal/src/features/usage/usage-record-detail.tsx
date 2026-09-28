@@ -7,19 +7,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../../components/ui/dialog';
+import { formatUsd } from '../../lib/money';
 import type { UsageRecord } from './types';
 
 /** 数字：千分位，无小数。 */
 export function formatUsageNumber(value: number): string {
   return new Intl.NumberFormat('zh-CN', { maximumFractionDigits: 0 }).format(value);
-}
-
-/** 金额：USD，保留 4 位小数（与总览一致）。 */
-export function formatUsageUsd(value: number): string {
-  return new Intl.NumberFormat('zh-CN', {
-    minimumFractionDigits: 4,
-    maximumFractionDigits: 4,
-  }).format(value);
 }
 
 /** 耗时：毫秒转秒，保留 2 位；无值显示占位而不是 0。 */
@@ -83,8 +76,8 @@ export function UsageRecordDetail({ record, timeZone, onOpenChange }: UsageRecor
           { label: '缓存读取 Token', value: formatUsageNumber(record.tokens.cacheRead) },
           { label: '输出 Token', value: formatUsageNumber(record.tokens.output) },
           { label: 'Token 合计', value: formatUsageNumber(record.tokens.total) },
-          { label: '标准价（USD）', value: formatUsageUsd(record.standardCost) },
-          { label: '实际消费（USD）', value: formatUsageUsd(record.actualCost) },
+          { label: '标准价', value: formatUsd(record.standardCost) },
+          { label: '实际消费', value: formatUsd(record.actualCost) },
           { label: '耗时', value: formatUsageDuration(record.durationMs) },
           { label: '请求类型', value: record.stream ? '流式' : '非流式' },
         ];

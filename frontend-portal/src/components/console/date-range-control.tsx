@@ -55,8 +55,12 @@ export interface DateRangeControlProps {
   onChange: (range: DateRange) => void;
   /** 触发器附加类名。 */
   className?: string;
-  /** split 将预选下拉、日期文字与日历按钮并排展示；默认保留合并触发器。 */
-  presentation?: 'combined' | 'split';
+  /**
+   * split 将预选下拉、日期文字与日历按钮并排展示，日历按钮撑满剩余宽度；
+   * compact 同样并排展示，但两者都只按内容宽度、不撑满容器，用于工具栏一行右对齐的场景；
+   * 默认 combined 保留合并触发器。
+   */
+  presentation?: 'combined' | 'split' | 'compact';
 }
 
 interface Draft {
@@ -246,14 +250,16 @@ export function DateRangeControl({
           aria-haspopup="dialog"
           aria-expanded={open}
           aria-label={
-            presentation === 'split'
+            presentation !== 'combined'
               ? `选择起止日期，当前范围：${formatDateRange(value)}`
               : undefined
           }
           className={
             presentation === 'split'
               ? 'min-w-0 flex-1 justify-start gap-2'
-              : cn('justify-start gap-2', className)
+              : presentation === 'compact'
+                ? 'w-auto shrink-0 justify-start gap-2'
+                : cn('justify-start gap-2', className)
           }
         >
           <CalendarDays className="size-4 text-muted-foreground" aria-hidden="true" />
@@ -273,11 +279,16 @@ export function DateRangeControl({
     </Popover>
   );
 
-  if (presentation === 'split') {
+  if (presentation === 'split' || presentation === 'compact') {
     return (
-      <div className={cn('flex min-w-0 items-center gap-2', className)}>
+      <div
+        className={cn('flex items-center gap-2', presentation === 'split' && 'min-w-0', className)}
+      >
         <Select value={selectedPreset ?? 'custom'} onValueChange={handlePresetChange}>
-          <SelectTrigger aria-label="预选范围" className="w-28 shrink-0">
+          <SelectTrigger
+            aria-label="预选范围"
+            className={presentation === 'split' ? 'w-28 shrink-0' : 'w-auto shrink-0'}
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent

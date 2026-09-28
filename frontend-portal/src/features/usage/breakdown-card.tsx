@@ -2,12 +2,8 @@
 
 import { useMemo, useState } from 'react';
 
-import {
-  SlidingIndicator,
-  useSlidingIndicatorId,
-} from '../../components/effects/sliding-indicator';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
+import { SegmentedControl, type SegmentedOption } from '../../components/ui/segmented-control';
 import {
   Table,
   TableBody,
@@ -17,11 +13,16 @@ import {
   TableRow,
 } from '../../components/ui/table';
 import { DonutChart } from '../../components/charts/donut-chart';
-import { cn } from '../../lib/utils';
 import type { BreakdownRow } from './types';
+import { formatUsdCompact } from '../../lib/money';
 import { formatUsageNumber, formatUsageUsd } from './usage-format';
 
 type BreakdownMetric = 'tokens' | 'cost';
+
+const METRIC_OPTIONS: ReadonlyArray<SegmentedOption<BreakdownMetric>> = [
+  { value: 'tokens', label: '按 Token' },
+  { value: 'cost', label: '按消费' },
+];
 
 const compactNumberFormatter = new Intl.NumberFormat('en-US', {
   notation: 'compact',
@@ -33,13 +34,6 @@ function formatCompactNumber(value: number): string {
   return Math.abs(value) < 1000 ? formatUsageNumber(value) : compactNumberFormatter.format(value);
 }
 
-function formatCompactUsd(value: number): string {
-  if (!Number.isFinite(value)) return '$—';
-  return Math.abs(value) < 1000
-    ? `$${formatUsageUsd(value)}`
-    : `$${compactNumberFormatter.format(value)}`;
-}
-
 export interface BreakdownCardProps {
   title: string;
   rows: readonly BreakdownRow[];
@@ -47,7 +41,6 @@ export interface BreakdownCardProps {
 
 export function BreakdownCard({ title, rows }: BreakdownCardProps) {
   const [metric, setMetric] = useState<BreakdownMetric>('tokens');
-  const indicatorId = useSlidingIndicatorId();
   const chartRows = useMemo(
     () =>
       rows.map((row) => ({ name: row.label, value: metric === 'tokens' ? row.tokens : row.cost })),
@@ -63,49 +56,22 @@ export function BreakdownCard({ title, rows }: BreakdownCardProps) {
           ? '接口'
           : '名称';
   const centerValue =
-    metric === 'tokens' ? formatCompactNumber(chartTotal) : formatCompactUsd(chartTotal);
+    metric === 'tokens' ? formatCompactNumber(chartTotal) : formatUsdCompact(chartTotal);
   const centerTitle =
-    metric === 'tokens' ? formatUsageNumber(chartTotal) : `$${formatUsageUsd(chartTotal)}`;
-  const centerLabel = metric === 'tokens' ? 'Token' : 'USD';
+    metric === 'tokens' ? formatUsageNumber(chartTotal) : formatUsageUsd(chartTotal);
+  const centerLabel = metric === 'tokens' ? 'Token' : '消费';
 
   return (
     <Card className="min-w-0 gap-3 py-4">
       <CardHeader className="flex-row items-center justify-between gap-3 px-5">
         <CardTitle>{title}</CardTitle>
-        <div
-          className="inline-flex shrink-0 overflow-hidden rounded-control border border-input isolate"
-          role="group"
+        <SegmentedControl
+          size="sm"
+          options={METRIC_OPTIONS}
+          value={metric}
+          onValueChange={setMetric}
           aria-label={`${title}统计维度`}
-        >
-          <Button
-            type="button"
-            size="sm"
-            variant="ghost"
-            aria-pressed={metric === 'tokens'}
-            className={cn(
-              'relative rounded-none',
-              metric === 'tokens' && 'text-primary-foreground hover:bg-transparent',
-            )}
-            onClick={() => setMetric('tokens')}
-          >
-            {metric === 'tokens' ? <SlidingIndicator layoutId={indicatorId} pace="quick" /> : null}
-            <span className="sliding-indicator-label">按 Token</span>
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant="ghost"
-            aria-pressed={metric === 'cost'}
-            className={cn(
-              'relative rounded-none',
-              metric === 'cost' && 'text-primary-foreground hover:bg-transparent',
-            )}
-            onClick={() => setMetric('cost')}
-          >
-            {metric === 'cost' ? <SlidingIndicator layoutId={indicatorId} pace="quick" /> : null}
-            <span className="sliding-indicator-label">按消费</span>
-          </Button>
-        </div>
+        />
       </CardHeader>
       <CardContent className="space-y-4 px-5">
         {rows.length === 0 ? (
@@ -122,13 +88,13 @@ export function BreakdownCard({ title, rows }: BreakdownCardProps) {
                 className="h-44 w-full"
               />
             </div>
-            <Table className="min-w-0 [&_th]:h-8 [&_th]:px-2 [&_td]:px-2 [&_td]:py-1.5">
+            <Table data-density="compact" className="min-w-0">
               <TableHeader>
                 <TableRow>
                   <TableHead>{firstColumnLabel}</TableHead>
                   <TableHead className="text-right">请求</TableHead>
                   <TableHead className="text-right">Token</TableHead>
-                  <TableHead className="text-right">消费（USD）</TableHead>
+                  <TableHead className="text-right">消费</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -148,7 +114,7 @@ export function BreakdownCard({ title, rows }: BreakdownCardProps) {
                     <TableCell className="text-right" title={formatUsageNumber(row.tokens)}>
                       {formatCompactNumber(row.tokens)}
                     </TableCell>
-                    <TableCell className="text-right">${formatUsageUsd(row.cost)}</TableCell>
+                    <TableCell className="text-right">{formatUsageUsd(row.cost)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

@@ -16,12 +16,9 @@
 
 import { useMemo, useState } from 'react';
 
-import {
-  SlidingIndicator,
-  useSlidingIndicatorId,
-} from '../../components/effects/sliding-indicator';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import { SegmentedControl, type SegmentedOption } from '../../components/ui/segmented-control';
 import {
   Table,
   TableBody,
@@ -31,11 +28,15 @@ import {
   TableRow,
 } from '../../components/ui/table';
 import { DonutChart } from '../../components/charts/donut-chart';
-import { cn } from '../../lib/utils';
 import type { MemberUsageRow } from './types';
 import { formatUsageNumber, formatUsageUsd } from '../usage/usage-format';
 
 type MemberMetric = 'tokens' | 'cost';
+
+const METRIC_OPTIONS: ReadonlyArray<SegmentedOption<MemberMetric>> = [
+  { value: 'tokens', label: 'Token' },
+  { value: 'cost', label: '消费' },
+];
 
 /** 姓名兜底顺序：display_name → username → email → 成员 #id（与成员模块一致）。 */
 export function memberUsageLabel(row: MemberUsageRow): string {
@@ -57,7 +58,6 @@ export function MemberDistributionCard({
   onSelectMember,
 }: MemberDistributionCardProps) {
   const [metric, setMetric] = useState<MemberMetric>('tokens');
-  const indicatorId = useSlidingIndicatorId();
   const chartRows = useMemo(
     () =>
       rows.map((row) => ({
@@ -72,40 +72,13 @@ export function MemberDistributionCard({
     <Card className="min-w-0 gap-4">
       <CardHeader className="flex-row flex-wrap items-center justify-between gap-3">
         <CardTitle>全组织成员分布</CardTitle>
-        <div
-          className="flex shrink-0 gap-1 isolate"
-          role="group"
+        <SegmentedControl
+          size="sm"
+          options={METRIC_OPTIONS}
+          value={metric}
+          onValueChange={setMetric}
           aria-label="全组织成员分布统计维度"
-        >
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            aria-pressed={metric === 'tokens'}
-            className={cn(
-              'relative',
-              metric === 'tokens' && 'border-transparent text-primary-foreground',
-            )}
-            onClick={() => setMetric('tokens')}
-          >
-            {metric === 'tokens' ? <SlidingIndicator layoutId={indicatorId} pace="quick" /> : null}
-            <span className="sliding-indicator-label">Token</span>
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            aria-pressed={metric === 'cost'}
-            className={cn(
-              'relative',
-              metric === 'cost' && 'border-transparent text-primary-foreground',
-            )}
-            onClick={() => setMetric('cost')}
-          >
-            {metric === 'cost' ? <SlidingIndicator layoutId={indicatorId} pace="quick" /> : null}
-            <span className="sliding-indicator-label">消费</span>
-          </Button>
-        </div>
+        />
       </CardHeader>
       <CardContent className="min-w-0 space-y-4">
         <p className="text-xs text-muted-foreground">
@@ -133,7 +106,7 @@ export function MemberDistributionCard({
                   <TableHead>姓名</TableHead>
                   <TableHead className="text-right">请求</TableHead>
                   <TableHead className="text-right">Token</TableHead>
-                  <TableHead className="text-right">消费（USD）</TableHead>
+                  <TableHead className="text-right">消费</TableHead>
                   <TableHead className="text-right">操作</TableHead>
                 </TableRow>
               </TableHeader>
@@ -149,7 +122,8 @@ export function MemberDistributionCard({
                       aria-label={`按成员 ${label} 查看用量`}
                       aria-pressed={selected}
                       data-member-id={row.userId}
-                      className={selected ? 'cursor-pointer bg-muted/50' : 'cursor-pointer'}
+                      data-state={selected ? 'selected' : undefined}
+                      className="cursor-pointer"
                       onClick={() => onSelectMember(row.userId)}
                       onKeyDown={(event) => {
                         if (event.key === 'Enter' || event.key === ' ') {

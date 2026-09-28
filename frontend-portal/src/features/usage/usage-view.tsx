@@ -32,12 +32,12 @@ import { fetchKeys } from '../keys/api';
 import { getPresetRange } from '../../lib/time/date-range';
 import { fetchUsageRecords } from './api';
 import type { DateRange, UsageFilters, UsageRecord } from './types';
+import { formatUsageUsd } from './usage-format';
 import {
   UsageRecordDetail,
   formatUsageDateTime,
   formatUsageDuration,
   formatUsageNumber,
-  formatUsageUsd,
 } from './usage-record-detail';
 
 /** 明细固定每页 20 条。 */
@@ -227,7 +227,7 @@ export function UsageView({ initialKeyId }: UsageViewProps) {
                   <TableHead className="text-right">缓存写入</TableHead>
                   <TableHead className="text-right">缓存读取</TableHead>
                   <TableHead className="text-right">输出</TableHead>
-                  <TableHead className="text-right">实际消费 USD</TableHead>
+                  <TableHead className="text-right">实际消费</TableHead>
                   <TableHead className="text-right">耗时</TableHead>
                 </TableRow>
               </TableHeader>

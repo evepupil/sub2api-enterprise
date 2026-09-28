@@ -167,85 +167,70 @@ function OrganizationUsageOwnerView({ initialMemberId }: OwnerViewProps) {
     <div className="flex min-w-0 flex-col gap-6" data-org-usage="view">
       <PageHeader title="组织用量" />
 
-      <Card className="min-w-0" data-org-usage="filters">
-        <CardContent className="flex flex-col gap-4">
-          <div className="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-end">
-            <div className="flex min-w-0 flex-col gap-2">
-              <span className="text-xs font-medium text-muted-foreground">日期范围</span>
-              <DateRangeControl value={range} onChange={applyRange} className="md:min-w-64" />
-            </div>
-            <div className="flex min-w-0 flex-col gap-2">
-              <span className="text-xs font-medium text-muted-foreground">统计对象</span>
-              <Select
-                value={memberId === undefined ? ALL_MEMBERS : String(memberId)}
-                onValueChange={(next) =>
-                  applyMember(next === ALL_MEMBERS ? undefined : Number(next))
-                }
-              >
-                <SelectTrigger aria-label="统计成员" className="md:w-64">
-                  <SelectValue placeholder="全组织" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={ALL_MEMBERS}>全组织</SelectItem>
-                  {memberId !== undefined && !memberIdInOptions ? (
-                    <SelectItem value={String(memberId)}>{`成员 #${memberId}`}</SelectItem>
-                  ) : null}
-                  {options.map((item) => (
-                    <SelectItem key={item.userId} value={String(item.userId)}>
-                      {organizationMemberLabel(item)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex min-w-0 flex-col gap-2">
-              <span className="text-xs font-medium text-muted-foreground">趋势粒度</span>
-              <Select
-                value={granularity}
-                onValueChange={(value) => {
-                  if (value === 'day' || value === 'hour') {
-                    setGranularity(value);
-                    setPage(1);
-                  }
-                }}
-              >
-                <SelectTrigger aria-label="趋势粒度" className="md:w-32">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="day">按天</SelectItem>
-                  <SelectItem value="hour">按小时</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <Button type="button" variant="outline" onClick={reset}>
-                重置
-              </Button>
-            </div>
-          </div>
-          <p role="status" data-org-usage="scope" className="text-sm text-muted-foreground">
-            当前统计对象：<span className="font-medium text-foreground">{scopeLabel}</span>
-          </p>
-          {memberOptions.isError ? (
-            <Alert
-              variant="destructive"
-              title="成员列表加载失败"
-              description={organizationErrorText(memberOptions.error, '请检查网络后重试')}
-              action={
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => void memberOptions.refetch()}
-                >
-                  重试
-                </Button>
+      <div className="flex min-w-0 flex-col gap-3" data-org-usage="filters">
+        <div className="flex flex-wrap justify-start gap-2 md:justify-end">
+          <DateRangeControl value={range} onChange={applyRange} presentation="compact" />
+          <Select
+            value={memberId === undefined ? ALL_MEMBERS : String(memberId)}
+            onValueChange={(next) => applyMember(next === ALL_MEMBERS ? undefined : Number(next))}
+          >
+            <SelectTrigger aria-label="统计成员" className="w-auto shrink-0">
+              <SelectValue placeholder="全组织" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL_MEMBERS}>全组织</SelectItem>
+              {memberId !== undefined && !memberIdInOptions ? (
+                <SelectItem value={String(memberId)}>{`成员 #${memberId}`}</SelectItem>
+              ) : null}
+              {options.map((item) => (
+                <SelectItem key={item.userId} value={String(item.userId)}>
+                  {organizationMemberLabel(item)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select
+            value={granularity}
+            onValueChange={(value) => {
+              if (value === 'day' || value === 'hour') {
+                setGranularity(value);
+                setPage(1);
               }
-            />
-          ) : null}
-        </CardContent>
-      </Card>
+            }}
+          >
+            <SelectTrigger aria-label="趋势粒度" className="w-auto shrink-0">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="day">按天</SelectItem>
+              <SelectItem value="hour">按小时</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button type="button" variant="outline" onClick={reset}>
+            重置
+          </Button>
+        </div>
+        <p role="status" data-org-usage="scope" className="sr-only">
+          当前统计对象：<span className="font-medium text-foreground">{scopeLabel}</span>
+        </p>
+        {memberOptions.isError ? (
+          <Alert
+            variant="destructive"
+            title="成员列表加载失败"
+            description={organizationErrorText(memberOptions.error, '请检查网络后重试')}
+            action={
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => void memberOptions.refetch()}
+              >
+                重试
+              </Button>
+            }
+          />
+        ) : null}
+      </div>
 
       {overviewFailed ? (
         <Alert

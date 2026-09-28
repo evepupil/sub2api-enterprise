@@ -56,9 +56,7 @@ function FundsAction({ funds, loading }: { funds: CurrentFunds | undefined; load
     return (
       <div className="min-w-32 text-right">
         <p className="text-xs text-muted-foreground">可用配额</p>
-        <p className="font-semibold tabular-nums">
-          {funds.amount === null ? '不限' : `$${formatQuotaAmount(funds.amount)}`}
-        </p>
+        <p className="font-semibold tabular-nums">{formatQuotaAmount(funds.amount)}</p>
       </div>
     );
   }
@@ -66,9 +64,9 @@ function FundsAction({ funds, loading }: { funds: CurrentFunds | undefined; load
     <div className="flex items-center gap-3">
       <div className="text-right">
         <p className="text-xs text-muted-foreground">余额</p>
-        <p className="font-semibold tabular-nums">${formatUsageUsd(funds.amount)}</p>
+        <p className="font-semibold tabular-nums">{formatUsageUsd(funds.amount)}</p>
         {funds.frozen > 0 ? (
-          <p className="text-xs text-muted-foreground">冻结 ${formatUsageUsd(funds.frozen)}</p>
+          <p className="text-xs text-muted-foreground">冻结 {formatUsageUsd(funds.frozen)}</p>
         ) : null}
       </div>
       <Button asChild size="sm">
@@ -87,37 +85,14 @@ function SummaryCards({ overview }: { overview: UsageOverview }) {
         value={formatUsageNumber(summary.requests)}
         icon={MessagesSquare}
       />
-      <MetricCard label="总 Token" value={formatCompactToken(summary.tokens.total)} icon={Database}>
-        <>
-          <p className="flex justify-between gap-3">
-            <span>输入</span>
-            <span className="tabular-nums" title={formatUsageNumber(summary.tokens.input)}>
-              {formatCompactToken(summary.tokens.input)}
-            </span>
-          </p>
-          <p className="flex justify-between gap-3">
-            <span>输出</span>
-            <span className="tabular-nums" title={formatUsageNumber(summary.tokens.output)}>
-              {formatCompactToken(summary.tokens.output)}
-            </span>
-          </p>
-          <p className="flex justify-between gap-3">
-            <span>缓存写入</span>
-            <span className="tabular-nums" title={formatUsageNumber(summary.tokens.cacheWrite)}>
-              {formatCompactToken(summary.tokens.cacheWrite)}
-            </span>
-          </p>
-          <p className="flex justify-between gap-3">
-            <span>缓存读取</span>
-            <span className="tabular-nums" title={formatUsageNumber(summary.tokens.cacheRead)}>
-              {formatCompactToken(summary.tokens.cacheRead)}
-            </span>
-          </p>
-        </>
-      </MetricCard>
+      <MetricCard
+        label="总 Token"
+        value={formatCompactToken(summary.tokens.total)}
+        icon={Database}
+      />
       <MetricCard
         label="总消费"
-        value={`$${formatUsageUsd(summary.actualCost)}`}
+        value={formatUsageUsd(summary.actualCost)}
         icon={CircleDollarSign}
       />
       <MetricCard
@@ -147,11 +122,24 @@ function SummarySkeleton() {
 
 function TrendCard({ overview }: { overview: UsageOverview }) {
   const labels = overview.trend.map((point) => formatUsageDateLabel(point.date));
+  const totals = overview.summary.tokens;
   const series = [
-    { name: '输入', values: overview.trend.map((point) => point.tokens.input) },
-    { name: '输出', values: overview.trend.map((point) => point.tokens.output) },
-    { name: '缓存写入', values: overview.trend.map((point) => point.tokens.cacheWrite) },
-    { name: '缓存读取', values: overview.trend.map((point) => point.tokens.cacheRead) },
+    {
+      name: `输入 ${formatCompactToken(totals.input)}`,
+      values: overview.trend.map((point) => point.tokens.input),
+    },
+    {
+      name: `输出 ${formatCompactToken(totals.output)}`,
+      values: overview.trend.map((point) => point.tokens.output),
+    },
+    {
+      name: `缓存写入 ${formatCompactToken(totals.cacheWrite)}`,
+      values: overview.trend.map((point) => point.tokens.cacheWrite),
+    },
+    {
+      name: `缓存读取 ${formatCompactToken(totals.cacheRead)}`,
+      values: overview.trend.map((point) => point.tokens.cacheRead),
+    },
   ];
   return (
     <Card className="min-w-0 gap-3 py-4">
@@ -219,38 +207,23 @@ export function OverviewView() {
         />
       ) : null}
 
-      <Card className="min-w-0 gap-0">
-        <CardContent className="flex min-w-0 flex-wrap items-center gap-3 md:justify-between">
-          <div className="flex min-w-0 flex-1 items-center gap-3 md:min-w-72">
-            <span className="shrink-0 text-sm text-muted-foreground">时间范围</span>
-            <DateRangeControl
-              value={range}
-              onChange={setRange}
-              presentation="split"
-              className="min-w-0 flex-1"
-            />
-          </div>
-          <div className="flex shrink-0 items-center gap-3">
-            <label htmlFor="overview-granularity" className="text-sm text-muted-foreground">
-              粒度
-            </label>
-            <Select
-              value={granularity}
-              onValueChange={(value) => {
-                if (value === 'day' || value === 'hour') setGranularity(value);
-              }}
-            >
-              <SelectTrigger id="overview-granularity" className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="day">按天</SelectItem>
-                <SelectItem value="hour">按小时</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="flex flex-wrap justify-start gap-2 md:justify-end">
+        <DateRangeControl value={range} onChange={setRange} presentation="compact" />
+        <Select
+          value={granularity}
+          onValueChange={(value) => {
+            if (value === 'day' || value === 'hour') setGranularity(value);
+          }}
+        >
+          <SelectTrigger aria-label="粒度" className="w-auto shrink-0">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="day">按天</SelectItem>
+            <SelectItem value="hour">按小时</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
       {overviewError !== null ? (
         <Alert

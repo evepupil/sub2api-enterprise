@@ -35,7 +35,8 @@ function formatCompactToken(value: number): string {
 }
 
 /**
- * 四张摘要卡：请求、总 Token（四类分项）、实际消费 USD、平均耗时。
+ * 四张摘要卡：请求、总 Token、实际消费 USD、平均耗时；Token 四类分项合计放进
+ * 下方「Token 使用趋势」卡的图例，不在这里重复列出。
  * 统计对象（全组织或选定成员）由父组件在筛选区说明，卡片本身不重复标注。
  */
 export function OrganizationSummaryCards({ overview }: { overview: UsageOverview }) {
@@ -51,37 +52,14 @@ export function OrganizationSummaryCards({ overview }: { overview: UsageOverview
         value={formatUsageNumber(summary.requests)}
         icon={MessagesSquare}
       />
-      <MetricCard label="总 Token" value={formatCompactToken(summary.tokens.total)} icon={Database}>
-        <>
-          <p className="flex justify-between gap-3">
-            <span>输入</span>
-            <span className="tabular-nums" title={formatUsageNumber(summary.tokens.input)}>
-              {formatCompactToken(summary.tokens.input)}
-            </span>
-          </p>
-          <p className="flex justify-between gap-3">
-            <span>输出</span>
-            <span className="tabular-nums" title={formatUsageNumber(summary.tokens.output)}>
-              {formatCompactToken(summary.tokens.output)}
-            </span>
-          </p>
-          <p className="flex justify-between gap-3">
-            <span>缓存写入</span>
-            <span className="tabular-nums" title={formatUsageNumber(summary.tokens.cacheWrite)}>
-              {formatCompactToken(summary.tokens.cacheWrite)}
-            </span>
-          </p>
-          <p className="flex justify-between gap-3">
-            <span>缓存读取</span>
-            <span className="tabular-nums" title={formatUsageNumber(summary.tokens.cacheRead)}>
-              {formatCompactToken(summary.tokens.cacheRead)}
-            </span>
-          </p>
-        </>
-      </MetricCard>
+      <MetricCard
+        label="总 Token"
+        value={formatCompactToken(summary.tokens.total)}
+        icon={Database}
+      />
       <MetricCard
         label="总消费"
-        value={`$${formatUsageUsd(summary.actualCost)}`}
+        value={formatUsageUsd(summary.actualCost)}
         icon={CircleDollarSign}
       />
       <MetricCard
@@ -116,11 +94,24 @@ export function OrganizationSummarySkeleton() {
 /** 四类 Token 趋势：输入、输出、缓存写入、缓存读取，标签复用 M3 日期文案。 */
 export function OrganizationTrendCard({ overview }: { overview: UsageOverview }) {
   const labels = overview.trend.map((point) => formatUsageDateLabel(point.date));
+  const totals = overview.summary.tokens;
   const series = [
-    { name: '输入', values: overview.trend.map((point) => point.tokens.input) },
-    { name: '输出', values: overview.trend.map((point) => point.tokens.output) },
-    { name: '缓存写入', values: overview.trend.map((point) => point.tokens.cacheWrite) },
-    { name: '缓存读取', values: overview.trend.map((point) => point.tokens.cacheRead) },
+    {
+      name: `输入 ${formatCompactToken(totals.input)}`,
+      values: overview.trend.map((point) => point.tokens.input),
+    },
+    {
+      name: `输出 ${formatCompactToken(totals.output)}`,
+      values: overview.trend.map((point) => point.tokens.output),
+    },
+    {
+      name: `缓存写入 ${formatCompactToken(totals.cacheWrite)}`,
+      values: overview.trend.map((point) => point.tokens.cacheWrite),
+    },
+    {
+      name: `缓存读取 ${formatCompactToken(totals.cacheRead)}`,
+      values: overview.trend.map((point) => point.tokens.cacheRead),
+    },
   ];
   return (
     <Card className="min-w-0 gap-3 py-4">

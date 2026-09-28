@@ -111,7 +111,7 @@ export function OrganizationRecordsCard({
                 <TableHead className="text-right">缓存写入</TableHead>
                 <TableHead className="text-right">缓存读取</TableHead>
                 <TableHead className="text-right">输出</TableHead>
-                <TableHead className="text-right">实际消费 USD</TableHead>
+                <TableHead className="text-right">实际消费</TableHead>
                 <TableHead className="text-right">耗时</TableHead>
               </TableRow>
             </TableHeader>

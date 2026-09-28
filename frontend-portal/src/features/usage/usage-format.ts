@@ -1,8 +1,6 @@
+import { formatUsd } from '../../lib/money';
+
 const numberFormatter = new Intl.NumberFormat('zh-CN', { maximumFractionDigits: 0 });
-const usdFormatter = new Intl.NumberFormat('zh-CN', {
-  minimumFractionDigits: 4,
-  maximumFractionDigits: 4,
-});
 const secondsFormatter = new Intl.NumberFormat('zh-CN', {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
@@ -12,8 +10,9 @@ export function formatUsageNumber(value: number): string {
   return Number.isFinite(value) ? numberFormatter.format(value) : '—';
 }
 
+/** 金额：统一走 lib/money 的两位小数格式，自带 $ 符号，调用处不要再拼 $。 */
 export function formatUsageUsd(value: number): string {
-  return Number.isFinite(value) ? usdFormatter.format(value) : '—';
+  return formatUsd(value);
 }
 
 export function formatUsageSeconds(milliseconds: number): string {
