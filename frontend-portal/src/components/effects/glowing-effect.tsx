@@ -94,12 +94,26 @@ export function GlowingEffect({
       pointer = { x: event.clientX, y: event.clientY };
       schedule();
     };
+    // 指针移出浏览器窗口或窗口失去焦点时熄灭，避免光停在离开前的方向上。
+    const deactivate = () => {
+      pointer = null;
+      layer.style.setProperty('--glow-active', '0');
+    };
+    const handlePointerOut = (event: PointerEvent) => {
+      if (event.relatedTarget === null) {
+        deactivate();
+      }
+    };
 
     window.addEventListener('pointermove', handlePointerMove, { passive: true });
     window.addEventListener('scroll', schedule, { passive: true });
+    document.addEventListener('pointerout', handlePointerOut, { passive: true });
+    window.addEventListener('blur', deactivate);
     return () => {
       window.removeEventListener('pointermove', handlePointerMove);
       window.removeEventListener('scroll', schedule);
+      document.removeEventListener('pointerout', handlePointerOut);
+      window.removeEventListener('blur', deactivate);
       if (frame !== 0) {
         window.cancelAnimationFrame(frame);
       }

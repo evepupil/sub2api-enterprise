@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 
 import { Activity, ArrowUpRight, BookOpen, KeyRound, Search, WalletCards } from 'lucide-react';
 import { HoverHighlight } from '../../components/effects/hover-highlight';
@@ -52,6 +52,8 @@ export function HelpView({ settings }: { settings: PublicSettings }) {
   const [articleId, setArticleId] = useState('getting-started');
   const [query, setQuery] = useState('');
   const [highlighted, setHighlighted] = useState<number | null>(null);
+  // 记住组内获得焦点的卡片：指针离开时高亮退回到它，焦点移出整组才清空。
+  const focusedTask = useRef<number | null>(null);
   const highlightId = useId();
   const indicatorId = useSlidingIndicatorId();
   const normalizedQuery = query.trim().toLowerCase();
@@ -121,10 +123,11 @@ export function HelpView({ settings }: { settings: PublicSettings }) {
         </div>
         <div
           className="help-task-grid"
-          onPointerLeave={() => setHighlighted(null)}
+          onPointerLeave={() => setHighlighted(focusedTask.current)}
           onBlur={(event) => {
             const nextTarget = event.relatedTarget;
             if (!(nextTarget instanceof Node) || !event.currentTarget.contains(nextTarget)) {
+              focusedTask.current = null;
               setHighlighted(null);
             }
           }}
@@ -137,7 +140,10 @@ export function HelpView({ settings }: { settings: PublicSettings }) {
                 href={task.href}
                 className="help-task-card"
                 onPointerEnter={() => setHighlighted(index)}
-                onFocus={() => setHighlighted(index)}
+                onFocus={() => {
+                  focusedTask.current = index;
+                  setHighlighted(index);
+                }}
               >
                 <HoverHighlight layoutId={highlightId} active={highlighted === index} />
                 <span className="help-task-icon" aria-hidden="true">
