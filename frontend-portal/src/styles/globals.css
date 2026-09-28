@@ -2,6 +2,10 @@
 @import './tokens.css';
 /* 共享动效组件（Aceternity 适配件），各页面样式可在其后按需覆盖 */
 @import './effects.css';
+/* 分段切换的基础样式（共享组件，任何页面可用） */
+@import './segmented-control.css';
+/* 控制台表面、胶囊控件、分段切换配色与表格（仅作用于 [data-surface='console']） */
+@import './console.css';
 /* 页面专属样式：首页前半、首页后半、公开内页 */
 @import './marketing.css';
 /* 首页后半与公开内页样式由各自实施路创建；缺失时构建会明确报错，不静默跳过 */

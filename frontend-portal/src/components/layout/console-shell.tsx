@@ -19,6 +19,7 @@ import type { Audience, NavigationItem } from '../../lib/navigation';
 import { cn } from '../../lib/utils';
 import { Button } from '../ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '../ui/dialog';
+import { SurfaceProvider } from '../ui/surface';
 
 import { Brand } from './brand';
 
@@ -126,13 +127,14 @@ export function ConsoleShell({
         aria-current={active ? 'page' : undefined}
         onClick={handleNavClick(item.href)}
         className={cn(
-          'flex h-touch items-center gap-3 rounded-control px-3 text-sm font-medium transition-colors duration-150 outline-none',
+          'flex h-touch items-center gap-3 rounded-full px-3 text-sm font-medium transition-colors duration-150 outline-none',
           'focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-card focus-visible:ring-ring',
-          'hover:bg-secondary hover:text-foreground',
-          active ? 'bg-secondary text-primary' : 'text-muted-foreground',
+          active
+            ? 'bg-[var(--console-surface)] text-foreground shadow-[var(--console-shadow-raised)]'
+            : 'text-muted-foreground hover:bg-foreground/5 hover:text-foreground',
         )}
       >
-        <Icon className="size-4 shrink-0" aria-hidden="true" />
+        <Icon className="size-[18px] shrink-0" aria-hidden="true" />
         <span className="truncate">{item.label}</span>
       </a>
     );
@@ -145,90 +147,97 @@ export function ConsoleShell({
   );
 
   return (
-    <div className={cn('flex min-h-dvh flex-col bg-background md:flex-row', className)} {...props}>
-      {/* 手机顶栏：44px 菜单按钮 + 品牌 + 身份标识 */}
-      <header
-        data-slot="console-mobile-header"
-        className="sticky top-0 z-40 flex h-header shrink-0 items-center gap-2 border-b border-border bg-card px-4 md:hidden"
+    <SurfaceProvider area="console">
+      <div
+        data-slot="console-shell"
+        data-surface="console"
+        className={cn('flex min-h-dvh flex-col bg-background md:flex-row', className)}
+        {...props}
       >
-        <Dialog open={mobileOpen} onOpenChange={setMobileOpen}>
-          <DialogTrigger asChild>
-            <Button variant="ghost" size="icon" aria-label="打开导航菜单">
-              <Menu className="size-5" aria-hidden="true" />
-            </Button>
-          </DialogTrigger>
-          <DialogContent
-            className="inset-y-0 top-0 right-0 left-auto flex h-dvh max-h-dvh w-72 max-w-[85vw] translate-x-0 translate-y-0 flex-col rounded-none rounded-l-dialog border-l p-4"
-            aria-describedby={undefined}
-          >
-            <DialogTitle className="sr-only">控制台导航</DialogTitle>
-            <DialogDescription className="sr-only">
-              选择要访问的页面，点击后菜单会关闭。
-            </DialogDescription>
-            <div className="flex min-h-0 flex-1 flex-col">
-              <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-                {renderNavGroup(mainItems, '控制台导航')}
-              </div>
-              <div className="mt-4 flex shrink-0 flex-col gap-1 border-t border-border pt-4">
-                {accountActions !== undefined ? (
-                  <div className="mb-2 flex flex-col gap-2">{accountActions}</div>
-                ) : null}
-                {renderNavGroup(footerItems, '控制台底部导航')}
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-        <Brand className="min-w-0" />
-        <ThemeSwitcher className="ml-auto" />
-      </header>
-
-      {/* 桌面侧栏：216px 深色卡片右边框，固定在视口内 */}
-      <aside
-        data-slot="console-sidebar"
-        className="sticky top-0 hidden h-dvh w-sidebar shrink-0 flex-col border-r border-border bg-card md:flex"
-      >
-        <div className="flex h-header shrink-0 items-center px-4">
-          <Brand href="/console" onClick={handleNavClick('/console')} />
-        </div>
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pt-2 pb-4">
-          {renderNavGroup(mainItems, '控制台导航')}
-        </div>
-        <div className="shrink-0 border-t border-border p-4">
-          <div className="mb-2">
-            <ThemeSwitcher compact={false} />
-          </div>
-          {accountActions !== undefined ? (
-            <div className="mb-2 flex flex-col gap-2">{accountActions}</div>
-          ) : null}
-          {renderNavGroup(footerItems, '控制台底部导航')}
-        </div>
-      </aside>
-
-      {/* 主内容区：桌面水平 24px、顶部 16px，手机水平 16px */}
-      <main className="min-w-0 flex-1 px-4 py-6 md:px-6 md:py-4">
-        <div className="mx-auto w-full max-w-site">
-          {/* 路径行：控制台 / 当前页，位于内容之前，与内容留 8px */}
-          <nav
-            aria-label="面包屑"
-            className="mb-2 flex min-w-0 items-center gap-1 text-xs text-muted-foreground"
-          >
-            <a
-              href="/console"
-              onClick={handleNavClick('/console')}
-              className="rounded-control outline-none transition-colors duration-150 hover:text-foreground focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ring"
+        {/* 手机顶栏：44px 菜单按钮 + 品牌 + 主题切换 */}
+        <header
+          data-slot="console-mobile-header"
+          className="sticky top-0 z-40 flex h-header shrink-0 items-center gap-2 border-b border-border bg-card px-4 md:hidden"
+        >
+          <Dialog open={mobileOpen} onOpenChange={setMobileOpen}>
+            <DialogTrigger asChild>
+              <Button variant="ghost" size="icon" aria-label="打开导航菜单">
+                <Menu className="size-5" aria-hidden="true" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent
+              className="inset-y-0 top-0 right-0 left-auto flex h-dvh max-h-dvh w-72 max-w-[85vw] translate-x-0 translate-y-0 flex-col rounded-none rounded-l-dialog border-l p-4"
+              aria-describedby={undefined}
             >
-              控制台
-            </a>
-            {current !== null ? (
-              <>
-                <span aria-hidden="true">/</span>
-                <span className="min-w-0 truncate">{current.label}</span>
-              </>
+              <DialogTitle className="sr-only">控制台导航</DialogTitle>
+              <DialogDescription className="sr-only">
+                选择要访问的页面，点击后菜单会关闭。
+              </DialogDescription>
+              <div className="flex min-h-0 flex-1 flex-col">
+                <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+                  {renderNavGroup(mainItems, '控制台导航')}
+                </div>
+                <div className="mt-4 flex shrink-0 flex-col gap-1 pt-4">
+                  {accountActions !== undefined ? (
+                    <div className="mb-2 flex flex-col gap-2">{accountActions}</div>
+                  ) : null}
+                  {renderNavGroup(footerItems, '控制台底部导航')}
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+          <Brand className="min-w-0" />
+          <ThemeSwitcher className="ml-auto" />
+        </header>
+
+        {/* 桌面侧栏：216px 深色卡片右边框，固定在视口内 */}
+        <aside
+          data-slot="console-sidebar"
+          className="sticky top-0 hidden h-dvh w-sidebar shrink-0 flex-col border-r border-border bg-card md:flex"
+        >
+          <div className="flex h-header shrink-0 items-center px-4">
+            <Brand href="/console" onClick={handleNavClick('/console')} />
+          </div>
+          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pt-2 pb-4">
+            {renderNavGroup(mainItems, '控制台导航')}
+          </div>
+          <div className="shrink-0 p-4">
+            <div className="mb-2">
+              <ThemeSwitcher compact={false} />
+            </div>
+            {accountActions !== undefined ? (
+              <div className="mb-2 flex flex-col gap-2">{accountActions}</div>
             ) : null}
-          </nav>
-          {children}
-        </div>
-      </main>
-    </div>
+            {renderNavGroup(footerItems, '控制台底部导航')}
+          </div>
+        </aside>
+
+        {/* 主内容区：桌面水平 24px、顶部 16px，手机水平 16px */}
+        <main className="min-w-0 flex-1 px-4 py-6 md:px-6 md:py-4">
+          <div className="mx-auto w-full max-w-site">
+            {/* 路径行：控制台 / 当前页，位于内容之前，与内容留 8px */}
+            <nav
+              aria-label="面包屑"
+              className="mb-2 flex min-w-0 items-center gap-1 text-xs text-muted-foreground"
+            >
+              <a
+                href="/console"
+                onClick={handleNavClick('/console')}
+                className="rounded-control outline-none transition-colors duration-150 hover:text-foreground focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ring"
+              >
+                控制台
+              </a>
+              {current !== null ? (
+                <>
+                  <span aria-hidden="true">/</span>
+                  <span className="min-w-0 truncate">{current.label}</span>
+                </>
+              ) : null}
+            </nav>
+            {children}
+          </div>
+        </main>
+      </div>
+    </SurfaceProvider>
   );
 }

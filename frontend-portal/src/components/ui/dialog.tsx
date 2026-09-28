@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 import * as React from 'react';
 
 import { cn } from '../../lib/utils';
+import { useSurfaceArea } from './surface';
 
 /**
  * 对话框：组合方式参考 shadcn/ui 对 Radix Dialog 的封装，样式使用
@@ -47,11 +48,14 @@ export function DialogContent({
   showCloseButton = true,
   ...props
 }: DialogContentProps) {
+  const surface = useSurfaceArea();
+
   return (
     <DialogPortal>
       <DialogOverlay />
       <DialogPrimitive.Content
         data-slot="dialog-content"
+        data-surface={surface}
         className={cn(
           // 默认居中面板：宽屏 480px，窄屏左右各保留 16px 边距。
           'fixed inset-x-4 top-1/2 z-50 mx-auto w-auto -translate-y-1/2',

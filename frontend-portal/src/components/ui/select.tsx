@@ -5,6 +5,7 @@ import { Check, ChevronDown, ChevronUp } from 'lucide-react';
 import * as React from 'react';
 
 import { cn } from '../../lib/utils';
+import { useSurfaceArea } from './surface';
 
 /**
  * 选择器：组合方式参考 shadcn/ui 对 Radix Select 的封装，样式全部使用
@@ -79,10 +80,13 @@ export function SelectContent({
   sideOffset = 4,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Content>) {
+  const surface = useSurfaceArea();
+
   return (
     <SelectPrimitive.Portal>
       <SelectPrimitive.Content
         data-slot="select-content"
+        data-surface={surface}
         position={position}
         sideOffset={sideOffset}
         className={cn(

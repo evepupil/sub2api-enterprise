@@ -4,6 +4,7 @@ import * as PopoverPrimitive from '@radix-ui/react-popover';
 import * as React from 'react';
 
 import { cn } from '../../lib/utils';
+import { useSurfaceArea } from './surface';
 
 /**
  * 气泡层：组合方式参考 shadcn/ui 对 Radix Popover 的封装。内容经 Portal
@@ -24,10 +25,13 @@ export function PopoverContent({
   avoidCollisions = true,
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Content>) {
+  const surface = useSurfaceArea();
+
   return (
     <PopoverPrimitive.Portal>
       <PopoverPrimitive.Content
         data-slot="popover-content"
+        data-surface={surface}
         align={align}
         side={side}
         sideOffset={sideOffset}

@@ -144,6 +144,19 @@
   --transition-duration: 150ms;
   --overlay-shadow: 0 18px 50px -24px rgb(0 0 0 / 0.7), 0 2px 10px rgb(0 0 0 / 0.35);
   --marketing-shadow: 0 30px 80px -40px var(--marketing-glow-strong), 0 2px 12px rgb(0 0 0 / 0.5);
+
+  /*
+   * 控制台表面（2026-09-28 控制台质感改版，规格见 design/console-refresh.md）：
+   * 页面底与卡片拉开层次，卡片不靠描边分块；分段切换用底槽 + 浮起的选中块。
+   * 深色主题本身已有层次，只弱化描边、不加阴影。
+   */
+  --console-canvas: var(--background);
+  --console-surface: var(--card);
+  --console-surface-border: color-mix(in srgb, var(--border) 65%, transparent);
+  --console-track: color-mix(in srgb, var(--foreground) 7%, var(--background));
+  --console-shadow: none;
+  --console-shadow-raised: 0 1px 2px rgb(0 0 0 / 0.45);
+  --console-card-radius: 20px;
 }
 
 /* 浅色与深色共用布局、字号及效果，仅切换语义颜色。 */
@@ -177,6 +190,12 @@
   --chart-6: #b44370;
   --overlay-shadow: 0 18px 50px -24px rgb(15 23 42 / 0.2), 0 2px 10px rgb(15 23 42 / 0.08);
   --marketing-shadow: 0 30px 80px -40px var(--marketing-glow), 0 2px 12px rgb(15 23 42 / 0.08);
+  --console-canvas: #f1f3f6;
+  --console-surface: #ffffff;
+  --console-surface-border: transparent;
+  --console-track: #e7eaef;
+  --console-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 2px 10px rgb(15 23 42 / 0.04);
+  --console-shadow-raised: 0 1px 2px rgb(15 23 42 / 0.1), 0 1px 1px rgb(15 23 42 / 0.04);
 }
 
 @media (min-width: 768px) {

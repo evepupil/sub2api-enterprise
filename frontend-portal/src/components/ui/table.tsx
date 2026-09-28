@@ -2,7 +2,11 @@ import * as React from 'react';
 
 import { cn } from '../../lib/utils';
 
-/** 表格外层：min-w-0 + 横向滚动，长表格只在容器内滚动不撑全页。 */
+/**
+ * 表格外层：min-w-0 + 横向滚动，长表格只在容器内滚动不撑全页。
+ * 这里只放通用外观；控制台的表头圆角条、行高、行间线与悬停色在 styles/console.css，
+ * 选中行用 data-state="selected" 标记，紧凑表格在 table 上加 data-density="compact"。
+ */
 export function Table({ className, ...props }: React.ComponentProps<'table'>) {
   return (
     <div data-slot="table-container" className="relative min-w-0 w-full overflow-x-auto">
@@ -34,7 +38,7 @@ export function TableRow({ className, ...props }: React.ComponentProps<'tr'>) {
     <tr
       data-slot="table-row"
       className={cn(
-        'border-b border-border transition-colors duration-150 hover:bg-muted/50',
+        'border-b border-border transition-colors duration-150 hover:bg-muted/50 data-[state=selected]:bg-muted',
         className,
       )}
       {...props}
