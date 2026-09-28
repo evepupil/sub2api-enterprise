@@ -1,6 +1,7 @@
 'use client';
 
 import type { EChartsOption } from 'echarts';
+import type { ChartTheme } from './chart-theme';
 import { Chart } from './chart';
 
 export interface LineChartSeries {
@@ -21,21 +22,38 @@ export function LineChart({
   ariaLabel,
   className = 'h-72 w-full',
 }: LineChartProps) {
-  const option: EChartsOption = {
+  const option = (theme: ChartTheme): EChartsOption => ({
     grid: { top: 20, right: 18, bottom: 36, left: 52, containLabel: true },
-    legend: { bottom: 0, type: 'scroll' },
+    legend: {
+      bottom: 0,
+      type: 'scroll',
+      textStyle: { color: theme.mutedForeground },
+    },
     tooltip: {
       trigger: 'axis',
       renderMode: 'richText',
-      axisPointer: { type: 'line' },
+      backgroundColor: theme.card,
+      borderColor: theme.border,
+      borderWidth: 1,
+      textStyle: { color: theme.foreground },
+      axisPointer: { type: 'line', lineStyle: { color: theme.border } },
     },
     xAxis: {
       type: 'category',
       boundaryGap: false,
       data: [...labels],
-      axisLabel: { hideOverlap: true },
+      axisLabel: { hideOverlap: true, color: theme.mutedForeground },
+      axisLine: { lineStyle: { color: theme.border } },
+      axisTick: { show: false },
     },
-    yAxis: { type: 'value', min: 0, splitLine: { lineStyle: { color: 'var(--border)' } } },
+    yAxis: {
+      type: 'value',
+      min: 0,
+      axisLabel: { color: theme.mutedForeground },
+      axisLine: { show: false },
+      axisTick: { show: false },
+      splitLine: { lineStyle: { color: theme.border } },
+    },
     series: series.map((item) => ({
       type: 'line' as const,
       name: item.name,
@@ -46,6 +64,6 @@ export function LineChart({
       lineStyle: { width: 2 },
       emphasis: { focus: 'series' },
     })),
-  };
+  });
   return <Chart option={option} ariaLabel={ariaLabel} className={className} />;
 }

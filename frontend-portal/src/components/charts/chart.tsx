@@ -4,9 +4,12 @@ import type { EChartsOption } from 'echarts';
 import * as React from 'react';
 import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
+import type { ChartTheme } from './chart-theme';
+import { readChartTheme } from './chart-theme';
 
 type EChartsCore = typeof import('echarts/core');
 type EChartsInstance = ReturnType<EChartsCore['init']>;
+type ThemedChartOption = EChartsOption | ((theme: ChartTheme) => EChartsOption);
 
 let echartsReady: Promise<EChartsCore> | null = null;
 
@@ -38,17 +41,20 @@ function loadEcharts(): Promise<EChartsCore> {
   return echartsReady;
 }
 
-export function readChartColors(element: HTMLElement): string[] {
-  const computed = getComputedStyle(element);
-  return Array.from({ length: 6 }, (_, index) =>
-    computed.getPropertyValue(`--chart-${index + 1}`).trim(),
-  ).filter((color) => color !== '');
-}
-
 export interface ChartProps {
-  option: EChartsOption;
+  option: ThemedChartOption;
   ariaLabel: string;
   className?: string;
+}
+
+function resolveOption(option: ThemedChartOption, theme: ChartTheme): EChartsOption {
+  const resolved = typeof option === 'function' ? option(theme) : option;
+  return {
+    ...resolved,
+    backgroundColor: 'transparent',
+    ...(theme.colors.length > 0 ? { color: theme.colors } : {}),
+    textStyle: { ...resolved.textStyle, color: theme.foreground },
+  };
 }
 
 /** Shared lazy ECharts host with token colors, resize handling and clean disposal. */
@@ -56,8 +62,7 @@ export function Chart({ option, ariaLabel, className }: ChartProps) {
   const elementRef = React.useRef<HTMLDivElement | null>(null);
   const chartRef = React.useRef<EChartsInstance | null>(null);
   const optionRef = React.useRef(option);
-  const colorsRef = React.useRef<string[]>([]);
-  const [colors, setColors] = React.useState<string[]>([]);
+  const themeRef = React.useRef<ChartTheme | null>(null);
   const [attempt, setAttempt] = React.useState(0);
   const [ready, setReady] = React.useState(false);
   const [failed, setFailed] = React.useState(false);
@@ -67,14 +72,11 @@ export function Chart({ option, ariaLabel, className }: ChartProps) {
   }, [option]);
 
   React.useEffect(() => {
-    colorsRef.current = colors;
-  }, [colors]);
-
-  React.useEffect(() => {
     const element = elementRef.current;
     if (element === null) return undefined;
 
-    setColors(readChartColors(element));
+    const theme = readChartTheme(element);
+    themeRef.current = theme;
     let disposed = false;
     let resizeObserver: ResizeObserver | null = null;
     let removeWindowResize: (() => void) | null = null;
@@ -94,11 +96,7 @@ export function Chart({ option, ariaLabel, className }: ChartProps) {
         }
         const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         chart.setOption(
-          {
-            ...optionRef.current,
-            ...(colorsRef.current.length > 0 ? { color: colorsRef.current } : {}),
-            animation: !reducedMotion,
-          },
+          { ...resolveOption(optionRef.current, theme), animation: !reducedMotion },
           { notMerge: true },
         );
         chart.resize();
@@ -119,18 +117,15 @@ export function Chart({ option, ariaLabel, className }: ChartProps) {
 
   React.useEffect(() => {
     const chart = chartRef.current;
-    if (chart === null) return;
+    const theme = themeRef.current;
+    if (chart === null || theme === null) return;
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     chart.setOption(
-      {
-        ...option,
-        ...(colors.length > 0 ? { color: colors } : {}),
-        animation: !reducedMotion,
-      },
+      { ...resolveOption(option, theme), animation: !reducedMotion },
       { notMerge: true },
     );
     chart.resize();
-  }, [colors, option]);
+  }, [option]);
 
   return (
     <div className={cn('relative', className)}>

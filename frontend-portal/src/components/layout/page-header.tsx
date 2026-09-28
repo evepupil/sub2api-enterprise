@@ -10,8 +10,9 @@ export interface PageHeaderProps extends React.ComponentProps<'div'> {
 }
 
 /**
- * 页面头部：标题 28px 页面字号，长标题自然换行；
+ * 页面头部：统一深色页面标题，28px 页面字号，长标题自然换行。
  * 操作按钮在桌面与标题同行右对齐，窄屏换到标题下方单独一行。
+ * 签名保持 M0 契约（title / actions），仅视觉跟随深色主题。
  */
 export function PageHeader({ title, actions, className, ...props }: PageHeaderProps) {
   return (
@@ -23,7 +24,7 @@ export function PageHeader({ title, actions, className, ...props }: PageHeaderPr
       )}
       {...props}
     >
-      <h1 className="min-w-0 max-w-full break-words text-page font-semibold text-foreground">
+      <h1 className="min-w-0 max-w-full text-page font-semibold break-words text-foreground">
         {title}
       </h1>
       {actions !== undefined ? (

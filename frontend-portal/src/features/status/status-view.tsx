@@ -1,8 +1,8 @@
 'use client';
 
-import { RefreshCw } from 'lucide-react';
+import { Activity, CircleAlert, CircleCheck, Clock3, RefreshCw } from 'lucide-react';
 
-import { PageHeader } from '../../components/layout/page-header';
+import { SectionHeading } from '../../components/marketing/section-heading';
 import { Alert } from '../../components/ui/alert';
 import { Badge, type BadgeVariant } from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
@@ -39,6 +39,11 @@ const STATUS_BADGE_VARIANTS: Readonly<Record<StatusLevel, BadgeVariant>> = {
   unknown: 'neutral',
 };
 
+function StatusLevelIcon({ level }: { level: StatusLevel }) {
+  const Icon = level === 'operational' ? CircleCheck : level === 'unknown' ? Clock3 : CircleAlert;
+  return <Icon aria-hidden="true" className="size-5" />;
+}
+
 export interface StatusViewProps {
   result: PublicResult<StatusData>;
 }
@@ -70,13 +75,11 @@ function StatusComponentCard({ component }: { component: StatusComponent }) {
   const lastPoint = component.history.at(-1);
 
   return (
-    <Card className="gap-5 rounded-card p-5 shadow-none">
-      <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <Card className="status-component-card gap-5 rounded-card p-5 shadow-none">
+      <div className="status-component-header">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-            <h2 className="min-w-0 break-words text-xl font-semibold text-foreground [overflow-wrap:anywhere]">
-              {component.name}
-            </h2>
+            <h2 className="status-component-name min-w-0 break-words">{component.name}</h2>
             <Badge
               variant={STATUS_BADGE_VARIANTS[component.level]}
               className={
@@ -107,10 +110,10 @@ function StatusComponentCard({ component }: { component: StatusComponent }) {
         </dl>
       </div>
 
-      <section className="space-y-3 border-t border-border pt-4" aria-label="近期可用性">
-        <h3 className="text-sm font-medium text-foreground">近期可用性</h3>
+      <section className="status-history" aria-label="近期可用性">
+        <h3>近期可用性</h3>
         {component.history.length === 0 ? (
-          <p className="text-sm text-muted-foreground">暂无探测记录</p>
+          <p className="status-history-empty">暂无探测记录</p>
         ) : (
           <>
             <StatusTimeline points={component.history} />
@@ -151,62 +154,93 @@ export function StatusView({ result }: StatusViewProps) {
   );
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="服务状态"
-        actions={
-          result.kind === 'ready' ? (
-            <>
-              <time dateTime={result.data.updatedAt} className="text-sm text-muted-foreground">
-                更新时间：{formatShanghaiDateTime(result.data.updatedAt)} (Asia/Shanghai)
+    <div className="public-page public-page-status space-y-8">
+      <section
+        className="public-page-hero"
+        data-slot="marketing-hero"
+        aria-labelledby="status-title"
+      >
+        <div className="public-page-hero-row">
+          <div className="public-page-hero-copy">
+            <p className="public-page-eyebrow public-page-eyebrow-with-icon">
+              <Activity aria-hidden="true" /> 服务状态 / STATUS
+            </p>
+            <h1 id="status-title" className="public-page-title">
+              每一次连接，都有迹可循。
+            </h1>
+            <p className="public-page-description">
+              查看实际探测得到的可用率、最近响应耗时和历史记录，遇到问题时沿着同一条信息找到答案。
+            </p>
+          </div>
+          {result.kind === 'ready' ? (
+            <div className="status-page-actions">
+              <time dateTime={result.data.updatedAt}>
+                更新于 {formatShanghaiDateTime(result.data.updatedAt)}
               </time>
               {refreshButton}
-            </>
-          ) : undefined
-        }
-      />
+            </div>
+          ) : null}
+        </div>
+      </section>
 
       {result.kind === 'disabled' ? (
-        <EmptyState title="服务状态尚未公开" />
+        <div className="public-page-state">
+          <EmptyState title="服务状态尚未公开" />
+        </div>
       ) : result.kind === 'authentication-required' ? (
-        <EmptyState title="暂时无法查看服务状态" />
+        <div className="public-page-state">
+          <EmptyState title="暂时无法查看服务状态" description="当前账号没有查看状态数据的权限。" />
+        </div>
       ) : result.kind === 'unavailable' ? (
-        <Alert
-          variant="destructive"
-          title="服务状态暂时无法加载"
-          action={
-            <Button variant="outline" onClick={() => window.location.reload()}>
-              重试
-            </Button>
-          }
-        />
+        <div className="public-page-state">
+          <Alert
+            variant="destructive"
+            title="服务状态暂时无法加载"
+            action={
+              <Button variant="outline" onClick={() => window.location.reload()}>
+                重试
+              </Button>
+            }
+          />
+        </div>
       ) : result.kind === 'ready' ? (
         <>
-          <dl className="grid grid-cols-1 divide-y divide-border border-y border-border sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-            <div className="py-4 sm:px-5">
-              <dt className="text-sm text-muted-foreground">总体状态</dt>
-              <dd className="mt-2">
-                <Badge
-                  variant={STATUS_BADGE_VARIANTS[result.data.level]}
-                  className={
-                    result.data.level === 'unknown' ? 'bg-muted text-muted-foreground' : undefined
-                  }
-                >
-                  {STATUS_LABELS[result.data.level]}
-                </Badge>
-              </dd>
+          <dl className="status-summary-grid" aria-label="服务状态摘要">
+            <div className="status-summary-card" data-level={result.data.level}>
+              <div className="status-summary-icon" aria-hidden="true">
+                <StatusLevelIcon level={result.data.level} />
+              </div>
+              <div>
+                <dt>总体状态</dt>
+                <dd>
+                  <Badge
+                    variant={STATUS_BADGE_VARIANTS[result.data.level]}
+                    className={
+                      result.data.level === 'unknown' ? 'bg-muted text-muted-foreground' : undefined
+                    }
+                  >
+                    {STATUS_LABELS[result.data.level]}
+                  </Badge>
+                </dd>
+              </div>
             </div>
-            <div className="py-4 sm:px-5">
-              <dt className="text-sm text-muted-foreground">近7天可用率</dt>
-              <dd className="mt-2 text-xl font-semibold tabular-nums text-foreground">
-                {formatAvailability(result.data.availability)}
-              </dd>
+            <div className="status-summary-card">
+              <div className="status-summary-icon" aria-hidden="true">
+                <CircleCheck className="size-5" />
+              </div>
+              <div>
+                <dt>近7天可用率</dt>
+                <dd className="tabular-nums">{formatAvailability(result.data.availability)}</dd>
+              </div>
             </div>
-            <div className="py-4 sm:px-5">
-              <dt className="text-sm text-muted-foreground">监测项目数</dt>
-              <dd className="mt-2 text-xl font-semibold tabular-nums text-foreground">
-                {result.data.components.length}
-              </dd>
+            <div className="status-summary-card">
+              <div className="status-summary-icon" aria-hidden="true">
+                <Clock3 className="size-5" />
+              </div>
+              <div>
+                <dt>监测项目数</dt>
+                <dd className="tabular-nums">{result.data.components.length}</dd>
+              </div>
             </div>
           </dl>
 
@@ -219,6 +253,29 @@ export function StatusView({ result }: StatusViewProps) {
               ))}
             </div>
           )}
+
+          <section className="status-guidance" aria-labelledby="status-guidance-title">
+            <SectionHeading
+              eyebrow="读懂状态"
+              title="三组信息，刚好够你判断下一步。"
+              id="status-guidance-title"
+              description="页面只展示已经探测到的事实，缺失时会明确说明记录边界。"
+            />
+            <div className="status-guidance-grid">
+              <article>
+                <h3>可用性</h3>
+                <p>近七天探测结果的比例，用来观察服务是否持续可用。</p>
+              </article>
+              <article>
+                <h3>响应耗时</h3>
+                <p>每个项目最近一次响应的耗时，只代表当前值，不代替历史曲线。</p>
+              </article>
+              <article>
+                <h3>记录范围</h3>
+                <p>历史条来自实际探测记录，覆盖范围取决于探测间隔和返回数量。</p>
+              </article>
+            </div>
+          </section>
         </>
       ) : null}
     </div>

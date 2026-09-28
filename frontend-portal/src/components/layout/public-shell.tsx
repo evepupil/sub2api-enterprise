@@ -11,12 +11,16 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } 
 import type { PublicAction } from '../../features/public/types';
 import { Brand } from './brand';
 
-/** 官网固定导航：桌面与手机共用这一组链接与匹配规则。 */
+/**
+ * 官网固定导航：桌面与手机共用这一组链接与匹配规则。
+ * 锚点链接（含 #）不参与当前页高亮，避免和真实路由页争同一个 aria-current。
+ */
 const PUBLIC_NAVIGATION = [
-  { href: '/', label: '首页' },
-  { href: '/catalog', label: '模型' },
+  { href: '/#platform', label: '产品功能' },
+  { href: '/catalog', label: '模型价格' },
   { href: '/status', label: '服务状态' },
-  { href: '/help', label: '帮助' },
+  { href: '/#stories', label: '客户故事' },
+  { href: '/help', label: '开发文档' },
 ] as const;
 
 /**
@@ -28,8 +32,13 @@ const DEFAULT_ACTIONS: readonly PublicAction[] = [
   { href: '/console', label: '进入控制台', primary: true },
 ];
 
+/** 锚点项只做同页定位，不成为“当前页”。 */
+function isAnchorHref(href: string): boolean {
+  return href.includes('#');
+}
+
 function isItemActive(item: { href: string }, activePath: string): boolean {
-  return isNavigationActive(activePath, item.href);
+  return !isAnchorHref(item.href) && isNavigationActive(activePath, item.href);
 }
 
 export interface PublicShellProps extends React.ComponentProps<'div'> {
@@ -41,7 +50,7 @@ export interface PublicShellProps extends React.ComponentProps<'div'> {
    * 并负责更新 activePath。未传时渲染正常链接，站内导航。
    */
   onNavigate?: (href: string) => void;
-  /** 品牌站名纯文本；未传保留默认“模型服务”。 */
+  /** 品牌站名纯文本；未传保留默认映射（旧“模型服务”→ Nexus API）。 */
   siteName?: string;
   /** 导航右侧操作入口；未传保留 M0 预览默认，传空数组则隐藏整块。 */
   actions?: readonly PublicAction[];
@@ -50,9 +59,12 @@ export interface PublicShellProps extends React.ComponentProps<'div'> {
 }
 
 /**
- * 官网外壳：64px 顶栏，品牌左、导航中、操作右。
- * 手机导航收进 44px 触控按钮打开的 Dialog 菜单，链接与匹配规则和桌面一致。
- * 外壳本身不做数据请求；onNavigate 未传时依赖原生站内导航。
+ * 官网外壳：1280px 以上是 top 16px 的浮动窄边框导航条，
+ * 初始透明、滚动后变深色模糊卡片；窄屏为 64px 固定顶栏。
+ * 品牌在左，五个导航居中，右侧操作由 actions 配置决定。
+ * 手机导航收进 44px 触控按钮打开的 Radix Dialog 菜单，链接与匹配规则和桌面一致，
+ * 点击链接或 Escape 关闭后焦点归还触发按钮（Radix 原语负责）。
+ * 外壳不做数据请求；onNavigate 未传时依赖原生站内导航。
  */
 export function PublicShell({
   children,
@@ -65,17 +77,27 @@ export function PublicShell({
   ...props
 }: PublicShellProps) {
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [scrolled, setScrolled] = React.useState(false);
+
+  React.useEffect(() => {
+    const onScroll = () => {
+      setScrolled(window.scrollY > 8);
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const handleNavClick = (href: string) => (event: React.MouseEvent<HTMLAnchorElement>) => {
+    setMobileOpen(false);
     if (!onNavigate) {
       return;
     }
     event.preventDefault();
     onNavigate(href);
-    setMobileOpen(false);
   };
 
-  const renderNavLink = (item: { href: string; label: string }) => {
+  const renderNavLink = (item: { href: string; label: string }, variant: 'bar' | 'menu') => {
     const active = isItemActive(item, activePath);
     return (
       <a
@@ -84,10 +106,16 @@ export function PublicShell({
         aria-current={active ? 'page' : undefined}
         onClick={handleNavClick(item.href)}
         className={cn(
-          'inline-flex h-touch items-center rounded-control px-3 text-sm font-medium transition-colors duration-150 outline-none',
-          'focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ring',
-          'hover:text-foreground',
-          active ? 'text-foreground' : 'text-muted-foreground',
+          'inline-flex items-center rounded-pill text-sm font-medium transition-colors duration-150 outline-none',
+          'focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:ring-ring',
+          variant === 'bar' ? 'h-control px-4' : 'h-touch px-3 text-base',
+          variant === 'bar'
+            ? active
+              ? 'bg-secondary text-foreground'
+              : 'text-muted-foreground hover:text-foreground'
+            : active
+              ? 'bg-secondary text-foreground'
+              : 'text-muted-foreground hover:bg-secondary hover:text-foreground',
         )}
       >
         {item.label}
@@ -112,9 +140,9 @@ export function PublicShell({
         onClick={handleNavClick(action.href)}
         className={cn(
           'flex h-touch items-center rounded-control px-3 text-base font-medium outline-none',
-          'focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ring',
-          'hover:bg-muted',
-          action.primary === true ? 'text-foreground' : 'text-muted-foreground',
+          'focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:ring-ring',
+          'hover:bg-secondary',
+          action.primary === true ? 'bg-primary text-primary-foreground' : 'text-muted-foreground',
         )}
       >
         {action.label}
@@ -126,9 +154,17 @@ export function PublicShell({
     <div className={cn('flex min-h-dvh flex-col bg-background', className)} {...props}>
       <header
         data-slot="public-header"
-        className="sticky top-0 z-40 border-b border-border bg-card"
+        data-scrolled={scrolled || undefined}
+        className={cn(
+          'fixed inset-x-0 top-0 z-40 transition-colors duration-150 motion-reduce:transition-none',
+          'border-b border-border bg-background/90 backdrop-blur',
+          // 1280px 以上：top 16px 的浮动窄条，最大宽度与官网内容一致（与 .marketing-shell 对齐）
+          'xl:top-[var(--public-header-offset)] xl:mx-auto xl:w-[min(100%,var(--marketing-shell-max))]',
+          'xl:rounded-pill xl:border xl:bg-transparent xl:backdrop-blur-none',
+          scrolled && 'xl:border-border xl:bg-card/85 xl:shadow-overlay xl:backdrop-blur-xl',
+        )}
       >
-        <div className="mx-auto flex h-header w-full max-w-site items-center gap-6 px-4 md:px-8 xl:px-16">
+        <div className="mx-auto flex h-header w-full items-center gap-4 px-4 md:px-8 xl:px-3">
           <Brand
             href="/"
             name={siteName}
@@ -136,70 +172,73 @@ export function PublicShell({
             className="min-w-0 shrink"
           />
 
-          {/* 桌面中部导航 */}
-          <nav aria-label="站内导航" className="hidden flex-1 md:block">
+          {/* 桌面中部导航：产品功能 / 模型价格 / 服务状态 / 客户故事 / 开发文档。
+              1024px 以下改用手机菜单，避免五个中文标签在 768px 挤坏布局。 */}
+          <nav aria-label="站内导航" className="hidden flex-1 lg:block">
             <div className="flex items-center justify-center gap-1">
-              {PUBLIC_NAVIGATION.map(renderNavLink)}
+              {PUBLIC_NAVIGATION.map((item) => renderNavLink(item, 'bar'))}
             </div>
           </nav>
 
           {/* 桌面右侧操作：actions 为空数组时不渲染 */}
           {actions.length > 0 ? (
-            <div className="hidden shrink-0 items-center gap-2 md:flex">
+            <div className="hidden shrink-0 items-center gap-2 lg:flex">
               {actions.map((action) => renderAction(action, 'button'))}
             </div>
           ) : null}
 
-          {/* 手机菜单按钮：44px 触控，打开 Dialog 侧向菜单 */}
+          {/* 手机菜单按钮：44px 触控，打开 Radix Dialog 侧向菜单 */}
           <Dialog open={mobileOpen} onOpenChange={setMobileOpen}>
             <DialogTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
                 aria-label="打开导航菜单"
-                className="ml-auto md:hidden"
+                className="ml-auto lg:hidden"
               >
                 <Menu className="size-5" aria-hidden="true" />
               </Button>
             </DialogTrigger>
             <DialogContent
-              className="inset-y-0 right-0 left-auto top-0 h-dvh max-h-dvh w-72 max-w-[85vw] translate-y-0 rounded-none rounded-l-dialog border-l"
+              className="inset-y-0 top-0 right-0 left-auto flex h-dvh max-h-dvh w-72 max-w-[85vw] translate-x-0 translate-y-0 flex-col rounded-none rounded-l-dialog border-l bg-card p-4"
               aria-describedby={undefined}
             >
               <DialogTitle className="sr-only">站内导航</DialogTitle>
               <DialogDescription className="sr-only">
                 选择要访问的页面，点击后菜单会关闭。
               </DialogDescription>
-              <nav aria-label="手机导航" className="mt-6 flex flex-col gap-1">
-                {PUBLIC_NAVIGATION.map((item) => {
-                  const active = isItemActive(item, activePath);
-                  return (
-                    <a
-                      key={item.href}
-                      href={item.href}
-                      aria-current={active ? 'page' : undefined}
-                      onClick={handleNavClick(item.href)}
-                      className={cn(
-                        'flex h-touch items-center rounded-control px-3 text-base font-medium transition-colors duration-150 outline-none',
-                        'focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ring',
-                        'hover:bg-muted',
-                        active ? 'bg-muted text-foreground' : 'text-foreground',
-                      )}
-                    >
-                      {item.label}
-                    </a>
-                  );
-                })}
-                <div className="my-2 border-t border-border" />
-                {actions.map((action) => renderAction(action, 'menu'))}
-              </nav>
+              <div className="flex min-h-0 flex-1 flex-col">
+                <Brand
+                  href="/"
+                  name={siteName}
+                  onClick={handleNavClick('/')}
+                  className="h-touch pr-12"
+                />
+                <nav
+                  aria-label="手机导航"
+                  className="mt-2 flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto"
+                >
+                  {PUBLIC_NAVIGATION.map((item) => renderNavLink(item, 'menu'))}
+                </nav>
+                {actions.length > 0 ? (
+                  <div className="mt-4 flex shrink-0 flex-col gap-1 border-t border-border pt-4">
+                    {actions.map((action) => renderAction(action, 'menu'))}
+                  </div>
+                ) : null}
+              </div>
             </DialogContent>
           </Dialog>
         </div>
       </header>
+      {/*
+        唯一的 main：顶部留出固定导航的让位间距，避免正文被浮动条遮挡。
+        首页 fullWidth 时宽度交给页面自己控制，其余页面沿用 1408px 业务宽度；
+        公开内页的 1200px 官网内容宽由 public-pages.css 各页面自己控制，
+        这里不改变既有宽度契约，避免与内页实施路冲突。
+      */}
       <main
         className={cn(
-          'w-full flex-1',
+          'w-full flex-1 pt-[var(--public-header-clearance)]',
           fullWidth ? 'min-w-0' : 'mx-auto max-w-site px-4 md:px-8 xl:px-16',
         )}
       >

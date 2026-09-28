@@ -1,14 +1,15 @@
 import type { Metadata } from 'next';
 import { AppProviders } from '@/components/app-providers';
+import { marketingContent } from '@/content/marketing';
 
 import '@/styles/globals.css';
 
 export const metadata: Metadata = {
   title: {
-    default: '模型服务',
-    template: '%s · 模型服务',
+    default: marketingContent.brand.name,
+    template: `%s · ${marketingContent.brand.name}`,
   },
-  description: '模型服务门户与客户控制台。',
+  description: marketingContent.hero.description,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

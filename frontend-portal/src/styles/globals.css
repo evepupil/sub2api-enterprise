@@ -1,6 +1,15 @@
 @import 'tailwindcss';
 @import './tokens.css';
+/* 页面专属样式：首页前半、首页后半、公开内页 */
 @import './marketing.css';
+/* 首页后半与公开内页样式由各自实施路创建；缺失时构建会明确报错，不静默跳过 */
+@import './marketing-sections.css';
+@import './public-pages.css';
+/*
+ * 公共营销基础类放在最后：规格要求各页面专属样式表不得重定义公共类，
+ * 因此同名冲突时以 marketing-base.css 为准，避免首页旧样式覆盖 1200px 宽与 96px 间距。
+ */
+@import './marketing-base.css';
 
 /* 显式声明扫描根目录，避免依赖自动探测结果 */
 @source '../';
@@ -24,6 +33,7 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-popover: var(--popover);
@@ -47,12 +57,22 @@
   --text-page: var(--font-size-page);
   --text-hero: var(--font-size-hero);
 
+  --text-display: var(--font-size-display);
+  --text-display-md: var(--font-size-display-md);
+  --text-display-sm: var(--font-size-display-sm);
+  --text-section: var(--font-size-section);
+  --text-section-md: var(--font-size-section-md);
+  --text-section-sm: var(--font-size-section-sm);
+
   --leading-body: var(--line-height-body);
   --leading-heading: var(--line-height-heading);
+  --leading-display: var(--line-height-display);
 
   --radius-control: var(--control-radius);
   --radius-card: var(--card-radius);
   --radius-dialog: var(--dialog-radius);
+  --radius-panel: var(--panel-radius);
+  --radius-pill: var(--pill-radius);
 
   --shadow-overlay: var(--overlay-shadow);
 
@@ -97,6 +117,10 @@
 
 @utility min-w-table {
   min-width: var(--table-min-width);
+}
+
+@utility max-w-marketing {
+  max-width: var(--marketing-shell-max);
 }
 
 @layer base {

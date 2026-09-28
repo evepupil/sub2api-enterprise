@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import type { Stripe, StripeElements, StripePaymentElement } from '@stripe/stripe-js';
+import type { Appearance, Stripe, StripeElements, StripePaymentElement } from '@stripe/stripe-js';
 
 import { Alert } from '../../components/ui/alert';
 import { Button } from '../../components/ui/button';
@@ -100,10 +100,33 @@ export function StripePaymentInline({
           return;
         }
 
+        const container = mountRef.current;
+        const computedStyle = container === null ? null : window.getComputedStyle(container);
+        const readVariable = (...names: string[]): string | undefined => {
+          for (const name of names) {
+            const value = computedStyle?.getPropertyValue(name).trim();
+            if (value) return value;
+          }
+          return undefined;
+        };
+        const variables: NonNullable<Appearance['variables']> = {};
+        const colorPrimary = readVariable('--primary');
+        const colorBackground = readVariable('--card', '--background');
+        const colorText = readVariable('--foreground');
+        const colorDanger = readVariable('--destructive');
+        const fontFamily = readVariable('--font-family-sans');
+        const borderRadius = readVariable('--control-radius');
+        if (colorPrimary !== undefined) variables.colorPrimary = colorPrimary;
+        if (colorBackground !== undefined) variables.colorBackground = colorBackground;
+        if (colorText !== undefined) variables.colorText = colorText;
+        if (colorDanger !== undefined) variables.colorDanger = colorDanger;
+        if (fontFamily !== undefined) variables.fontFamily = fontFamily;
+        if (borderRadius !== undefined) variables.borderRadius = borderRadius;
+
         const elements = stripe.elements({
           clientSecret,
           locale: 'zh',
-          appearance: { theme: 'stripe' },
+          appearance: { theme: 'night', variables },
         });
         const element = elements.create('payment', { layout: 'tabs' });
         localElement = element;

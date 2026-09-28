@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 
-import { PageHeader } from '../../components/layout/page-header';
+import { ArrowRight, Search } from 'lucide-react';
+import { MarketingLink } from '../../components/marketing/marketing-link';
 import { Alert } from '../../components/ui/alert';
 import { Button } from '../../components/ui/button';
 import { EmptyState } from '../../components/ui/empty-state';
@@ -53,47 +54,85 @@ export function CatalogView({ result }: CatalogViewProps) {
   });
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="模型与价格"
-        actions={<span className="text-sm text-muted-foreground">美元 / 百万 Token</span>}
-      />
+    <div className="public-page public-page-catalog space-y-8">
+      <section
+        className="public-page-hero"
+        data-slot="marketing-hero"
+        aria-labelledby="catalog-title"
+      >
+        <div className="public-page-hero-row">
+          <div className="public-page-hero-copy">
+            <p className="public-page-eyebrow">模型目录 / CATALOG</p>
+            <h1 id="catalog-title" className="public-page-title">
+              为你的下一步，找到合适的模型。
+            </h1>
+            <p className="public-page-description">
+              按厂家、代号和四项实际价格快速比较，选好模型后用同一个账户接入你的工作流。
+            </p>
+          </div>
+          <MarketingLink href="/help" variant="outline" arrow>
+            查看接入说明
+          </MarketingLink>
+        </div>
+        <div className="public-page-tags" aria-label="目录信息">
+          <span>
+            <ArrowRight aria-hidden="true" /> 四维价格
+          </span>
+          <span>
+            <ArrowRight aria-hidden="true" /> 美元计费
+          </span>
+          <span>
+            <ArrowRight aria-hidden="true" /> 一个账户
+          </span>
+        </div>
+      </section>
 
       {result.kind === 'disabled' ? (
-        <EmptyState title="模型目录尚未开放" />
+        <div className="public-page-state">
+          <EmptyState title="模型目录尚未开放" />
+        </div>
       ) : result.kind === 'authentication-required' ? (
-        <EmptyState
-          title="请登录后查看模型"
-          action={
-            <Button asChild>
-              <a href="/login?next=/catalog">登录</a>
-            </Button>
-          }
-        />
+        <div className="public-page-state">
+          <EmptyState
+            title="请登录后查看模型"
+            description="登录后可以查看当前账户适用的模型分组和价格。"
+            action={
+              <Button asChild>
+                <a href="/login?next=/catalog">登录</a>
+              </Button>
+            }
+          />
+        </div>
       ) : result.kind === 'unavailable' ? (
-        <Alert
-          variant="destructive"
-          title="模型价格暂时无法加载"
-          action={
-            <Button variant="outline" onClick={() => window.location.reload()}>
-              重试
-            </Button>
-          }
-        />
+        <div className="public-page-state">
+          <Alert
+            variant="destructive"
+            title="模型价格暂时无法加载"
+            action={
+              <Button variant="outline" onClick={() => window.location.reload()}>
+                重试
+              </Button>
+            }
+          />
+        </div>
       ) : (
         <>
-          <div className="flex flex-col gap-4 md:flex-row md:items-end">
-            <div className="min-w-0 flex-1 space-y-2">
+          <section className="catalog-toolbar marketing-surface" aria-label="模型筛选">
+            <div className="catalog-field min-w-0">
               <Label htmlFor="catalog-model-search">搜索模型</Label>
-              <Input
-                id="catalog-model-search"
-                type="search"
-                value={search}
-                onChange={(event) => setSearch(event.currentTarget.value)}
-                placeholder="搜索模型代号"
-              />
+              <div className="catalog-input-wrap">
+                <Search aria-hidden="true" className="catalog-input-icon" />
+                <Input
+                  id="catalog-model-search"
+                  type="search"
+                  value={search}
+                  onChange={(event) => setSearch(event.currentTarget.value)}
+                  placeholder="搜索模型代号或厂家"
+                  className="pl-10"
+                />
+              </div>
             </div>
-            <div className="w-full space-y-2 md:w-48 md:shrink-0">
+            <div className="catalog-field catalog-provider-field">
               <Label htmlFor="catalog-provider-filter">厂家</Label>
               <Select value={providerFilter} onValueChange={setProviderFilter}>
                 <SelectTrigger id="catalog-provider-filter">
@@ -109,13 +148,18 @@ export function CatalogView({ result }: CatalogViewProps) {
                 </SelectContent>
               </Select>
             </div>
-          </div>
+            <p className="catalog-toolbar-note">价格单位：美元 / 百万 Token</p>
+          </section>
 
           {models.length === 0 ? (
-            <EmptyState title="暂无公开模型" />
+            <EmptyState
+              title="暂无公开模型"
+              description="当前没有可展示的模型价格，请稍后再来查看。"
+            />
           ) : visibleModels.length === 0 ? (
             <EmptyState
               title="没有匹配的模型"
+              description="换一个模型代号或厂家，继续查找可用价格。"
               action={
                 <Button
                   variant="outline"
@@ -129,7 +173,7 @@ export function CatalogView({ result }: CatalogViewProps) {
               }
             />
           ) : (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <div className="catalog-model-grid" data-slot="catalog-grid">
               {visibleModels.map((model) => (
                 <ModelCard
                   key={`${model.providerKey}:${model.provider}:${model.id}`}

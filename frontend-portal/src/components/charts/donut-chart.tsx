@@ -1,6 +1,7 @@
 'use client';
 
 import type { EChartsOption } from 'echarts';
+import type { ChartTheme } from './chart-theme';
 import { Chart } from './chart';
 import { cn } from '../../lib/utils';
 
@@ -29,14 +30,15 @@ export function DonutChart({
   centerTitle,
 }: DonutChartProps) {
   const hasPositiveValue = data.some((item) => item.value > 0);
-  const chartData = hasPositiveValue
-    ? data.map((item) => ({ name: item.name, value: item.value }))
-    : [{ name: EMPTY_CHART_ITEM, value: 1, itemStyle: { color: 'var(--border)' } }];
-  const option: EChartsOption = {
+  const option = (theme: ChartTheme): EChartsOption => ({
     tooltip: {
       show: hasPositiveValue,
       trigger: 'item',
       renderMode: 'richText',
+      backgroundColor: theme.card,
+      borderColor: theme.border,
+      borderWidth: 1,
+      textStyle: { color: theme.foreground },
       formatter: (params) => {
         if (Array.isArray(params)) return '';
         return `${params.name}\n${params.value}`;
@@ -48,13 +50,15 @@ export function DonutChart({
         radius: ['48%', '72%'],
         center: ['50%', '50%'],
         avoidLabelOverlap: true,
-        itemStyle: { borderColor: 'var(--card)', borderWidth: 2 },
+        itemStyle: { borderColor: theme.card, borderWidth: 2 },
         label: { show: false },
         emphasis: { label: { show: false } },
-        data: chartData,
+        data: hasPositiveValue
+          ? data.map((item) => ({ name: item.name, value: item.value }))
+          : [{ name: EMPTY_CHART_ITEM, value: 1, itemStyle: { color: theme.border } }],
       },
     ],
-  };
+  });
   const showCenter = centerValue !== undefined || centerLabel !== undefined;
 
   return (

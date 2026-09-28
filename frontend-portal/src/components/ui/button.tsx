@@ -17,7 +17,8 @@ const buttonVariantClasses: Record<ButtonVariant, string> = {
   default: 'bg-primary text-primary-foreground hover:bg-primary/90',
   outline: 'border border-input bg-card hover:bg-muted',
   ghost: 'hover:bg-muted',
-  destructive: 'bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive',
+  destructive:
+    'bg-destructive text-destructive-foreground hover:bg-destructive/90 focus-visible:ring-destructive',
 };
 
 const buttonSizeClasses: Record<ButtonSize, string> = {

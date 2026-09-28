@@ -146,9 +146,9 @@ export function ConsoleShell({
         onClick={handleNavClick(item.href)}
         className={cn(
           'flex h-touch items-center gap-3 rounded-control px-3 text-sm font-medium transition-colors duration-150 outline-none',
-          'focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ring',
-          'hover:bg-muted hover:text-foreground',
-          active ? 'bg-muted text-foreground' : 'text-muted-foreground',
+          'focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-card focus-visible:ring-ring',
+          'hover:bg-secondary hover:text-foreground',
+          active ? 'bg-secondary text-primary' : 'text-muted-foreground',
         )}
       >
         <Icon className="size-4 shrink-0" aria-hidden="true" />
@@ -190,6 +190,9 @@ export function ConsoleShell({
                 {renderNavGroup(mainItems, '控制台导航')}
               </div>
               <div className="mt-4 flex shrink-0 flex-col gap-1 border-t border-border pt-4">
+                {accountActions !== undefined ? (
+                  <div className="mb-2 flex flex-col gap-2">{accountActions}</div>
+                ) : null}
                 {renderNavGroup(footerItems, '控制台底部导航')}
               </div>
             </div>
@@ -199,7 +202,7 @@ export function ConsoleShell({
         <AccountIdentity audience={audience} className="ml-auto text-xs" />
       </header>
 
-      {/* 桌面侧栏：216px 白底右边框，固定在视口内 */}
+      {/* 桌面侧栏：216px 深色卡片右边框，固定在视口内 */}
       <aside
         data-slot="console-sidebar"
         className="sticky top-0 hidden h-dvh w-sidebar shrink-0 flex-col border-r border-border bg-card md:flex"

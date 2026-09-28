@@ -1,0 +1,269 @@
+/*
+ * 官网公共营销基础类（共享基础路所有）。
+ *
+ * 规格：design/proactiv-redesign.md 第 2、3 节。
+ * 这里只放跨页面复用的骨架类，颜色与尺寸全部引用 tokens.css；
+ * 首页前半专属样式在 marketing.css，首页后半在 marketing-sections.css，
+ * 公开内页在 public-pages.css，各自不得覆盖本文件的公共定义。
+ * globals.css 把本文件放在页面专属样式之后，确保公共数值不被旧样式覆盖。
+ */
+
+/* 锚点定位：让 /#platform 等首页锚点滚入时不被浮动导航遮住 */
+.marketing-page :is(section, div, h2, h3)[id] {
+  scroll-margin-top: var(--public-header-clearance);
+}
+
+/* 页面根：裁剪横向溢出，深色底与前景色 */
+.marketing-page {
+  overflow: clip;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* 内容宽：最大 1200px，外侧 16 / 32px 边距（内容盒含在 1200px 内） */
+.marketing-shell {
+  width: min(calc(100% - (2 * var(--marketing-gutter-mobile))), var(--marketing-shell-max));
+  margin-inline: auto;
+}
+
+/* 区块纵向间距：桌面 96px，手机 64px */
+.marketing-section {
+  padding-block: var(--marketing-section-gap-mobile);
+}
+
+/* 区块标题：eyebrow + 标题 + 说明 + 可选右侧操作 */
+.marketing-section-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.marketing-section-heading h2 {
+  margin: 0;
+  font-size: var(--font-size-section-sm);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: var(--line-height-heading);
+}
+
+.marketing-section-heading p {
+  margin: 0;
+  max-width: 68ch;
+  color: var(--muted-foreground);
+  font-size: var(--font-size-base);
+  line-height: 1.7;
+}
+
+.marketing-section-heading a,
+.marketing-inline-link {
+  color: var(--primary);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.marketing-section-heading a:hover,
+.marketing-inline-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* 区块右侧操作区 */
+.marketing-heading-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+
+/* 小标签：大写、字距放宽 */
+.marketing-eyebrow,
+.marketing-kicker {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* 主标题：80 / 60 / 40，白到灰渐变。
+   用背景渐变而非透明度，首屏服务端渲染即为可见状态，不依赖 JS 动画。
+   标题元素带本类时优先级不低于页面专属样式，保证营销标题字号不被旧样式覆盖。 */
+.marketing-heading {
+  --marketing-heading-size: var(--font-size-display-sm);
+  margin: 0;
+  font-size: var(--marketing-heading-size);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: var(--line-height-display);
+  color: var(--foreground);
+}
+
+:is(h1, h2, h3).marketing-heading {
+  font-size: var(--marketing-heading-size);
+}
+
+/* 渐变文字需要同时支持 background-clip:text 与 color-mix；
+   任一不支持时保持不透明前景色，避免出现“透明文字”不可见。 */
+@supports ((background-clip: text) or (-webkit-background-clip: text)) and
+  (color: color-mix(in srgb, red, blue)) {
+  :is(h1, h2, h3).marketing-heading,
+  .marketing-heading {
+    background-image: var(--marketing-heading-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+/* 操作按钮组：默认居中；需要左对齐时加 -start 修饰类 */
+.marketing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.marketing-actions-start {
+  justify-content: flex-start;
+}
+
+/* 深色表面：微渐变 + 1px 描边 + 顶部微亮边 */
+.marketing-surface {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: var(--card-radius);
+  background-color: var(--card);
+  background-image: var(--marketing-surface-gradient);
+}
+
+.marketing-surface::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, var(--marketing-surface-highlight), transparent);
+  pointer-events: none;
+}
+
+/* 移动描边包裹器：外框装饰层绝对定位且不拦截指针，内容层保持可交互 */
+.moving-border {
+  position: relative;
+  border-radius: var(--panel-radius);
+  isolation: isolate;
+}
+
+.moving-border-decoration {
+  position: absolute;
+  inset: 0;
+  /* 装饰层在父元素背景之上、内容之下：外框描边与光点可见，不遮挡内部按钮 */
+  z-index: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.moving-border-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.moving-border-svg rect {
+  stroke: var(--border);
+  stroke-width: 1.5;
+}
+
+.moving-border-dot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: inline-block;
+  width: 160px;
+  height: 160px;
+  background: radial-gradient(circle, var(--marketing-glow-strong) 0%, transparent 62%);
+}
+
+.moving-border-content {
+  position: relative;
+  z-index: 1;
+  border-radius: inherit;
+}
+
+/* 对齐修饰：居中区块（平台能力等）在宽屏也保持纵向居中，不切成左右两栏 */
+.marketing-section-heading[data-align='left'] {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.marketing-section-heading[data-align='center'] {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.marketing-section-heading[data-align='center'] p {
+  margin-inline: auto;
+}
+
+@media (min-width: 768px) {
+  .marketing-shell {
+    width: min(calc(100% - (2 * var(--marketing-gutter-tablet))), var(--marketing-shell-max));
+  }
+
+  .marketing-section {
+    padding-block: var(--marketing-section-gap);
+  }
+
+  .marketing-section-heading h2 {
+    font-size: var(--font-size-section-md);
+  }
+
+  .marketing-heading {
+    --marketing-heading-size: var(--font-size-display-md);
+  }
+}
+
+@media (min-width: 1024px) {
+  .marketing-section-heading {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  .marketing-section-heading[data-align='center'] {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .marketing-section-heading h2 {
+    font-size: var(--font-size-section);
+  }
+
+  .marketing-heading-actions {
+    justify-content: flex-end;
+  }
+
+  .marketing-heading {
+    --marketing-heading-size: var(--font-size-display);
+  }
+}
+
+/* 减少动态：公共类不参与动画，只保证滚动立即生效 */
+@media (prefers-reduced-motion: reduce) {
+  .moving-border-dot {
+    display: none;
+  }
+
+  .marketing-page *,
+  .marketing-page *::before,
+  .marketing-page *::after {
+    scroll-behavior: auto !important;
+  }
+}

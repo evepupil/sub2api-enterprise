@@ -1,5 +1,7 @@
 # M1 帮助页面
 
+2026-09-28 视觉和任务入口按 [Proactiv 内页规格](proactiv-redesign.md#6-其它页面层) 更新，文章与公开设置仍按下述边界处理。
+
 依据：[官网规格](public-site.md)。导出 `HelpView({settings})`，使用主控提供的 `src/features/help/articles.ts` 内容。
 
 标题“帮助中心”，右侧当settings.documentationUrl有效时提供“完整接入文档”外部链接。桌面左侧216px文章目录，右侧白色正文卡；手机目录变横向/换行按钮在正文上方。分类“接入”“账户与用量”“公告”。文章列表每项按钮有标题、选中态与aria-current，点击切换正文，hash可选，不引入额外路由。
