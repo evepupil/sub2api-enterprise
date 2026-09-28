@@ -5,14 +5,13 @@
  * 本文件不放进层叠层，规则会压过组件自带的工具类；需要按页微调的尺寸走变量或 data 属性。
  */
 
-/* 页面底与侧栏、手机顶栏同一底色，不再用分隔线切开。 */
+/* 页面底与侧栏、手机顶栏同一底色；侧栏右侧与手机顶栏底部的分界线保留，标出侧栏边界。 */
 [data-slot='console-shell'] {
   background: var(--console-canvas);
 }
 
 [data-slot='console-shell']
   :is([data-slot='console-sidebar'], [data-slot='console-mobile-header']) {
-  border-color: transparent;
   background: var(--console-canvas);
 }
 

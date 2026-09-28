@@ -177,7 +177,7 @@ export function ConsoleShell({
                 <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
                   {renderNavGroup(mainItems, '控制台导航')}
                 </div>
-                <div className="mt-4 flex shrink-0 flex-col gap-1 pt-4">
+                <div className="mt-4 flex shrink-0 flex-col gap-1 border-t border-border pt-4">
                   {accountActions !== undefined ? (
                     <div className="mb-2 flex flex-col gap-2">{accountActions}</div>
                   ) : null}
@@ -190,7 +190,7 @@ export function ConsoleShell({
           <ThemeSwitcher className="ml-auto" />
         </header>
 
-        {/* 桌面侧栏：216px 深色卡片右边框，固定在视口内 */}
+        {/* 桌面侧栏：216px，右侧分界线，固定在视口内 */}
         <aside
           data-slot="console-sidebar"
           className="sticky top-0 hidden h-dvh w-sidebar shrink-0 flex-col border-r border-border bg-card md:flex"
@@ -201,7 +201,7 @@ export function ConsoleShell({
           <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pt-2 pb-4">
             {renderNavGroup(mainItems, '控制台导航')}
           </div>
-          <div className="shrink-0 p-4">
+          <div className="shrink-0 border-t border-border p-4">
             <div className="mb-2">
               <ThemeSwitcher compact={false} />
             </div>
