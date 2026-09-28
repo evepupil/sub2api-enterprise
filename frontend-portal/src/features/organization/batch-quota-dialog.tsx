@@ -18,10 +18,6 @@
 
 import { useState, type FormEvent } from 'react';
 
-import {
-  SlidingIndicator,
-  useSlidingIndicatorId,
-} from '../../components/effects/sliding-indicator';
 import { Alert } from '../../components/ui/alert';
 import { Button } from '../../components/ui/button';
 import {
@@ -34,7 +30,7 @@ import {
 } from '../../components/ui/dialog';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
-import { cn } from '../../lib/utils';
+import { SegmentedControl, type SegmentedOption } from '../../components/ui/segmented-control';
 import type { ApiRequester } from '../auth/types';
 import { saveBatchQuota, splitMemberLimits } from './api';
 import { organizationErrorText } from './errors';
@@ -53,6 +49,13 @@ const BATCH_DRAFT: QuotaDraft = {
   startDate: '',
 };
 
+type BatchMode = 'split' | 'periodic';
+
+const BATCH_MODE_OPTIONS: readonly SegmentedOption<BatchMode>[] = [
+  { value: 'split', label: '均分总上限' },
+  { value: 'periodic', label: '批量设置周期额度' },
+];
+
 export interface BatchQuotaDialogProps {
   /** 当前选中的普通成员（调用方已排除所有者）。 */
   members: OrganizationMember[];
@@ -63,8 +66,7 @@ export interface BatchQuotaDialogProps {
 }
 
 export function BatchQuotaDialog({ members, request, onClose, onSaved }: BatchQuotaDialogProps) {
-  const [mode, setMode] = useState<'split' | 'periodic'>('split');
-  const modeIndicatorId = useSlidingIndicatorId();
+  const [mode, setMode] = useState<BatchMode>('split');
   const [splitTotal, setSplitTotal] = useState('');
   const [draft, setDraft] = useState<QuotaDraft>(BATCH_DRAFT);
   const [saving, setSaving] = useState(false);
@@ -76,6 +78,15 @@ export function BatchQuotaDialog({ members, request, onClose, onSaved }: BatchQu
 
   function patchDraft(patch: Partial<QuotaDraft>) {
     setDraft((previous) => ({ ...previous, ...patch }));
+    setError(null);
+  }
+
+  // 保存中禁止切换操作方式，与其余表单控件的 disabled={saving} 保持一致。
+  function handleModeChange(next: BatchMode) {
+    if (saving) {
+      return;
+    }
+    setMode(next);
     setError(null);
   }
 
@@ -134,46 +145,13 @@ export function BatchQuotaDialog({ members, request, onClose, onSaved }: BatchQu
           <div className="space-y-5 py-5">
             <div className="space-y-2">
               <Label htmlFor="batch-mode">操作方式</Label>
-              <div className="flex flex-wrap gap-2 isolate" role="group" aria-label="批量操作方式">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className={cn(
-                    'relative',
-                    mode === 'split' && 'border-transparent text-primary-foreground',
-                  )}
-                  aria-pressed={mode === 'split'}
-                  disabled={saving}
-                  onClick={() => {
-                    setMode('split');
-                    setError(null);
-                  }}
-                >
-                  {mode === 'split' ? (
-                    <SlidingIndicator layoutId={modeIndicatorId} pace="quick" />
-                  ) : null}
-                  <span className="sliding-indicator-label">均分总上限</span>
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className={cn(
-                    'relative',
-                    mode === 'periodic' && 'border-transparent text-primary-foreground',
-                  )}
-                  aria-pressed={mode === 'periodic'}
-                  disabled={saving}
-                  onClick={() => {
-                    setMode('periodic');
-                    setError(null);
-                  }}
-                >
-                  {mode === 'periodic' ? (
-                    <SlidingIndicator layoutId={modeIndicatorId} pace="quick" />
-                  ) : null}
-                  <span className="sliding-indicator-label">批量设置周期额度</span>
-                </Button>
-              </div>
+              <SegmentedControl
+                options={BATCH_MODE_OPTIONS}
+                value={mode}
+                onValueChange={handleModeChange}
+                aria-label="批量操作方式"
+                disabled={saving}
+              />
             </div>
 
             {mode === 'split' ? (

@@ -18,10 +18,6 @@
 
 import { useState, type FormEvent } from 'react';
 
-import {
-  SlidingIndicator,
-  useSlidingIndicatorId,
-} from '../../components/effects/sliding-indicator';
 import { Alert } from '../../components/ui/alert';
 import { Button } from '../../components/ui/button';
 import {
@@ -34,13 +30,18 @@ import {
 } from '../../components/ui/dialog';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
-import { cn } from '../../lib/utils';
+import { SegmentedControl, type SegmentedOption } from '../../components/ui/segmented-control';
 import type { ApiRequester } from '../auth/types';
 import { saveMemberQuota } from './api';
 import { organizationErrorText } from './errors';
 import { QuotaPeriodicFields, quotaChangeNotices } from './member-shared';
 import type { OrganizationMember, QuotaDraft } from './types';
 import { buildMemberQuotaPayload, createQuotaDraft } from './validation';
+
+const QUOTA_MODE_OPTIONS: readonly SegmentedOption<QuotaDraft['mode']>[] = [
+  { value: 'static', label: '固定总上限' },
+  { value: 'periodic', label: '周期额度' },
+];
 
 export interface QuotaEditorProps {
   member: OrganizationMember;
@@ -54,11 +55,19 @@ export function QuotaEditor({ member, request, onClose, onSaved }: QuotaEditorPr
   const [draft, setDraft] = useState<QuotaDraft>(() => createQuotaDraft(member));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const quotaModeIndicatorId = useSlidingIndicatorId();
 
   function patchDraft(patch: Partial<QuotaDraft>) {
     setDraft((previous) => ({ ...previous, ...patch }));
     setError(null);
+  }
+
+  // 只有真正切换模式时才清空「不限额」，避免重复点击当前模式时静默丢弃用户已勾选的状态；
+  // 保存中禁止切换，与其余表单控件的 disabled={saving} 保持一致。
+  function handleModeChange(mode: QuotaDraft['mode']) {
+    if (saving) {
+      return;
+    }
+    patchDraft(mode === draft.mode ? { mode } : { mode, unlimited: false });
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -114,52 +123,13 @@ export function QuotaEditor({ member, request, onClose, onSaved }: QuotaEditorPr
           <div className="space-y-5 py-5">
             <div className="space-y-2">
               <Label htmlFor="quota-mode">额度模式</Label>
-              <div className="flex flex-wrap gap-2 isolate" role="group" aria-label="额度模式">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className={cn(
-                    'relative',
-                    draft.mode === 'static' && 'border-transparent text-primary-foreground',
-                  )}
-                  aria-pressed={draft.mode === 'static'}
-                  disabled={saving}
-                  onClick={() =>
-                    patchDraft(
-                      draft.mode === 'static'
-                        ? { mode: 'static' }
-                        : { mode: 'static', unlimited: false },
-                    )
-                  }
-                >
-                  {draft.mode === 'static' ? (
-                    <SlidingIndicator layoutId={quotaModeIndicatorId} pace="quick" />
-                  ) : null}
-                  <span className="sliding-indicator-label">固定总上限</span>
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className={cn(
-                    'relative',
-                    draft.mode === 'periodic' && 'border-transparent text-primary-foreground',
-                  )}
-                  aria-pressed={draft.mode === 'periodic'}
-                  disabled={saving}
-                  onClick={() =>
-                    patchDraft(
-                      draft.mode === 'periodic'
-                        ? { mode: 'periodic' }
-                        : { mode: 'periodic', unlimited: false },
-                    )
-                  }
-                >
-                  {draft.mode === 'periodic' ? (
-                    <SlidingIndicator layoutId={quotaModeIndicatorId} pace="quick" />
-                  ) : null}
-                  <span className="sliding-indicator-label">周期额度</span>
-                </Button>
-              </div>
+              <SegmentedControl
+                options={QUOTA_MODE_OPTIONS}
+                value={draft.mode}
+                onValueChange={handleModeChange}
+                aria-label="额度模式"
+                disabled={saving}
+              />
             </div>
 
             {draft.mode === 'static' ? (

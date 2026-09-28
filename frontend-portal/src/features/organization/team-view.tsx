@@ -11,7 +11,7 @@
  *   只显示说明与返回控制台的入口，不发起任何管理员组织请求。
  * - 组织摘要来自 GET /organization，成员总数来自服务端返回的总数，
  *   不把当前分页条数当成员总数。
- * - 页签用 Button + aria-pressed 表达当前项；邀请码与配额申请分别复用
+ * - 页签用 SegmentedControl 表达当前项；邀请码与配额申请分别复用
  *   InvitationsPanel / OwnerRequestsPanel（它们自行读取 Auth）。
  * - 所有组织查询 key 前缀为 ['organization', ...]，数据变更后统一失效
  *   ['portal', identityKey, 'organization']；影响本人的变更另行刷新身份。
@@ -20,10 +20,6 @@
 import Link from 'next/link';
 import { useState } from 'react';
 
-import {
-  SlidingIndicator,
-  useSlidingIndicatorId,
-} from '../../components/effects/sliding-indicator';
 import { Alert } from '../../components/ui/alert';
 import { Button } from '../../components/ui/button';
 import {
@@ -35,8 +31,8 @@ import {
 } from '../../components/ui/card';
 import { EmptyState } from '../../components/ui/empty-state';
 import { PageHeader } from '../../components/layout/page-header';
+import { SegmentedControl, type SegmentedOption } from '../../components/ui/segmented-control';
 import { Skeleton } from '../../components/ui/skeleton';
-import { cn } from '../../lib/utils';
 import { useAuth } from '../auth/auth-provider';
 import { usePortalQuery } from '../console/use-portal-query';
 import { fetchMembers, fetchOrganization } from './api';
@@ -50,7 +46,7 @@ import { OwnerRequestsPanel } from './owner-requests-panel';
 
 type TeamTab = 'members' | 'invitations' | 'requests';
 
-const TABS: readonly { value: TeamTab; label: string }[] = [
+const TABS: readonly SegmentedOption<TeamTab>[] = [
   { value: 'members', label: '成员' },
   { value: 'invitations', label: '邀请码' },
   { value: 'requests', label: '配额申请' },
@@ -98,7 +94,6 @@ export function TeamView() {
 function TeamWorkspace() {
   const [tab, setTab] = useState<TeamTab>('members');
   const [defaultQuotaOpen, setDefaultQuotaOpen] = useState(false);
-  const indicatorId = useSlidingIndicatorId();
   const refreshOrganization = useOrganizationRefresh();
 
   // 组织摘要：名称、状态与创建时间；失败时给出可重试错误。
@@ -210,30 +205,12 @@ function TeamWorkspace() {
 
       <Card className="min-w-0">
         <CardContent className="space-y-4">
-          <div
-            className="flex flex-wrap items-center gap-2 isolate"
-            role="group"
+          <SegmentedControl
+            options={TABS}
+            value={tab}
+            onValueChange={setTab}
             aria-label="组织成员页签"
-          >
-            {TABS.map((item) => (
-              <Button
-                key={item.value}
-                type="button"
-                variant="outline"
-                className={cn(
-                  'relative',
-                  tab === item.value && 'border-transparent text-primary-foreground',
-                )}
-                aria-pressed={tab === item.value}
-                onClick={() => setTab(item.value)}
-              >
-                {tab === item.value ? (
-                  <SlidingIndicator layoutId={indicatorId} pace="quick" />
-                ) : null}
-                <span className="sliding-indicator-label">{item.label}</span>
-              </Button>
-            ))}
-          </div>
+          />
 
           {tab === 'members' ? (
             <MembersPanel />
