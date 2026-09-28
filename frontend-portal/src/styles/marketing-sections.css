@@ -394,6 +394,8 @@
 /* ------------------------------------------------------- 6. 使用场景 */
 
 .ms-tabs {
+  position: relative;
+  isolation: isolate;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -401,6 +403,7 @@
 }
 
 .ms-tab {
+  position: relative;
   display: inline-flex;
   align-items: center;
   min-height: var(--touch-height);
@@ -424,9 +427,7 @@
 }
 
 .ms-tab[aria-selected='true'] {
-  border-color: var(--primary);
-  background: color-mix(in srgb, var(--primary) 16%, var(--card));
-  color: var(--foreground);
+  color: var(--primary-foreground);
 }
 
 .ms-scenario-panel {

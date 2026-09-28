@@ -1,5 +1,6 @@
 import { Activity, ArrowUpRight, Gauge, KeyRound } from 'lucide-react';
 
+import { GlowingEffect } from '../../components/effects/glowing-effect';
 import { SectionHeading } from '../../components/marketing/section-heading';
 import { marketingContent } from '../../content/marketing';
 
@@ -190,6 +191,7 @@ export function PlatformSection() {
               } ${index === 1 ? 'platform-card-tall' : ''}`}
               data-platform-kind={item.kind}
             >
+              <GlowingEffect />
               <div className="platform-card-heading">
                 <span className="platform-card-index">0{index + 1}</span>
                 <ArrowUpRight className="size-4" aria-hidden="true" />

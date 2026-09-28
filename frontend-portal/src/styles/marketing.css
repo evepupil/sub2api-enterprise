@@ -738,6 +738,7 @@
 }
 
 .platform-card {
+  position: relative;
   display: flex;
   grid-column: span 2;
   min-width: 0;

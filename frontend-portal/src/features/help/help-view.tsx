@@ -1,8 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useId, useState } from 'react';
 
 import { Activity, ArrowUpRight, BookOpen, KeyRound, Search, WalletCards } from 'lucide-react';
+import { HoverHighlight } from '../../components/effects/hover-highlight';
+import {
+  SlidingIndicator,
+  useSlidingIndicatorId,
+} from '../../components/effects/sliding-indicator';
 import { MarketingLink } from '../../components/marketing/marketing-link';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent } from '../../components/ui/card';
@@ -46,6 +51,9 @@ export function HelpView({ settings }: { settings: PublicSettings }) {
   const [category, setCategory] = useState<HelpCategory>('接入');
   const [articleId, setArticleId] = useState('getting-started');
   const [query, setQuery] = useState('');
+  const [highlighted, setHighlighted] = useState<number | null>(null);
+  const highlightId = useId();
+  const indicatorId = useSlidingIndicatorId();
   const normalizedQuery = query.trim().toLowerCase();
   const visibleArticles = helpArticles.filter((item) => {
     if (item.category !== category) {
@@ -111,11 +119,27 @@ export function HelpView({ settings }: { settings: PublicSettings }) {
           <p className="public-page-eyebrow">常用任务</p>
           <h2 id="help-task-title">从你正在做的事开始。</h2>
         </div>
-        <div className="help-task-grid">
-          {helpTasks.map((task) => {
+        <div
+          className="help-task-grid"
+          onPointerLeave={() => setHighlighted(null)}
+          onBlur={(event) => {
+            const nextTarget = event.relatedTarget;
+            if (!(nextTarget instanceof Node) || !event.currentTarget.contains(nextTarget)) {
+              setHighlighted(null);
+            }
+          }}
+        >
+          {helpTasks.map((task, index) => {
             const Icon = task.icon;
             return (
-              <a key={task.href} href={task.href} className="help-task-card">
+              <a
+                key={task.href}
+                href={task.href}
+                className="help-task-card"
+                onPointerEnter={() => setHighlighted(index)}
+                onFocus={() => setHighlighted(index)}
+              >
+                <HoverHighlight layoutId={highlightId} active={highlighted === index} />
                 <span className="help-task-icon" aria-hidden="true">
                   <Icon className="size-5" />
                 </span>
@@ -139,11 +163,16 @@ export function HelpView({ settings }: { settings: PublicSettings }) {
           {categories.map((item) => (
             <Button
               key={item}
-              variant={category === item ? 'default' : 'outline'}
+              variant="outline"
+              className={cn(
+                'relative',
+                category === item && 'border-transparent text-primary-foreground',
+              )}
               aria-pressed={category === item}
               onClick={() => selectCategory(item)}
             >
-              {item}
+              {category === item ? <SlidingIndicator layoutId={indicatorId} /> : null}
+              <span className="sliding-indicator-label">{item}</span>
             </Button>
           ))}
         </div>

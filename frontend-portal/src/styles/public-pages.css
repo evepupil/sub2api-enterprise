@@ -484,6 +484,9 @@
 }
 
 .help-task-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: grid;
   min-width: 0;
   grid-template-columns: auto minmax(0, 1fr) auto;
@@ -496,14 +499,11 @@
   color: var(--foreground);
   background-image: var(--marketing-surface-gradient);
   text-decoration: none;
-  transition:
-    border-color var(--transition-duration) ease,
-    transform var(--transition-duration) ease;
+  transition: border-color var(--transition-duration) ease;
 }
 
 .help-task-card:hover {
   border-color: color-mix(in srgb, var(--primary) 42%, var(--border));
-  transform: translateY(-2px);
 }
 
 .help-task-icon {
@@ -543,6 +543,7 @@
 
 .help-category-tabs {
   display: flex;
+  isolation: isolate;
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 20px;
@@ -895,8 +896,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .catalog-model-surface,
-  .help-task-card {
+  .catalog-model-surface {
     transition: none;
   }
 }

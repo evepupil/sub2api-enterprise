@@ -3,6 +3,10 @@
 import { Check, CornerDownLeft, Cpu, Send } from 'lucide-react';
 import * as React from 'react';
 
+import {
+  SlidingIndicator,
+  useSlidingIndicatorId,
+} from '../../components/effects/sliding-indicator';
 import { SectionHeading } from '../../components/marketing/section-heading';
 import { marketingContent } from '../../content/marketing';
 
@@ -20,6 +24,7 @@ const scenarios = marketingContent.scenarios;
 
 export function ScenariosSection() {
   const [activeIndex, setActiveIndex] = React.useState(0);
+  const indicatorId = useSlidingIndicatorId();
   const tabRefs = React.useRef<Array<HTMLButtonElement | null>>([]);
   const active = scenarios[activeIndex] ?? scenarios[0];
 
@@ -80,7 +85,8 @@ export function ScenariosSection() {
               onClick={() => select(index)}
               onKeyDown={onKeyDown}
             >
-              {scenario.label}
+              {selected ? <SlidingIndicator layoutId={indicatorId} /> : null}
+              <span className="sliding-indicator-label">{scenario.label}</span>
             </button>
           );
         })}
