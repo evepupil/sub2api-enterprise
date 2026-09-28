@@ -1,6 +1,6 @@
 # M1 首页页面
 
-2026-09-28 当前首页以 [Proactiv 整站改版](proactiv-redesign.md#5-首页逐区块规格) 的十二区块为准，营销文案集中在 `src/content/marketing.ts`。下面四段浅色首页是历史记录，已被新规格取代；真实价格、注册配置、可访问性和身份边界继续保留。
+2026-09-28 当前首页以 [Proactiv 整站改版](proactiv-redesign.md#5-首页逐区块规格) 的企业版 10 个区块为准，营销文案集中在 `src/content/marketing.ts`。下面四段浅色首页是历史记录，已被新规格取代；真实价格、注册配置、可访问性和身份边界继续保留。
 
 依据：[官网规格](public-site.md) 和已确认08号首页图。导出 `HomeView({catalog,site})`，四段内容。
 

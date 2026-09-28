@@ -1,10 +1,8 @@
-import { Activity, ArrowUpRight, Gauge, KeyRound } from 'lucide-react';
+import { KeyRound } from 'lucide-react';
 
 import { GlowingEffect } from '../../components/effects/glowing-effect';
 import { SectionHeading } from '../../components/marketing/section-heading';
 import { marketingContent } from '../../content/marketing';
-
-const statusCells = Array.from({ length: 28 }, (_, index) => index);
 
 function ProviderMark({ provider }: { provider: (typeof marketingContent.providers)[number] }) {
   return provider.logo !== null ? (
@@ -22,9 +20,8 @@ export function ProviderStrip() {
     <section className="provider-strip marketing-section" aria-labelledby="provider-strip-title">
       <div className="marketing-shell">
         <div className="provider-strip-heading">
-          <p className="marketing-eyebrow">模型接入</p>
-          <h2 id="provider-strip-title">与你熟悉的模型一起工作。</h2>
-          <span>一个入口，按需要选择合适的模型。</span>
+          <p className="marketing-eyebrow">{marketingContent.sections.providers.eyebrow}</p>
+          <h2 id="provider-strip-title">{marketingContent.sections.providers.title}</h2>
         </div>
         <ul className="provider-strip-list" aria-label="可接入的模型厂家">
           {marketingContent.providers.map((provider) => (
@@ -39,6 +36,7 @@ export function ProviderStrip() {
   );
 }
 
+/** models：多模型统一接入，沿用请求分发到多家模型厂家的路由示意。 */
 function RoutingVisual() {
   return (
     <div className="platform-routing-visual" aria-label="厂家经过统一入口连接到 API">
@@ -56,29 +54,9 @@ function RoutingVisual() {
   );
 }
 
-function AnalyticsVisual() {
-  const spend =
-    marketingContent.dashboard.stats.find((stat) => stat.icon === 'chart')?.value ?? '—';
+const keyLimitTags = ['额度', '有效期', '5 小时限速', 'IP 白名单'] as const;
 
-  return (
-    <div className="platform-analytics-visual" aria-label={`本周消费 ${spend}`}>
-      <div className="platform-analytics-value">
-        <strong>{spend}</strong>
-        <span>本周消费</span>
-      </div>
-      <div className="platform-mini-bars" aria-hidden="true">
-        {[34, 48, 42, 68, 52, 78, 61, 86, 72].map((height, index) => (
-          <span key={index} style={{ height: `${height}%` }} />
-        ))}
-      </div>
-      <div className="platform-analytics-meta">
-        <span>请求</span>
-        <strong>{marketingContent.dashboard.stats[1]?.value ?? '—'}</strong>
-      </div>
-    </div>
-  );
-}
-
+/** access：访问控制，沿用密钥示意，附加限制项标签。 */
 function KeysVisual() {
   const keys = [
     { label: '研发应用', value: 'sk-••••••••', status: '活跃' },
@@ -87,7 +65,10 @@ function KeysVisual() {
   ] as const;
 
   return (
-    <div className="platform-keys-visual" aria-label="三个按应用分配的脱敏密钥">
+    <div
+      className="platform-keys-visual"
+      aria-label="三个按应用分配的脱敏密钥，可设置额度、有效期、限速与 IP 白名单"
+    >
       {keys.map((key) => (
         <div className="platform-key-row" key={key.label}>
           <span className="platform-key-icon" aria-hidden="true">
@@ -100,10 +81,18 @@ function KeysVisual() {
           <span className="platform-key-status">{key.status}</span>
         </div>
       ))}
+      <div className="platform-key-tags" aria-hidden="true">
+        {keyLimitTags.map((tag) => (
+          <span key={tag} className="platform-key-tag">
+            {tag}
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
 
+/** organization：组织账户体系，沿用团队成员与配额示意。 */
 function TeamVisual() {
   return (
     <div className="platform-team-visual" aria-label="三个团队成员及其配额使用情况">
@@ -127,81 +116,120 @@ function TeamVisual() {
   );
 }
 
-function StatusVisual() {
+const failoverAccounts = [
+  { label: '账号 A', status: '已隔离', tone: 'warning' },
+  { label: '账号 B', status: '调度中', tone: 'success' },
+  { label: '账号 C', status: '备用', tone: 'neutral' },
+] as const;
+
+/** availability：高可用调度，改为故障切换示意——三个上游账号，语义色区分状态。 */
+function FailoverVisual() {
   return (
-    <div className="platform-status-visual" aria-label="当前响应 428 毫秒，二十八个可用性记录">
-      <div className="platform-status-summary">
-        <span className="platform-status-icon" aria-hidden="true">
-          <Gauge className="size-4" />
-        </span>
-        <span>
-          <strong>428ms</strong>
-          <small>当前响应</small>
-        </span>
-      </div>
-      <div className="platform-status-cells" aria-hidden="true">
-        {statusCells.map((cell) => (
-          <i key={cell} />
+    <div
+      className="platform-failover-visual"
+      aria-label="账号 A 已隔离，账号 B 调度中，账号 C 备用"
+    >
+      {failoverAccounts.map((account) => (
+        <div className="platform-failover-row" data-tone={account.tone} key={account.label}>
+          <span className="platform-failover-dot" aria-hidden="true" />
+          <span className="platform-failover-label">{account.label}</span>
+          <span className="platform-failover-status">{account.status}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+const streamChunks = Array.from({ length: 6 }, (_, index) => index);
+
+/** latency：低延迟转发，改为流式逐段到达示意。 */
+function StreamVisual() {
+  return (
+    <div className="platform-stream-visual" aria-label="响应内容按事件逐段转发">
+      <div className="platform-stream-row" aria-hidden="true">
+        {streamChunks.map((chunk) => (
+          <span key={chunk} />
         ))}
+        <i className="platform-stream-cursor" />
       </div>
-      <div className="platform-status-footer">
-        <span>
-          <Activity className="size-3.5" aria-hidden="true" />
-          过去 28 次记录
-        </span>
-        <span className="platform-status-level">运行正常</span>
+      <div className="platform-stream-meta">
+        <span className="platform-stream-dot" aria-hidden="true" />
+        <span>逐事件转发</span>
       </div>
     </div>
   );
 }
 
-function PlatformVisual({ kind }: { kind: (typeof marketingContent.platform)[number]['kind'] }) {
+/** deployment：独立部署，客户环境边框内放网关与数据两个方块。 */
+function DeploymentVisual() {
+  return (
+    <div className="platform-deploy-visual" aria-label="客户环境内部署网关与数据">
+      <div className="platform-deploy-frame">
+        <span className="platform-deploy-frame-label">客户环境</span>
+        <div className="platform-deploy-blocks">
+          <span className="platform-deploy-block">网关</span>
+          <span className="platform-deploy-block">数据</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PlatformVisual({
+  kind,
+}: {
+  kind: (typeof marketingContent.capabilities)[number]['kind'];
+}) {
   switch (kind) {
-    case 'routing':
-      return <RoutingVisual />;
-    case 'analytics':
-      return <AnalyticsVisual />;
-    case 'keys':
+    case 'availability':
+      return <FailoverVisual />;
+    case 'latency':
+      return <StreamVisual />;
+    case 'access':
       return <KeysVisual />;
-    case 'team':
+    case 'organization':
       return <TeamVisual />;
-    case 'status':
-      return <StatusVisual />;
+    case 'models':
+      return <RoutingVisual />;
+    case 'deployment':
+      return <DeploymentVisual />;
   }
 }
 
 export function PlatformSection() {
+  const heading = marketingContent.sections.capabilities;
+
   return (
-    <section id="platform" className="platform-section marketing-section" data-slot="platform-grid">
+    <section
+      id="platform"
+      className="platform-section marketing-section"
+      data-slot="platform-grid"
+      aria-labelledby="platform-title"
+    >
       <div className="marketing-shell">
         <SectionHeading
           id="platform-title"
-          eyebrow="平台能力"
-          title="一套平台，连接你的 AI 工作流。"
-          description="接入、用量、密钥、团队和状态，按同一套规则协作。"
+          eyebrow={heading.eyebrow}
+          title={heading.title}
           align="center"
         />
         <div className="platform-grid">
-          {marketingContent.platform.map((item, index) => (
-            <a
+          {marketingContent.capabilities.map((item, index) => (
+            <article
               key={item.kind}
-              href={item.href}
-              className={`platform-card marketing-surface ${
-                index === 0 ? 'platform-card-feature' : ''
-              } ${index === 1 ? 'platform-card-tall' : ''}`}
+              className="platform-card marketing-surface"
               data-platform-kind={item.kind}
             >
               <GlowingEffect />
               <div className="platform-card-heading">
                 <span className="platform-card-index">0{index + 1}</span>
-                <ArrowUpRight className="size-4" aria-hidden="true" />
               </div>
               <div className="platform-card-copy">
                 <h3>{item.title}</h3>
                 <p>{item.description}</p>
               </div>
               <PlatformVisual kind={item.kind} />
-            </a>
+            </article>
           ))}
         </div>
       </div>

@@ -197,7 +197,7 @@ function ModelCostRows() {
       <div className="dashboard-panel-heading">
         <div>
           <p className="dashboard-panel-kicker">模型费用</p>
-          <h3>每一笔消费都有依据</h3>
+          <h3>{marketingContent.sections.showcase.costTitle}</h3>
         </div>
         <a href="/console/usage" className="dashboard-panel-link">
           查看明细 <span aria-hidden="true">↗</span>
@@ -223,7 +223,7 @@ function ModelCostRows() {
 
 function DashboardPreview() {
   return (
-    <div className="dashboard-preview" aria-label="工作台营销预览">
+    <div className="dashboard-preview" aria-label="组织控制台界面示意">
       <div className="dashboard-preview-topbar">
         <div className="dashboard-preview-breadcrumb">
           <span className="dashboard-window-dots" aria-hidden="true">
@@ -248,8 +248,8 @@ function DashboardPreview() {
         <main className="dashboard-preview-main">
           <div className="dashboard-main-heading">
             <div>
-              <span className="dashboard-panel-kicker">周度概览</span>
-              <h2>保持每次调用都清楚。</h2>
+              <span className="dashboard-panel-kicker">概览</span>
+              <h2>{marketingContent.sections.showcase.overview}</h2>
             </div>
             <span className="dashboard-main-date">{marketingContent.dashboard.period}</span>
           </div>
@@ -272,7 +272,8 @@ export function DashboardShowcase() {
         <ContainerScroll
           titleComponent={
             <span>
-              一个工作台，<strong>看清每一次调用</strong>
+              {marketingContent.sections.showcase.title}
+              <strong>{marketingContent.sections.showcase.highlight}</strong>
             </span>
           }
         >

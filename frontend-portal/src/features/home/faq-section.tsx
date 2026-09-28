@@ -4,9 +4,7 @@ import { SectionHeading } from '../../components/marketing/section-heading';
 import { marketingContent } from '../../content/marketing';
 
 /**
- * 首页区块 11：常见问题（#faq）。
- *
- * 规格：design/proactiv-redesign.md 第 5 节第 11 条。
+ * 首页区块：常见问题（#faq）。
  * 使用原生 details / summary，展开收起与键盘操作由浏览器保证，
  * 不手写无键盘支持的 div 折叠；首项默认展开。
  * 问答来自 marketingContent.faqs，只陈述首版已有边界。
@@ -26,9 +24,8 @@ export function FaqSection() {
         <div className="ms-faq-intro">
           <SectionHeading
             id="faq-title"
-            eyebrow="常见问题"
-            title="先看清边界，再决定怎么用。"
-            description="计费方式、缓存价格、团队配额与接入方式都在这里说明。"
+            eyebrow={marketingContent.sections.faq.eyebrow}
+            title={marketingContent.sections.faq.title}
           />
           <p className="ms-faq-help">
             <LifeBuoy className="ms-faq-help-icon" aria-hidden="true" />

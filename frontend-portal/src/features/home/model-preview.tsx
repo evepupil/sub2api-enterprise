@@ -1,6 +1,7 @@
 import { ArrowUpRight } from 'lucide-react';
 
 import { SectionHeading } from '../../components/marketing/section-heading';
+import { marketingContent } from '../../content/marketing';
 import { formatPrice } from '../catalog/format';
 import type { CatalogData, CatalogModel, PublicResult } from '../public/types';
 
@@ -109,9 +110,9 @@ export function ModelPreview({ catalog }: ModelPreviewProps) {
         <div className="model-preview-heading">
           <SectionHeading
             id="model-preview-title"
-            eyebrow="模型价格"
-            title="选对模型，也算清成本。"
-            description="四维价格公开展示，按美元 / 百万 Token 计算。"
+            eyebrow={marketingContent.sections.models.eyebrow}
+            title={marketingContent.sections.models.title}
+            description={marketingContent.sections.models.description}
           />
           <a className="model-preview-catalog-link" href="/catalog">
             查看全部模型 <ArrowUpRight className="size-4" aria-hidden="true" />

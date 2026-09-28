@@ -16,18 +16,18 @@ interface FooterColumn {
 
 /** 产品：与桌面导航一致的功能入口。 */
 const PRODUCT_LINKS = [
-  { href: '/#platform', label: '产品功能' },
+  { href: '/#platform', label: '产品能力' },
+  { href: '/#governance', label: '组织管控' },
   { href: '/catalog', label: '模型价格' },
   { href: '/status', label: '服务状态' },
-  { href: '/#stories', label: '客户故事' },
 ] as const;
 
-/** 资源：文档、FAQ、工具生态与使用场景。 */
+/** 资源：文档、服务保障、计费方式与常见问题。 */
 const RESOURCE_LINKS = [
   { href: '/help', label: '开发文档' },
+  { href: '/#service', label: '服务保障' },
+  { href: '/#pricing', label: '计费方式' },
   { href: '/#faq', label: '常见问题' },
-  { href: '/#integrations', label: '工具生态' },
-  { href: '/#scenarios', label: '使用场景' },
 ] as const;
 
 /** 账户：始终三条站内入口；注册关闭时第二项改为帮助中心。 */

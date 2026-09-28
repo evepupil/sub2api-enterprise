@@ -1,4 +1,4 @@
-import { Check, Wallet } from 'lucide-react';
+import { Check } from 'lucide-react';
 
 import { MarketingLink } from '../../components/marketing/marketing-link';
 import { SectionHeading } from '../../components/marketing/section-heading';
@@ -6,23 +6,27 @@ import { marketingContent } from '../../content/marketing';
 import type { PublicSiteData } from '../public/types';
 
 /**
- * 首页区块 8：余额计费（#pricing）。
+ * 首页区块：计费方式（#pricing）。
  *
- * 规格：design/proactiv-redesign.md 第 5 节第 8 条。
- * 只描述余额按量计费，没有套餐表、订阅切换或购买按钮；
- * 入口按注册开关调整：注册关闭时“个人开发”卡走登录，团队卡固定去工作台。
- * 卡片能力与说明全部来自 marketingContent.pricing。
+ * 三张卡依次为个人版、企业版、模型价格，文案与入口全部来自 marketingContent.plans；
+ * 企业版为推荐卡，沿用现有推荐卡强调样式。注册关闭时个人版卡的入口回退登录，
+ * 不承诺可直接创建账户。
  */
 
-const { pricing, faqs } = marketingContent;
+const { plans } = marketingContent;
 
-/** 注册关闭时不能承诺创建账户，退回登录入口。 */
-function personalHref(registrationEnabled: boolean, configured: string): string {
-  return registrationEnabled ? configured : '/login';
+/** 注册关闭时不能承诺创建账户，入口与按钮文字都退回登录。 */
+function personalAction(
+  registrationEnabled: boolean,
+  plan: { href: string; action: string },
+): { href: string; label: string } {
+  return registrationEnabled
+    ? { href: plan.href, label: plan.action }
+    : { href: '/login', label: '登录' };
 }
 
 export function PricingSection({ site }: { site: PublicSiteData }) {
-  const billingFaq = faqs[1];
+  const heading = marketingContent.sections.pricing;
 
   return (
     <section
@@ -31,17 +35,14 @@ export function PricingSection({ site }: { site: PublicSiteData }) {
       className="marketing-section marketing-shell ms-pricing"
       aria-labelledby="pricing-title"
     >
-      <SectionHeading
-        id="pricing-title"
-        eyebrow="余额计费"
-        title="一个余额，按实际使用付费。"
-        description="不为用不到的能力买单。余额、配额与四项价格都写在账单里，随时可以核对。"
-      />
+      <SectionHeading id="pricing-title" eyebrow={heading.eyebrow} title={heading.title} />
 
       <ul className="ms-price-grid">
-        {pricing.map((plan, index) => {
-          const href =
-            index === 0 ? personalHref(site.settings.registrationEnabled, plan.href) : plan.href;
+        {plans.map((plan, index) => {
+          const action =
+            index === 0
+              ? personalAction(site.settings.registrationEnabled, plan)
+              : { href: plan.href, label: plan.action };
           const recommended = index === 1;
 
           return (
@@ -50,14 +51,9 @@ export function PricingSection({ site }: { site: PublicSiteData }) {
               className="ms-price-card marketing-surface"
               data-recommended={recommended ? 'true' : undefined}
             >
-              <div className="ms-price-head">
-                <span className="ms-price-icon" aria-hidden="true">
-                  <Wallet className="ms-price-icon-svg" />
-                </span>
-                <span className="ms-chip">{plan.label}</span>
-              </div>
               <h3 className="ms-price-title">{plan.title}</h3>
-              <p className="ms-price-subtitle">{plan.subtitle}</p>
+              <p className="ms-price-value">{plan.value}</p>
+              <p className="ms-price-description">{plan.description}</p>
               <ul className="ms-price-features">
                 {plan.features.map((feature) => (
                   <li key={feature}>
@@ -67,23 +63,18 @@ export function PricingSection({ site }: { site: PublicSiteData }) {
                 ))}
               </ul>
               <div className="marketing-actions marketing-actions-start ms-price-action">
-                <MarketingLink href={href} variant={recommended ? 'default' : 'outline'} arrow>
-                  {plan.action}
+                <MarketingLink
+                  href={action.href}
+                  variant={recommended ? 'default' : 'outline'}
+                  arrow
+                >
+                  {action.label}
                 </MarketingLink>
               </div>
             </li>
           );
         })}
       </ul>
-
-      {billingFaq !== undefined ? (
-        <p className="ms-price-note">
-          {billingFaq.answer}
-          <a className="marketing-inline-link" href="#faq">
-            常见问题
-          </a>
-        </p>
-      ) : null}
     </section>
   );
 }

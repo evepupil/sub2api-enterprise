@@ -1,16 +1,19 @@
 /**
- * User-authorized fictional marketing content for the Proactiv redesign.
- * This file never supplies account balances, billing records, model prices or live status.
- * Replace the brand, showcase and customer stories here before using them as factual claims.
+ * 官网营销内容集中管理（企业版定位）。
+ *
+ * - 能力与参数表述均按当前系统实现核实，核实结论与来源见 docs/前端设计/官网素材与动效来源.md；
+ *   新增表述前先核实，不写系统做不到的事，也不写任何读取或检测调用内容的说法。
+ * - dashboard 是首页控制台示意的构造数据，不代表真实运营数据；
+ *   本文件不向账户、账单、目录价格或服务状态提供数据。
  */
 export const marketingContent = {
-  brand: { name: 'Nexus API', tagline: '连接模型，成就下一个好产品。' },
+  brand: { name: 'Nexus API', tagline: '企业级 AI 模型统一接入网关。' },
   hero: {
-    eyebrow: '为下一代 AI 产品而生',
-    lines: ['每一个想法', '都值得更好的模型。'],
+    eyebrow: 'AI 模型网关 · 企业版',
+    lines: ['统一接入 · 组织管控', '高可用 · 低延迟'],
     description:
-      '把主流 AI 模型接进你的产品。一个账户管理接入、用量与团队，让每一份创造力都有稳定的起点。',
-    benefits: ['一个密钥，连接多种模型', '美元计费，费用一目了然', '从个人开发到团队协作'],
+      '面向企业规模使用的 AI 模型网关：主流模型统一接入，多账号冗余调度，额度与权限按组织、成员与密钥分级下发。',
+    benefits: ['多账号冗余调度', '密钥级访问控制', '单价逐项公开'],
   },
   dashboard: {
     period: '近 7 天',
@@ -39,216 +42,177 @@ export const marketingContent = {
     { name: 'DeepSeek', logo: null, short: 'D' },
     { name: 'Qwen', logo: null, short: 'Q' },
   ],
-  platform: [
-    {
-      title: '你熟悉的模型，一个接入点',
-      description: '统一管理多个模型的调用入口，切换选择，让灵感少等一步。',
-      kind: 'routing',
-      href: '/catalog',
+  /** 各区块标题；区块只保留必要的一句说明，能省则省。 */
+  sections: {
+    showcase: {
+      title: '组织控制台，',
+      highlight: '用量、费用与配额一处可查',
+      overview: '组织用量概览',
+      costTitle: '按模型汇总',
     },
-    {
-      title: '每一笔用量，都有答案',
-      description: '按模型、日期与密钥查看请求、Token 和费用。',
-      kind: 'analytics',
-      href: '/console/usage',
+    providers: { eyebrow: '模型接入', title: '覆盖主流模型厂家' },
+    capabilities: { eyebrow: '核心能力', title: '为企业规模使用而设计' },
+    governance: {
+      eyebrow: '组织管控',
+      title: '配额与权限按组织分级下发',
     },
-    {
-      title: '密钥各司其职',
-      description: '为不同应用分配密钥，随时调整额度与有效期。',
-      kind: 'keys',
-      href: '/console/keys',
+    models: {
+      eyebrow: '模型价格',
+      title: '主流模型单价逐项公开',
+      description: '单位：美元 / 百万 Token',
     },
-    {
-      title: '把团队放在同一张账单里',
-      description: '统一余额、分配成员配额，让协作和预算一起清晰。',
-      kind: 'team',
-      href: '/console/team',
-    },
-    {
-      title: '连接状况，公开可见',
-      description: '可用性、当前响应速度和历史记录，一处看清。',
-      kind: 'status',
-      href: '/status',
-    },
-  ],
-  workspace: {
-    title: '把精力留给产品，\n把复杂交给我们。',
-    description: '从一个人的创意，到一个团队的日常。接入、协作和费用管理，都在同一个工作空间。',
-    points: [
-      '按项目管理密钥，各自独立',
-      '按成员分配配额，支出有边界',
-      '按日期查看用量，数据能对上',
-    ],
-    analyticsTitle: '看清每一次调用的价值。',
-    analyticsDescription:
-      '不用在不同平台之间来回找账单。模型分布、Token 构成和消费趋势，帮助你做出下一步选择。',
+    pricing: { eyebrow: '计费方式', title: '单价与计费规则公开' },
+    service: { eyebrow: '服务保障', title: '服务与数据保障' },
+    faq: { eyebrow: '常见问题', title: '接入前的常见问题' },
   },
-  scenarios: [
+  capabilities: [
     {
-      id: 'coding',
-      label: '编程与研发',
-      title: '让想法更快成为可运行的代码。',
-      description: '从理解旧项目、编写功能到检查改动，为研发过程选择合适的模型。',
-      tasks: ['在编辑器里完成代码理解与重构', '为不同项目独立分配调用密钥'],
-      tags: ['代码助手', '项目隔离', '多模型选择'],
-      screenTitle: '研发工作空间',
-      prompt: '帮我为这个应用补齐登录流程',
-      result: '已整理接口约定、页面状态与实现步骤。',
-      model: 'Claude Sonnet',
-      items: ['理解项目结构', '完成登录与错误处理', '检查会话恢复'],
+      kind: 'availability',
+      title: '高可用调度',
+      description:
+        '同一分组挂载多个上游账号，出现异常时自动切换，并临时隔离故障账号，调用方无需改动。',
     },
     {
-      id: 'agents',
-      label: '智能体与应用',
-      title: '把模型能力，放进你的业务流程。',
-      description: '知识问答、任务执行、内容提取，连接你已有的应用与自动化工具。',
-      tasks: ['为问答与复杂任务选择不同模型', '查看应用用量，持续调整调用成本'],
-      tags: ['智能体', '知识问答', '应用集成'],
-      screenTitle: '客户知识助手',
-      prompt: '整理本周用户最关心的三个问题',
-      result: '已从知识库整理高频主题与参考资料。',
-      model: 'GPT',
-      items: ['检索相关知识', '归纳问题与依据', '生成回复草稿'],
+      kind: 'latency',
+      title: '低延迟转发',
+      description: '流式响应按上游事件逐条转发，不整段缓冲，尽量压低中转耗时。',
     },
     {
-      id: 'content',
-      label: '内容与知识',
-      title: '把零散信息，变成值得分享的内容。',
-      description: '让研究、整理和写作拥有同一个起点，把时间留给判断与表达。',
-      tasks: ['整理长文档，提取观点与素材', '从选题草稿走到多种表达版本'],
-      tags: ['长文本', '研究整理', '内容创作'],
-      screenTitle: '内容工作空间',
-      prompt: '把这份研究整理成一篇清晰的文章',
-      result: '已完成结构、核心论点和待核实资料。',
-      model: 'Gemini',
-      items: ['梳理研究材料', '组织论据与结构', '生成文章初稿'],
+      kind: 'access',
+      title: '访问控制',
+      description:
+        '单个密钥可设消费额度、有效期、5 小时 / 1 天 / 7 天速率限制、IP 白名单与黑名单和可用分组。',
+    },
+    {
+      kind: 'organization',
+      title: '组织账户体系',
+      description:
+        '组织、成员、配额与分组授权是平台原生能力。成员各自持有消费上限，单人超限不影响团队。',
+    },
+    {
+      kind: 'models',
+      title: '多模型统一接入',
+      description: '兼容 OpenAI、Anthropic 与 Gemini 协议，文本与图像模型统一计量，单价逐项公开。',
+    },
+    {
+      kind: 'deployment',
+      title: '独立部署',
+      description: '支持在客户自有环境独立部署，满足数据驻留与网络隔离要求。',
     },
   ],
-  pricing: [
+  governance: [
     {
-      title: '个人开发',
-      subtitle: '让第一个想法轻装上阵',
-      label: '按量使用',
+      kind: 'isolation',
+      title: '组织隔离',
+      description: '数据按组织隔离，成员看不到其他组织的密钥与用量记录。',
+    },
+    {
+      kind: 'budget',
+      title: '配额分配',
+      description:
+        '为成员单独设定消费上限，或按组织总额批量均分；某位成员额度用尽，只停止该成员的调用。',
+    },
+    {
+      kind: 'scope',
+      title: '分组授权',
+      description: '组织可用的模型分组由平台配置，成员创建密钥时不能超出授权范围。',
+    },
+    {
+      kind: 'suspend',
+      title: '统一停用',
+      description: '一个开关停用整个组织的调用权限；恢复时，成员原有的停用设置保持不变。',
+    },
+  ],
+  plans: [
+    {
+      title: '个人版',
+      value: '按量计费',
+      description: '按模型单价结算，余额按调用实时扣减，注册后自助开通。',
+      features: ['主流模型统一接入', '密钥额度、有效期与限速自主设置', '用量与费用逐次可查'],
       href: '/register',
-      action: '开始使用',
-      features: ['一个余额，调用多种模型', '独立密钥与有效期管理', '随时查看请求与消费'],
+      action: '注册开通',
     },
     {
-      title: '团队协作',
-      subtitle: '让每一份投入都有边界',
-      label: '统一余额',
-      href: '/console/team',
-      action: '进入工作台',
-      features: ['管理员统一管理组织余额', '为成员分配可用配额', '按成员查看组织用量'],
+      title: '企业版',
+      value: '按用量核定',
+      description: '在个人版基础上增加组织账户、成员配额与分组授权，支持独立部署。',
+      features: ['组织隔离与统一停用', '成员配额单独设定或批量均分', '专属对接人支持接入与排障'],
+      href: '/help#contact-title',
+      action: '联系我们',
     },
     {
-      title: '费用透明',
-      subtitle: '用清楚的价格做决定',
-      label: '四维定价',
+      title: '模型价格',
+      value: '逐项公开',
+      description: '各模型输入、输出与缓存单价逐项列示，接入前即可完成成本测算。',
+      features: ['输入与输出分别计价', '缓存写入与读取单独列示', '美元计价，精确到小数点后 8 位'],
       href: '/catalog',
       action: '查看模型价格',
-      features: ['输入与输出分别计费', '缓存写入与读取单独展示', '美元计价，明细可查询'],
     },
   ],
-  stories: [
+  service: [
     {
-      company: '北辰实验室',
-      mark: '北',
-      category: 'AI 应用',
-      quote:
-        '我们把多个模型放进同一套产品流程。每周看一次模型用量和费用，就能决定哪些任务值得换一个选择。',
-      name: '陈亦舟',
-      role: '联合创始人',
-      result: '3 个产品',
-      resultLabel: '共用一个工作空间',
+      kind: 'support',
+      title: '技术支持',
+      description: '个人版提供邮件支持；企业版配置专属对接人，覆盖接入、扩容与故障排查。',
     },
     {
-      company: '简序工作室',
-      mark: '简',
-      category: '独立开发',
-      quote:
-        '项目密钥分开以后，终于能看清每个小产品的实际成本。一个人也可以把研发和账单管理得很从容。',
-      name: '林序',
-      role: '独立开发者',
-      result: '6 个项目',
-      resultLabel: '分别管理调用密钥',
+      kind: 'ownership',
+      title: '数据归属',
+      description: '调用记录归属客户组织；成员变更或组织停用后，既有记录仍可查询。',
     },
     {
-      company: '澜图科技',
-      mark: '澜',
-      category: '团队协作',
-      quote:
-        '给研发、运营和内容同事各自分配额度，大家按需要选模型。管理员在一处就能看到团队整体支出。',
-      name: '许知遥',
-      role: '产品负责人',
-      result: '12 位成员',
-      resultLabel: '协作在同一个账户',
+      kind: 'status',
+      title: '状态公开',
+      description: '可用率与响应耗时在服务状态页公开展示。',
     },
     {
-      company: '拾光内容',
-      mark: '拾',
-      category: '内容创作',
-      quote:
-        '研究时用长文本模型，写作时换成更适合表达的模型。工具还是原来的工具，创作过程顺畅了很多。',
-      name: '周乐宁',
-      role: '内容主理人',
-      result: '4 类工作流',
-      resultLabel: '串起研究与表达',
-    },
-    {
-      company: '观山数据',
-      mark: '观',
-      category: '知识工程',
-      quote:
-        '我们把客户知识助手接进统一入口，按密钥追踪不同应用。遇到问题先看状态和用量，排查路径更清楚。',
-      name: '顾行远',
-      role: '技术负责人',
-      result: '8 个助手',
-      resultLabel: '各自保留用量明细',
-    },
-    {
-      company: '向量工场',
-      mark: '向',
-      category: '产品研发',
-      quote:
-        '试验阶段能快速切换模型，进入稳定运行后又能认真核对费用。这让我们可以把更多精力放在用户体验上。',
-      name: '苏予安',
-      role: '工程经理',
-      result: '一个入口',
-      resultLabel: '连接整个研发流程',
+      kind: 'deployment',
+      title: '部署方式',
+      description: '有数据驻留或网络隔离要求的，支持在客户环境独立部署，方案单独约定。',
     },
   ],
-  integrations: ['Cursor', 'Claude Code', 'Cline', 'Open WebUI', 'LobeChat', '自建应用'],
   faqs: [
     {
-      question: '如何开始使用？',
+      question: '支持哪些接入协议？',
       answer:
-        '创建账户后，在控制台生成密钥、充值余额，再按照接入文档配置工具。模型目录会列出当前可用的模型与价格。',
+        'OpenAI Chat Completions、OpenAI Responses、Anthropic Messages、Gemini 原生协议以及图像生成接口，使用平台签发的密钥鉴权。',
     },
     {
-      question: '需要订阅套餐吗？',
+      question: '费用如何计算？',
       answer:
-        '当前采用余额按量计费。你可以在控制台查看余额、订单和实际消费，按自己的使用节奏安排支出。',
+        '按模型目录公开的单价计费，输入、输出与缓存读写分别计价。账户余额按调用实时扣减，精确到小数点后 8 位，无最低消费。',
     },
     {
-      question: '四项模型价格分别是什么？',
+      question: '组织如何分配额度？',
       answer:
-        '输入、缓存写入、缓存读取和输出分别展示，单位为美元 / 百万 Token。不同模型的缓存支持情况和价格以模型目录及实际调用记录为准。',
+        '管理员可为成员单独设定消费上限，也可按总额批量均分。某位成员额度用尽只停止该成员的调用，不影响其他成员。',
     },
     {
-      question: '团队成员如何使用余额？',
+      question: '如何限制密钥的使用范围？',
       answer:
-        '组织管理员统一管理余额，并为成员设置配额。成员在配额范围内使用，管理员可以在组织用量中查看各成员的消费。',
+        '单个密钥可设置消费额度、有效期、5 小时 / 1 天 / 7 天速率限制、IP 白名单与黑名单，以及可用的模型分组。',
     },
     {
-      question: '可以接入我正在使用的工具吗？',
+      question: '上游账号异常时会怎样？',
       answer:
-        '支持配置兼容 API 地址和密钥的工具，可以按接入文档进行配置。工具所用协议与模型需要匹配，具体方式见帮助中心。',
+        '同一分组挂载多个上游账号。某个账号异常时，网关自动切换到其他账号，并临时隔离故障账号。',
     },
     {
-      question: '在哪里查看服务状态和历史记录？',
-      answer:
-        '服务状态页公开展示可用率、最近一次响应耗时，以及已有的历史可用性记录。缺少探测结果时会明确显示，历史记录的范围以页面实际标注为准。',
+      question: '能否在自有环境部署？',
+      answer: '支持。有数据驻留或网络隔离要求的，可在客户环境独立部署，具体方案联系我们单独约定。',
     },
   ],
+  cta: {
+    title: '开始接入',
+    secondary: '查看模型价格',
+  },
+  /** 登录、注册页左侧展示区。 */
+  auth: {
+    title: '统一接入主流模型，按组织管控额度与权限。',
+    points: [
+      '多账号冗余调度，异常自动切换',
+      '组织、成员与密钥分级管控额度',
+      '单价逐项公开，用量逐次可查',
+    ],
+  },
 } as const;

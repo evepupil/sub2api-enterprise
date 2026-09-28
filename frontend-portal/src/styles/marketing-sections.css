@@ -1,21 +1,18 @@
 /*
  * 首页后半专属样式（首页后半实施路所有）。
  *
- * 规格：design/proactiv-redesign.md 第 2、5 节。
  * 公共类 .marketing-shell / .marketing-section / .marketing-section-heading /
  * .marketing-eyebrow / .marketing-actions / .marketing-surface 由 marketing-base.css 定义，
- * 这里只补充工作空间、场景、计费、故事、工具生态、FAQ 与结尾 CTA 的专属类。
+ * 这里只补充组织管控、技术规格、计费方式、服务保障、FAQ 与结尾 CTA 的专属类。
  * 颜色与尺寸全部引用 tokens.css；所有类名以 .ms- 前缀并限定在对应区块内，
  * 不覆盖全局或其它实现路的类。
  */
 
 /* 区块锚点：这些类只作语义标记，样式来自公共 marketing-section / marketing-shell，
    保留空规则会触发 lint，因此统一在这里声明区块的滚动定位与锚点让位。 */
-.ms-workspace,
-.ms-scenarios,
+.ms-governance,
 .ms-pricing,
-.ms-stories,
-.ms-integrations,
+.ms-service,
 .ms-faq,
 .ms-cta {
   scroll-margin-top: var(--public-header-clearance);
@@ -26,63 +23,20 @@
 /* 左右分栏里的标题块保持纵向左对齐：共享 .marketing-section-heading 在宽屏会切成
    横向两端对齐，这里只在自己的容器内调整，不重定义公共类本身。 */
 .ms-copy .marketing-section-heading,
-.ms-faq-intro .marketing-section-heading,
-.ms-integrations-copy .marketing-section-heading {
+.ms-faq-intro .marketing-section-heading {
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
   margin-bottom: 0;
 }
 
-.ms-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border: 1px solid var(--border);
-  border-radius: var(--pill-radius);
-  color: var(--muted-foreground);
-  background: var(--muted);
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.ms-note {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  margin: 24px 0 0;
-  max-width: 52ch;
-  color: var(--muted-foreground);
-  font-size: var(--font-size-sm);
-  line-height: 1.7;
-}
-
-.ms-note-icon {
-  flex: none;
-  width: 18px;
-  height: 18px;
-  margin-top: 3px;
-  color: var(--primary);
-}
-
-/* ------------------------------------------------------- 5. 工作空间 */
-
-/* 标题里的换行来自内容文件，允许按原文断行 */
-.ms-workspace .marketing-section-heading h2 {
-  white-space: pre-line;
-}
+/* ------------------------------------------------------------- 组织管控 */
 
 .ms-split {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 32px;
   align-items: center;
-}
-
-.ms-split-spaced {
-  margin-top: 64px;
 }
 
 .ms-copy {
@@ -93,34 +47,51 @@
   min-width: 0;
 }
 
-.ms-points {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.ms-governance-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
   margin: 24px 0 0;
   padding: 0;
   list-style: none;
 }
 
-.ms-points li {
+.ms-governance-item {
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
   gap: 10px;
-  color: var(--foreground);
-  font-size: var(--font-size-sm);
-  line-height: 1.7;
+  min-width: 0;
+  padding: 20px;
 }
 
-.ms-point-icon {
-  flex: none;
+.ms-governance-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border);
+  border-radius: var(--control-radius);
+  background: var(--secondary);
+  color: var(--primary);
+}
+
+.ms-governance-icon-svg {
   width: 18px;
   height: 18px;
-  margin-top: 3px;
-  color: var(--success);
 }
 
-.ms-actions {
-  margin-top: 28px;
+.ms-governance-item h3 {
+  margin: 0;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+}
+
+.ms-governance-item p {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: var(--font-size-sm);
+  line-height: 1.7;
 }
 
 .ms-panel {
@@ -148,27 +119,6 @@
   margin: 4px 0 0;
   color: var(--muted-foreground);
   font-size: var(--font-size-xs);
-}
-
-.ms-balance {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 16px;
-  border: 1px solid var(--border);
-  border-radius: var(--control-radius);
-  background: var(--secondary);
-}
-
-.ms-balance-label {
-  color: var(--muted-foreground);
-  font-size: var(--font-size-xs);
-}
-
-.ms-balance-value {
-  font-size: var(--font-size-page);
-  font-weight: 600;
-  letter-spacing: -0.02em;
 }
 
 .ms-member-list {
@@ -260,432 +210,7 @@
   white-space: nowrap;
 }
 
-.ms-trend-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.ms-trend {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 12px;
-  border: 1px solid var(--border);
-  border-radius: var(--control-radius);
-  background: var(--secondary);
-}
-
-.ms-trend-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 6px;
-}
-
-.ms-trend-label {
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-}
-
-.ms-trend-caption {
-  color: var(--muted-foreground);
-  font-size: var(--font-size-xs);
-  white-space: nowrap;
-}
-
-.ms-trend-bars {
-  display: flex;
-  align-items: flex-end;
-  gap: 4px;
-  height: 72px;
-}
-
-.ms-trend-bar {
-  flex: 1 1 0;
-  min-width: 2px;
-  border-radius: 2px 2px 0 0;
-  background: linear-gradient(180deg, var(--chart-1), var(--chart-5));
-}
-
-.ms-model-list {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.ms-model {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 0;
-}
-
-.ms-model-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.ms-model-name {
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-}
-
-.ms-model-cost {
-  color: var(--foreground);
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.ms-model-track {
-  height: 6px;
-  overflow: hidden;
-  border-radius: var(--pill-radius);
-  background: var(--secondary);
-}
-
-.ms-model-fill {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: var(--chart-2);
-}
-
-.ms-model-meta {
-  margin: 0;
-  color: var(--muted-foreground);
-  font-size: var(--font-size-xs);
-}
-
-.ms-stat-row {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  margin: 0;
-  padding: 16px 0 0;
-  border-top: 1px solid var(--border);
-  list-style: none;
-}
-
-.ms-stat {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-}
-
-.ms-stat-label {
-  color: var(--muted-foreground);
-  font-size: var(--font-size-xs);
-}
-
-.ms-stat-value {
-  font-size: var(--font-size-base);
-  font-weight: 600;
-}
-
-/* ------------------------------------------------------- 6. 使用场景 */
-
-.ms-tabs {
-  position: relative;
-  isolation: isolate;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 24px;
-}
-
-.ms-tab {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--touch-height);
-  padding: 8px 16px;
-  border: 1px solid var(--border);
-  border-radius: var(--pill-radius);
-  background: var(--card);
-  color: var(--muted-foreground);
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  cursor: pointer;
-  transition:
-    color var(--transition-duration) ease,
-    border-color var(--transition-duration) ease,
-    background-color var(--transition-duration) ease;
-}
-
-.ms-tab:hover {
-  color: var(--foreground);
-  border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
-}
-
-.ms-tab[aria-selected='true'] {
-  color: var(--primary-foreground);
-}
-
-.ms-scenario-panel {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 24px;
-  align-items: start;
-  outline-offset: 4px;
-}
-
-.ms-scenario-copy {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.ms-scenario-copy h3 {
-  margin: 0;
-  font-size: var(--font-size-xl);
-  letter-spacing: -0.01em;
-}
-
-.ms-scenario-description {
-  margin: 0;
-  max-width: 48ch;
-  color: var(--muted-foreground);
-  font-size: var(--font-size-sm);
-  line-height: 1.7;
-}
-
-.ms-task-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.ms-task-list li {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  font-size: var(--font-size-sm);
-  line-height: 1.6;
-}
-
-.ms-task-icon {
-  flex: none;
-  width: 16px;
-  height: 16px;
-  margin-top: 3px;
-  color: var(--primary);
-}
-
-.ms-tag-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.ms-tag {
-  padding: 4px 10px;
-  border: 1px solid var(--border);
-  border-radius: var(--pill-radius);
-  background: var(--secondary);
-  color: var(--muted-foreground);
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-}
-
-.ms-scenario-screen {
-  min-width: 0;
-  overflow: hidden;
-}
-
-.ms-screen-bar {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border);
-  background: var(--secondary);
-}
-
-.ms-screen-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: var(--pill-radius);
-  background: var(--border);
-}
-
-.ms-screen-dot:first-child {
-  background: var(--chart-6);
-}
-
-.ms-screen-dot:nth-child(2) {
-  background: var(--chart-4);
-}
-
-.ms-screen-dot:nth-child(3) {
-  background: var(--chart-2);
-}
-
-.ms-screen-title {
-  margin-left: 8px;
-  color: var(--muted-foreground);
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-}
-
-.ms-screen-body {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 20px;
-}
-
-.ms-screen-chat {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.ms-bubble {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  max-width: 92%;
-  padding: 12px 14px;
-  border-radius: var(--control-radius);
-  font-size: var(--font-size-sm);
-  line-height: 1.6;
-  overflow-wrap: anywhere;
-}
-
-.ms-bubble-user {
-  align-self: flex-end;
-  border: 1px solid color-mix(in srgb, var(--primary) 40%, var(--border));
-  background: color-mix(in srgb, var(--primary) 14%, var(--card));
-  color: var(--foreground);
-}
-
-.ms-bubble-assistant {
-  align-self: flex-start;
-  border: 1px solid var(--border);
-  background: var(--secondary);
-  color: var(--foreground);
-}
-
-.ms-bubble-model {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--primary);
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-}
-
-.ms-bubble-icon {
-  width: 14px;
-  height: 14px;
-}
-
-.ms-screen-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin: 0;
-  padding: 14px;
-  border: 1px solid var(--border);
-  border-radius: var(--control-radius);
-  background: var(--card);
-  list-style: none;
-}
-
-.ms-screen-step {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: var(--font-size-sm);
-}
-
-.ms-screen-step-index {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  border-radius: var(--pill-radius);
-  background: color-mix(in srgb, var(--chart-2) 22%, var(--card));
-  color: var(--chart-2);
-  font-size: var(--font-size-xs);
-  font-weight: 700;
-}
-
-.ms-screen-step-text {
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-
-.ms-screen-compose {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: var(--control-radius);
-  background: var(--card);
-}
-
-.ms-screen-placeholder {
-  min-width: 0;
-  overflow: hidden;
-  color: var(--muted-foreground);
-  font-size: var(--font-size-xs);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.ms-screen-send {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: var(--pill-radius);
-  background: var(--primary);
-  color: var(--primary-foreground);
-}
-
-.ms-screen-send-icon {
-  width: 14px;
-  height: 14px;
-}
-
-.ms-screen-foot {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin: 0;
-  color: var(--muted-foreground);
-  font-size: var(--font-size-xs);
-}
-
-.ms-screen-foot-icon {
-  width: 13px;
-  height: 13px;
-}
-
-/* ------------------------------------------------------- 8. 余额计费 */
+/* ------------------------------------------------------------- 计费方式 */
 
 .ms-price-grid {
   display: grid;
@@ -709,40 +234,24 @@
   box-shadow: 0 24px 60px -40px var(--marketing-glow-soft);
 }
 
-.ms-price-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.ms-price-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border: 1px solid var(--border);
-  border-radius: var(--control-radius);
-  background: var(--secondary);
-  color: var(--primary);
-}
-
-.ms-price-icon-svg {
-  width: 18px;
-  height: 18px;
-}
-
 .ms-price-title {
   margin: 0;
   font-size: var(--font-size-xl);
 }
 
-.ms-price-subtitle {
-  margin: -8px 0 0;
+.ms-price-value {
+  margin: 0;
+  color: var(--foreground);
+  font-size: var(--font-size-page);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.ms-price-description {
+  margin: 0;
   color: var(--muted-foreground);
   font-size: var(--font-size-sm);
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
 .ms-price-features {
@@ -775,25 +284,9 @@
   padding-top: 8px;
 }
 
-.ms-price-note {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 8px;
-  margin: 24px 0 0;
-  padding: 16px 20px;
-  border: 1px solid var(--border);
-  border-radius: var(--card-radius);
-  background: var(--secondary);
-  color: var(--muted-foreground);
-  font-size: var(--font-size-sm);
-  line-height: 1.7;
-  overflow-wrap: anywhere;
-}
+/* ------------------------------------------------------------- 服务保障 */
 
-/* ------------------------------------------------------- 9. 客户故事 */
-
-.ms-story-grid {
+.ms-service-list {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 16px;
@@ -802,23 +295,16 @@
   list-style: none;
 }
 
-.ms-story-card {
+.ms-service-item {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
   min-width: 0;
-  padding: 24px;
+  padding: 20px;
 }
 
-.ms-story-head {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.ms-story-mark {
+.ms-service-icon {
   display: inline-flex;
-  flex: none;
   align-items: center;
   justify-content: center;
   width: 36px;
@@ -827,161 +313,24 @@
   border-radius: var(--control-radius);
   background: var(--secondary);
   color: var(--primary);
-  font-size: var(--font-size-sm);
-  font-weight: 700;
 }
 
-.ms-story-identity {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.ms-story-company {
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  overflow-wrap: anywhere;
-}
-
-.ms-story-category {
-  color: var(--muted-foreground);
-  font-size: var(--font-size-xs);
-}
-
-.ms-story-quote-icon {
-  flex: none;
+.ms-service-icon-svg {
   width: 18px;
   height: 18px;
-  margin-left: auto;
-  color: var(--border);
 }
 
-.ms-story-quote {
+.ms-service-item h3 {
   margin: 0;
-  color: var(--foreground);
-  font-size: var(--font-size-sm);
-  line-height: 1.8;
-  overflow-wrap: anywhere;
-}
-
-.ms-story-foot {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: auto;
-  padding-top: 16px;
-  border-top: 1px solid var(--border);
-}
-
-.ms-story-person {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.ms-story-name {
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-}
-
-.ms-story-role {
-  color: var(--muted-foreground);
-  font-size: var(--font-size-xs);
-}
-
-.ms-story-result {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
-  text-align: right;
-}
-
-.ms-story-result-value {
-  color: var(--primary);
   font-size: var(--font-size-base);
   font-weight: 600;
-  white-space: nowrap;
 }
 
-.ms-story-result-label {
-  color: var(--muted-foreground);
-  font-size: var(--font-size-xs);
-}
-
-/* ---------------------------------------------------- 10. 工具生态 */
-
-.ms-integrations-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 32px;
-  align-items: start;
-}
-
-.ms-integrations-copy {
-  min-width: 0;
-}
-
-.ms-integrations-note {
-  margin: 24px 0 12px;
-  max-width: 52ch;
+.ms-service-item p {
+  margin: 0;
   color: var(--muted-foreground);
   font-size: var(--font-size-sm);
   line-height: 1.7;
-}
-
-.ms-integrations-link {
-  margin: 0;
-}
-
-.ms-integration-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.ms-integration-item {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 0;
-  padding: 16px;
-}
-
-.ms-integration-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  margin-bottom: 4px;
-  border: 1px solid var(--border);
-  border-radius: var(--control-radius);
-  background: var(--secondary);
-  color: var(--primary);
-}
-
-.ms-integration-icon-svg {
-  width: 16px;
-  height: 16px;
-}
-
-.ms-integration-name {
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  overflow-wrap: anywhere;
-}
-
-.ms-integration-type {
-  color: var(--muted-foreground);
-  font-size: var(--font-size-xs);
 }
 
 /* ------------------------------------------------------- 11. FAQ */
@@ -1107,14 +456,6 @@
   line-height: var(--line-height-heading);
 }
 
-.ms-cta-description {
-  margin: 0;
-  max-width: 52ch;
-  color: var(--muted-foreground);
-  font-size: var(--font-size-base);
-  line-height: 1.7;
-}
-
 .ms-cta-actions {
   margin-top: 8px;
 }
@@ -1146,21 +487,17 @@
     padding: 28px;
   }
 
-  .ms-price-card,
-  .ms-story-card {
+  .ms-governance-list,
+  .ms-service-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ms-price-card {
     padding: 28px;
   }
 
   .ms-price-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .ms-story-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .ms-integration-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .ms-cta-card {
@@ -1178,35 +515,12 @@
     gap: 48px;
   }
 
-  .ms-split-reverse .ms-copy {
-    order: 2;
-  }
-
-  .ms-split-reverse .ms-visual {
-    order: 1;
-  }
-
-  .ms-split-spaced {
-    margin-top: 96px;
-  }
-
-  .ms-scenario-panel {
-    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
-    gap: 40px;
-    align-items: center;
-  }
-
   .ms-price-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .ms-story-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .ms-integrations-layout {
-    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
-    gap: 48px;
+  .ms-service-list {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .ms-faq-layout {
@@ -1219,24 +533,8 @@
   }
 }
 
-/* 手机：面板与图表在窄屏按单列堆叠，避免横向挤压 */
-@media (max-width: 479px) {
-  .ms-trend-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .ms-stat-row {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .ms-integration-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
 /* 减少动态：过渡立即生效，展开状态指示（旋转）保留 */
 @media (prefers-reduced-motion: reduce) {
-  .ms-tab,
   .ms-faq-chevron {
     transition: none;
   }

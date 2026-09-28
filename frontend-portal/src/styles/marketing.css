@@ -219,7 +219,6 @@
 .dashboard-status-led,
 .dashboard-cost-label,
 .dashboard-model-name,
-.platform-status-footer span,
 .platform-key-status {
   display: inline-flex;
   align-items: center;
@@ -676,11 +675,6 @@
   font-weight: 600;
 }
 
-.provider-strip-heading span:last-child {
-  color: var(--muted-foreground);
-  font-size: var(--font-size-sm);
-}
-
 .provider-strip-list {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -746,8 +740,6 @@
   flex-direction: column;
   overflow: hidden;
   padding: 22px;
-  color: inherit;
-  text-decoration: none;
   transition:
     border-color var(--transition-duration),
     transform var(--transition-duration),
@@ -760,23 +752,10 @@
   transform: translateY(-2px);
 }
 
-.platform-card-feature {
-  grid-column: span 4;
-}
-
-.platform-card-tall {
-  grid-column: span 2;
-}
-
 .platform-card-heading {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   color: var(--muted-foreground);
-}
-
-.platform-card-heading svg {
-  color: var(--primary);
 }
 
 .platform-card-index {
@@ -809,10 +788,11 @@
 }
 
 .platform-routing-visual,
-.platform-analytics-visual,
+.platform-stream-visual,
 .platform-keys-visual,
 .platform-team-visual,
-.platform-status-visual {
+.platform-failover-visual,
+.platform-deploy-visual {
   min-height: 148px;
   margin: 22px 0 24px;
 }
@@ -880,59 +860,79 @@
   font-size: var(--font-size-xs);
 }
 
-.platform-analytics-visual {
+.platform-stream-visual {
   display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: end;
-  gap: 10px;
+  align-content: center;
+  gap: 14px;
   padding: 18px;
-  border-bottom: 1px solid var(--border);
+  border: 1px solid var(--border);
+  border-radius: var(--card-radius);
+  background: color-mix(in srgb, var(--background) 72%, var(--card));
 }
 
-.platform-analytics-value {
-  display: grid;
-  gap: 3px;
+.platform-stream-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 14px;
 }
 
-.platform-analytics-value strong {
-  color: var(--primary);
-  font-size: var(--font-size-xl);
-  font-weight: 600;
+.platform-stream-row span {
+  display: block;
+  height: 8px;
+  border-radius: var(--pill-radius);
+  background: color-mix(in srgb, var(--primary) 70%, var(--chart-3));
 }
 
-.platform-analytics-value span,
-.platform-analytics-meta {
+.platform-stream-row span:nth-child(1) {
+  width: 20px;
+}
+
+.platform-stream-row span:nth-child(2) {
+  width: 34px;
+}
+
+.platform-stream-row span:nth-child(3) {
+  width: 16px;
+}
+
+.platform-stream-row span:nth-child(4) {
+  width: 28px;
+}
+
+.platform-stream-row span:nth-child(5) {
+  width: 22px;
+}
+
+.platform-stream-row span:nth-child(6) {
+  width: 12px;
+  opacity: 0.55;
+}
+
+.platform-stream-cursor {
+  display: block;
+  width: 6px;
+  height: 14px;
+  border-radius: 2px;
+  background: var(--primary);
+  opacity: 0.85;
+}
+
+.platform-stream-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
   color: var(--muted-foreground);
   font-size: var(--font-size-xs);
 }
 
-.platform-mini-bars {
-  display: flex;
-  align-items: end;
-  gap: 5px;
-  height: 72px;
-}
-
-.platform-mini-bars span {
-  display: block;
-  width: 7px;
-  min-height: 8px;
-  border-radius: 3px 3px 0 0;
-  background: color-mix(in srgb, var(--primary) 75%, var(--chart-3));
-}
-
-.platform-analytics-meta {
-  display: flex;
-  grid-column: 1 / -1;
-  justify-content: space-between;
-  gap: 8px;
-  padding-top: 10px;
-  border-top: 1px solid var(--border);
-}
-
-.platform-analytics-meta strong {
-  color: var(--foreground);
-  font-weight: 600;
+.platform-stream-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
 }
 
 .platform-keys-visual,
@@ -997,6 +997,22 @@
   font-size: 10px;
 }
 
+.platform-key-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.platform-key-tag {
+  padding: 4px 9px;
+  border: 1px solid var(--border);
+  border-radius: var(--pill-radius);
+  color: var(--muted-foreground);
+  background: color-mix(in srgb, var(--background) 62%, var(--card));
+  font-size: 10px;
+}
+
 .platform-member-avatar {
   display: grid;
   place-items: center;
@@ -1025,80 +1041,113 @@
   background: var(--chart-2);
 }
 
-.platform-status-visual {
+.platform-failover-visual {
   display: grid;
   align-content: start;
-  gap: 16px;
-  padding: 16px;
-  border: 1px solid var(--border);
-  border-radius: var(--card-radius);
-  background: color-mix(in srgb, var(--background) 68%, var(--card));
+  gap: 8px;
 }
 
-.platform-status-summary {
+.platform-failover-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 9px;
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid var(--border);
+  border-radius: var(--control-radius);
+  background: color-mix(in srgb, var(--background) 62%, var(--card));
 }
 
-.platform-status-icon {
+.platform-failover-dot {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--muted-foreground);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--muted-foreground) 13%, transparent);
+}
+
+.platform-failover-row[data-tone='success'] .platform-failover-dot {
+  background: var(--success);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--success) 13%, transparent);
+}
+
+.platform-failover-row[data-tone='warning'] .platform-failover-dot {
+  background: var(--warning);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--warning) 13%, transparent);
+}
+
+.platform-failover-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--foreground);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.platform-failover-status {
+  flex: 0 0 auto;
+  color: var(--muted-foreground);
+  font-size: 10px;
+}
+
+.platform-failover-row[data-tone='success'] .platform-failover-status {
+  color: var(--success);
+}
+
+.platform-failover-row[data-tone='warning'] .platform-failover-status {
+  color: var(--warning);
+}
+
+.platform-deploy-visual {
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 9px;
-  color: var(--success);
-  background: color-mix(in srgb, var(--success) 13%, var(--card));
+  min-height: 164px;
+  padding: 20px;
 }
 
-.platform-status-summary > span:last-child {
+.platform-deploy-frame {
+  position: relative;
   display: grid;
-  gap: 2px;
+  justify-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 22px 16px 16px;
+  border: 1px dashed var(--border);
+  border-radius: var(--card-radius);
+  background: color-mix(in srgb, var(--background) 72%, var(--card));
 }
 
-.platform-status-summary strong {
-  color: var(--foreground);
-  font-size: var(--font-size-lg);
-  font-weight: 600;
-}
-
-.platform-status-summary small {
+.platform-deploy-frame-label {
+  position: absolute;
+  top: -10px;
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--pill-radius);
   color: var(--muted-foreground);
+  background: var(--card);
   font-size: 10px;
 }
 
-.platform-status-cells {
-  display: grid;
-  grid-template-columns: repeat(14, minmax(0, 1fr));
-  gap: 4px;
-}
-
-.platform-status-cells i {
-  display: block;
-  aspect-ratio: 1;
-  border-radius: 2px;
-  background: var(--success);
-  opacity: 0.72;
-}
-
-.platform-status-cells i:nth-child(7n) {
-  opacity: 0.42;
-}
-
-.platform-status-footer {
+.platform-deploy-blocks {
   display: flex;
-  justify-content: space-between;
   gap: 10px;
-  color: var(--muted-foreground);
-  font-size: 10px;
 }
 
-.platform-status-footer span {
-  gap: 4px;
-}
-
-.platform-status-level {
-  color: var(--success);
+.platform-deploy-block {
+  display: grid;
+  place-items: center;
+  min-width: 72px;
+  padding: 14px 12px;
+  border: 1px solid color-mix(in srgb, var(--primary) 55%, var(--border));
+  border-radius: var(--control-radius);
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 12%, var(--card));
+  font-size: var(--font-size-xs);
+  font-weight: 600;
 }
 
 /* 真实模型目录预览：只裁剪数量，不改公开价格数据。 */
@@ -1256,12 +1305,7 @@
     padding: 22px;
   }
 
-  .platform-card-feature {
-    grid-column: span 6;
-  }
-
-  .platform-card-tall,
-  .platform-card:not(.platform-card-feature):not(.platform-card-tall) {
+  .platform-card {
     grid-column: span 3;
   }
 
@@ -1387,10 +1431,7 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .platform-card,
-  .platform-card-feature,
-  .platform-card-tall,
-  .platform-card:not(.platform-card-feature):not(.platform-card-tall) {
+  .platform-card {
     grid-column: auto;
     min-height: 300px;
   }

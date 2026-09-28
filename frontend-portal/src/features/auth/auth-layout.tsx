@@ -13,8 +13,6 @@ export interface AuthLayoutProps {
   children: ReactNode;
 }
 
-const showcaseStory = marketingContent.stories[0];
-
 /** Shared account shell: a focused form with a product context on wider screens. */
 export function AuthLayout({ title, description, children }: AuthLayoutProps) {
   return (
@@ -45,24 +43,14 @@ export function AuthLayout({ title, description, children }: AuthLayoutProps) {
             xOffset={48}
           />
           <Brand href="/" name={marketingContent.brand.name} />
-          <p className="auth-showcase-eyebrow">你的 AI 工作空间</p>
-          <h2>让每一次模型调用，都有清晰的起点。</h2>
+          <p className="auth-showcase-eyebrow">{marketingContent.hero.eyebrow}</p>
+          <h2>{marketingContent.auth.title}</h2>
           <p className="auth-showcase-description">{marketingContent.brand.tagline}</p>
           <ul className="auth-showcase-benefits">
-            {marketingContent.hero.benefits.map((benefit) => (
-              <li key={benefit}>{benefit}</li>
+            {marketingContent.auth.points.map((point) => (
+              <li key={point}>{point}</li>
             ))}
           </ul>
-          <figure className="auth-showcase-story">
-            <blockquote>“{showcaseStory.quote}”</blockquote>
-            <figcaption>
-              <span>{showcaseStory.name}</span>
-              <span>{showcaseStory.role}</span>
-              <strong>
-                {showcaseStory.result} · {showcaseStory.resultLabel}
-              </strong>
-            </figcaption>
-          </figure>
         </aside>
         <section className="auth-form-column" aria-labelledby="auth-form-title">
           <Card className="auth-form-card w-full gap-5">

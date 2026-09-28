@@ -17,10 +17,10 @@ import { ThemeSwitcher } from '../../features/theme/theme-switcher';
  * 锚点链接（含 #）不参与当前页高亮，避免和真实路由页争同一个 aria-current。
  */
 const PUBLIC_NAVIGATION = [
-  { href: '/#platform', label: '产品功能' },
+  { href: '/#platform', label: '产品能力' },
   { href: '/catalog', label: '模型价格' },
+  { href: '/#pricing', label: '计费方式' },
   { href: '/status', label: '服务状态' },
-  { href: '/#stories', label: '客户故事' },
   { href: '/help', label: '开发文档' },
 ] as const;
 
@@ -173,7 +173,7 @@ export function PublicShell({
             className="min-w-0 shrink"
           />
 
-          {/* 桌面中部导航：产品功能 / 模型价格 / 服务状态 / 客户故事 / 开发文档。
+          {/* 桌面中部导航：产品能力 / 模型价格 / 计费方式 / 服务状态 / 开发文档。
               1024px 以下改用手机菜单，避免五个中文标签在 768px 挤坏布局。 */}
           <nav aria-label="站内导航" className="hidden flex-1 lg:block">
             <div className="flex items-center justify-center gap-1">
