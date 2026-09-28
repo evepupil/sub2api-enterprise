@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 @import './tokens.css';
+/* 共享动效组件（Aceternity 适配件），各页面样式可在其后按需覆盖 */
+@import './effects.css';
 /* 页面专属样式：首页前半、首页后半、公开内页 */
 @import './marketing.css';
 /* 首页后半与公开内页样式由各自实施路创建；缺失时构建会明确报错，不静默跳过 */
