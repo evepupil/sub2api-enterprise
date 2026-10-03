@@ -8,6 +8,14 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 // 开发服务允许经 Cloudflare 隧道（dev.chaosyn.com）访问开发资源
 const devOrigins = ['dev.chaosyn.com', '127.0.0.1', 'localhost'];
 
+/**
+ * 中文是默认语言、地址不带前缀：用配置里的路径改写把 /models 在内部交给 /zh/models 渲染。
+ * 不用语言中间件做这件事——中间件生成的改写地址带主机名（localhost），
+ * 和服务实际的主机名、经隧道或反向代理时的协议对不上，会被当成外部地址再请求一次。
+ * 排除英文、已带 zh 前缀、框架资源、接口和带扩展名的文件（public 下的图片等）。
+ */
+export const ZH_PATH = '/:path((?!en(?:/|$)|zh(?:/|$)|_next(?:/|$)|api(?:/|$)|.*\\.[^/]+$).+)';
+
 const nextConfig = (phase: string): NextConfig =>
   withNextIntl({
     output: 'standalone',
@@ -16,6 +24,23 @@ const nextConfig = (phase: string): NextConfig =>
     typescript: { ignoreBuildErrors: true },
     allowedDevOrigins: phase === PHASE_DEVELOPMENT_SERVER ? devOrigins : undefined,
     distDir: phase === PHASE_DEVELOPMENT_SERVER ? '.next' : '.next-build',
+    // 带 /zh 前缀的地址统一跳回不带前缀的地址，避免同一页面有两个网址
+    async redirects() {
+      return [
+        { source: '/zh', destination: '/', permanent: false },
+        { source: '/zh/:path*', destination: '/:path*', permanent: false },
+      ];
+    },
+    async rewrites() {
+      return {
+        beforeFiles: [
+          { source: '/', destination: '/zh' },
+          { source: ZH_PATH, destination: '/zh/:path' },
+        ],
+        afterFiles: [],
+        fallback: [],
+      };
+    },
   });
 
 export default nextConfig;

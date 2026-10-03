@@ -357,7 +357,7 @@ pnpm format:check  # prettier
 
 ## 8. 文件写入边界与分路表（并发协作铁律）
 
-公共文件（**区块实现会话一律不准碰**）：`src/app/**`、`src/components/**`、`src/lib/**`、`src/i18n/**`、`src/proxy.ts`、`src/global.d.ts`、`src/messages/index.ts`、`src/messages/*/common.json`、`public/**`、`tests/**`、`package.json`、`pnpm-lock.yaml`、所有配置文件、`DESIGN.md`、`design/**`。
+公共文件（**区块实现会话一律不准碰**）：`src/app/**`、`src/components/**`、`src/lib/**`、`src/i18n/**`、`src/global.d.ts`、`src/messages/index.ts`、`src/messages/*/common.json`、`public/**`、`tests/**`、`package.json`、`pnpm-lock.yaml`、所有配置文件、`DESIGN.md`、`design/**`。
 
 每路只写分给自己的文件；要拆子组件，只能放在本页目录、文件名以自己的区块文件名开头（例如 `src/blocks/home/features-bento-globe-card.tsx`）。每路的消息文件里已有的 `meta` 键原样保留，只往里加。
 
