@@ -46,13 +46,23 @@
     "perMTokens": "per 1M tokens",
     "longContext": "Over {threshold}: {input} / {output}",
     "perImageFrom": "from {price} / image",
-    "perImageApprox": "≈ {price} / image",
-    "custom": "Custom",
     "new": "New",
     "try": "Try it",
     "favorite": "Favorite",
-    "unfavorite": "Remove favorite"
+    "unfavorite": "Remove favorite",
+    "perImage": "{price} / image",
+    "perRequest": "{price} / request",
+    "perRequestFrom": "from {price} / request",
+    "peak": "Peak {window} ×{multiplier}",
+    "timeWindow": "{window} ×{multiplier}",
+    "timeWindowWeekdays": "Weekdays {window} ×{multiplier}"
   },
   "empty": "No matching models",
-  "emptyFavorites": "No favorites yet"
+  "emptyFavorites": "No favorites yet",
+  "noModels": "No models available",
+  "error": {
+    "unavailable": "Models couldn't be loaded",
+    "tooMany": "Too many requests. Try again shortly.",
+    "retry": "Retry"
+  }
 }

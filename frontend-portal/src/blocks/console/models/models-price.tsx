@@ -4,108 +4,121 @@ import { useTranslations } from 'next-intl';
 
 import { DiscountBadge } from '@/components/catalog/discount-badge';
 import type { AppLocale } from '@/i18n/routing';
+import { formatContext } from '@/lib/catalog';
 import {
-  editionDiscount,
-  editionRatio,
-  formatContext,
-  type Currency,
-  type EditionId,
-  type Model,
-} from '@/lib/catalog';
+  formatLiveMoney,
+  type LiveCurrency,
+  type ModelRowView,
+  type PriceWindow,
+} from '@/lib/console/live/models-view';
 import { cn } from '@/lib/utils';
 
-import { priceViewAt, type PriceView } from './models-price-view';
+type Money = (usd: number | null) => string;
 
-/** 价格主行：文本是「输入 / 输出」，生图是「起价 / 张起」或「≈ 每张 / 张」 */
-function PriceMain({ view }: { view: PriceView }) {
+/** 金额格式化：没有这一项时写「—」 */
+function moneyFormatter(currency: LiveCurrency, rechargeMultiplier: number): Money {
+  return (usd) => (usd === null ? '—' : formatLiveMoney(usd, currency, rechargeMultiplier));
+}
+
+/** 时段说明：「高峰 20:00–23:00 ×1.5」「工作日 00:30–08:30 ×0.5」 */
+function WindowLine({ window }: { window: PriceWindow }) {
   const t = useTranslations('consoleModels');
-  switch (view.kind) {
-    case 'text':
-      return <>{`${view.input} / ${view.output}`}</>;
-    case 'image-from':
-      return <>{t('table.perImageFrom', { price: view.price })}</>;
-    case 'image-approx':
-      return <>{t('table.perImageApprox', { price: view.price })}</>;
-  }
+  const values = { window: `${window.start}–${window.end}`, multiplier: window.multiplier };
+  const text =
+    window.kind === 'peak'
+      ? t('table.peak', values)
+      : window.weekdaysOnly
+        ? t('table.timeWindowWeekdays', values)
+        : t('table.timeWindow', values);
+  return <p className="text-xs text-subtle-foreground">{text}</p>;
 }
 
 /**
- * 价格列：当前通道的实际价格（官方价 × 通道倍率）。
- * 倍率按合同定制的通道（企业通道）没有固定单价，显示「定制」。
+ * 价格列：当前通道的实付价（后端单价 × 通道倍率）。按 Token 计费的是「输入 / 输出」每百万 Token，
+ * 有长上下文分档时多一行加价档；按张、按次计费的是单价；下面再列高峰、分时段的加价。
  * 交互检查用 data-model-price 取这一格。
  */
 export function ModelPrice({
-  model,
-  group,
+  row,
   currency,
+  rechargeMultiplier,
 }: {
-  model: Model;
-  group: EditionId;
-  currency: Currency;
+  row: ModelRowView;
+  currency: LiveCurrency;
+  rechargeMultiplier: number;
 }) {
   const t = useTranslations('consoleModels');
-  const ratio = editionRatio(group);
-  const view = ratio === null ? null : priceViewAt(model, ratio, currency);
+  const money = moneyFormatter(currency, rechargeMultiplier);
+  const { price } = row;
 
   return (
-    <div data-model-price={model.id} className="tabular-nums">
-      {ratio === null ? (
-        <p className="font-medium text-foreground">{t('table.custom')}</p>
-      ) : view ? (
+    <div data-model-price={row.id} className="tabular-nums">
+      {price.kind === 'token' ? (
         <>
-          <p className="font-medium text-foreground">
-            <PriceMain view={view} />
-          </p>
-          {view.kind === 'text' ? (
-            <p className="text-xs text-subtle-foreground">{t('table.perMTokens')}</p>
-          ) : null}
-          {/* 超过阈值后的加价档：只有部分文本模型有 */}
-          {view.kind === 'text' && view.longContext ? (
+          <p className="font-medium text-foreground">{`${money(price.input)} / ${money(price.output)}`}</p>
+          <p className="text-xs text-subtle-foreground">{t('table.perMTokens')}</p>
+          {price.longContext ? (
             <p className="text-xs text-subtle-foreground">
               {t('table.longContext', {
-                threshold: formatContext(view.longContext.threshold),
-                input: view.longContext.input,
-                output: view.longContext.output,
+                threshold: formatContext(price.longContext.threshold),
+                input: money(price.longContext.input),
+                output: money(price.longContext.output),
               })}
             </p>
           ) : null}
         </>
-      ) : null}
+      ) : price.kind === 'request' ? (
+        <p className="font-medium text-foreground">
+          {t(
+            price.unit === 'image'
+              ? price.from
+                ? 'table.perImageFrom'
+                : 'table.perImage'
+              : price.from
+                ? 'table.perRequestFrom'
+                : 'table.perRequest',
+            { price: money(price.price) },
+          )}
+        </p>
+      ) : (
+        <p className="text-subtle-foreground">—</p>
+      )}
+      {row.windows.map((window) => (
+        <WindowLine key={`${window.kind}-${window.start}-${window.end}`} window={window} />
+      ))}
     </div>
   );
 }
 
 /**
- * 折扣列：折扣标加一行官方价。打折的通道把官方价划掉，让人一眼看出省了多少；
- * 企业通道没有折扣标，官方价只是参考，不划线。
+ * 折扣列：折扣标加一行官方价。打折时把官方价划掉，让人一眼看出省了多少；
+ * 按张、按次计费的模型和官方价单位不同，不显示。
  */
 export function ModelDiscount({
-  model,
-  group,
+  row,
   currency,
+  rechargeMultiplier,
   locale,
 }: {
-  model: Model;
-  group: EditionId;
-  currency: Currency;
+  row: ModelRowView;
+  currency: LiveCurrency;
+  rechargeMultiplier: number;
   locale: AppLocale;
 }) {
-  const discount = editionDiscount(group);
-  const official = priceViewAt(model, 1, currency);
+  const money = moneyFormatter(currency, rechargeMultiplier);
+  if (!row.official) return <span className="text-subtle-foreground">—</span>;
 
   return (
     <div className="flex flex-col items-start gap-1">
-      <DiscountBadge discount={discount} locale={locale} />
-      {official ? (
-        <p
-          className={cn(
-            'text-xs tabular-nums text-subtle-foreground',
-            discount !== null && 'line-through',
-          )}
-        >
-          <PriceMain view={official} />
-        </p>
-      ) : null}
+      <DiscountBadge discount={row.discount} locale={locale} />
+      <p
+        className={cn(
+          'text-xs tabular-nums text-subtle-foreground',
+          row.discount !== null && 'line-through',
+        )}
+      >
+        {`${money(row.official.input)} / ${money(row.official.output)}`}
+      </p>
     </div>
   );
 }

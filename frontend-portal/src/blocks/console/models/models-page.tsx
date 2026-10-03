@@ -1,20 +1,28 @@
 'use client';
 
-import { useState } from 'react';
+import { Layers, TriangleAlert } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useMemo, useState } from 'react';
 
+import { Button } from '@/components/console/button';
 import { ConsolePage } from '@/components/console/console-page';
+import { EmptyState } from '@/components/console/empty-state';
+import { Skeleton } from '@/components/console/skeleton';
 import { SegmentedControl } from '@/components/ui/segmented-control';
-import { MODELS, filterModels, type Currency, type EditionId } from '@/lib/catalog';
-import { CURRENT_USER } from '@/lib/console';
+import { useConsoleModels } from '@/lib/console/live/models-client';
+import { useFavoriteModels } from '@/lib/console/live/models-favorites';
+import {
+  filterRows,
+  modelRows,
+  providersIn,
+  type LiveCurrency,
+} from '@/lib/console/live/models-view';
 
 import { ModelsFilterBar } from './models-filter-bar';
 import {
-  DEFAULT_FAVORITES,
   DEFAULT_QUERY,
   clearFilters,
   paginationKey,
-  toModelFilter,
   type ModelScope,
   type ModelsQuery,
 } from './models-state';
@@ -22,65 +30,106 @@ import { ModelsTable } from './models-table';
 import { ModelsToolbar } from './models-toolbar';
 
 /**
- * 控制台「模型」页：可以按类型、厂商、上下文、协议、关键词筛选，换通道和币种看价格，
- * 收藏常用模型，文本模型一键带着模型名去对话页试用。全部状态只存在本页，不发请求。
+ * 控制台「模型」页（接后端）：账号能用的每个通道、通道里的模型与实付价都来自后端模型广场；
+ * 展示名、厂商、协议、上下文来自官网目录。可以按类型、厂商、上下文、协议、关键词筛选，
+ * 换通道和币种看价格，收藏常用模型（存在这台浏览器里），文本模型一键带着模型名去对话页试用。
  */
 export function ConsoleModelsPage() {
   const t = useTranslations('consoleModels');
+  const [reloadKey, setReloadKey] = useState(0);
+  const { data, loading, error } = useConsoleModels(reloadKey);
+  const [favorites, toggleFavorite] = useFavoriteModels();
 
   const [scope, setScope] = useState<ModelScope>('all');
-  const [favorites, setFavorites] = useState<readonly string[]>(DEFAULT_FAVORITES);
   const [query, setQuery] = useState<ModelsQuery>(DEFAULT_QUERY);
-  // 价格按哪个通道算，默认是当前账号的默认通道
-  const [group, setGroup] = useState<EditionId>(CURRENT_USER.defaultGroup);
-  const [currency, setCurrency] = useState<Currency>('usd');
+  const [channelId, setChannelId] = useState<string | null>(null);
+  const [currency, setCurrency] = useState<LiveCurrency>('usd');
+
+  // 没选过通道时用第一个（后端按倍率从低到高排）
+  const channels = data?.channels ?? [];
+  const channel = channels.find((item) => item.id === channelId) ?? channels[0] ?? null;
+  const allRows = useMemo(() => (channel ? modelRows(channel) : []), [channel]);
+  const providers = useMemo(() => providersIn(allRows), [allRows]);
+  const filtered = useMemo(() => filterRows(allRows, query), [allRows, query]);
+  const rows =
+    scope === 'favorites' ? filtered.filter((row) => favorites.includes(row.id)) : filtered;
+  const favoriteCount = allRows.filter((row) => favorites.includes(row.id)).length;
 
   const patchQuery = (change: Partial<ModelsQuery>) =>
     setQuery((current) => ({ ...current, ...change }));
 
-  const toggleFavorite = (id: string) =>
-    setFavorites((current) =>
-      current.includes(id) ? current.filter((item) => item !== id) : [...current, id],
+  let body: React.ReactNode;
+  if (error && !data) {
+    body = (
+      <EmptyState
+        id="models-error"
+        icon={TriangleAlert}
+        title={error === 'too_many' ? t('error.tooMany') : t('error.unavailable')}
+        action={
+          <Button
+            variant="secondary"
+            onClick={() => setReloadKey((key) => key + 1)}
+            data-models-retry
+          >
+            {t('error.retry')}
+          </Button>
+        }
+      />
     );
+  } else if (loading && !data) {
+    body = (
+      <div data-models-loading className="space-y-4">
+        <Skeleton className="h-9 w-48" />
+        <Skeleton className="h-16 w-full" />
+        <Skeleton className="h-96 w-full" />
+      </div>
+    );
+  } else if (!channel || !data) {
+    body = <EmptyState id="models-none" icon={Layers} title={t('noModels')} />;
+  } else {
+    body = (
+      <>
+        <div className="space-y-4">
+          <SegmentedControl
+            name="model-scope"
+            value={scope}
+            onChange={setScope}
+            ariaLabel={t('scope.label')}
+            options={[
+              { value: 'all', label: t('scope.all'), count: allRows.length },
+              { value: 'favorites', label: t('scope.favorites'), count: favoriteCount },
+            ]}
+          />
+          <ModelsFilterBar query={query} providers={providers} onChange={patchQuery} />
+          <ModelsToolbar
+            sort={query.sort}
+            onSortChange={(sort) => patchQuery({ sort })}
+            channels={channels}
+            channelId={channel.id}
+            onChannelChange={setChannelId}
+            currency={currency}
+            onCurrencyChange={setCurrency}
+            rechargeMultiplier={data.rechargeMultiplier}
+          />
+        </div>
 
-  // 筛选和排序交给数据层；价格排序要知道通道，所以把通道一并传进去
-  const filtered = filterModels(MODELS, toModelFilter(query), group);
-  const rows = scope === 'favorites' ? filtered.filter((m) => favorites.includes(m.id)) : filtered;
+        <ModelsTable
+          rows={rows}
+          resetKey={paginationKey(channel.id, scope, query)}
+          currency={currency}
+          rechargeMultiplier={data.rechargeMultiplier}
+          favorites={favorites}
+          noFavorites={scope === 'favorites' && favoriteCount === 0}
+          onToggleFavorite={toggleFavorite}
+          onClearFilters={() => setQuery(clearFilters)}
+        />
+      </>
+    );
+  }
 
   return (
     <ConsolePage id="models" title={t('meta.title')}>
-      <div className="space-y-4">
-        <SegmentedControl
-          name="model-scope"
-          value={scope}
-          onChange={setScope}
-          ariaLabel={t('scope.label')}
-          options={[
-            { value: 'all', label: t('scope.all'), count: MODELS.length },
-            { value: 'favorites', label: t('scope.favorites'), count: favorites.length },
-          ]}
-        />
-        <ModelsFilterBar query={query} onChange={patchQuery} />
-        <ModelsToolbar
-          sort={query.sort}
-          onSortChange={(sort) => patchQuery({ sort })}
-          group={group}
-          onGroupChange={setGroup}
-          currency={currency}
-          onCurrencyChange={setCurrency}
-        />
-      </div>
-
-      <ModelsTable
-        rows={rows}
-        resetKey={paginationKey(scope, query)}
-        group={group}
-        currency={currency}
-        favorites={favorites}
-        noFavorites={scope === 'favorites' && favorites.length === 0}
-        onToggleFavorite={toggleFavorite}
-        onClearFilters={() => setQuery(clearFilters)}
-      />
+      {body}
     </ConsolePage>
   );
 }

@@ -30,7 +30,7 @@ import {
 } from '@/blocks/console/keys/keys-model';
 import { generateKeySecret } from '@/blocks/console/keys/keys-secret';
 import { buildSnippet } from '@/blocks/console/keys/keys-snippets';
-import { clearFilters, DEFAULT_QUERY, toModelFilter } from '@/blocks/console/models/models-state';
+import { clearFilters, DEFAULT_QUERY, paginationKey } from '@/blocks/console/models/models-state';
 import {
   buildInvitation,
   generateInviteCode,
@@ -268,12 +268,14 @@ describe('对话页逐字输出', () => {
 });
 
 describe('模型页筛选条件', () => {
-  it('单选「全部」换成空数组，清除筛选保留排序', () => {
-    expect(toModelFilter(DEFAULT_QUERY)).toMatchObject({ providers: [], protocols: [] });
-    expect(toModelFilter({ ...DEFAULT_QUERY, provider: 'openai' }).providers).toEqual(['openai']);
+  it('清除筛选保留排序；换通道、换范围或改筛选都回第 1 页', () => {
     expect(clearFilters({ ...DEFAULT_QUERY, type: 'image', sort: 'price-asc' })).toEqual({
       ...DEFAULT_QUERY,
       sort: 'price-asc',
     });
+    const base = paginationKey('2', 'all', DEFAULT_QUERY);
+    expect(paginationKey('3', 'all', DEFAULT_QUERY)).not.toBe(base);
+    expect(paginationKey('2', 'favorites', DEFAULT_QUERY)).not.toBe(base);
+    expect(paginationKey('2', 'all', { ...DEFAULT_QUERY, query: 'gpt' })).not.toBe(base);
   });
 });

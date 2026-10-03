@@ -8,10 +8,10 @@ import {
   CONTEXT_FILTERS,
   PROTOCOLS,
   PROTOCOL_LABELS,
-  PROVIDERS,
   TYPE_FILTERS,
   type ContextFilter,
   type Protocol,
+  type Provider,
   type ProviderId,
   type TypeFilter,
 } from '@/lib/catalog';
@@ -31,12 +31,14 @@ const CONTEXT_LABEL = {
   '1m': 'filters.ctx1m',
 } as const satisfies Record<ContextFilter, string>;
 
-/** 筛选栏：类型、厂商、上下文、协议四个下拉加一个搜索框 */
+/** 筛选栏：类型、厂商、上下文、协议四个下拉加一个搜索框。厂商只列当前通道里出现过的 */
 export function ModelsFilterBar({
   query,
+  providers,
   onChange,
 }: {
   query: ModelsQuery;
+  providers: readonly Provider[];
   onChange: (change: Partial<ModelsQuery>) => void;
 }) {
   const t = useTranslations('consoleModels');
@@ -47,7 +49,7 @@ export function ModelsFilterBar({
   }));
   const providerOptions: SelectOption<ProviderId | 'all'>[] = [
     { value: 'all', label: t('filters.all') },
-    ...PROVIDERS.map((provider) => ({ value: provider.id, label: provider.name })),
+    ...providers.map((provider) => ({ value: provider.id, label: provider.name })),
   ];
   const contextOptions: SelectOption<ContextFilter>[] = CONTEXT_FILTERS.map((value) => ({
     value,

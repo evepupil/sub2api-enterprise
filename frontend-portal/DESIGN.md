@@ -394,7 +394,8 @@ pnpm format:check  # prettier
 | 登录 | 2026-10-03 接通后端：`src/app/api/portal/auth/*` 转发、`src/lib/server/` 调后端与凭证 cookie、`src/lib/session/` 浏览器端登录状态、`src/proxy.ts` 拦截没登录的控制台访问（做法见技术设计 18.1） |
 | 注册 | 2026-10-03 接通后端，规则与现有 sub2api 注册页一致：`src/app/api/portal/auth/{settings,register,send-verify-code,validate-invitation-code,validate-promo-code}` 转发、`src/lib/server/sub2api/public-settings.ts` 读后端公开开关、`src/lib/auth/` 注册规则（规格见 `design/登录注册.md` A2） |
 | 找回密码、谷歌登录、人机验证 | 不连后端，入口不显示；后端开了人机验证时，注册失败提示联系管理员 |
-| 控制台用量页 | 2026-10-03 接通后端，显示登录账号自己的真实用量：后端用量总览接口（技术设计 18.2）、官网转发 `src/app/api/portal/console/usage/`、取数与换算 `src/lib/console/live/`；控制台其余页面仍是占位数据（**编的**） |
+| 控制台用量页 | 2026-10-03 接通后端，显示登录账号自己的真实用量：后端用量总览接口（技术设计 18.2）、官网转发 `src/app/api/portal/console/usage/`、取数与换算 `src/lib/console/live/` |
+| 控制台模型页 | 2026-10-04 接通后端：通道、模型、实付价、官方价来自后端模型广场（技术设计 18.3），官网转发 `src/app/api/portal/console/models/`、换算 `src/lib/console/live/models-*.ts`；展示名、厂商、协议、上下文仍取官网目录（见上面「30 个模型」一行）。用量页、模型页以外的控制台页面仍是占位数据（**编的**） |
 
 ---
 
@@ -464,7 +465,7 @@ pnpm format:check  # prettier
 
 ### 10.4 控制台实现守则（在第 7 章之外）
 
-- 页面区块全部 `'use client'`，状态用本地 `useState`（对话页的模型参数除外，见页面规格）；除了已接后端的用量页（经 `src/lib/console/live/`），不发任何网络请求，不用 `Math.random()`、`Date.now()`、`new Date()` 生成显示用的数据（新建密钥、邀请码这类一次性随机串可以用 `crypto.getRandomValues`，只在点击事件里调用）。
+- 页面区块全部 `'use client'`，状态用本地 `useState`（对话页的模型参数除外，见页面规格）；除了已接后端的用量页、模型页（经 `src/lib/console/live/`），不发任何网络请求，不用 `Math.random()`、`Date.now()`、`new Date()` 生成显示用的数据（新建密钥、邀请码这类一次性随机串可以用 `crypto.getRandomValues`，只在点击事件里调用）。
 - 时间一律用 `formatDateTime` 一类函数（北京时间），金额一律 `formatUsd`（写作 US$，不要自己拼「$」），Token 一律 `formatCompact`。模型单价沿用官网价格表的写法（`formatMoney`，`$` / `¥`）。
 - 新增、编辑、删除只改本页的本地列表；刷新按钮转 600ms 圈后恢复；表单提交先校验（所有出错字段同时标红，焦点落第一个），通过后加载 800–1200ms 再给结果。
 - 每个列表都要有空状态（筛选无结果时给「清除筛选」）；长文本截断；手机 375 宽页面不横向溢出（宽表格在 `TableShell` 里横向滚动，筛选栏折成一到两列）。

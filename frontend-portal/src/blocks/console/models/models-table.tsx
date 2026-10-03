@@ -3,34 +3,34 @@
 import { Layers } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 
-import { EmptyState } from '@/components/console/empty-state';
+import { Button } from '@/components/console/button';
 import { Table, TableShell, Th } from '@/components/console/data-table';
+import { EmptyState } from '@/components/console/empty-state';
 import { Pagination, usePagination } from '@/components/console/pagination';
-import { Button } from '@/components/ui/button';
 import type { AppLocale } from '@/i18n/routing';
-import type { Currency, EditionId, Model } from '@/lib/catalog';
+import type { LiveCurrency, ModelRowView } from '@/lib/console/live/models-view';
 
 import { ModelRow } from './models-row';
 
 /**
  * 模型表：宽表在小屏横向滚动，带分页；没有结果时表头下方显示空状态。
- * 分页状态放在这里，resetKey 变了（筛选条件变了）自动回第 1 页。
+ * 分页状态放在这里，resetKey 变了（通道或筛选条件变了）自动回第 1 页。
  */
 export function ModelsTable({
   rows,
   resetKey,
-  group,
   currency,
+  rechargeMultiplier,
   favorites,
   noFavorites,
   onToggleFavorite,
   onClearFilters,
 }: {
   /** 筛选、排序、范围都处理完的全部结果，分页在表内做 */
-  rows: readonly Model[];
+  rows: readonly ModelRowView[];
   resetKey: string;
-  group: EditionId;
-  currency: Currency;
+  currency: LiveCurrency;
+  rechargeMultiplier: number;
   favorites: readonly string[];
   /** 收藏范围下一个模型都没收藏：空状态换成「还没有收藏的模型」，不给清除筛选 */
   noFavorites: boolean;
@@ -73,14 +73,14 @@ export function ModelsTable({
           </tr>
         </thead>
         <tbody>
-          {pager.items.map((model) => (
+          {pager.items.map((row) => (
             <ModelRow
-              key={model.id}
-              model={model}
-              group={group}
+              key={row.id}
+              row={row}
               currency={currency}
+              rechargeMultiplier={rechargeMultiplier}
               locale={locale}
-              favorite={favorites.includes(model.id)}
+              favorite={favorites.includes(row.id)}
               onToggleFavorite={onToggleFavorite}
             />
           ))}
