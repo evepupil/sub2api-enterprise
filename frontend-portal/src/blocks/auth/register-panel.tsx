@@ -12,9 +12,10 @@ import { Field } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { Link } from '@/i18n/navigation';
+import { REGISTRATION } from '@/lib/site';
 import { useUrlState } from '@/lib/use-url-state';
 
-/** 账号类型与注册页共用同一个网址键，互相跳转时带 ?account=organization */
+/** 注册类型存在网址 ?account=organization，刷新与分享链接保留所选类型 */
 const ACCOUNT_VALUES = ['personal', 'organization'] as const;
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -22,10 +23,23 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 /** 提交成功后的加载时长（规格：1200ms 后按钮恢复），卸载时清掉定时器 */
 const SUBMIT_DELAY_MS = 1200;
 
-type RegisterErrors = Partial<Record<'orgName' | 'email' | 'password', string>>;
+type RegisterField = 'orgName' | 'email' | 'password' | 'invite';
+type RegisterErrors = Partial<Record<RegisterField, string>>;
 type AccountValue = 'personal' | 'organization';
 
-/** 注册表单：个人注册或创建组织，结构与登录表单一致，校验规则按规格顺序。 */
+/** 出错时焦点的先后顺序与各字段输入框的 id */
+const FIELD_ORDER: readonly RegisterField[] = ['orgName', 'email', 'password', 'invite'];
+const FIELD_INPUT_ID: Record<RegisterField, string> = {
+  orgName: 'org-name',
+  email: 'email',
+  password: 'password',
+  invite: 'invite',
+};
+
+/**
+ * 注册表单：个人注册或创建组织，结构与登录表单一致，校验规则按规格顺序。
+ * 平台开启邀请码注册时才显示邀请码，且必填（开关见 REGISTRATION）。
+ */
 export function RegisterPanel() {
   const t = useTranslations('auth');
   const [account, setAccount] = useUrlState('account', ACCOUNT_VALUES, 'personal');
@@ -42,10 +56,9 @@ export function RegisterPanel() {
     setAccount(next);
   };
 
-  const setValue = (key: 'orgName' | 'email' | 'password' | 'invite', value: string) => {
-    // 输入即清掉该字段的错误（邀请码不参与校验，无需清理）
+  const setValue = (key: RegisterField, value: string) => {
+    // 输入即清掉该字段的错误
     setValues((current) => ({ ...current, [key]: value }));
-    if (key === 'invite') return;
     setErrors((current) => {
       if (!(key in current)) return current;
       const next = { ...current };
@@ -63,10 +76,9 @@ export function RegisterPanel() {
   };
   useEffect(() => () => clearTimer(), []);
 
-  /** 按规格顺序校验，返回第一个错误（也决定了焦点落点）；邀请码选填，不校验 */
   /** 按规格顺序校验每个字段，每个字段只报它的第一条错误；所有出错字段同时标红 */
-  const validate = (): Partial<Record<'orgName' | 'email' | 'password', string>> => {
-    const next: Partial<Record<'orgName' | 'email' | 'password', string>> = {};
+  const validate = (): RegisterErrors => {
+    const next: RegisterErrors = {};
     if (isOrganization && values.orgName.trim() === '') {
       next.orgName = t('fields.errors.orgNameRequired');
     }
@@ -80,6 +92,9 @@ export function RegisterPanel() {
     } else if (values.password.length < 8) {
       next.password = t('fields.errors.passwordShort');
     }
+    if (REGISTRATION.invitationCodeRequired && values.invite.trim() === '') {
+      next.invite = t('fields.errors.inviteRequired');
+    }
     return next;
   };
 
@@ -87,11 +102,11 @@ export function RegisterPanel() {
     event.preventDefault();
     if (submitting) return;
     const found = validate();
-    // 焦点落在第一个出错的输入框（顺序：组织名称 → 邮箱 → 密码）
-    const firstField = (['orgName', 'email', 'password'] as const).find((field) => found[field]);
+    // 焦点落在第一个出错的输入框（顺序：组织名称 → 邮箱 → 密码 → 邀请码）
+    const firstField = FIELD_ORDER.find((field) => found[field]);
     if (firstField) {
       setErrors(found);
-      document.getElementById(firstField === 'orgName' ? 'org-name' : firstField)?.focus();
+      document.getElementById(FIELD_INPUT_ID[firstField])?.focus();
       return;
     }
     // 校验通过：进入加载态 1.2 秒再恢复，不跳转、不弹提示
@@ -101,8 +116,6 @@ export function RegisterPanel() {
 
   const describedBy = (field: keyof RegisterErrors, id: string) =>
     errors[field] ? `${id}-error` : undefined;
-
-  const loginLinkHref = isOrganization ? '/login?account=organization' : '/login';
 
   return (
     <section id="register" className="flex min-h-dvh flex-col px-6 py-8 sm:px-12 lg:px-16 xl:px-24">
@@ -182,28 +195,21 @@ export function RegisterPanel() {
               dataAttribute="data-register-password"
             />
 
-            <Field
-              label={
-                <>
-                  {t('fields.invite')}
-                  <span className="text-subtle-foreground">（{t('fields.optional')}）</span>
-                </>
-              }
-              htmlFor="invite"
-              hint={
-                isOrganization ? t('fields.inviteHintOrganization') : t('fields.inviteHintPersonal')
-              }
-            >
-              <Input
-                id="invite"
-                name="invite"
-                data-register-invite
-                autoComplete="off"
-                value={values.invite}
-                onChange={(event) => setValue('invite', event.target.value)}
-                className="min-w-0"
-              />
-            </Field>
+            {REGISTRATION.invitationCodeRequired ? (
+              <Field label={t('fields.invite')} htmlFor="invite" error={errors.invite}>
+                <Input
+                  id="invite"
+                  name="invite"
+                  data-register-invite
+                  autoComplete="off"
+                  value={values.invite}
+                  onChange={(event) => setValue('invite', event.target.value)}
+                  aria-invalid={errors.invite ? true : undefined}
+                  aria-describedby={describedBy('invite', 'invite')}
+                  className="min-w-0"
+                />
+              </Field>
+            ) : null}
 
             <Button type="submit" block loading={submitting} data-register-submit>
               {isOrganization ? t('register.submitOrganization') : t('register.submitPersonal')}
@@ -213,7 +219,7 @@ export function RegisterPanel() {
           <p className="mt-4 text-center text-sm text-muted-foreground">
             {t('register.hasAccount')}{' '}
             <Link
-              href={loginLinkHref}
+              href="/login"
               data-to-login
               className="font-medium text-foreground hover:underline"
             >

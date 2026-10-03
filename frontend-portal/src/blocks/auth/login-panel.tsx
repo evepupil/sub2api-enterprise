@@ -10,39 +10,27 @@ import { ThemeToggle } from '@/components/layout/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { SegmentedControl } from '@/components/ui/segmented-control';
 import { Link } from '@/i18n/navigation';
-import { useUrlState } from '@/lib/use-url-state';
-
-/** 账号类型与登录页共用同一个网址键，互相跳转时带 ?account=organization */
-const ACCOUNT_VALUES = ['personal', 'organization'] as const;
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /** 提交成功后的加载时长（规格：1200ms 后按钮恢复），卸载时清掉定时器 */
 const SUBMIT_DELAY_MS = 1200;
 
-type LoginErrors = Partial<Record<'orgId' | 'email' | 'password', string>>;
-type AccountValue = 'personal' | 'organization';
+type LoginErrors = Partial<Record<'email' | 'password', string>>;
 
-/** 登录表单：身份切换、受控输入、按顺序校验、提交加载态。后端不接，只做前端校验。 */
+/**
+ * 登录表单：个人与组织成员都用邮箱和密码登录，界面不区分账号类型。
+ * 受控输入、按顺序校验、提交加载态；后端不接，只做前端校验。
+ */
 export function LoginPanel() {
   const t = useTranslations('auth');
-  const [account, setAccount] = useUrlState('account', ACCOUNT_VALUES, 'personal');
-  const [values, setValues] = useState({ orgId: '', email: '', password: '' });
+  const [values, setValues] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState<LoginErrors>({});
   const [submitting, setSubmitting] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const isOrganization = account === 'organization';
-
-  /** 切身份：清空全部错误（输入值保留），组织 ID 框随之出现/消失 */
-  const switchAccount = (next: AccountValue) => {
-    if (next !== account) setErrors({});
-    setAccount(next);
-  };
-
-  const setValue = (key: 'orgId' | 'email' | 'password', value: string) => {
+  const setValue = (key: 'email' | 'password', value: string) => {
     // 输入即清掉该字段的错误
     setValues((current) => ({ ...current, [key]: value }));
     setErrors((current) => {
@@ -65,9 +53,6 @@ export function LoginPanel() {
   /** 按规格顺序校验每个字段，每个字段只报它的第一条错误；所有出错字段同时标红 */
   const validate = (): LoginErrors => {
     const next: LoginErrors = {};
-    if (isOrganization && values.orgId.trim() === '') {
-      next.orgId = t('fields.errors.orgIdRequired');
-    }
     if (values.email.trim() === '') {
       next.email = t('fields.errors.emailRequired');
     } else if (!EMAIL_PATTERN.test(values.email)) {
@@ -85,11 +70,11 @@ export function LoginPanel() {
     event.preventDefault();
     if (submitting) return;
     const found = validate();
-    // 焦点落在第一个出错的输入框（顺序：组织 ID → 邮箱 → 密码）
-    const firstField = (['orgId', 'email', 'password'] as const).find((field) => found[field]);
+    // 焦点落在第一个出错的输入框（顺序：邮箱 → 密码）
+    const firstField = (['email', 'password'] as const).find((field) => found[field]);
     if (firstField) {
       setErrors(found);
-      document.getElementById(firstField === 'orgId' ? 'org-id' : firstField)?.focus();
+      document.getElementById(firstField)?.focus();
       return;
     }
     // 校验通过：进入加载态 1.2 秒再恢复，不跳转、不弹提示
@@ -99,8 +84,6 @@ export function LoginPanel() {
 
   const describedBy = (field: keyof LoginErrors, id: string) =>
     errors[field] ? `${id}-error` : undefined;
-
-  const registerLinkHref = isOrganization ? '/register?account=organization' : '/register';
 
   return (
     <section id="login" className="flex min-h-dvh flex-col px-6 py-8 sm:px-12 lg:px-16 xl:px-24">
@@ -119,46 +102,8 @@ export function LoginPanel() {
             {t('login.title')}
           </h1>
 
-          <SegmentedControl
-            name="account"
-            className="mt-6 [&>button]:flex-1 [&>button]:justify-center"
-            value={account}
-            onChange={switchAccount}
-            ariaLabel={t('account.label')}
-            options={[
-              { value: 'personal', label: t('account.personal') },
-              { value: 'organization', label: t('account.organization') },
-            ]}
-          />
-
-          <form noValidate onSubmit={handleSubmit} className="mt-6 space-y-5" data-login-form>
-            {isOrganization ? (
-              <Field
-                label={t('fields.orgId')}
-                htmlFor="org-id"
-                error={errors.orgId}
-                hint={errors.orgId ? undefined : t('fields.orgIdHint')}
-              >
-                <Input
-                  id="org-id"
-                  name="orgId"
-                  data-login-org
-                  autoComplete="organization"
-                  placeholder={t('fields.orgIdPlaceholder')}
-                  value={values.orgId}
-                  onChange={(event) => setValue('orgId', event.target.value)}
-                  aria-invalid={errors.orgId ? true : undefined}
-                  aria-describedby={describedBy('orgId', 'org-id')}
-                  className="min-w-0"
-                />
-              </Field>
-            ) : null}
-
-            <Field
-              label={isOrganization ? t('fields.memberEmail') : t('fields.email')}
-              htmlFor="email"
-              error={errors.email}
-            >
+          <form noValidate onSubmit={handleSubmit} className="mt-8 space-y-5" data-login-form>
+            <Field label={t('fields.email')} htmlFor="email" error={errors.email}>
               <Input
                 id="email"
                 name="email"
@@ -197,7 +142,7 @@ export function LoginPanel() {
           <p className="mt-4 text-center text-sm text-muted-foreground">
             {t('login.noAccount')}{' '}
             <Link
-              href={registerLinkHref}
+              href="/register"
               data-to-register
               className="font-medium text-foreground hover:underline"
             >
