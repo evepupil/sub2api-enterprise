@@ -1,4 +1,4 @@
-import type { AuthErrorReason, SessionUser } from './types';
+import { isAuthErrorReason, type AuthErrorReason, type SessionUser } from './types';
 
 /**
  * 浏览器端调官网登录接口（/api/portal/auth/*）。凭证在 cookie 里由浏览器自动带上，这里只处理结果。
@@ -10,30 +10,13 @@ export type LoginResult =
   | { kind: 'requires_2fa'; emailMasked: string }
   | { kind: 'error'; reason: AuthErrorReason };
 
-const KNOWN_REASONS: readonly AuthErrorReason[] = [
-  'INVALID_CREDENTIALS',
-  'USER_NOT_ACTIVE',
-  'ORGANIZATION_DISABLED',
-  'TOO_MANY_REQUESTS',
-  'TOTP_INVALID_CODE',
-  'TWO_FACTOR_EXPIRED',
-  'NOT_LOGGED_IN',
-  'BAD_REQUEST',
-  'FORBIDDEN_ORIGIN',
-  'BACKEND_UNAVAILABLE',
-  'UNKNOWN',
-];
-
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
 /** 官网接口返回的错误原因；读不出来时按状态码兜底。纯函数，单测锁住 */
 export function reasonFromResponse(status: number, body: unknown): AuthErrorReason {
-  if (isRecord(body) && isRecord(body.error)) {
-    const reason = body.error.reason;
-    if (typeof reason === 'string' && (KNOWN_REASONS as readonly string[]).includes(reason)) {
-      return reason as AuthErrorReason;
-    }
+  if (isRecord(body) && isRecord(body.error) && isAuthErrorReason(body.error.reason)) {
+    return body.error.reason;
   }
   if (status === 429) return 'TOO_MANY_REQUESTS';
   if (status === 401) return 'NOT_LOGGED_IN';

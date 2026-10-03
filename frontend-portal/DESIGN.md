@@ -392,7 +392,8 @@ pnpm format:check  # prettier
 | 首页四张黑白示例图 | AI 生成（imagegen，gpt-image），`public/showcase/` |
 | 厂商标志 | lobehub icons（MIT），`public/providers/`；谷歌登录按钮标志 `public/brands/google.svg` |
 | 登录 | 2026-10-03 接通后端：`src/app/api/portal/auth/*` 转发、`src/lib/server/` 调后端与凭证 cookie、`src/lib/session/` 浏览器端登录状态、`src/proxy.ts` 拦截没登录的控制台访问（做法见技术设计 18.1） |
-| 注册、找回密码、谷歌登录、人机验证 | 占位，不连后端；登录页暂不显示「忘记密码」与谷歌登录；「邀请码注册」开关先写死为开启（`src/lib/site.ts` 的 `REGISTRATION`），接后端后改读公开设置 |
+| 注册 | 2026-10-03 接通后端，规则与现有 sub2api 注册页一致：`src/app/api/portal/auth/{settings,register,send-verify-code,validate-invitation-code,validate-promo-code}` 转发、`src/lib/server/sub2api/public-settings.ts` 读后端公开开关、`src/lib/auth/` 注册规则（规格见 `design/登录注册.md` A2） |
+| 找回密码、谷歌登录、人机验证 | 不连后端，入口不显示；后端开了人机验证时，注册失败提示联系管理员 |
 
 ---
 

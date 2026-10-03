@@ -11,14 +11,6 @@ export const SITE = {
   apiBase: 'https://api.nexus-api.example',
 } as const;
 
-/**
- * 注册设置（占位）。接入后端后改读公开设置里的「邀请码注册」开关（invitation_code_enabled）：
- * 开启时注册页显示必填的邀请码，关闭时不显示。
- */
-export const REGISTRATION: { invitationCodeRequired: boolean } = {
-  invitationCodeRequired: true,
-};
-
 export type NavKey = 'models' | 'pricing' | 'groups' | 'docs';
 
 /** 顶栏菜单，顺序即显示顺序；文字取 common.nav.<key>（groups 这个键对应「通道」页） */

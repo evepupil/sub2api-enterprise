@@ -1,122 +1,210 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { AuthPasswordInput } from '@/blocks/auth/auth-password-input';
+import { AuthFormAlert } from '@/blocks/auth/auth-form-alert';
 import { Brand } from '@/components/layout/brand';
 import { LanguageSwitcher } from '@/components/layout/language-switcher';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
 import { Button } from '@/components/ui/button';
-import { Field } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { Link, useRouter } from '@/i18n/navigation';
-import { REGISTRATION } from '@/lib/site';
+import {
+  clearReferralCode,
+  loadReferralCode,
+  referralCodeFromQuery,
+  storeReferralCode,
+} from '@/lib/auth/affiliate';
+import { checkInvitationCode, checkPromoCode, register } from '@/lib/auth/register-client';
+import {
+  EMPTY_REGISTER_VALUES,
+  isCreatingOrganization,
+  isOrganizationInvitation,
+  needsMemberName,
+  REGISTER_FIELD_ORDER,
+  registerPayload,
+  submitBlockFor,
+  validateRegister,
+  type RegisterContext,
+  type RegisterErrors,
+  type RegisterField,
+  type RegisterValues,
+} from '@/lib/auth/register-form';
+import { useAuthSettings } from '@/lib/auth/use-auth-settings';
+import { useCodeCheck } from '@/lib/auth/use-code-check';
+import type { AuthErrorReason } from '@/lib/session/types';
 import { useUrlState } from '@/lib/use-url-state';
+
+import { RegisterFields } from './register-fields';
+import { RegisterVerifyStep } from './register-verify-step';
+import { useRegisterMessages } from './use-register-messages';
 
 /** 注册类型存在网址 ?account=organization，刷新与分享链接保留所选类型 */
 const ACCOUNT_VALUES = ['personal', 'organization'] as const;
+type AccountValue = (typeof ACCOUNT_VALUES)[number];
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-/** 提交成功后的加载时长，结束后进入控制台（后端未接，只做前端校验）；卸载时清掉定时器 */
-const SUBMIT_DELAY_MS = 1200;
-
-type RegisterField = 'orgName' | 'email' | 'password' | 'invite';
-type RegisterErrors = Partial<Record<RegisterField, string>>;
-type AccountValue = 'personal' | 'organization';
-
-/** 出错时焦点的先后顺序与各字段输入框的 id */
-const FIELD_ORDER: readonly RegisterField[] = ['orgName', 'email', 'password', 'invite'];
+/** 各字段输入框的 id，出错时把焦点放过去 */
 const FIELD_INPUT_ID: Record<RegisterField, string> = {
   orgName: 'org-name',
   email: 'email',
   password: 'password',
   invite: 'invite',
+  memberName: 'member-name',
 };
 
 /**
- * 注册表单：个人注册或创建组织，结构与登录表单一致，校验规则按规格顺序。
- * 平台开启邀请码注册时才显示邀请码，且必填（开关见 REGISTRATION）。
+ * 注册页：规则与现有 sub2api 注册页一致（见 src/lib/auth/register-form.ts）。
+ * 打开时读后端开关决定显示哪些输入框；后台开了邮箱验证时多一步验证码；注册成功即为登录状态，进控制台。
+ * 网址里的 ?invite= / ?promo= / ?aff= 会自动填好并校验。
  */
 export function RegisterPanel() {
   const t = useTranslations('auth');
   const router = useRouter();
+  const { loaded, settings } = useAuthSettings();
+  const messages = useRegisterMessages(settings);
   const [account, setAccount] = useUrlState('account', ACCOUNT_VALUES, 'personal');
-  const [values, setValues] = useState({ orgName: '', email: '', password: '', invite: '' });
+  const [values, setValues] = useState<RegisterValues>(EMPTY_REGISTER_VALUES);
   const [errors, setErrors] = useState<RegisterErrors>({});
+  const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [step, setStep] = useState<'form' | 'verify'>('form');
+  const invite = useCodeCheck(checkInvitationCode);
+  const promo = useCodeCheck(checkPromoCode);
+  const prefilled = useRef(false);
 
-  const isOrganization = account === 'organization';
+  const context: RegisterContext = useMemo(
+    () => ({
+      settings,
+      creatingOrganization: account === 'organization',
+      invitation: invite.check,
+    }),
+    [settings, account, invite.check],
+  );
+  const orgInvite = isOrganizationInvitation(invite.check);
+  const creatingOrganization = isCreatingOrganization(context);
 
-  /** 切身份：清空全部错误（输入值保留），组织名称框随之出现/消失 */
-  const switchAccount = (next: AccountValue) => {
-    if (next !== account) setErrors({});
-    setAccount(next);
-  };
+  // 邀请码被识别为组织邀请码：只能加入，切回个人注册（和现有注册页一致）
+  useEffect(() => {
+    if (orgInvite && account === 'organization') setAccount('personal');
+  }, [orgInvite, account, setAccount]);
 
-  const setValue = (key: RegisterField, value: string) => {
-    // 输入即清掉该字段的错误
+  // 读到开关后，把网址里的邀请码、优惠码、返利码填好并校验（只做一次）
+  useEffect(() => {
+    if (!loaded || prefilled.current) return;
+    prefilled.current = true;
+    const params = new URLSearchParams(window.location.search);
+    const inviteParam = (params.get('invite') ?? params.get('invitation_code') ?? '').trim();
+    const promoParam = settings.promoCodeEnabled ? (params.get('promo') ?? '').trim() : '';
+    const queryAff = referralCodeFromQuery(window.location.search);
+    if (queryAff) storeReferralCode(queryAff);
+    const aff = queryAff || loadReferralCode();
+    setValues((current) => ({
+      ...current,
+      invite: current.invite || inviteParam,
+      promo: current.promo || promoParam,
+      aff: current.aff || aff,
+    }));
+    if (inviteParam) void invite.checkNow(inviteParam);
+    if (promoParam) void promo.checkNow(promoParam);
+  }, [loaded, settings.promoCodeEnabled, invite, promo]);
+
+  const setValue = (key: keyof RegisterValues, value: string) => {
     setValues((current) => ({ ...current, [key]: value }));
+    setFormError(null);
+    if (key === 'invite') invite.onInput(value);
+    if (key === 'promo') promo.onInput(value);
     setErrors((current) => {
       if (!(key in current)) return current;
       const next = { ...current };
-      delete next[key];
+      delete next[key as RegisterField];
       return next;
     });
   };
 
-  // 组件卸载时清掉提交定时器，避免对已卸载组件 setState
-  const clearTimer = () => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
+  const switchAccount = (next: AccountValue) => {
+    if (next !== account) {
+      setErrors({});
+      setFormError(null);
     }
-  };
-  useEffect(() => () => clearTimer(), []);
-
-  /** 按规格顺序校验每个字段，每个字段只报它的第一条错误；所有出错字段同时标红 */
-  const validate = (): RegisterErrors => {
-    const next: RegisterErrors = {};
-    if (isOrganization && values.orgName.trim() === '') {
-      next.orgName = t('fields.errors.orgNameRequired');
-    }
-    if (values.email.trim() === '') {
-      next.email = t('fields.errors.emailRequired');
-    } else if (!EMAIL_PATTERN.test(values.email)) {
-      next.email = t('fields.errors.emailInvalid');
-    }
-    if (values.password === '') {
-      next.password = t('fields.errors.passwordRequired');
-    } else if (values.password.length < 8) {
-      next.password = t('fields.errors.passwordShort');
-    }
-    if (REGISTRATION.invitationCodeRequired && values.invite.trim() === '') {
-      next.invite = t('fields.errors.inviteRequired');
-    }
-    return next;
+    setAccount(next);
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  /** 真正提交注册；成功跳控制台并返回 null，失败返回原因 */
+  const submitRegistration = async (verifyCode?: string): Promise<AuthErrorReason | null> => {
+    const result = await register(registerPayload(values, context, verifyCode));
+    if (result.kind === 'signed_in') {
+      clearReferralCode();
+      router.replace('/console/usage');
+      return null;
+    }
+    return result.reason;
+  };
+
+  const showErrors = (found: RegisterErrors) => {
+    setErrors(found);
+    const first = REGISTER_FIELD_ORDER.find((field) => found[field]);
+    if (first) document.getElementById(FIELD_INPUT_ID[first])?.focus();
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (submitting) return;
-    const found = validate();
-    // 焦点落在第一个出错的输入框（顺序：组织名称 → 邮箱 → 密码 → 邀请码）
-    const firstField = FIELD_ORDER.find((field) => found[field]);
-    if (firstField) {
-      setErrors(found);
-      document.getElementById(FIELD_INPUT_ID[firstField])?.focus();
+    if (submitting || !loaded) return;
+    setFormError(null);
+
+    const found = validateRegister(values, context);
+    if (REGISTER_FIELD_ORDER.some((field) => found[field])) {
+      showErrors(found);
       return;
     }
-    // 校验通过：按钮加载 1.2 秒后进入控制台（占位，不调用接口、不弹提示）
+
+    const block = submitBlockFor(values, promo.check, invite.check);
+    if (block) {
+      setFormError(messages.blockMessage(block));
+      return;
+    }
+
     setSubmitting(true);
-    timerRef.current = setTimeout(() => router.push('/console/usage'), SUBMIT_DELAY_MS);
+    let ctx = context;
+    // 邀请码填了却还没校验（刚输完）：先校验一次再决定
+    if (values.invite.trim() !== '' && invite.check.status === 'idle') {
+      const result = await invite.checkNow(values.invite);
+      if (result.status !== 'valid') {
+        setSubmitting(false);
+        setFormError(messages.blockMessage('inviteInvalid'));
+        return;
+      }
+      ctx = { ...context, invitation: result };
+      const again = validateRegister(values, ctx);
+      if (REGISTER_FIELD_ORDER.some((field) => again[field])) {
+        setSubmitting(false);
+        showErrors(again);
+        return;
+      }
+    }
+
+    if (settings.emailVerifyEnabled) {
+      setSubmitting(false);
+      setStep('verify');
+      return;
+    }
+
+    const result = await register(registerPayload(values, ctx));
+    if (result.kind === 'signed_in') {
+      clearReferralCode();
+      router.replace('/console/usage');
+      return;
+    }
+    setSubmitting(false);
+    setFormError(messages.reasonMessage(result.reason));
   };
 
-  const describedBy = (field: keyof RegisterErrors, id: string) =>
-    errors[field] ? `${id}-error` : undefined;
+  const closed = loaded && !settings.registrationEnabled;
+  const submitLabel = settings.emailVerifyEnabled
+    ? t('register.next')
+    : creatingOrganization
+      ? t('register.submitOrganization')
+      : t('register.submitPersonal');
 
   return (
     <section id="register" className="flex min-h-dvh flex-col px-6 py-8 sm:px-12 lg:px-16 xl:px-24">
@@ -131,129 +219,114 @@ export function RegisterPanel() {
         </div>
 
         <div className="flex flex-1 flex-col justify-center py-12">
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            {t('register.title')}
-          </h1>
-
-          <SegmentedControl
-            name="account"
-            className="mt-6 [&>button]:flex-1 [&>button]:justify-center"
-            value={account}
-            onChange={switchAccount}
-            ariaLabel={t('account.label')}
-            options={[
-              { value: 'personal', label: t('account.registerPersonal') },
-              { value: 'organization', label: t('account.registerOrganization') },
-            ]}
-          />
-
-          <form noValidate onSubmit={handleSubmit} className="mt-6 space-y-5" data-register-form>
-            {isOrganization ? (
-              <Field label={t('fields.orgName')} htmlFor="org-name" error={errors.orgName}>
-                <Input
-                  id="org-name"
-                  name="orgName"
-                  data-register-org-name
-                  autoComplete="organization"
-                  placeholder={t('fields.orgNamePlaceholder')}
-                  value={values.orgName}
-                  onChange={(event) => setValue('orgName', event.target.value)}
-                  aria-invalid={errors.orgName ? true : undefined}
-                  aria-describedby={describedBy('orgName', 'org-name')}
-                  className="min-w-0"
-                />
-              </Field>
-            ) : null}
-
-            <Field
-              label={isOrganization ? t('fields.adminEmail') : t('fields.email')}
-              htmlFor="email"
-              error={errors.email}
-            >
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                data-register-email
-                autoComplete="email"
-                placeholder="name@company.com"
-                value={values.email}
-                onChange={(event) => setValue('email', event.target.value)}
-                aria-invalid={errors.email ? true : undefined}
-                aria-describedby={describedBy('email', 'email')}
-                className="min-w-0"
-              />
-            </Field>
-
-            <AuthPasswordInput
-              id="password"
-              name="password"
-              value={values.password}
-              onChange={(value) => setValue('password', value)}
-              error={errors.password}
-              hint={t('fields.passwordHint')}
-              autoComplete="new-password"
-              dataAttribute="data-register-password"
+          {step === 'verify' ? (
+            <RegisterVerifyStep
+              email={values.email.trim()}
+              submitLabel={
+                creatingOrganization
+                  ? t('register.submitOrganization')
+                  : t('register.verify.submit')
+              }
+              reasonMessage={messages.reasonMessage}
+              onSubmit={submitRegistration}
+              onBack={() => setStep('form')}
             />
+          ) : (
+            <>
+              <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+                {t('register.title')}
+              </h1>
 
-            {REGISTRATION.invitationCodeRequired ? (
-              <Field label={t('fields.invite')} htmlFor="invite" error={errors.invite}>
-                <Input
-                  id="invite"
-                  name="invite"
-                  data-register-invite
-                  autoComplete="off"
-                  value={values.invite}
-                  onChange={(event) => setValue('invite', event.target.value)}
-                  aria-invalid={errors.invite ? true : undefined}
-                  aria-describedby={describedBy('invite', 'invite')}
-                  className="min-w-0"
-                />
-              </Field>
-            ) : null}
+              {closed ? (
+                <p
+                  data-register-closed
+                  className="mt-8 rounded-md bg-muted px-4 py-3 text-sm text-muted-foreground"
+                >
+                  {t('register.closed')}
+                </p>
+              ) : (
+                <>
+                  {orgInvite ? null : (
+                    <SegmentedControl
+                      name="account"
+                      className="mt-6 [&>button]:flex-1 [&>button]:justify-center"
+                      value={account}
+                      onChange={switchAccount}
+                      ariaLabel={t('account.label')}
+                      options={[
+                        { value: 'personal', label: t('account.registerPersonal') },
+                        { value: 'organization', label: t('account.registerOrganization') },
+                      ]}
+                    />
+                  )}
 
-            <Button type="submit" block loading={submitting} data-register-submit>
-              {isOrganization ? t('register.submitOrganization') : t('register.submitPersonal')}
-            </Button>
-          </form>
+                  <form
+                    noValidate
+                    onSubmit={handleSubmit}
+                    className="mt-6 space-y-5"
+                    data-register-form
+                  >
+                    <RegisterFields
+                      settings={settings}
+                      values={values}
+                      errors={{
+                        orgName: messages.fieldError(errors.orgName),
+                        email: messages.fieldError(errors.email),
+                        password: messages.fieldError(errors.password),
+                        invite: messages.fieldError(errors.invite),
+                        memberName: messages.fieldError(errors.memberName),
+                      }}
+                      setValue={setValue}
+                      creatingOrganization={creatingOrganization}
+                      showMemberName={needsMemberName(context)}
+                      inviteStatus={messages.inviteStatus(invite.check)}
+                      promoStatus={messages.promoStatus(promo.check)}
+                    />
 
-          <p className="mt-4 text-center text-sm text-muted-foreground">
-            {t('register.hasAccount')}{' '}
-            <Link
-              href="/login"
-              data-to-login
-              className="font-medium text-foreground hover:underline"
-            >
-              {t('register.toLogin')}
-            </Link>
-          </p>
+                    <AuthFormAlert message={formError} />
 
-          <div className="my-8 flex items-center gap-4 text-xs text-subtle-foreground">
-            <span className="h-px flex-1 bg-border" />
-            {t('divider')}
-            <span className="h-px flex-1 bg-border" />
-          </div>
+                    <Button
+                      type="submit"
+                      block
+                      loading={submitting}
+                      disabled={!loaded}
+                      data-register-submit
+                    >
+                      {submitLabel}
+                    </Button>
+                  </form>
+                </>
+              )}
 
-          {/* 谷歌注册为占位，点击不做任何事 */}
-          <Button type="button" variant="secondary" block data-google-register>
-            <img src="/brands/google.svg" alt="" aria-hidden width={16} height={16} />
-            {t('register.google')}
-          </Button>
+              <p className="mt-4 text-center text-sm text-muted-foreground">
+                {t('register.hasAccount')}{' '}
+                <Link
+                  href="/login"
+                  data-to-login
+                  className="font-medium text-foreground hover:underline"
+                >
+                  {t('register.toLogin')}
+                </Link>
+              </p>
 
-          <p className="mt-8 text-center text-xs leading-5 text-subtle-foreground">
-            {t.rich('register.terms', {
-              terms: (chunks) => (
-                <a href="#" className="underline underline-offset-4 hover:text-foreground">
-                  {chunks}
-                </a>
-              ),
-              privacy: (chunks) => (
-                <a href="#" className="underline underline-offset-4 hover:text-foreground">
-                  {chunks}
-                </a>
-              ),
-            })}
-          </p>
+              {closed ? null : (
+                <p className="mt-8 text-center text-xs leading-5 text-subtle-foreground">
+                  {t.rich('register.terms', {
+                    terms: (chunks) => (
+                      <a href="#" className="underline underline-offset-4 hover:text-foreground">
+                        {chunks}
+                      </a>
+                    ),
+                    privacy: (chunks) => (
+                      <a href="#" className="underline underline-offset-4 hover:text-foreground">
+                        {chunks}
+                      </a>
+                    ),
+                  })}
+                </p>
+              )}
+            </>
+          )}
         </div>
       </div>
     </section>
