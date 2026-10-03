@@ -34,7 +34,7 @@ function WindowLine({ window }: { window: PriceWindow }) {
 }
 
 /**
- * 价格列：当前通道的实付价（后端单价 × 通道倍率）。按 Token 计费的是「输入 / 输出」每百万 Token，
+ * 价格列：当前分组的实付价（后端单价 × 分组倍率）。按 Token 计费的是「输入 / 输出」每百万 Token，
  * 有长上下文分档时多一行加价档；按张、按次计费的是单价；下面再列高峰、分时段的加价。
  * 交互检查用 data-model-price 取这一格。
  */

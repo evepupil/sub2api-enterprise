@@ -31,7 +31,7 @@ const CONTEXT_LABEL = {
   '1m': 'filters.ctx1m',
 } as const satisfies Record<ContextFilter, string>;
 
-/** 筛选栏：类型、厂商、上下文、协议四个下拉加一个搜索框。厂商只列当前通道里出现过的 */
+/** 筛选栏：类型、厂商、上下文、协议四个下拉加一个搜索框。厂商只列当前分组里出现过的 */
 export function ModelsFilterBar({
   query,
   providers,

@@ -13,7 +13,7 @@
     "context": "Context",
     "protocol": "Protocol",
     "search": "Search",
-    "searchPlaceholder": "Model, provider or channel",
+    "searchPlaceholder": "Model, provider or group",
     "all": "All",
     "text": "Text",
     "image": "Image",
@@ -36,7 +36,7 @@
   },
   "table": {
     "model": "Model",
-    "channel": "Channel",
+    "channel": "Group",
     "price": "Price",
     "discount": "Discount",
     "type": "Type",

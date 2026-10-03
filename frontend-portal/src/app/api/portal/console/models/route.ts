@@ -14,7 +14,7 @@ import { backendError, PORTAL_REASONS, type BackendResult } from '@/lib/server/s
 import { rechargeMultiplierFrom, toConsoleChannels } from '@/lib/server/sub2api/model-plaza';
 
 /**
- * 控制台模型页的数据：带着登录状态读后端「模型广场」（账号能用的通道、每个通道的模型与单价、官方价），
+ * 控制台模型页的数据：带着登录状态读后端「模型广场」（账号能用的分组、每个分组的模型与单价、官方价），
  * 同时读支付配置里的充值比例（人民币价格按它换算）。访问凭证过期会自动续期。
  * 模型广场没在后台打开时后端回 404，这里当作没有可用模型；充值比例读不到按 1。
  */

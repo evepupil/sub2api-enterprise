@@ -16,33 +16,33 @@ import {
 import type { ChannelModel, ConsoleChannel, TimeWindow, TokenRates } from './models-types';
 
 /**
- * 控制台模型页：后端通道数据 + 官网模型目录 → 表格里的一行。纯函数，单测锁住。
- * 所有通道的模型摊在同一张表里（2026-10-04 用户要求），每行是「一个通道里的一个模型」，带着通道名与倍率。
+ * 控制台模型页：后端分组数据 + 官网模型目录 → 表格里的一行。纯函数，单测锁住。
+ * 所有分组的模型摊在同一张表里（2026-10-04 用户要求），每行是「一个分组里的一个模型」，带着分组名与倍率。
  * 价格、官方价、计费方式来自后端；展示名、厂商、类型、协议、上下文、「新」标记来自官网目录，
  * 目录里没有的模型显示原名，厂商按模型名猜，协议按后端平台推，上下文未知。
  */
 
 export type LiveCurrency = 'usd' | 'cny';
 
-/** 实付价（美元，已乘通道倍率；按 Token 的是每百万 Token） */
+/** 实付价（美元，已乘分组倍率；按 Token 的是每百万 Token） */
 export type LivePrice =
   | {
       kind: 'token';
       input: number | null;
       output: number | null;
-      /** 超过 threshold 个输入 Token 后的单价（通道按长上下文分档计费时才有） */
+      /** 超过 threshold 个输入 Token 后的单价（分组按长上下文分档计费时才有） */
       longContext: { threshold: number; input: number | null; output: number | null } | null;
     }
   | { kind: 'request'; unit: 'image' | 'request'; price: number; from: boolean }
   | { kind: 'none' };
 
-/** 价格下方的时段说明：通道高峰，或模型的分时段价 */
+/** 价格下方的时段说明：分组高峰，或模型的分时段价 */
 export interface PriceWindow extends TimeWindow {
   kind: 'peak' | 'time';
   weekdaysOnly: boolean;
 }
 
-/** 这一行属于哪个通道 */
+/** 这一行属于哪个分组 */
 export interface RowChannel {
   id: string;
   name: string;
@@ -51,7 +51,7 @@ export interface RowChannel {
 }
 
 export interface ModelRowView {
-  /** 通道 ID + 模型名，表格里唯一 */
+  /** 分组 ID + 模型名，表格里唯一 */
   key: string;
   channel: RowChannel;
   /** 调用时填的模型名 */
@@ -210,12 +210,12 @@ function toRow(model: ChannelModel, channel: ConsoleChannel): ModelRowView {
   };
 }
 
-/** 一个通道里的全部模型行（顺序由排序决定） */
+/** 一个分组里的全部模型行（顺序由排序决定） */
 export function modelRows(channel: ConsoleChannel): ModelRowView[] {
   return channel.models.map((model) => toRow(model, channel));
 }
 
-/** 所有通道的模型摊成一张表：同一个模型在几个通道里就有几行，价格按各自通道的倍率算 */
+/** 所有分组的模型摊成一张表：同一个模型在几个分组里就有几行，价格按各自分组的倍率算 */
 export function allModelRows(channels: readonly ConsoleChannel[]): ModelRowView[] {
   return channels.flatMap(modelRows);
 }
@@ -231,7 +231,7 @@ function compareNullable(a: number | null, b: number | null, direction: 1 | -1):
 }
 
 function comparator(sort: SortKey): (a: ModelRowView, b: ModelRowView) => number {
-  // 同一个模型的几行挨着放，倍率低的通道在前
+  // 同一个模型的几行挨着放，倍率低的分组在前
   const byName = (a: ModelRowView, b: ModelRowView) =>
     a.id.localeCompare(b.id) ||
     a.channel.rate - b.channel.rate ||
@@ -255,7 +255,7 @@ function comparator(sort: SortKey): (a: ModelRowView, b: ModelRowView) => number
   }
 }
 
-/** 按类型、厂商、上下文、协议、关键词（模型名、厂商、通道名）筛选后排序；上下文未知的模型在按上下文筛选时不出现 */
+/** 按类型、厂商、上下文、协议、关键词（模型名、厂商、分组名）筛选后排序；上下文未知的模型在按上下文筛选时不出现 */
 export function filterRows(rows: readonly ModelRowView[], query: ModelsQuery): ModelRowView[] {
   const text = query.query.trim().toLowerCase();
   const minContext = CONTEXT_MIN[query.context];
@@ -276,7 +276,7 @@ export function filterRows(rows: readonly ModelRowView[], query: ModelsQuery): M
     .sort(comparator(query.sort));
 }
 
-/** 筛选栏的厂商选项：只列这个通道里出现过的厂商，顺序同官网目录 */
+/** 筛选栏的厂商选项：只列这个分组里出现过的厂商，顺序同官网目录 */
 export function providersIn(rows: readonly ModelRowView[]): Provider[] {
   const present = new Set(rows.map((row) => row.provider));
   return PROVIDERS.filter((provider) => present.has(provider.id));

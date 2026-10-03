@@ -8,7 +8,7 @@ import type {
 } from '@/lib/console/live/models-types';
 
 /**
- * 后端「模型广场」（/api/v1/model-plaza）→ 控制台模型页用的通道与模型。纯函数，单测锁住。
+ * 后端「模型广场」（/api/v1/model-plaza）→ 控制台模型页用的分组与模型。纯函数，单测锁住。
  * 口径与后端计费、旧版广场页一致：实付价 = 单价 × 生效倍率（专属倍率优先；生图模型在开了
  * 「生图独立倍率」时用生图倍率），官方价不乘倍率；长上下文分档没给绝对价时按「基础价 × 档位倍率」算。
  */
@@ -120,7 +120,7 @@ function toChannel(raw: RawRecord): ConsoleChannel | null {
   };
 }
 
-/** 广场数据 → 通道列表（沿用后端顺序：倍率从低到高）；没有模型的通道不要；看不懂时返回 null */
+/** 广场数据 → 分组列表（沿用后端顺序：倍率从低到高）；没有模型的分组不要；看不懂时返回 null */
 export function toConsoleChannels(raw: unknown): ConsoleChannel[] | null {
   if (!isRecord(raw) || !Array.isArray(raw.groups)) return null;
   return list(raw.groups)

@@ -3,7 +3,7 @@ import { ratioLabel } from '@/lib/catalog';
 import type { RowChannel } from '@/lib/console/live/models-view';
 
 /**
- * 倍率徽标的颜色：倍率越低越「便宜」的颜色，一眼分出通道档次。
+ * 倍率徽标的颜色：倍率越低越「便宜」的颜色，一眼分出分组档次。
  * 低于 ×0.2 绿、低于 ×0.5 蓝、低于 ×1 橙、正好 ×1（官方价）灰、高于官方价红。
  */
 function rateTone(rate: number): BadgeTone {
@@ -14,7 +14,7 @@ function rateTone(rate: number): BadgeTone {
   return 'danger';
 }
 
-/** 通道列：通道名 + 倍率徽标（名字太长时截断，悬停看全名） */
+/** 分组列：分组名 + 倍率徽标（名字太长时截断，悬停看全名） */
 export function ChannelCell({ channel }: { channel: RowChannel }) {
   return (
     <div className="flex min-w-0 items-center gap-2 whitespace-nowrap">

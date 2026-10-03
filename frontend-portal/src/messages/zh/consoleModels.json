@@ -13,7 +13,7 @@
     "context": "上下文",
     "protocol": "协议",
     "search": "搜索",
-    "searchPlaceholder": "模型名、厂商或通道",
+    "searchPlaceholder": "模型名、厂商或分组",
     "all": "全部",
     "text": "文本",
     "image": "生图",
@@ -36,7 +36,7 @@
   },
   "table": {
     "model": "模型",
-    "channel": "通道",
+    "channel": "分组",
     "price": "价格",
     "discount": "折扣",
     "type": "类型",

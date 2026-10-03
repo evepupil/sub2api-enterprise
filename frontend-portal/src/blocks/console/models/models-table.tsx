@@ -26,7 +26,7 @@ export function ModelsTable({
   onToggleFavorite,
   onClearFilters,
 }: {
-  /** 筛选、排序、范围都处理完的全部结果（每行是一个通道里的一个模型），分页在表内做 */
+  /** 筛选、排序、范围都处理完的全部结果（每行是一个分组里的一个模型），分页在表内做 */
   rows: readonly ModelRowView[];
   resetKey: string;
   currency: LiveCurrency;

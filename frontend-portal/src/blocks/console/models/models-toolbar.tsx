@@ -14,7 +14,7 @@ const SORT_LABEL = {
 } as const satisfies Record<SortKey, string>;
 
 /**
- * 排序与币种：左边排序，右边币种。通道不再单独选，表格里每行都写着通道和倍率。
+ * 排序与币种：左边排序，右边币种。分组不再单独选，表格里每行都写着分组和倍率。
  * 切到人民币时下方补一行折算说明（按充值比例），提醒钱包仍按美元扣费。
  */
 export function ModelsToolbar({

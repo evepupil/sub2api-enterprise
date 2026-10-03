@@ -17,7 +17,7 @@ import { ChannelCell } from './models-channel';
 import { ModelDiscount, ModelPrice } from './models-price';
 
 /**
- * 模型表的一行：一个通道里的一个模型（同一个模型在几个通道里就有几行）。
+ * 模型表的一行：一个分组里的一个模型（同一个模型在几个分组里就有几行）。
  * 第一列（模型）和最后一列（操作）固定，横向滚动时始终看得见；
  * 手机宽度下第一列不固定，否则它一列就占满屏幕，其余列没法看。
  * 单元格内容一律不换行（whitespace-nowrap），宽度不够时由表格整体横向滚动。

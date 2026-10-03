@@ -395,7 +395,7 @@ pnpm format:check  # prettier
 | 注册 | 2026-10-03 接通后端，规则与现有 sub2api 注册页一致：`src/app/api/portal/auth/{settings,register,send-verify-code,validate-invitation-code,validate-promo-code}` 转发、`src/lib/server/sub2api/public-settings.ts` 读后端公开开关、`src/lib/auth/` 注册规则（规格见 `design/登录注册.md` A2） |
 | 找回密码、谷歌登录、人机验证 | 不连后端，入口不显示；后端开了人机验证时，注册失败提示联系管理员 |
 | 控制台用量页 | 2026-10-03 接通后端，显示登录账号自己的真实用量：后端用量总览接口（技术设计 18.2）、官网转发 `src/app/api/portal/console/usage/`、取数与换算 `src/lib/console/live/` |
-| 控制台模型页 | 2026-10-04 接通后端：通道、模型、实付价、官方价来自后端模型广场（技术设计 18.3），官网转发 `src/app/api/portal/console/models/`、换算 `src/lib/console/live/models-*.ts`；展示名、厂商、协议、上下文仍取官网目录（见上面「30 个模型」一行）。用量页、模型页以外的控制台页面仍是占位数据（**编的**） |
+| 控制台模型页 | 2026-10-04 接通后端：分组、模型、实付价、官方价来自后端模型广场（技术设计 18.3），官网转发 `src/app/api/portal/console/models/`、换算 `src/lib/console/live/models-*.ts`；展示名、厂商、协议、上下文仍取官网目录（见上面「30 个模型」一行）。用量页、模型页以外的控制台页面仍是占位数据（**编的**） |
 
 ---
 
