@@ -6,64 +6,6 @@
   "primaryCta": "Get started",
   "secondaryCta": "View pricing",
   "preview": {
-    "nav": {
-      "overview": "Overview",
-      "keys": "API keys",
-      "usage": "Usage",
-      "billing": "Billing",
-      "groups": "Channels",
-      "members": "Members",
-      "settings": "Settings"
-    },
-    "title": "Overview",
-    "search": "Search models or keys",
-    "edition": "Dedicated",
-    "stats": {
-      "spend": {
-        "title": "Spend this month",
-        "desc": "Across all channels"
-      },
-      "requests": {
-        "title": "Requests",
-        "desc": "Last 30 days"
-      },
-      "tokens": {
-        "title": "Token usage",
-        "desc": "Input and output combined"
-      },
-      "availability": {
-        "title": "Availability",
-        "desc": "Dedicated · last 30 days",
-        "target": "Target {value}%"
-      }
-    },
-    "charts": {
-      "daily": {
-        "title": "Requests, last 14 days",
-        "unit": "In thousands",
-        "start": "14 days ago",
-        "mid": "7 days ago",
-        "end": "Today"
-      },
-      "models": {
-        "title": "Calls by model",
-        "range": "Last 30 days"
-      },
-      "groups": {
-        "title": "Spend by channel",
-        "range": "Last 30 days",
-        "center": "channels"
-      }
-    },
-    "recent": {
-      "title": "Recent requests",
-      "time": "Time",
-      "model": "Model",
-      "tokens": "Tokens",
-      "cost": "Cost",
-      "status": "Status",
-      "ok": "Success",
-      "failed": "Failed"
-    }
+    "alt": "The usage page of the {name} console"
   }
 }

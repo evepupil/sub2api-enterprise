@@ -6,64 +6,6 @@
   "primaryCta": "免费注册",
   "secondaryCta": "查看价格",
   "preview": {
-    "nav": {
-      "overview": "概览",
-      "keys": "API 密钥",
-      "usage": "用量",
-      "billing": "账单",
-      "groups": "通道",
-      "members": "组织成员",
-      "settings": "设置"
-    },
-    "title": "概览",
-    "search": "搜索模型或密钥",
-    "edition": "专用通道",
-    "stats": {
-      "spend": {
-        "title": "本月消费",
-        "desc": "全部通道合计"
-      },
-      "requests": {
-        "title": "请求次数",
-        "desc": "近 30 天"
-      },
-      "tokens": {
-        "title": "Token 用量",
-        "desc": "输入与输出合计"
-      },
-      "availability": {
-        "title": "可用率",
-        "desc": "专用通道 · 近 30 天",
-        "target": "目标 {value}%"
-      }
-    },
-    "charts": {
-      "daily": {
-        "title": "近 14 天调用量",
-        "unit": "单位：千次",
-        "start": "14 天前",
-        "mid": "7 天前",
-        "end": "今天"
-      },
-      "models": {
-        "title": "模型调用占比",
-        "range": "近 30 天"
-      },
-      "groups": {
-        "title": "通道消费占比",
-        "range": "近 30 天",
-        "center": "个通道"
-      }
-    },
-    "recent": {
-      "title": "最近请求",
-      "time": "时间",
-      "model": "模型",
-      "tokens": "Token",
-      "cost": "费用",
-      "status": "状态",
-      "ok": "成功",
-      "failed": "失败"
-    }
+    "alt": "{name} 控制台的用量页"
   }
 }

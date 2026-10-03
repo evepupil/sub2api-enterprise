@@ -346,7 +346,7 @@ pnpm format:check  # prettier
 - 用了 `useState` / `useEffect` / 事件处理 / motion 组件 / `useTranslations` 以外的客户端钩子的文件，第一行是 `'use client'`；纯展示的不加。服务端组件不能给客户端组件传函数参数。
 - 禁止 `any`、`@ts-ignore`、`@ts-expect-error`、`eslint-disable`、未使用的变量和 import。
 - 禁止 `Math.random()`、`Date.now()`、`new Date()`（时间相关一律用数据层的 `CATALOG_AS_OF`）。
-- 组件里不写死业务数字（价格、倍率、数量、可用率），全部来自 `@/lib/catalog`、`@/lib/content/console-preview` 或 `SITE`。
+- 组件里不写死业务数字（价格、倍率、数量、可用率），全部来自 `@/lib/catalog` 或 `SITE`。
 - 不写十六进制色值（2.1 的三个例外除外），不拼接类名。
 - 手机 375 宽不出现横向滚动条；宽表格放进 `overflow-x-auto` 容器，网格子项里的横向滚动区给子项加 `min-w-0`。
 - 图片有 `alt`（装饰图 `alt=""` 加 `aria-hidden`）；图标按钮有 `aria-label`；装饰 SVG 加 `aria-hidden`；有意义的 SVG 图表加 `role="img"` 和 `aria-label`。
@@ -367,7 +367,7 @@ pnpm format:check  # prettier
 | 路 | 负责的文件 |
 |---|---|
 | L0 地基 | 第 4.3 节全部共享组件、`src/app/[locale]/(site)/**`、`src/app/[locale]/(auth)/**`、`src/app/[locale]/not-found.tsx`、`src/blocks/**` 全部占位、`eslint.config.mjs` |
-| L1 首页首屏 | `src/blocks/home/hero*.tsx`、`src/blocks/home/console-preview*.tsx`、`src/messages/{zh,en}/homeHero.json` |
+| L1 首页首屏 | `src/blocks/home/hero*.tsx`、`src/blocks/home/console-preview.tsx`、`public/home/`、`src/messages/{zh,en}/homeHero.json` |
 | L2 首页能力 | `src/blocks/home/provider-logos*.tsx`、`src/blocks/home/features-bento*.tsx`、`src/messages/{zh,en}/homeShowcase.json` |
 | L3 首页下半 | `src/blocks/home/feature-grid*.tsx`、`src/blocks/home/model-marquee*.tsx`、`src/blocks/home/home-cta*.tsx`、`src/messages/{zh,en}/homeMore.json` |
 | L4 模型页 | `src/blocks/models/**`、`src/messages/{zh,en}/models.json` |
@@ -388,7 +388,7 @@ pnpm format:check  # prettier
 | 可用率目标、RPM、并发、组织成员上限、工单响应时限、通道卡特权清单、特权对比各项 | **编的**，`editions.ts`、`groups.ts` |
 | 近 24 小时可用率与状态格 | **编的**，固定种子生成（`uptime.ts`），接监测后替换 |
 | 人民币汇率 7.1、按 Token 计费生图的每张估算 1290 Token | **编的**，`pricing.ts` |
-| 首页控制台预览里的消费、请求数、图表 | **编的**，`src/lib/content/console-preview.ts` |
+| 首页控制台预览 | 控制台用量页的截图，数字是控制台的占位数据（**编的**），`public/home/console-*.webp` |
 | 首页四张黑白示例图 | AI 生成（imagegen，gpt-image），`public/showcase/` |
 | 厂商标志 | lobehub icons（MIT），`public/providers/`；谷歌登录按钮标志 `public/brands/google.svg` |
 | 登录 | 2026-10-03 接通后端：`src/app/api/portal/auth/*` 转发、`src/lib/server/` 调后端与凭证 cookie、`src/lib/session/` 浏览器端登录状态、`src/proxy.ts` 拦截没登录的控制台访问（做法见技术设计 18.1） |
@@ -499,6 +499,6 @@ pnpm format:check  # prettier
 | `filterModels(models, filter, edition)`、`facetCounts(models, type)`、`groupByProvider(models)`、`DEFAULT_FILTER`、`TYPE_FILTERS`、`CONTEXT_FILTERS`、`SORT_KEYS`、`PROTOCOLS`、`PROTOCOL_LABELS` | 模型页筛选排序、价目表分段 |
 | `uptimeFor(modelId, edition)`、`UPTIME_SLOTS` | 近 24 小时可用率（percent）与 24 个状态格（up/degraded/down） |
 
-其他：`SITE`、`NAV_ITEMS`、`FOOTER_COLUMNS`（`@/lib/site`）；`PREVIEW_*`（`@/lib/content/console-preview`）；`useEdition`、`useCurrency`（`@/lib/use-catalog-state`）；`useUrlState`、`useUrlList`、`useUrlText`（`@/lib/use-url-state`）；`initPage`、`LocaleParams`（`@/i18n/page`）。
+其他：`SITE`、`NAV_ITEMS`、`FOOTER_COLUMNS`（`@/lib/site`）；`useEdition`、`useCurrency`（`@/lib/use-catalog-state`）；`useUrlState`、`useUrlList`、`useUrlText`（`@/lib/use-url-state`）；`initPage`、`LocaleParams`（`@/i18n/page`）。
 
 单测算出的几个关键数字（交互检查会用）：全部 30 / 文本 23 / 生图 7；厂商 OpenAI 10、Anthropic 6、Google 8；只看 Anthropic 文本 6 个；上下文 ≥1M 共 21 个；搜「nano」4 个、搜「gemini」8 个；默认排序第一个 Claude Sonnet 5.5；文本按价格从低到高第一个 GPT-6 Luna；Claude Sonnet 5.5 输入单价 共享通道 $0.3、专用通道 $0.6、企业通道定制（无单价），人民币共享通道 ¥2.13；折扣标 共享通道 1.5折、专用通道 3折、企业通道不显示。
