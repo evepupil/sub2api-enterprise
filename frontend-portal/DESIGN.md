@@ -60,13 +60,13 @@
 | 多语言 | `next-intl` 4.14：服务端组件 `useTranslations`（同步组件）或 `await getTranslations`（异步组件）；客户端组件 `useTranslations`；当前语言 `useLocale()`（类型为 `'zh' \| 'en'`） |
 | 站内链接 | `import { Link, usePathname, useRouter } from '@/i18n/navigation'`（自动带语言前缀）；`href="#"` 的占位链接用原生 `<a>` |
 | 主题 | `next-themes` 0.4（`useTheme()`，类名写在 `<html>`，默认亮色） |
-| 基础组件 | Radix：`@radix-ui/react-dropdown-menu`、`@radix-ui/react-accordion`、`@radix-ui/react-slot`；样式按 shadcn new-york 写法自己包一层 |
+| 基础组件 | Radix：`@radix-ui/react-dropdown-menu`、`@radix-ui/react-accordion`、`@radix-ui/react-slot`，控制台另加 `@radix-ui/react-dialog`（弹窗、抽屉）与 `@radix-ui/react-popover`（日期范围）；样式按 shadcn new-york 写法自己包一层 |
 | 工具 | `clsx` + `tailwind-merge`（`cn`）、`class-variance-authority`（可用可不用） |
 | 图标 | `lucide-react` 1.48，只用白名单 |
 | 地球 | `cobe` 2.0（只在共享组件 `Globe` 里用） |
 | 字体 | `geist`（Geist Sans / Geist Mono，已在根布局挂好，`font-sans` / `font-mono` 直接用） |
 | 图片 | 原生 `<img>`，写 `width`、`height`、`alt`、`loading="lazy"`、`decoding="async"`；不用 `next/image` |
-| 图表 | 手写 SVG |
+| 图表 | 手写 SVG（控制台的堆叠柱状图、活跃热力图是共享组件） |
 | 单测 | vitest 4（只测数据层，界面不写单测） |
 | 包管理 | pnpm 10.34.5 |
 
@@ -74,6 +74,7 @@
 
 可用图标白名单（已在本机 1.48 版逐个确认存在，只用这些）：
 `Menu X Sun Moon Languages Globe ChevronDown ChevronRight ChevronLeft ChevronUp Check ArrowRight ArrowUpRight ArrowLeft Plus Minus Search SlidersHorizontal ArrowUpDown ListFilter Eye EyeOff Mail Lock User Users Building2 KeyRound Copy ExternalLink Info CircleCheck CircleX CircleAlert Clock Activity Gauge Zap Layers ShieldCheck Network Receipt RefreshCw Server Cpu Bot MessageSquare Image ImagePlus Images Sparkles WandSparkles Terminal SquareTerminal Workflow CodeXml Braces Database Cloud Infinity Percent LifeBuoy Headphones FileText BookOpen LayoutDashboard Wallet Coins CreditCard ChartColumn ChartLine ChartPie TrendingUp Timer Route Split Shuffle Puzzle Plug Boxes Package Rocket Award BadgeCheck Fingerprint Settings Bell Calendar Download Upload Filter Hash AtSign LoaderCircle`。
+控制台另可用：`CalendarDays ScrollText Gift House LogOut ChevronsUpDown PanelLeftClose PanelLeftOpen Pencil Pause Play Trash2 Ticket TriangleAlert Star Send SquarePen Inbox ArrowUp ArrowDown Share2 Link QrCode UserPlus Shield Webhook Type Ellipsis EllipsisVertical Ban Paperclip MessageCircle CirclePause CirclePlay Code`。
 没有的形状（谷歌标志、厂商标志）用 `public/` 里的 SVG 文件或手写内联 SVG。
 
 ---
@@ -100,6 +101,7 @@
 | `navy-foreground` / `navy-muted` | #f8fafc / #94a3b8 | 同左 | 深色块上的文字 |
 | `grid-line` / `grid-dot` / `beam` | #f0f0f0 / #e5e5e5 / #a3a3a3 | #161616 / #262626 / #737373 | 背景网格线、交点圆点、流动光线 |
 | `chart-1..4` | #2563eb #60a5fa #bfdbfe #e11d48 | #3b82f6 #60a5fa #1e3a8a #fb7185 | **只用于图形** |
+| `chart-5..7` / `chart-muted` | #10b981 #f59e0b #8b5cf6 / #d4d4d4 | #34d399 #fbbf24 #a78bfa / #525252 | 控制台多系列图表的补充色，「其他」用 `chart-muted`；**只用于图形** |
 | `success` / `success-soft` / `success-graphic` | #15803d / #dcfce7 / #22c55e | #4ade80 / 绿 14% / #22c55e | 折扣标、可用率；`*-graphic` 只做色块 |
 | `warning` / `warning-soft` / `warning-graphic` | #b45309 / #fef3c7 / #f59e0b | #fbbf24 / 琥珀 14% / #f59e0b | 降级 |
 | `danger` / `danger-soft` / `danger-graphic` | #dc2626 / #fee2e2 / #ef4444 | #f87171 / 红 14% / #ef4444 | 错误、中断 |
@@ -390,6 +392,89 @@ pnpm format:check  # prettier
 | 首页四张黑白示例图 | AI 生成（imagegen，gpt-image），`public/showcase/` |
 | 厂商标志 | lobehub icons（MIT），`public/providers/`；谷歌登录按钮标志 `public/brands/google.svg` |
 | 登录、注册、谷歌登录 | 占位，不连后端；「邀请码注册」开关先写死为开启（`src/lib/site.ts` 的 `REGISTRATION`），接后端后改读公开设置 |
+
+---
+
+## 10. 控制台（M6）
+
+控制台和官网同一个应用、同一套令牌与基础组件，地址 `/console/<页>`（英文 `/en/console/<页>`，`/console` 自动跳到 `/console/usage`）。信息组织参考 onehop 控制台（用量、模型、日志、API 密钥、账单、邀请、工单，左上角深色「对话」入口），视觉一律按本文件第 2 章的令牌。任务墙不做；侧栏「文档」链到官网 `/docs` 占位页。另加「组织」（成员与配额）和「账户设置」（头像菜单进入）两页。
+
+数据全部占位，集中在 `src/lib/console/`（主控已写好并有单测锁住，**不准改**）。所有操作只改页面内的本地状态，不发请求；刷新、保存、提交一类按钮进入加载态 600–1200ms 再恢复。
+
+### 10.1 外壳（主控已写好）
+
+- `src/app/[locale]/console/layout.tsx`：换上控制台自己的一组文案（`CONSOLE_NAMESPACES`），套 `ConsoleShell`；控制台页面 `noindex`。
+- `ConsoleShell`：整屏固定高度，顶部公告条（深色，可关闭，多条轮换）+ 左侧边栏（`w-64`，可收起成 `w-16` 图标栏）+ 右侧内容区（`<main data-console-main>`，只有它滚动）。大屏以下侧栏变成左侧抽屉，由顶部手机栏的菜单按钮（`data-mobile-nav`）打开，换页自动关闭。
+- 侧栏：品牌、收起按钮（`data-sidebar-toggle`）、深色「对话」按钮（`data-nav="chat"`）、菜单（`data-nav={key}`，当前页 `aria-current="page"`）、底部头像菜单（`data-user-menu`：账户设置、返回官网、退出登录）与通知、语言、主题。
+- 每个页面最外层用 `ConsolePage`：顶部标题行（标题 + 右侧操作 + 底部分隔线）+ 内容区（`max-w-[1440px]`、`space-y-6`、左右 `px-4 sm:px-6 lg:px-8`）。**只放标题，不加描述句。**
+
+### 10.2 控制台共享组件（`src/components/console/`，主控已写好，直接用，不准再造）
+
+| 组件 | 文件 | 用法要点 |
+|---|---|---|
+| `ConsolePage` | `console-page.tsx` | `{ id, title, actions?, children, className? }`；`id` 写在 `data-console-page` 上，等于路由名 |
+| `Panel` | `panel.tsx` | 白底圆角卡片，`{ id?, title?, actions?, children, className?, bodyClassName? }`；默认内边距 `p-5`，表格放进 Panel 时传 `bodyClassName="p-0"` |
+| `StatCard` | `stat-card.tsx` | `{ id, label, value, aside?, sub?, size?: 'md' \| 'sm' }`；`data-stat={id}`，数字在 `[data-stat-value]` |
+| `Select` | `select.tsx` | 单选下拉 `{ name, value, onChange, options: { value, label }[], ariaLabel, size?, align?, className? }`；触发按钮 `data-select={name}`，选项 `data-option={value}`；宽度默认撑满父级 |
+| `FilterField` / `SearchInput` | `filter-field.tsx` | 筛选项：上方小标签 + 控件；`SearchInput` 是带放大镜的输入框（`type="search"`） |
+| `DateRangePicker` | `date-range-picker.tsx` | `{ value: DateRange, onChange, align? }`；左侧常用范围立即生效，右侧月历自选后点「应用」；`rangeLabel()` 可复用 |
+| `TableShell` / `Table` / `Th` / `Td` / `Tr` | `data-table.tsx` | 外框可带 `footer`（放分页）；`Table` 传 `minWidth` 让小屏横向滚动；`Th`/`Td` 支持 `align` 与 `sticky: 'left' \| 'right'`（固定首列或操作列） |
+| `RefreshButton` | `refresh-button.tsx` | 标题行刷新按钮（转 600ms，`data-refresh`），可传 `onRefresh` |
+| `Pagination` + `usePagination` | `pagination.tsx` | `const pager = usePagination(rows, resetKey)`，筛选条件变化（resetKey 变）自动回第 1 页；`<Pagination page={pager.page} pages={pager.pages} total={pager.total} pageSize={pager.pageSize} onPageChange={pager.setPage} onPageSizeChange={pager.setPageSize} />`，当前页数据在 `pager.items` |
+| `EmptyState` | `empty-state.tsx` | `{ id, icon, title, description?, action?, bordered? }`；`data-empty={id}`；表格内空状态传 `bordered={false}` |
+| `Dialog` / `Sheet` / `ConfirmDialog` | `dialog.tsx` | 居中弹窗 `data-dialog={id}`（`size: sm/md/lg`，`footer` 放按钮）；右侧抽屉 `data-sheet={id}`；确认弹窗确认按钮带 `data-confirm`，`tone="danger"` 时是红色按钮；`initialFocus` 传输入框 id 时打开后先聚焦它；关闭后焦点回到打开前的元素 |
+| `Switch` | `switch.tsx` | `{ name, checked, onCheckedChange, ariaLabel?, id?, disabled? }`；`data-switch={name}` |
+| `CopyButton` / `useCopy` | `copy-button.tsx` | 复制图标按钮（成功后变对勾 1.5 秒），`data-copy={name}`；菜单项里复制用 `useCopy()` |
+| `StackedBarChart` | `charts/stacked-bar-chart.tsx` | 堆叠柱状图 `{ id, labels: { axis, full }[], series: { id, label, color, values }[], formatValue, formatAxis?, ariaLabel, totalLabel, emptyLabel, height? }`；颜色用 `seriesColor(i)`，「其他」用 `OTHER_COLOR`；`data-chart={id}`、`data-buckets` |
+| `ActivityHeatmap` | `charts/activity-heatmap.tsx` | 活跃热力图 `{ data: Heatmap, monthLabel, cellTitle, ariaLabel, lessLabel, moreLabel, weekdayLabels }` |
+| 外壳件 | `shell/*` | 页面不用直接引用；`Avatar` 可在设置页复用 |
+
+官网已有的基础组件照用：`Button`（新增 `variant="danger"`）/ `buttonClass`、`Textarea`（`ui/textarea.tsx`，多行输入框，传 `footer` 时带字数底栏）、`Badge`、`Input`、`Field`、`SegmentedControl`、`DropdownMenu*`、`ProviderLogo`、`DiscountBadge`、`LanguageSwitcher`、`ThemeToggle`。
+
+### 10.3 控制台数据接口（`import { … } from '@/lib/console'`，一个字都不要改）
+
+| 导出 | 用途 |
+|---|---|
+| `CONSOLE_NOW`、`TODAY`、`DEFAULT_RANGE`、`presetRange(p)`、`customRange(a, b)`、`rangeDays(r)`、`inRange(day, r)`、`isSingleDay(r)`、`DateRange`、`RANGE_PRESETS` | 固定的「现在」（北京时间 2026-10-03 14:32）与日期范围 |
+| `dayKey(ts)`、`formatDateTime(ts)`、`formatDateTimeShort(ts)`、`formatDayLabel(day, locale)`、`formatMonthLabel(month, locale)`、`formatMonthTitle(y, m, locale)`、`formatHour(h)` | 时间显示（一律北京时间） |
+| `formatCompact(n)`、`formatInteger(n)`、`formatUsd(usd)`、`formatSignedUsd(usd)`、`formatDuration(ms)`、`formatPercent(r, digits?)`、`maskEmail(e)` | 数字、金额（美元）、耗时、百分比 |
+| `USAGE_RECORDS`、`recordsInRange(r)`、`summarize(records)`、`breakdown(records, r, dimension, metric, max?)`、`dailyTotals()`、`activityStats(totals, r)`、`heatmap(totals)`、`monthlyRunRate(cost, days)`、`keyUsage(keyId)`、`OTHER_SERIES`、`USAGE_METRICS` | 用量与图表数据 |
+| `REQUEST_LOGS`、`filterLogs(logs, filter)`、`logsToCsv(logs)`、`curlFor(log)`、`LogFilter`、`RequestLog` | 请求日志 |
+| `API_KEYS`、`getKey(id)`、`maskKey(secret)`、`searchKeys(keys, q, status)`、`KEY_STATUSES`、`USED_MODEL_IDS` | API 密钥 |
+| `LEDGER`、`BALANCE_USD`、`buildLedger(txns)`、`billingSummary(ledger, r)`、`filterTransactions(ledger, f)`、`BALANCE_ALERT`、`isLowBalance(b, t)`、`RECHARGE_PRESETS`、`RECHARGE_BONUS_TIERS`、`rechargeBonus(a)`、`RECHARGE_LIMITS`、`PAYMENT_METHODS`、`TXN_TYPES` | 钱包与流水 |
+| `INVITE_PROGRAM`、`INVITEES`、`inviteStats(list)` | 邀请返利 |
+| `ORGANIZATION`、`ORG_MEMBERS`、`ORG_INVITATIONS`、`quotaRatio(m)`、`orgSummary(list)` | 组织 |
+| `TICKETS`、`filterTickets(list, status)`、`TICKET_STATUSES`、`TICKET_CATEGORIES`、`TICKET_LIMITS` | 工单 |
+| `CHAT_SAMPLE`、`CHAT_REPLIES`、`CHAT_MODEL_IDS`、`DEFAULT_CHAT_MODEL`、`CHAT_INPUT_MAX` | 对话页 |
+| `CURRENT_USER`、`ANNOUNCEMENTS`、`NOTIFICATIONS` | 当前用户、公告、通知 |
+| `paginate`、`pageButtons`、`PAGE_SIZES` | 分页（组件已封装） |
+
+模型、厂商、版本与价格照旧从 `@/lib/catalog` 取（`MODELS`、`getModel`、`getProvider`、`getEdition`、`EDITIONS`、`textPrice`、`imagePrice`、`textPriceAt`、`imagePriceAt`、`editionDiscount`、`formatRatio`、`filterModels`、`facetCounts`、`PROTOCOL_LABELS`、`USD_CNY_RATE`、`formatMoney` 等）。版本名用 `getEdition(id).name[locale]`。
+
+单测算出的关键数字（交互检查会用）：近 30 天请求 41,198、花费 $142.97、Token 250.3M、缓存命中 62%；今天请求 492；日志 240 条，其中失败 8 条、生图 24 条、今天 11 条；余额 $129.68；近 30 天充值 1 笔 $100.00、流水 31 条；密钥 5 个；组织成员 5 人。
+
+### 10.4 控制台实现守则（在第 7 章之外）
+
+- 页面区块全部 `'use client'`，状态用本地 `useState`（对话页的模型参数除外，见页面规格）；不发任何网络请求，不用 `Math.random()`、`Date.now()`、`new Date()` 生成显示用的数据（新建密钥、邀请码这类一次性随机串可以用 `crypto.getRandomValues`，只在点击事件里调用）。
+- 时间一律用 `formatDateTime` 一类函数（北京时间），金额一律 `formatUsd`，Token 一律 `formatCompact`。
+- 新增、编辑、删除只改本页的本地列表；刷新按钮转 600ms 圈后恢复；表单提交先校验（所有出错字段同时标红，焦点落第一个），通过后加载 800–1200ms 再给结果。
+- 每个列表都要有空状态（筛选无结果时给「清除筛选」）；长文本截断；手机 375 宽页面不横向溢出（宽表格在 `TableShell` 里横向滚动，筛选栏折成一到两列）。
+- 只写标题，不写页面描述句；面板标题能省就省；不写「示意」「暂不支持」「即将上线」之类的话。
+- 状态徽标的颜色约定：成功 / 启用 `success`，处理中 `info`，待处理 / 已暂停 / 冻结 `warning`，失败 / 已过期 `danger` 或 `neutral`（页面规格逐个写明）。
+
+### 10.5 控制台的写入边界与分路
+
+公共文件同第 8 章，另加 `src/components/console/**`、`src/lib/console/**`、`src/app/[locale]/console/**`、`src/messages/*/console.json`（都归主控）。每路只写自己的区块目录和自己的两个消息文件（已有的 `meta` 键原样保留，只往里加）；要拆子组件或页面内的小工具函数，放在自己的区块目录里。
+
+| 路 | 页面 | 负责的文件 | 页面规格 |
+|---|---|---|---|
+| C1 | 用量、日志 | `src/blocks/console/usage/**`、`src/blocks/console/logs/**`、`src/messages/{zh,en}/consoleUsage.json`、`consoleLogs.json` | `design/控制台-用量与日志.md` |
+| C2 | 模型、对话 | `src/blocks/console/models/**`、`src/blocks/console/chat/**`、`src/messages/{zh,en}/consoleModels.json`、`consoleChat.json` | `design/控制台-模型与对话.md` |
+| C3 | API 密钥、组织 | `src/blocks/console/keys/**`、`src/blocks/console/organization/**`、`src/messages/{zh,en}/consoleKeys.json`、`consoleOrg.json` | `design/控制台-密钥与组织.md` |
+| C4 | 账单、邀请 | `src/blocks/console/billing/**`、`src/blocks/console/invite/**`、`src/messages/{zh,en}/consoleBilling.json`、`consoleInvite.json` | `design/控制台-账单与邀请.md` |
+| C5 | 工单、账户设置 | `src/blocks/console/tickets/**`、`src/blocks/console/settings/**`、`src/messages/{zh,en}/consoleTickets.json`、`consoleSettings.json` | `design/控制台-工单与设置.md` |
+
+页面入口文件（`src/app/[locale]/console/<页>/page.tsx`）和每页的占位区块（`src/blocks/console/<页>/<页>-page.tsx`，导出名不变）已由主控建好，各路把占位区块换成真实内容。
 
 ---
 
