@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { buttonClass } from '@/components/ui/button-styles';
 import type { AppLocale } from '@/i18n/routing';
 import {
+  ACCOUNT_SINCE,
   customRange,
   formatDayLabel,
   formatMonthTitle,
@@ -39,30 +40,34 @@ interface Draft {
   to: string | null;
 }
 
-const TODAY_YEAR = Number(TODAY.slice(0, 4));
-const TODAY_MONTH = Number(TODAY.slice(5, 7));
-
 /**
  * 时间范围选择：左侧常用范围（点了立即生效），右侧月历自选起止日（点「应用」生效）。
- * 今天之后的日期不能选。交互检查：触发按钮 data-range-trigger，预设 data-range-preset，
- * 日期 data-day，应用 data-range-apply。
+ * 今天之后的日期不能选。today 与 since（「全部」的起点）默认是占位数据的固定日期，
+ * 接了后端的页面传入真实的今天和账号创建日。
+ * 交互检查：触发按钮 data-range-trigger，预设 data-range-preset，日期 data-day，应用 data-range-apply。
  */
 export function DateRangePicker({
   value,
   onChange,
+  today = TODAY,
+  since = ACCOUNT_SINCE,
   align = 'end',
   className,
 }: {
   value: DateRange;
   onChange: (range: DateRange) => void;
+  today?: string;
+  since?: string;
   align?: 'start' | 'end';
   className?: string;
 }) {
   const t = useTranslations('console');
   const locale = useLocale() as AppLocale;
+  const todayYear = Number(today.slice(0, 4));
+  const todayMonth = Number(today.slice(5, 7));
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<Draft>({ from: null, to: null });
-  const [view, setView] = useState({ year: TODAY_YEAR, month: TODAY_MONTH });
+  const [view, setView] = useState({ year: todayYear, month: todayMonth });
 
   const handleOpenChange = (next: boolean) => {
     if (next) {
@@ -73,12 +78,12 @@ export function DateRangePicker({
   };
 
   const choosePreset = (preset: RangePreset) => {
-    onChange(presetRange(preset));
+    onChange(presetRange(preset, today, since));
     setOpen(false);
   };
 
   const clickDay = (day: string) => {
-    if (day > TODAY) return;
+    if (day > today) return;
     // 已经选好一段时，再点就重新开始；否则这一下是结束日
     setDraft((current) =>
       current.from === null || current.to !== null
@@ -89,7 +94,7 @@ export function DateRangePicker({
 
   const apply = () => {
     if (draft.from === null) return;
-    onChange(customRange(draft.from, draft.to ?? draft.from));
+    onChange(customRange(draft.from, draft.to ?? draft.from, today));
     setOpen(false);
   };
 
@@ -98,7 +103,7 @@ export function DateRangePicker({
       const index = year * 12 + (month - 1) + step;
       return { year: Math.floor(index / 12), month: (index % 12) + 1 };
     });
-  const atLatestMonth = view.year === TODAY_YEAR && view.month === TODAY_MONTH;
+  const atLatestMonth = view.year === todayYear && view.month === todayMonth;
 
   const [low, high] =
     draft.from !== null && draft.to !== null
@@ -185,7 +190,7 @@ export function DateRangePicker({
               {monthMatrix(view.year, view.month)
                 .flat()
                 .map((cell) => {
-                  const disabled = cell.day > TODAY;
+                  const disabled = cell.day > today;
                   const isEdge = cell.day === low || cell.day === high;
                   const inside = low !== null && high !== null && cell.day > low && cell.day < high;
                   return (
@@ -205,7 +210,7 @@ export function DateRangePicker({
                             : cell.inMonth
                               ? 'text-foreground hover:bg-muted'
                               : 'text-subtle-foreground/60 hover:bg-muted',
-                        cell.day === TODAY &&
+                        cell.day === today &&
                           !isEdge &&
                           'font-semibold underline underline-offset-4',
                       )}

@@ -45,6 +45,12 @@
     "ariaGroup": "按通道的用量",
     "total": "总计",
     "other": "其他",
-    "empty": "所选时间内没有调用"
+    "empty": "所选时间内没有调用",
+    "noGroup": "未分组"
+  },
+  "error": {
+    "unavailable": "用量暂时加载不出来",
+    "tooMany": "查询太频繁，请稍后再试",
+    "retry": "重试"
   }
 }

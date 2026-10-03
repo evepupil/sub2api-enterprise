@@ -208,8 +208,8 @@ export function metricValue(record: UsageRecord, metric: UsageMetric): number {
 export interface UsageSummary {
   requests: number;
   failed: number;
-  /** 成功率 0–1 */
-  successRate: number;
+  /** 成功率 0–1；拿不到失败数时为 null，界面不显示 */
+  successRate: number | null;
   inputTokens: number;
   cacheTokens: number;
   outputTokens: number;
@@ -218,8 +218,8 @@ export interface UsageSummary {
   cacheHitRate: number;
   images: number;
   avgLatencyMs: number;
-  /** 文本请求的平均首字耗时 */
-  avgTtftMs: number;
+  /** 文本请求的平均首字耗时；没有记录首字耗时的请求时为 null，界面不显示 */
+  avgTtftMs: number | null;
   costUsd: number;
 }
 
@@ -341,6 +341,18 @@ export function breakdown(
     }
   }
 
+  return rankSeries(buckets, sums, maxSeries);
+}
+
+/**
+ * 把各系列按合计从大到小排，超过 maxSeries 个时把排在后面的合并成「其他」，再算出每个柱子的合计。
+ * sums 里每个系列的数组和 buckets 一一对应。占位数据和后端数据共用。
+ */
+export function rankSeries(
+  buckets: UsageBucket[],
+  sums: ReadonlyMap<string, number[]>,
+  maxSeries = 5,
+): UsageBreakdown {
   const all = [...sums.entries()]
     .map(([id, values]) => ({ id, values, total: values.reduce((a, b) => a + b, 0) }))
     .sort((a, b) => b.total - a.total || a.id.localeCompare(b.id));
@@ -384,7 +396,10 @@ export interface ActivityStats {
 }
 
 /** 范围内的活跃天数、最长连续活跃天数、最活跃的一天与总花费 */
-export function activityStats(totals: Map<string, DayTotal>, range: DateRange): ActivityStats {
+export function activityStats(
+  totals: ReadonlyMap<string, DayTotal>,
+  range: DateRange,
+): ActivityStats {
   let activeDays = 0;
   let streak = 0;
   let longestStreak = 0;
@@ -425,14 +440,19 @@ export interface Heatmap {
   months: { week: number; month: number }[];
 }
 
+/** 热力图第一列（最早那周的周一）：要看的天数从这一天到 endDay */
+export function heatmapStart(endDay: string = TODAY, weekCount = 53): string {
+  const lastMonday = addDays(endDay, -weekdayIndex(endDay));
+  return addDays(lastMonday, -(weekCount - 1) * 7);
+}
+
 /** 活跃热力图：最近 weekCount 周，按非零天的四分位分 4 档深浅 */
 export function heatmap(
-  totals: Map<string, DayTotal>,
+  totals: ReadonlyMap<string, DayTotal>,
   endDay: string = TODAY,
   weekCount = 53,
 ): Heatmap {
-  const lastMonday = addDays(endDay, -weekdayIndex(endDay));
-  const firstMonday = addDays(lastMonday, -(weekCount - 1) * 7);
+  const firstMonday = heatmapStart(endDay, weekCount);
 
   const nonZero: number[] = [];
   for (let day = firstMonday; day <= endDay; day = addDays(day, 1)) {

@@ -394,6 +394,7 @@ pnpm format:check  # prettier
 | 登录 | 2026-10-03 接通后端：`src/app/api/portal/auth/*` 转发、`src/lib/server/` 调后端与凭证 cookie、`src/lib/session/` 浏览器端登录状态、`src/proxy.ts` 拦截没登录的控制台访问（做法见技术设计 18.1） |
 | 注册 | 2026-10-03 接通后端，规则与现有 sub2api 注册页一致：`src/app/api/portal/auth/{settings,register,send-verify-code,validate-invitation-code,validate-promo-code}` 转发、`src/lib/server/sub2api/public-settings.ts` 读后端公开开关、`src/lib/auth/` 注册规则（规格见 `design/登录注册.md` A2） |
 | 找回密码、谷歌登录、人机验证 | 不连后端，入口不显示；后端开了人机验证时，注册失败提示联系管理员 |
+| 控制台用量页 | 2026-10-03 接通后端，显示登录账号自己的真实用量：后端用量总览接口（技术设计 18.2）、官网转发 `src/app/api/portal/console/usage/`、取数与换算 `src/lib/console/live/`；控制台其余页面仍是占位数据（**编的**） |
 
 ---
 
@@ -419,7 +420,7 @@ pnpm format:check  # prettier
 | `StatCard` | `stat-card.tsx` | `{ id, label, value, aside?, sub?, size?: 'md' \| 'sm' }`；`data-stat={id}`，数字在 `[data-stat-value]` |
 | `Select` | `select.tsx` | 单选下拉 `{ name, value, onChange, options: { value, label }[], ariaLabel, size?, align?, className? }`；触发按钮 `data-select={name}`，选项 `data-option={value}`；宽度默认撑满父级 |
 | `FilterField` / `SearchInput` | `filter-field.tsx` | 筛选项：上方小标签 + 控件；`SearchInput` 是带放大镜的输入框（`type="search"`） |
-| `DateRangePicker` | `date-range-picker.tsx` | `{ value: DateRange, onChange, align? }`；左侧常用范围立即生效，右侧月历自选后点「应用」；`rangeLabel()` 可复用 |
+| `DateRangePicker` | `date-range-picker.tsx` | `{ value: DateRange, onChange, today?, since?, align? }`；左侧常用范围立即生效，右侧月历自选后点「应用」；`today` / `since`（「全部」的起点）不传就是占位日期，接了后端的页面传真实的今天和账号创建日；`rangeLabel()` 可复用 |
 | `TableShell` / `Table` / `Th` / `Td` / `Tr` | `data-table.tsx` | 外框可带 `footer`（放分页）；`Table` 传 `minWidth` 让小屏横向滚动；`Th`/`Td` 支持 `align` 与 `sticky: 'left' \| 'right'`（固定首列或操作列） |
 | `RefreshButton` | `refresh-button.tsx` | 标题行刷新按钮（高 40、小圆角，转 600ms，`data-refresh`），可传 `onRefresh` |
 | `CONTROL_BUTTON` | `control-button.ts` | 和输入框、下拉框、日期范围排在同一行的按钮（标题行操作、筛选行按钮）叠加的类 `h-10 rounded-md`：`<Button className={CONTROL_BUTTON}>`；弹窗底部、面板里的主操作仍是胶囊按钮 |
@@ -430,6 +431,7 @@ pnpm format:check  # prettier
 | `CopyButton` / `useCopy` | `copy-button.tsx` | 复制图标按钮（成功后变对勾 1.5 秒），`data-copy={name}`；菜单项里复制用 `useCopy()` |
 | `StackedBarChart` | `charts/stacked-bar-chart.tsx` | 堆叠柱状图 `{ id, labels: { axis, full }[], series: { id, label, color, values }[], formatValue, formatAxis?, ariaLabel, totalLabel, emptyLabel, height? }`；颜色用 `seriesColor(i)`，「其他」用 `OTHER_COLOR`；`data-chart={id}`、`data-buckets` |
 | `ActivityHeatmap` | `charts/activity-heatmap.tsx` | 活跃热力图 `{ data: Heatmap, monthLabel, cellTitle, ariaLabel, lessLabel, moreLabel, weekdayLabels }` |
+| `Skeleton` | `skeleton.tsx` | 加载占位块 `{ className?, style? }`：浅灰圆角、轻轻呼吸（减少动效时不动），`data-skeleton`；尺寸和真实内容一样，加载完不跳动 |
 | 外壳件 | `shell/*` | 页面不用直接引用；`Avatar` 可在设置页复用 |
 
 官网已有的基础组件照用：`Button`（新增 `variant="danger"`）/ `buttonClass`、`Textarea`（`ui/textarea.tsx`，多行输入框，传 `footer` 时带字数底栏）、`Badge`、`Input`、`Field`、`SegmentedControl`、`DropdownMenu*`、`ProviderLogo`、`DiscountBadge`；切换语言用 `useSwitchLocale()`（`@/i18n/use-switch-locale`）。
@@ -438,10 +440,11 @@ pnpm format:check  # prettier
 
 | 导出 | 用途 |
 |---|---|
-| `CONSOLE_NOW`、`TODAY`、`DEFAULT_RANGE`、`presetRange(p)`、`customRange(a, b)`、`rangeDays(r)`、`inRange(day, r)`、`isSingleDay(r)`、`DateRange`、`RANGE_PRESETS` | 固定的「现在」（北京时间 2026-10-03 14:32）与日期范围 |
+| `CONSOLE_NOW`、`TODAY`、`DEFAULT_RANGE`、`presetRange(p, today?, since?)`、`customRange(a, b, today?)`、`rangeDays(r)`、`inRange(day, r)`、`isSingleDay(r)`、`DateRange`、`RANGE_PRESETS` | 固定的「现在」（北京时间 2026-10-03 14:32）与日期范围；`today` / `since` 不传就按固定日期算 |
+| `liveClockSnapshot()`、`parseLiveClock(s)`、`LiveClock` | 真实的今天与当前小时（北京时间），只给接了后端的页面用（经 `useLiveClock()`） |
 | `dayKey(ts)`、`formatDateTime(ts)`、`formatDateTimeShort(ts)`、`formatDayLabel(day, locale)`、`formatMonthLabel(month, locale)`、`formatMonthTitle(y, m, locale)`、`formatHour(h)` | 时间显示（一律北京时间） |
 | `formatCompact(n)`、`formatInteger(n)`、`formatUsd(usd)`、`formatSignedUsd(usd)`、`formatDuration(ms)`、`formatPercent(r, digits?)`、`maskEmail(e)` | 数字、金额（美元，前缀写 `US$`，如 `US$142.97`；导出常量 `USD_PREFIX`）、耗时、百分比 |
-| `USAGE_RECORDS`、`recordsInRange(r)`、`summarize(records)`、`breakdown(records, r, dimension, metric, max?)`、`dailyTotals()`、`activityStats(totals, r)`、`heatmap(totals)`、`monthlyRunRate(cost, days)`、`keyUsage(keyId)`、`OTHER_SERIES`、`USAGE_METRICS` | 用量与图表数据 |
+| `USAGE_RECORDS`、`recordsInRange(r)`、`summarize(records)`、`breakdown(records, r, dimension, metric, max?)`、`rankSeries(buckets, sums, max?)`、`dailyTotals()`、`activityStats(totals, r)`、`heatmap(totals, endDay?)`、`heatmapStart(endDay?)`、`monthlyRunRate(cost, days)`、`keyUsage(keyId)`、`OTHER_SERIES`、`USAGE_METRICS` | 用量与图表数据（占位数据与后端数据共用图表函数） |
 | `REQUEST_LOGS`、`filterLogs(logs, filter)`、`logsToCsv(logs)`、`curlFor(log)`、`LogFilter`、`RequestLog` | 请求日志 |
 | `API_KEYS`、`getKey(id)`、`maskKey(secret)`、`searchKeys(keys, q, status)`、`KEY_STATUSES`、`USED_MODEL_IDS` | API 密钥 |
 | `LEDGER`、`BALANCE_USD`、`buildLedger(txns)`、`billingSummary(ledger, r)`、`filterTransactions(ledger, f)`、`BALANCE_ALERT`、`isLowBalance(b, t)`、`RECHARGE_PRESETS`、`RECHARGE_BONUS_TIERS`、`rechargeBonus(a)`、`RECHARGE_LIMITS`、`PAYMENT_METHODS`、`TXN_TYPES` | 钱包与流水 |
@@ -454,11 +457,13 @@ pnpm format:check  # prettier
 
 模型、厂商、版本与价格照旧从 `@/lib/catalog` 取（`MODELS`、`getModel`、`getProvider`、`getEdition`、`EDITIONS`、`textPrice`、`imagePrice`、`textPriceAt`、`imagePriceAt`、`editionDiscount`、`formatRatio`、`filterModels`、`facetCounts`、`PROTOCOL_LABELS`、`USD_CNY_RATE`、`formatMoney` 等）。版本名用 `getEdition(id).name[locale]`。
 
-单测算出的关键数字（交互检查会用）：近 30 天请求 41,198、花费 US$142.97、Token 250.3M、缓存命中 62%；今天请求 492；日志 240 条，其中失败 8 条、生图 24 条、今天 11 条；余额 US$129.68；近 30 天充值 1 笔 US$100.00、流水 31 条；密钥 5 个；组织成员 5 人。
+用量页的真实数据层在 `@/lib/console/live/`（`useUsageOverview`、`useLiveClock`、`summaryFromOverview`、`breakdownFromPoints`、`dailyTotalsFromBuckets` 等），不经 `@/lib/console` 导出。
+
+单测算出的关键数字（占位数据，用量页接后端后不再显示这组用量数字）：近 30 天请求 41,198、花费 US$142.97、Token 250.3M、缓存命中 62%；今天请求 492；日志 240 条，其中失败 8 条、生图 24 条、今天 11 条；余额 US$129.68；近 30 天充值 1 笔 US$100.00、流水 31 条；密钥 5 个；组织成员 5 人。
 
 ### 10.4 控制台实现守则（在第 7 章之外）
 
-- 页面区块全部 `'use client'`，状态用本地 `useState`（对话页的模型参数除外，见页面规格）；不发任何网络请求，不用 `Math.random()`、`Date.now()`、`new Date()` 生成显示用的数据（新建密钥、邀请码这类一次性随机串可以用 `crypto.getRandomValues`，只在点击事件里调用）。
+- 页面区块全部 `'use client'`，状态用本地 `useState`（对话页的模型参数除外，见页面规格）；除了已接后端的用量页（经 `src/lib/console/live/`），不发任何网络请求，不用 `Math.random()`、`Date.now()`、`new Date()` 生成显示用的数据（新建密钥、邀请码这类一次性随机串可以用 `crypto.getRandomValues`，只在点击事件里调用）。
 - 时间一律用 `formatDateTime` 一类函数（北京时间），金额一律 `formatUsd`（写作 US$，不要自己拼「$」），Token 一律 `formatCompact`。模型单价沿用官网价格表的写法（`formatMoney`，`$` / `¥`）。
 - 新增、编辑、删除只改本页的本地列表；刷新按钮转 600ms 圈后恢复；表单提交先校验（所有出错字段同时标红，焦点落第一个），通过后加载 800–1200ms 再给结果。
 - 每个列表都要有空状态（筛选无结果时给「清除筛选」）；长文本截断；手机 375 宽页面不横向溢出（宽表格在 `TableShell` 里横向滚动，筛选栏折成一到两列）。

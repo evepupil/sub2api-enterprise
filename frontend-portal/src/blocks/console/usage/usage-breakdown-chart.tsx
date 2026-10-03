@@ -12,7 +12,6 @@ import {
 } from '@/components/console/charts/stacked-bar-chart';
 import type { AppLocale } from '@/i18n/routing';
 import {
-  breakdown,
   formatCompact,
   formatDayLabel,
   formatHour,
@@ -20,14 +19,13 @@ import {
   formatUsd,
   OTHER_SERIES,
   type DateRange,
-  type UsageDimension,
   type UsageMetric,
-  type UsageRecord,
 } from '@/lib/console';
+import type { UsageOverviewPoint } from '@/lib/console/live/usage-types';
+import { breakdownFromPoints } from '@/lib/console/live/usage-view';
 
 /**
- * 三种指标的数字写法：Token 用紧凑写法，请求数用整数
- * （范围只有一天时按小时拆分会出小数，formatInteger 会先四舍五入），费用用美元。
+ * 三种指标的数字写法：Token 用紧凑写法，请求数用整数，费用用美元。
  * 柱子顶部的提示和纵轴刻度共用同一种写法。
  */
 const VALUE_FORMAT: Record<UsageMetric, (value: number) => string> = {
@@ -37,24 +35,21 @@ const VALUE_FORMAT: Record<UsageMetric, (value: number) => string> = {
 };
 
 /**
- * 用量明细的一张堆叠柱状图：按所选维度（模型 / 密钥 / 通道）拆系列，
- * 范围只有一天时按 24 小时出柱子，其余按天出柱子。
- * 系列名由调用方给（模型名、密钥名、通道名来自不同的数据表）。
+ * 用量明细的一张堆叠柱状图：一个维度（模型 / 密钥 / 通道）的后端拆分数据，
+ * 范围只有一天时按 24 小时出柱子，其余按天出柱子。系列名由调用方给。
  */
 export function UsageBreakdownChart({
   id,
-  records,
+  points,
   range,
-  dimension,
   metric,
   seriesName,
   ariaLabel,
   height,
 }: {
   id: string;
-  records: readonly UsageRecord[];
+  points: readonly UsageOverviewPoint[];
   range: DateRange;
-  dimension: UsageDimension;
   metric: UsageMetric;
   seriesName: (seriesId: string) => string;
   ariaLabel: string;
@@ -63,10 +58,7 @@ export function UsageBreakdownChart({
   const t = useTranslations('consoleUsage');
   const locale = useLocale() as AppLocale;
 
-  const data = useMemo(
-    () => breakdown(records, range, dimension, metric),
-    [records, range, dimension, metric],
-  );
+  const data = useMemo(() => breakdownFromPoints(points, range, metric), [points, range, metric]);
 
   // 按小时的柱子带小时，按天的柱子提示框里写完整日期，方便跨月、跨年对照
   const labels: ChartLabel[] = data.buckets.map((bucket) =>

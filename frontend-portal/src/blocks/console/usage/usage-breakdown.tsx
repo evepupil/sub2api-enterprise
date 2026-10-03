@@ -1,45 +1,67 @@
 'use client';
 
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
+import { useMemo, type ReactNode } from 'react';
 
 import { Panel } from '@/components/console/panel';
+import { Skeleton } from '@/components/console/skeleton';
 import { SegmentedControl } from '@/components/ui/segmented-control';
-import type { AppLocale } from '@/i18n/routing';
-import { getEdition, getModel, isEditionId } from '@/lib/catalog';
-import {
-  getKey,
-  USAGE_METRICS,
-  type DateRange,
-  type UsageMetric,
-  type UsageRecord,
-} from '@/lib/console';
+import { USAGE_METRICS, type DateRange, type UsageMetric } from '@/lib/console';
+import type { UsageOverview } from '@/lib/console/live/usage-types';
+import { seriesNames } from '@/lib/console/live/usage-view';
 
 import { UsageBreakdownChart } from './usage-breakdown-chart';
+
+/** 没有通道的请求，后端给的通道 ID 是 0 */
+const NO_GROUP_ID = '0';
 
 /**
  * 用量明细：一个指标开关（Token / 请求数 / 费用）控制下面三张图，
  * 分别按模型、按 API 密钥、按通道看同一段时间的用量构成。
+ * overview 为 null 时还在加载，三张图的位置显示同样高度的占位块。
  */
 export function UsageBreakdown({
-  records,
+  overview,
   range,
   metric,
   onMetricChange,
 }: {
-  records: readonly UsageRecord[];
-  range: DateRange;
+  overview: UsageOverview | null;
+  range: DateRange | null;
   metric: UsageMetric;
   onMetricChange: (metric: UsageMetric) => void;
 }) {
   const t = useTranslations('consoleUsage');
-  const locale = useLocale() as AppLocale;
 
   const metricOptions = USAGE_METRICS.map((value) => ({ value, label: t(`detail.${value}`) }));
 
-  // 图例里的名字：模型和密钥只有一种写法，通道名跟随当前语言
-  const modelName = (id: string) => getModel(id).name;
-  const keyName = (id: string) => getKey(id).name;
-  const groupName = (id: string) => (isEditionId(id) ? getEdition(id).name[locale] : id);
+  // 图例里的名字：模型就是调用时的模型名；密钥、通道用后端给的名字
+  const keyNames = useMemo(() => seriesNames(overview?.series.key ?? []), [overview]);
+  const groupNames = useMemo(() => seriesNames(overview?.series.group ?? []), [overview]);
+  const keyName = (id: string) => keyNames.get(id) ?? `#${id}`;
+  const groupName = (id: string) =>
+    id === NO_GROUP_ID ? t('detail.noGroup') : (groupNames.get(id) ?? `#${id}`);
+
+  const chart = (
+    id: 'by-model' | 'by-key' | 'by-group',
+    dimension: 'model' | 'key' | 'group',
+    seriesName: (seriesId: string) => string,
+    ariaLabel: string,
+    height: number,
+  ): ReactNode =>
+    overview && range ? (
+      <UsageBreakdownChart
+        id={id}
+        points={overview.series[dimension]}
+        range={range}
+        metric={metric}
+        seriesName={seriesName}
+        ariaLabel={ariaLabel}
+        height={height}
+      />
+    ) : (
+      <Skeleton className="w-full" style={{ height }} />
+    );
 
   return (
     <section className="space-y-4">
@@ -56,41 +78,14 @@ export function UsageBreakdown({
       </div>
       <div className="space-y-6">
         <Panel id="by-model" title={t('detail.byModel')}>
-          <UsageBreakdownChart
-            id="by-model"
-            records={records}
-            range={range}
-            dimension="model"
-            metric={metric}
-            seriesName={modelName}
-            ariaLabel={t('detail.ariaModel')}
-            height={260}
-          />
+          {chart('by-model', 'model', (id) => id, t('detail.ariaModel'), 260)}
         </Panel>
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
           <Panel id="by-key" title={t('detail.byKey')}>
-            <UsageBreakdownChart
-              id="by-key"
-              records={records}
-              range={range}
-              dimension="key"
-              metric={metric}
-              seriesName={keyName}
-              ariaLabel={t('detail.ariaKey')}
-              height={220}
-            />
+            {chart('by-key', 'key', keyName, t('detail.ariaKey'), 220)}
           </Panel>
           <Panel id="by-group" title={t('detail.byGroup')}>
-            <UsageBreakdownChart
-              id="by-group"
-              records={records}
-              range={range}
-              dimension="group"
-              metric={metric}
-              seriesName={groupName}
-              ariaLabel={t('detail.ariaGroup')}
-              height={220}
-            />
+            {chart('by-group', 'group', groupName, t('detail.ariaGroup'), 220)}
           </Panel>
         </div>
       </div>

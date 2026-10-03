@@ -170,6 +170,7 @@ describe('当前用户', () => {
         role: 'user',
         balance: 100,
         organization: { id: 3, name: 'Acme', is_owner: true, status: '' },
+        created_at: '2026-04-12T09:30:00+08:00',
       }),
     ).toEqual({
       id: 7,
@@ -177,16 +178,26 @@ describe('当前用户', () => {
       username: 'alice',
       role: 'user',
       organization: { id: 3, name: 'Acme', isOwner: true },
+      createdAt: '2026-04-12T09:30:00+08:00',
     });
   });
 
   it('个人用户组织为空，字段不全返回 null', () => {
     expect(toSessionUser({ id: 1, email: 'x@y.test' })?.organization).toBeNull();
+    expect(
+      toSessionUser({ id: 1, email: 'x@y.test', created_at: 'not a date' })?.createdAt,
+    ).toBeNull();
     expect(toSessionUser({ email: 'x@y.test' })).toBeNull();
   });
 
   it('显示名：有用户名用用户名，没有用邮箱前缀；头像取首字', () => {
-    const base = { id: 1, email: 'zhou@example.com', role: 'user' as const, organization: null };
+    const base = {
+      id: 1,
+      email: 'zhou@example.com',
+      role: 'user' as const,
+      organization: null,
+      createdAt: null,
+    };
     expect(displayName({ ...base, username: '' })).toBe('zhou');
     expect(displayName({ ...base, username: ' 林舟 ' })).toBe('林舟');
     expect(avatarInitial('zhou')).toBe('Z');

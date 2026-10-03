@@ -24,5 +24,9 @@ export function toSessionUser(raw: unknown): SessionUser | null {
     username: typeof user.username === 'string' ? user.username : '',
     role: user.role === 'admin' ? 'admin' : 'user',
     organization,
+    createdAt:
+      typeof user.created_at === 'string' && !Number.isNaN(Date.parse(user.created_at))
+        ? user.created_at
+        : null,
   };
 }

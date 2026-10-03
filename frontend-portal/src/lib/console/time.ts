@@ -57,6 +57,25 @@ export function hourOf(ts: number): number {
 
 export const TODAY = dayKey(CONSOLE_NOW);
 
+/**
+ * 真实的「现在」（北京时间）：接了后端的页面用它，占位页面仍用固定的 TODAY。
+ * 返回「日期键|小时」这样的字符串，同一小时内不变，可以直接给 useSyncExternalStore 当快照。
+ */
+export function liveClockSnapshot(now: number = Date.now()): string {
+  return `${dayKey(now)}|${hourOf(now)}`;
+}
+
+export interface LiveClock {
+  today: string;
+  /** 北京时间的小时（0–23） */
+  hour: number;
+}
+
+export function parseLiveClock(snapshot: string): LiveClock {
+  const [today = TODAY, hour = '0'] = snapshot.split('|');
+  return { today, hour: Number(hour) };
+}
+
 /** 今天已经过去的比例（0–1），用来让「今天」的数据只算到现在 */
 export const TODAY_ELAPSED = (CONSOLE_NOW - dayStart(TODAY)) / DAY_MS;
 
@@ -141,29 +160,37 @@ export interface DateRange {
   to: string;
 }
 
-export function presetRange(preset: RangePreset): DateRange {
+/**
+ * 预设范围。today 与 since（「全部」的起点，账号开通日）默认是占位数据用的固定日期，
+ * 接了后端的页面传入真实的今天和账号创建日。
+ */
+export function presetRange(
+  preset: RangePreset,
+  today: string = TODAY,
+  since: string = ACCOUNT_SINCE,
+): DateRange {
   switch (preset) {
     case 'today':
-      return { preset, from: TODAY, to: TODAY };
+      return { preset, from: today, to: today };
     case 'yesterday': {
-      const day = addDays(TODAY, -1);
+      const day = addDays(today, -1);
       return { preset, from: day, to: day };
     }
     case 'last7d':
-      return { preset, from: addDays(TODAY, -6), to: TODAY };
+      return { preset, from: addDays(today, -6), to: today };
     case 'last30d':
-      return { preset, from: addDays(TODAY, -29), to: TODAY };
+      return { preset, from: addDays(today, -29), to: today };
     case 'thisMonth':
-      return { preset, from: `${TODAY.slice(0, 7)}-01`, to: TODAY };
+      return { preset, from: `${today.slice(0, 7)}-01`, to: today };
     case 'all':
-      return { preset, from: ACCOUNT_SINCE, to: TODAY };
+      return { preset, from: since < today ? since : today, to: today };
   }
 }
 
 /** 自定义范围：两端不分先后，结束日不晚于今天 */
-export function customRange(a: string, b: string): DateRange {
+export function customRange(a: string, b: string, today: string = TODAY): DateRange {
   const [from, to] = a <= b ? [a, b] : [b, a];
-  return { preset: null, from, to: to > TODAY ? TODAY : to };
+  return { preset: null, from, to: to > today ? today : to };
 }
 
 export const DEFAULT_RANGE = presetRange('last30d');

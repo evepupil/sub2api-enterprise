@@ -45,6 +45,12 @@
     "ariaGroup": "Usage by channel",
     "total": "Total",
     "other": "Other",
-    "empty": "No requests in this range"
+    "empty": "No requests in this range",
+    "noGroup": "No channel"
+  },
+  "error": {
+    "unavailable": "Usage couldn't be loaded",
+    "tooMany": "Too many requests. Try again shortly.",
+    "retry": "Retry"
   }
 }

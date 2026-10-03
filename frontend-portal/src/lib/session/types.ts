@@ -18,6 +18,8 @@ export interface SessionUser {
   role: 'admin' | 'user';
   /** 所属组织；个人用户为 null */
   organization: SessionOrganization | null;
+  /** 账号创建时间（ISO 时间串），控制台用量页的「全部」从这一天算起；后端没给时为 null */
+  createdAt: string | null;
 }
 
 /**
