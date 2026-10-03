@@ -1,17 +1,13 @@
-'use client';
-
 import { useTranslations } from 'next-intl';
 
 import { Container } from '@/components/ui/container';
 import { SectionHeading } from '@/components/ui/section-heading';
-import { useEdition } from '@/lib/use-catalog-state';
 
 import { RatioExplainerExamples } from './ratio-explainer-examples';
 
-/** 倍率说明：左栏公式卡，右栏当前版本的分组示例表。 */
+/** 倍率说明：左栏公式卡，右栏三个版本并排的计算示例表。 */
 export function RatioExplainer() {
   const t = useTranslations('groups');
-  const [edition] = useEdition();
 
   return (
     <section id="ratio" className="bg-surface py-20 md:py-28">
@@ -30,7 +26,7 @@ export function RatioExplainer() {
             <p className="mt-3 text-sm text-muted-foreground">{t('ratio.baseNote')}</p>
           </div>
         </div>
-        <RatioExplainerExamples edition={edition} />
+        <RatioExplainerExamples />
       </Container>
     </section>
   );

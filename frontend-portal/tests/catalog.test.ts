@@ -2,18 +2,18 @@ import { describe, expect, it } from 'vitest';
 
 import {
   DEFAULT_FILTER,
-  effectiveDiscount,
+  editionDiscount,
   facetCounts,
   filterModels,
   formatAmount,
   formatContext,
   formatDiscount,
   formatMoney,
-  formatRatio,
   groupByProvider,
   imagePrice,
   isNewModel,
   MODELS,
+  priceSortKey,
   textPrice,
   uptimeFor,
   type Model,
@@ -57,58 +57,49 @@ describe('模型目录', () => {
   });
 });
 
-describe('版本价格', () => {
-  it('Claude Sonnet 5.5：个人 0.6/3，专业 0.84/4.2，企业 1.2/6', () => {
+describe('版本价格 = 官方价 × 分组倍率', () => {
+  it('Claude Sonnet 5.5（官方 2 / 10）：个人 0.3 / 1.5，专业 0.6 / 3，企业版定制没有单价', () => {
     const m = model('claude-sonnet-5-5');
     expect(textPrice(m, 'personal')).toEqual({
+      input: 0.3,
+      output: 1.5,
+      cacheRead: 0.03,
+      longContext: null,
+    });
+    expect(textPrice(m, 'pro')).toEqual({
       input: 0.6,
       output: 3,
       cacheRead: 0.06,
       longContext: null,
     });
-    expect(textPrice(m, 'pro')).toEqual({
-      input: 0.84,
-      output: 4.2,
-      cacheRead: 0.084,
-      longContext: null,
-    });
-    expect(textPrice(m, 'enterprise')).toEqual({
-      input: 1.2,
-      output: 6,
-      cacheRead: 0.12,
-      longContext: null,
-    });
+    expect(textPrice(m, 'enterprise')).toBeNull();
   });
 
   it('GPT-6 Astra 超长上下文档按同一倍率换算', () => {
     expect(textPrice(model('gpt-6-astra'), 'pro')?.longContext).toEqual({
       threshold: 272_000,
-      input: 2.8,
-      output: 10.5,
+      input: 6,
+      output: 22.5,
     });
   });
 
   it('按 Token 计费的生图模型给出估算每张价', () => {
     expect(imagePrice(model('gemini-3.1-flash-image'), 'personal')).toEqual({
       kind: 'per-token',
-      perMTokens: 30,
-      estimatedPerImage: 0.0387,
+      perMTokens: 9,
+      estimatedPerImage: 0.01161,
     });
-    expect(imagePrice(model('gemini-3.1-flash-image'), 'enterprise')).toEqual({
-      kind: 'per-token',
-      perMTokens: 54,
-      estimatedPerImage: 0.06966,
-    });
+    expect(imagePrice(model('gemini-3.1-flash-image'), 'enterprise')).toBeNull();
   });
 
   it('按张计费的生图模型逐档换算并给出起价', () => {
     expect(imagePrice(model('gemini-3-pro-image'), 'pro')).toEqual({
       kind: 'per-image',
       resolutions: [
-        { label: '2K', price: 0.0871 },
-        { label: '4K', price: 0.156 },
+        { label: '2K', price: 0.0402 },
+        { label: '4K', price: 0.072 },
       ],
-      from: 0.0871,
+      from: 0.0402,
     });
   });
 
@@ -116,30 +107,21 @@ describe('版本价格', () => {
     expect(imagePrice(model('gpt-6-sol'), 'personal')).toBeNull();
     expect(textPrice(model('gpt-image-2'), 'personal')).toBeNull();
   });
+
+  it('定制版本排序按官方价', () => {
+    expect(priceSortKey(model('claude-sonnet-5-5'), 'enterprise')).toBe(2);
+    expect(priceSortKey(model('claude-sonnet-5-5'), 'pro')).toBe(0.6);
+  });
 });
 
 describe('折扣标', () => {
-  it('Claude 三个版本：3折 / 4.2折 / 6折', () => {
-    const m = model('claude-sonnet-5-5');
-    expect(formatDiscount(effectiveDiscount(m, 'personal'), 'zh')).toBe('3折');
-    expect(formatDiscount(effectiveDiscount(m, 'pro'), 'zh')).toBe('4.2折');
-    expect(formatDiscount(effectiveDiscount(m, 'enterprise'), 'zh')).toBe('6折');
-    expect(formatDiscount(effectiveDiscount(m, 'pro'), 'en')).toBe('58% off');
-  });
-
-  it('不低于官方价时不显示折扣标', () => {
-    expect(effectiveDiscount(model('deepseek-v4-pro'), 'pro')).toBeNull();
-    expect(effectiveDiscount(model('gemini-3.5-flash'), 'enterprise')).toBeNull();
+  it('个人版 1.5折、专业版 3折，企业版定制不显示', () => {
+    expect(formatDiscount(editionDiscount('personal'), 'zh')).toBe('1.5折');
+    expect(formatDiscount(editionDiscount('pro'), 'zh')).toBe('3折');
+    expect(formatDiscount(editionDiscount('personal'), 'en')).toBe('85% off');
+    expect(formatDiscount(editionDiscount('pro'), 'en')).toBe('70% off');
+    expect(editionDiscount('enterprise')).toBeNull();
     expect(formatDiscount(null, 'zh')).toBeNull();
-  });
-
-  it('生图模型按生图分组倍率算折扣', () => {
-    expect(formatDiscount(effectiveDiscount(model('gpt-image-2.5-flare'), 'pro'), 'zh')).toBe(
-      '3.9折',
-    );
-    expect(
-      formatDiscount(effectiveDiscount(model('gemini-2.5-flash-image'), 'enterprise'), 'zh'),
-    ).toBe('9折');
   });
 });
 
@@ -163,13 +145,6 @@ describe('格式化', () => {
     expect(formatContext(1_000_000)).toBe('1M');
     expect(formatContext(200_000)).toBe('200K');
     expect(formatContext(256_000)).toBe('256K');
-  });
-
-  it('倍率整数补一位小数，定制显示文字', () => {
-    expect(formatRatio(1, 'zh')).toBe('×1.0');
-    expect(formatRatio(1.4, 'zh')).toBe('×1.4');
-    expect(formatRatio(null, 'zh')).toBe('定制');
-    expect(formatRatio(null, 'en')).toBe('Custom');
   });
 });
 
@@ -218,14 +193,14 @@ describe('筛选与排序', () => {
     ).toEqual(['claude-sonnet-5-5', 'gpt-6-luna', 'gpt-6-astra', 'gpt-6-sol', 'claude-fable-5-1']);
   });
 
-  it('价格从低到高：最便宜 GPT-6 Luna，最贵 Claude Fable 5.1', () => {
+  it('价格从低到高：最便宜 GPT-6 Luna，最贵 GPT-6 Astra（与 Claude Fable 5.1 同价按名字排）', () => {
     const ids = filterModels(
       MODELS,
       { ...DEFAULT_FILTER, type: 'text', sort: 'price-asc' },
       'personal',
     ).map((m) => m.id);
     expect(ids.slice(0, 3)).toEqual(['gpt-6-luna', 'gpt-5.6-luna', 'gemini-3.1-flash-lite']);
-    expect(ids.at(-1)).toBe('claude-fable-5-1');
+    expect(ids.slice(-2)).toEqual(['claude-fable-5-1', 'gpt-6-astra']);
   });
 
   it('价格排序时文本在前、生图在后', () => {

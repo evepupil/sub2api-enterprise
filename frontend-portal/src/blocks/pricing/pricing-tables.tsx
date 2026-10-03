@@ -2,18 +2,26 @@
 
 import { useTranslations } from 'next-intl';
 
-import { MODELS } from '@/lib/catalog';
+import { editionRatio, MODELS } from '@/lib/catalog';
 import { Container } from '@/components/ui/container';
+import { useEdition } from '@/lib/use-catalog-state';
 
+import { PricingCustom } from './pricing-custom';
 import { CurrencyNote } from './pricing-tables-note';
 import { ImagePriceTable } from './pricing-tables-image';
 import { TextPriceTable } from './pricing-tables-text';
 
-/** 价格页价目表：文本与生图两张大表。版本、币种从网址参数读取，变化时所有金额整体重算。 */
+/**
+ * 价格页价目表：文本与生图两张大表。版本、币种从网址参数读取，变化时所有金额整体重算。
+ * 倍率按合同定制的版本（企业版）没有公开单价，换成联系销售卡。
+ */
 export function PricingTables() {
   const t = useTranslations('pricing');
+  const [edition] = useEdition();
   const textCount = MODELS.filter((model) => model.type === 'text').length;
   const imageCount = MODELS.filter((model) => model.type === 'image').length;
+
+  if (editionRatio(edition) === null) return <PricingCustom />;
 
   return (
     <section id="price-list" className="pb-16 md:pb-20">

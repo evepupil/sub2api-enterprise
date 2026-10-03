@@ -17,7 +17,7 @@
 1. 在首页弄清楚这是什么服务、能调哪些模型、怎么收费，然后注册。
 2. 在模型页按厂商、协议、上下文筛选模型，切换三个版本看每个模型的价格和近 24 小时可用率。
 3. 在价格页按版本、按币种查每个模型的输入、输出、缓存和生图单价。
-4. 在分组页看每个版本下各分组的倍率和特权，弄清「实际扣费 = 模型基础价 × 分组倍率」。
+4. 在分组页看三个版本（一个版本就是一个分组）的倍率和特权，弄清「实际扣费 = 官方价 × 分组倍率」。
 5. 登录（个人与组织成员同一入口），注册个人账号或创建组织。
 
 目标观感：**像素级复刻 Aceternity「AI SaaS Template」（Every AI）的观感，内容全部换成我们的。** 白底近黑字、Geist 字体、超大加粗标题、黑色胶囊按钮、带光线流动的网格背景、滚动后浮起的胶囊顶栏、深色重点卡、页脚超大水印字；暗色主题整体反转。
@@ -39,7 +39,7 @@
 | 首页 | `/` | 了解服务、注册 | 「免费注册」「查看价格」 | 模板首页 | 7 + 顶栏页脚 | L1 L2 L3 |
 | 模型 | `/models` | 选模型、看价格和可用率 | 版本切换、搜索、筛选 | onehop 模型页 | 2（筛选器内含 5 个区域） | L4 |
 | 价格 | `/pricing` | 查单价 | 版本切换、币种切换 | onehop 价格页 | 4 | L5 |
-| 分组 | `/groups` | 看分组倍率与特权 | 版本切换、看分组卡 | 模板价格页 | 6 | L6 |
+| 分组 | `/groups` | 看分组倍率与特权 | 看三张版本卡、对比特权 | 模板价格页 | 6 | L6 |
 | 登录 | `/login` | 登录（个人与组织成员同一入口） | 填邮箱和密码 | 模板登录页 | 2 | L7 |
 | 注册 | `/register` | 个人注册或创建组织 | 个人/创建组织切换、填表 | 模板注册页 | 2 | L7 |
 | 文档 | `/docs` | 占位 | 无 | 无 | 1 | L7 |
@@ -254,7 +254,7 @@
 | `src/components/catalog/provider-logo-cloud.tsx`（`'use client'`） | `ProviderLogoCloud` | `{ className?: string }`。两组：A `openai anthropic google deepseek`，B `moonshot zhipu minimax qwen`，每 3000ms 换一组（减少动态效果时停在 A）。外层 `grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-4`，`data-logo-cloud`，`data-logo-set="0"`/`"1"`。每格 `flex h-14 items-center justify-center`，里面 `AnimatePresence mode="wait" initial={false}`（首组直接显示，不等水合）按厂商 id 换 `motion.div`：`initial={{ opacity: 0, y: 12, filter: 'blur(8px)' }}`、`animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}`、`exit={{ opacity: 0, y: -12, filter: 'blur(8px)' }}`、`transition={{ duration: 0.45, delay: 格序号 × 0.08, ease: [0.22,1,0.36,1] }}`；内容 `flex items-center gap-3`：`ProviderLogo size={32}` + `<span className="text-xl font-semibold tracking-tight text-foreground/85 md:text-2xl">{厂商名}</span>` |
 | `src/components/catalog/discount-badge.tsx`（无指令） | `DiscountBadge` | `{ discount: number \| null; locale: AppLocale; className? }`：`formatDiscount` 为空时返回 `null`；否则 `<Badge tone="success" data-discount className={className}>{文字}</Badge>` |
 | `src/components/catalog/edition-switcher.tsx`（`'use client'`） | `EditionSwitcher` | `{ className?: string; size?: 'sm' \| 'md' }`。读写 `useEdition()`，渲染 `SegmentedControl name="edition"`，选项来自 `EDITIONS`，标签 `edition.name[locale]`，`ariaLabel` 取 `common.edition.label` |
-| `src/components/catalog/edition-summary.tsx`（`'use client'`） | `EditionSummary` | `{ className?: string }`。读 `useEdition()`，一行四项，外层 `flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm`，`data-edition-summary`。每项 `<span className="inline-flex items-center gap-1.5"><span className="text-subtle-foreground">{标签}</span><span data-summary={key} className="font-medium tabular-nums text-foreground">{值}</span></span>`。四项：`sla` 值 `${slaTarget.toFixed(1)}%`；`channel` 值 `channel[locale]`；`rpm` 值 `rpm.toLocaleString('en-US')`；`ratio` 值 `ratioLabel(editionRatio(edition, 'text'))`。标签取 `common.editionSummary.<key>` |
+| `src/components/catalog/edition-summary.tsx`（`'use client'`） | `EditionSummary` | `{ className?: string }`。读 `useEdition()`，一行四项，外层 `flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm`，`data-edition-summary`。每项 `<span className="inline-flex items-center gap-1.5"><span className="text-subtle-foreground">{标签}</span><span data-summary={key} className="font-medium tabular-nums text-foreground">{值}</span></span>`。四项：`sla` 值 `${slaTarget.toFixed(1)}%`；`channel` 值 `channel[locale]`；`rpm` 值 `rpm.toLocaleString('en-US')`；`ratio` 值 `formatRatio(edition.ratio, locale)`（企业版显示「定制」）。标签取 `common.editionSummary.<key>` |
 | `src/components/layout/brand.tsx`（无指令） | `Brand` | `{ className?: string }`：`<Link href="/" className="flex items-center gap-2 text-sm font-medium text-foreground">`，前面一个 `aria-hidden` 的 `block h-5 w-6 rounded-md bg-primary` 色块（模板同款黑色圆角块），后面 `SITE.name` |
 | `src/components/layout/theme-toggle.tsx`（`'use client'`） | `ThemeToggle` | `{ className?: string }`：`<button type="button" data-theme-toggle aria-label={common.theme.toggle} className={buttonClass({ variant: 'ghost', size: 'sm', className: 'size-9 px-0 text-muted-foreground hover:text-foreground' })}>`，里面 `Sun className="size-4 dark:hidden"` 和 `Moon className="hidden size-4 dark:block"`，点击 `setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')` |
 | `src/components/layout/language-switcher.tsx`（`'use client'`） | `LanguageSwitcher` | `{ className?: string; full?: boolean }`。触发按钮 `data-lang-trigger`，`aria-label={common.language.label}`，类名 `buttonClass({ variant: 'ghost', size: 'sm', className: 'h-9 gap-1.5 px-3 text-muted-foreground hover:text-foreground' })`，内容 `Languages` 图标 + 文字（full 时显示 `简体中文`/`English`，否则 `中文`/`EN`）+ `ChevronDown size-3.5`。菜单是 `DropdownMenuRadioGroup value={locale}`，两项 `zh`「简体中文」、`en`「English」，每项 `data-lang={code}`。切换时 `router.replace(\`${pathname}${window.location.search}\`, { locale: next, scroll: false })`（`useRouter`、`usePathname` 来自 `@/i18n/navigation`），保留 `?edition=` 等参数 |
@@ -383,8 +383,8 @@ pnpm format:check  # prettier
 | 品牌名 Nexus API、标志色块 | **编的**，沿用旧版临时品牌；只改 `src/lib/site.ts` |
 | 30 个模型的型号、上线日期、上下文、协议 | 型号参考 onehop.ai 与本仓库后端认识的模型名（2026-10-03）；上线日期、协议支持为**编的** |
 | 官方价 | 由 onehop.ai 2026-10-03 公开价目反推（onehop 价 ÷ 其折扣），未逐个核对厂商官网 |
-| 个人版折扣、三个版本与 12 个分组的倍率 | **编的**，`src/lib/catalog/models.ts`、`groups.ts`；单测锁住了换算结果 |
-| 可用率目标、渠道类型、RPM、并发、组织成员上限、工单响应时限、特权对比各项 | **编的**，`editions.ts`、`groups.ts` |
+| 三个版本的分组倍率（个人版 ×0.15、专业版 ×0.3、企业版定制） | 用户 2026-10-03 给定，`src/lib/catalog/editions.ts`；单测锁住了换算结果 |
+| 可用率目标、渠道类型、RPM、并发、组织成员上限、工单响应时限、分组卡特权清单、特权对比各项 | **编的**，`editions.ts`、`groups.ts` |
 | 近 24 小时可用率与状态格 | **编的**，固定种子生成（`uptime.ts`），接监测后替换 |
 | 人民币汇率 7.1、按 Token 计费生图的每张估算 1290 Token | **编的**，`pricing.ts` |
 | 首页控制台预览里的消费、请求数、图表 | **编的**，`src/lib/content/console-preview.ts` |
@@ -394,7 +394,7 @@ pnpm format:check  # prettier
 
 ---
 
-## 附录 数据接口（主控已写好并通过 33 条单测，**一个字都不要改**）
+## 附录 数据接口（主控已写好并有单测锁住，**一个字都不要改**）
 
 `import { ... } from '@/lib/catalog'`：
 
@@ -402,17 +402,17 @@ pnpm format:check  # prettier
 |---|---|
 | `MODELS: readonly Model[]` | 30 个模型（23 文本、7 生图），字段见 `types.ts` |
 | `PROVIDERS`、`getProvider(id)` | 8 个厂商：名称、标志路径、是否单色 |
-| `EDITIONS`、`EDITION_IDS`、`getEdition(id)`、`isEditionId(v)` | 三个版本：名称、一句话、可用率目标、渠道、RPM、并发、工单时限 |
-| `GROUPS`、`groupsFor(edition)`、`defaultGroup(edition, type)`、`editionRatio(edition, type)`、`ratioLabel(r)`、`PRIVILEGE_ROWS` | 分组、倍率、特权对比 |
-| `textPrice(model, edition)` | 文本单价（美元 / 百万 Token）：input、output、cacheRead、longContext |
-| `imagePrice(model, edition)` | 生图价：按张（resolutions、from）或按 Token（perMTokens、estimatedPerImage） |
-| `effectiveDiscount(model, edition)`、`formatDiscount(d, locale)` | 折扣与折扣标文字（「3折」/「70% off」，不打折时 null） |
+| `EDITIONS`、`EDITION_IDS`、`getEdition(id)`、`isEditionId(v)` | 三个版本（即三个分组）：名称、一句话、分组倍率（企业版 null 即定制）、可用率目标、渠道、RPM、并发、工单时限、是否重点卡、按钮类型 |
+| `editionRatio(edition)`、`ratioLabel(r)`、`ratioText(r)`、`formatRatio(r, locale)`、`GROUP_HIGHLIGHTS`、`PRIVILEGE_ROWS` | 分组倍率（×0.15 / 定制）、分组卡独有特权、特权对比 |
+| `textPrice(model, edition)`、`textPriceAt(model, k)` | 文本单价（美元 / 百万 Token）：input、output、cacheRead、longContext；= 官方价 × 分组倍率，定制版本返回 null；`k = 1` 即官方价 |
+| `imagePrice(model, edition)`、`imagePriceAt(model, k)` | 生图价：按张（resolutions、from）或按 Token（perMTokens、estimatedPerImage）；规则同上 |
+| `editionDiscount(edition)`、`formatDiscount(d, locale)` | 版本折扣与折扣标文字（「1.5折」/「85% off」，定制或不打折时 null） |
 | `formatMoney(usd, currency)`、`formatAmount(n)`、`convert(usd, currency)`、`USD_CNY_RATE` | 金额（`$0.6` / `¥4.26`） |
-| `formatContext(tokens)`、`formatRatio(r, locale)`、`localize(value, locale)` | 上下文、倍率、中英文字段 |
+| `formatContext(tokens)`、`localize(value, locale)` | 上下文、中英文字段 |
 | `isNewModel(model)`、`CATALOG_AS_OF`、`IMAGE_TOKENS_PER_IMAGE` | 「新」标记（30 天内上线的 7 个） |
 | `filterModels(models, filter, edition)`、`facetCounts(models, type)`、`groupByProvider(models)`、`DEFAULT_FILTER`、`TYPE_FILTERS`、`CONTEXT_FILTERS`、`SORT_KEYS`、`PROTOCOLS`、`PROTOCOL_LABELS` | 模型页筛选排序、价目表分段 |
 | `uptimeFor(modelId, edition)`、`UPTIME_SLOTS` | 近 24 小时可用率（percent）与 24 个状态格（up/degraded/down） |
 
 其他：`SITE`、`NAV_ITEMS`、`FOOTER_COLUMNS`（`@/lib/site`）；`PREVIEW_*`（`@/lib/content/console-preview`）；`useEdition`、`useCurrency`（`@/lib/use-catalog-state`）；`useUrlState`、`useUrlList`、`useUrlText`（`@/lib/use-url-state`）；`initPage`、`LocaleParams`（`@/i18n/page`）。
 
-单测算出的几个关键数字（交互检查会用）：全部 30 / 文本 23 / 生图 7；厂商 OpenAI 10、Anthropic 6、Google 8；只看 Anthropic 文本 6 个；上下文 ≥1M 共 21 个；搜「nano」4 个、搜「gemini」8 个；默认排序第一个 Claude Sonnet 5.5；文本按价格从低到高第一个 GPT-6 Luna；Claude Sonnet 5.5 输入单价 个人 $0.6、专业 $0.84、企业 $1.2，人民币个人 ¥4.26；折扣标 3折 / 4.2折 / 6折。
+单测算出的几个关键数字（交互检查会用）：全部 30 / 文本 23 / 生图 7；厂商 OpenAI 10、Anthropic 6、Google 8；只看 Anthropic 文本 6 个；上下文 ≥1M 共 21 个；搜「nano」4 个、搜「gemini」8 个；默认排序第一个 Claude Sonnet 5.5；文本按价格从低到高第一个 GPT-6 Luna；Claude Sonnet 5.5 输入单价 个人 $0.3、专业 $0.6、企业版定制（无单价），人民币个人 ¥2.13；折扣标 个人 1.5折、专业 3折、企业版不显示。

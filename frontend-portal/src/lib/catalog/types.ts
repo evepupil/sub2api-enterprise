@@ -53,8 +53,6 @@ export interface Model {
   /** 上线日期 YYYY-MM-DD，用于「最新」排序和「新」标记 */
   released: string;
   description: Localized;
-  /** 个人版折扣（相对官方价）：0.3 即三折 */
-  discount: number;
   /** 文本模型官方价 */
   official: TokenPrice | null;
   longContext: LongContextTier | null;

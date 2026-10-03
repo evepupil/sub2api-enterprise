@@ -61,6 +61,6 @@
     "sla": "Availability",
     "channel": "Channel",
     "rpm": "Requests per minute",
-    "ratio": "General ratio"
+    "ratio": "Group ratio"
   }
 }

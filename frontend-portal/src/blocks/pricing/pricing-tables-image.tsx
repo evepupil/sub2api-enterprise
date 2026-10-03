@@ -6,7 +6,7 @@ import { DiscountBadge } from '@/components/catalog/discount-badge';
 import { ProviderLogo } from '@/components/catalog/provider-logo';
 import { Badge } from '@/components/ui/badge';
 import {
-  effectiveDiscount,
+  editionDiscount,
   formatMoney,
   getProvider,
   groupByProvider,
@@ -23,7 +23,7 @@ function ImageModelCell({ model }: { model: Model }) {
   const t = useTranslations('pricing');
   const locale = useLocale();
   const [edition] = useEdition();
-  const discount = effectiveDiscount(model, edition);
+  const discount = editionDiscount(edition);
 
   return (
     <td className="px-5 py-4 align-top">

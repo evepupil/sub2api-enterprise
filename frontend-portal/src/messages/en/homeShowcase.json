@@ -32,7 +32,7 @@
     },
     "groupsCard": {
       "title": "Group routing, public ratios",
-      "desc": "Every key is bound to a group. Billed price = base model price × group ratio.",
+      "desc": "Every key is bound to a group. Billed price = official price × group ratio.",
       "panelTitle": "Groups",
       "add": "New"
     },

@@ -51,7 +51,7 @@
       },
       "groups": {
         "title": "Spend by group",
-        "edition": "Pro",
+        "range": "Last 30 days",
         "center": "groups"
       }
     },

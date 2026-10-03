@@ -1,6 +1,6 @@
 import type { AppLocale } from '@/i18n/routing';
 
-import { editionRatio, ratioLabel } from './groups';
+import { editionRatio } from './groups';
 import type { EditionId, Localized, Model } from './types';
 
 /** 人民币展示用的固定汇率（占位）。钱包按美元结算，人民币只做参考换算。 */
@@ -26,10 +26,9 @@ export interface TextPriceView {
   longContext: { threshold: number; input: number; output: number } | null;
 }
 
-/** 某版本下文本模型的单价（美元 / 百万 Token）= 官方价 × 折扣 × 版本默认分组倍率 */
-export function textPrice(model: Model, edition: EditionId): TextPriceView | null {
+/** 文本模型按倍率换算后的单价（美元 / 百万 Token），倍率 1 即官方价 */
+export function textPriceAt(model: Model, k: number): TextPriceView | null {
   if (model.type !== 'text' || !model.official) return null;
-  const k = model.discount * editionRatio(edition, 'text');
   return {
     input: round6(model.official.input * k),
     output: round6(model.official.output * k),
@@ -42,6 +41,12 @@ export function textPrice(model: Model, edition: EditionId): TextPriceView | nul
         }
       : null,
   };
+}
+
+/** 某版本下文本模型的单价 = 官方价 × 分组倍率；倍率按合同定制的版本返回 null */
+export function textPrice(model: Model, edition: EditionId): TextPriceView | null {
+  const ratio = editionRatio(edition);
+  return ratio === null ? null : textPriceAt(model, ratio);
 }
 
 export type ImagePriceView =
@@ -58,10 +63,9 @@ export type ImagePriceView =
       estimatedPerImage: number;
     };
 
-/** 某版本下生图模型的价格 = 官方价 × 折扣 × 版本生图分组倍率 */
-export function imagePrice(model: Model, edition: EditionId): ImagePriceView | null {
+/** 生图模型按倍率换算后的价格，倍率 1 即官方价 */
+export function imagePriceAt(model: Model, k: number): ImagePriceView | null {
   if (model.type !== 'image' || !model.image) return null;
-  const k = model.discount * editionRatio(edition, 'image');
   if (model.image.kind === 'per-image') {
     const resolutions = model.image.resolutions.map((r) => ({
       label: r.label,
@@ -77,13 +81,19 @@ export function imagePrice(model: Model, edition: EditionId): ImagePriceView | n
   };
 }
 
-/** 相对官方价的实际折扣，≥ 1 表示不打折（返回 null，不显示折扣标） */
-export function effectiveDiscount(model: Model, edition: EditionId): number | null {
-  const d = round6(model.discount * editionRatio(edition, model.type));
-  return d < 1 ? d : null;
+/** 某版本下生图模型的价格 = 官方价 × 分组倍率；倍率按合同定制的版本返回 null */
+export function imagePrice(model: Model, edition: EditionId): ImagePriceView | null {
+  const ratio = editionRatio(edition);
+  return ratio === null ? null : imagePriceAt(model, ratio);
 }
 
-/** 折扣标：中文「3折」「4.2折」，英文「70% off」 */
+/** 版本相对官方价的折扣（即分组倍率）；不低于官方价或按合同定制时返回 null，不显示折扣标 */
+export function editionDiscount(edition: EditionId): number | null {
+  const ratio = editionRatio(edition);
+  return ratio !== null && ratio < 1 ? ratio : null;
+}
+
+/** 折扣标：中文「3折」「1.5折」，英文「70% off」 */
 export function formatDiscount(discount: number | null, locale: AppLocale): string | null {
   if (discount === null) return null;
   if (locale === 'zh') {
@@ -115,13 +125,6 @@ export function formatContext(tokens: number): string {
   return `${Math.round(tokens / 1000)}K`;
 }
 
-const CUSTOM_RATIO: Localized = { zh: '定制', en: 'Custom' };
-
-/** 分组倍率：×1.0、×1.4；定制分组显示「定制」 */
-export function formatRatio(ratio: number | null, locale: AppLocale): string {
-  return ratio === null ? CUSTOM_RATIO[locale] : ratioLabel(ratio);
-}
-
 export function localize(value: Localized, locale: AppLocale): string {
   return value[locale];
 }
@@ -132,11 +135,15 @@ export function isNewModel(model: Model): boolean {
   return days >= 0 && days <= NEW_MODEL_DAYS;
 }
 
-/** 价格排序用的键：文本取输入单价，生图取每张价（按 Token 计费的取估算每张价） */
+/**
+ * 价格排序用的键：文本取输入单价，生图取每张价（按 Token 计费的取估算每张价）。
+ * 倍率按合同定制的版本没有单价，按官方价排。
+ */
 export function priceSortKey(model: Model, edition: EditionId): number {
-  const text = textPrice(model, edition);
+  const k = editionRatio(edition) ?? 1;
+  const text = textPriceAt(model, k);
   if (text) return text.input;
-  const image = imagePrice(model, edition);
+  const image = imagePriceAt(model, k);
   if (!image) return Number.POSITIVE_INFINITY;
   return image.kind === 'per-image' ? image.from : image.estimatedPerImage;
 }

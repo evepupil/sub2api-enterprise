@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * 模型卡：价格、折扣标、可用率都随当前版本（?edition=）变化。
+ * 模型卡：价格、折扣标、可用率都随当前版本（?edition=）变化；倍率按合同定制的版本（企业版）价格显示「定制」。
  * 复制调用名成功后短暂换成对勾，1.5 秒恢复；剪贴板不可用或失败时静默。
  */
 
@@ -17,9 +17,11 @@ import { Link } from '@/i18n/navigation';
 import type { AppLocale } from '@/i18n/routing';
 import {
   PROTOCOL_LABELS,
-  effectiveDiscount,
+  editionDiscount,
+  editionRatio,
   formatContext,
   formatMoney,
+  formatRatio,
   getProvider,
   imagePrice,
   isNewModel,
@@ -90,6 +92,7 @@ export function ModelsExplorerCard({
       .catch(() => {});
   };
 
+  const custom = editionRatio(edition) === null;
   const price = textPrice(model, edition);
   const image = imagePrice(model, edition);
 
@@ -141,7 +144,16 @@ export function ModelsExplorerCard({
 
       <div className="mt-4 flex items-end justify-between gap-3 border-t border-border pt-4">
         <div className="min-w-0">
-          {price ? (
+          {custom ? (
+            <>
+              <p className="text-xs text-subtle-foreground">
+                {model.type === 'text' ? t('card.inputOutput') : t('card.perImage')}
+              </p>
+              <p data-card-price className="mt-0.5 text-sm font-medium text-foreground">
+                {formatRatio(null, locale)}
+              </p>
+            </>
+          ) : price ? (
             <>
               <p className="text-xs text-subtle-foreground">{t('card.inputOutput')}</p>
               <p
@@ -178,7 +190,7 @@ export function ModelsExplorerCard({
           ) : null}
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1.5">
-          <DiscountBadge discount={effectiveDiscount(model, edition)} locale={locale} />
+          <DiscountBadge discount={editionDiscount(edition)} locale={locale} />
           {model.contextTokens !== null ? (
             <span className="text-xs tabular-nums text-muted-foreground">
               {formatContext(model.contextTokens)} {t('card.context')}
@@ -210,7 +222,8 @@ export function ModelsExplorerCard({
         href={{
           pathname: '/pricing',
           query: edition === 'personal' ? {} : { edition },
-          hash: `model-${model.id}`,
+          // 定制版本的价格页没有价目表，不带行锚点
+          ...(custom ? {} : { hash: `model-${model.id}` }),
         }}
         data-card-pricing
         className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-foreground hover:underline"

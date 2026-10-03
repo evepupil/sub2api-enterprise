@@ -1,23 +1,17 @@
-'use client';
-
 import { Container } from '@/components/ui/container';
-import { useEdition } from '@/lib/use-catalog-state';
-import { groupsFor } from '@/lib/catalog';
+import { EDITIONS } from '@/lib/catalog';
 
 import { GroupCardsCard } from './group-cards-card';
 
-/** 分组卡：当前版本的四个分组并排，第三张（Claude 专线）是深蓝重点卡。 */
+/** 分组卡：三个版本就是三个分组，并排三张，专业版是深蓝重点卡，企业版联系销售。 */
 export function GroupCards() {
-  const [edition] = useEdition();
-  const groups = groupsFor(edition);
-
   return (
     <section id="group-cards" className="pb-20 md:pb-28">
       <Container>
-        {/* 默认拉伸等高：卡片 flex h-full flex-col，按钮 mt-auto 靠底 */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 lg:gap-4">
-          {groups.map((group) => (
-            <GroupCardsCard key={group.id} group={group} edition={edition} />
+        {/* 默认拉伸等高：卡片 flex h-full flex-col，按钮 mt-auto 靠底；大屏以下单列并收窄 */}
+        <div className="mx-auto grid max-w-md gap-6 lg:max-w-6xl lg:grid-cols-3 lg:gap-4">
+          {EDITIONS.map((edition, index) => (
+            <GroupCardsCard key={edition.id} edition={edition} previous={EDITIONS[index - 1]} />
           ))}
         </div>
       </Container>

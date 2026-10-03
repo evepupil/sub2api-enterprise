@@ -2,7 +2,7 @@ import { useTranslations } from 'next-intl';
 
 import { Container } from '@/components/ui/container';
 import { Badge } from '@/components/ui/badge';
-import { formatAmount, getEdition, groupsFor } from '@/lib/catalog';
+import { formatAmount, getEdition } from '@/lib/catalog';
 import {
   PREVIEW_GROUP_SPEND,
   PREVIEW_MODEL_SHARE,
@@ -92,16 +92,12 @@ export function ConsolePreview() {
   const tokens = `${(stats.tokens / 1e9).toFixed(2)}B`;
   const slaTarget = getEdition('pro').slaTarget.toFixed(1);
 
-  // 环形图的图例要显示分组名，按 kind 对上专业版的四个分组
-  const proGroups = groupsFor('pro');
-  const spendGroups = PREVIEW_GROUP_SPEND.map((row) => {
-    const group = proGroups.find((g) => g.kind === row.kind);
-    return {
-      kind: row.kind,
-      percent: row.percent,
-      name: group ? group.name : { zh: row.kind, en: row.kind },
-    };
-  });
+  // 环形图的图例显示分组名：一个版本就是一个分组
+  const spendGroups = PREVIEW_GROUP_SPEND.map((row) => ({
+    id: row.edition,
+    percent: row.percent,
+    name: getEdition(row.edition).name,
+  }));
 
   return (
     <section id="preview" className="relative pb-20 md:pb-28">
@@ -229,7 +225,7 @@ export function ConsolePreview() {
                       <h3 className="text-sm font-semibold text-foreground">
                         {t('charts.groups.title')}
                       </h3>
-                      <p className="text-xs text-muted-foreground">{t('charts.groups.edition')}</p>
+                      <p className="text-xs text-muted-foreground">{t('charts.groups.range')}</p>
                       <ConsolePreviewGroupsChart groups={spendGroups} />
                     </div>
                   </div>

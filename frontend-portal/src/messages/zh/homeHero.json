@@ -51,7 +51,7 @@
       },
       "groups": {
         "title": "分组消费占比",
-        "edition": "专业版",
+        "range": "近 30 天",
         "center": "个分组"
       }
     },

@@ -4,7 +4,7 @@ import { DiscountBadge } from '@/components/catalog/discount-badge';
 import { ProviderLogo } from '@/components/catalog/provider-logo';
 import { Badge } from '@/components/ui/badge';
 import {
-  effectiveDiscount,
+  editionDiscount,
   formatContext,
   formatMoney,
   getProvider,
@@ -67,7 +67,7 @@ export function ModelMarqueeCard({ model }: { model: Model }) {
       </p>
       <div className="mt-4 flex items-center justify-between gap-3 border-t border-border pt-4 text-xs">
         <span className="truncate tabular-nums text-foreground">{price}</span>
-        <DiscountBadge discount={effectiveDiscount(model, 'personal')} locale={locale} />
+        <DiscountBadge discount={editionDiscount('personal')} locale={locale} />
       </div>
     </article>
   );

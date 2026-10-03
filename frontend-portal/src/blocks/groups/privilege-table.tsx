@@ -1,5 +1,3 @@
-'use client';
-
 import { ArrowRight, Check, Minus } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 
@@ -14,10 +12,9 @@ import {
   type EditionId,
   type PrivilegeCell,
 } from '@/lib/catalog';
-import { useEdition } from '@/lib/use-catalog-state';
 import { cn } from '@/lib/utils';
 
-/** 当前版本那一列整列铺 muted 底色，表头圆上角、最后一行圆下角 */
+/** 重点版本（专业版）那一列整列铺 muted 底色，表头圆上角、最后一行圆下角 */
 const COL_CELL = 'bg-muted';
 
 function CellValue({ value }: { value: PrivilegeCell }) {
@@ -41,12 +38,12 @@ function CellValue({ value }: { value: PrivilegeCell }) {
   return <span className="tabular-nums text-muted-foreground">{localize(value, locale)}</span>;
 }
 
-/** 版本特权对比：14 行指标逐行对比三个版本，当前版本的列整列高亮。 */
+/** 版本特权对比：逐行对比三个版本，重点版本（与分组卡的深色卡一致）整列高亮。 */
 export function PrivilegeTable() {
   const t = useTranslations('groups');
   const common = useTranslations('common');
   const locale = useLocale();
-  const [edition] = useEdition();
+  const highlighted = EDITIONS.find((e) => e.featured)?.id;
   const editionIds: readonly EditionId[] = EDITIONS.map((e) => e.id);
   const lastRowId = PRIVILEGE_ROWS[PRIVILEGE_ROWS.length - 1]?.id;
 
@@ -67,10 +64,10 @@ export function PrivilegeTable() {
                       key={id}
                       scope="col"
                       data-edition-col={id}
-                      data-selected={id === edition ? 'true' : 'false'}
+                      data-selected={id === highlighted ? 'true' : 'false'}
                       className={cn(
                         'px-4 pb-4 pt-5 text-center text-base font-semibold text-foreground',
-                        id === edition && 'rounded-t-xl bg-muted',
+                        id === highlighted && 'rounded-t-xl bg-muted',
                       )}
                     >
                       {name}
@@ -90,8 +87,8 @@ export function PrivilegeTable() {
                       key={id}
                       className={cn(
                         'px-4 py-4 text-center',
-                        id === edition && COL_CELL,
-                        id === edition && row.id === lastRowId && 'rounded-b-xl',
+                        id === highlighted && COL_CELL,
+                        id === highlighted && row.id === lastRowId && 'rounded-b-xl',
                       )}
                     >
                       <CellValue value={row.values[id]} />

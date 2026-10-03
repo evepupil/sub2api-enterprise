@@ -2,11 +2,11 @@
 
 import { useLocale, useTranslations } from 'next-intl';
 
-import { editionRatio, getEdition, localize, ratioLabel } from '@/lib/catalog';
+import { formatRatio, getEdition, localize } from '@/lib/catalog';
 import { useEdition } from '@/lib/use-catalog-state';
 import { cn } from '@/lib/utils';
 
-/** 当前版本的四项关键指标：可用率目标、渠道、单密钥每分钟请求、通用倍率。 */
+/** 当前版本的四项关键指标：可用率目标、渠道、单密钥每分钟请求、分组倍率（企业版显示「定制」）。 */
 export function EditionSummary({ className }: { className?: string }) {
   const t = useTranslations('common');
   const locale = useLocale();
@@ -28,7 +28,7 @@ export function EditionSummary({ className }: { className?: string }) {
     {
       key: 'ratio',
       label: t('editionSummary.ratio'),
-      value: ratioLabel(editionRatio(editionId, 'text')),
+      value: formatRatio(edition.ratio, locale),
     },
   ];
 

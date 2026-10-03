@@ -39,13 +39,13 @@
     "longContext": "When the input of a single request exceeds the context threshold of a model, the whole request is billed at the long-context price.",
     "edit": "Image-to-image and inpainting also count the tokens of the input image, usually a small share of the total.",
     "currency": "CNY prices are converted at $1 = ¥{rate} for reference only; wallets are always charged in USD.",
-    "editions": "Pro and Enterprise prices = Personal prices × the ratio of the matching group. Group ratios are listed on the <link>groups page</link>."
+    "editions": "Prices on this page = official price × the group ratio of the selected edition; Enterprise is set by contract. Ratios for every edition are listed on the <link>groups page</link>."
   },
   "faq": {
     "title": "FAQ",
     "items": {
       "q1": "Is the price on this page what I actually pay?",
-      "a1": "Yes. The displayed price = model base price × the ratio of your group, and every charge is itemized in the console.",
+      "a1": "Yes. The displayed price = official price × the group ratio of the selected edition, and every charge is itemized in the console.",
       "q2": "Why do prices differ across editions?",
       "a2": "Editions correspond to different channel quality and availability targets: Personal runs on shared channels, Pro on premium channels with priority scheduling, and Enterprise on dedicated channels with a contractual availability agreement.",
       "q3": "Are there subscription fees or minimum spend?",
@@ -57,5 +57,10 @@
       "q6": "How are CNY prices calculated?",
       "a6": "They are converted at the fixed rate noted on the page, for reference only. Billing is in USD."
     }
+  },
+  "custom": {
+    "title": "Enterprise pricing is set by contract",
+    "desc": "Dedicated channels, custom ratios and an availability agreement, quoted on your usage.",
+    "compare": "Compare editions"
   }
 }

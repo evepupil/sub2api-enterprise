@@ -1,3 +1,5 @@
+import type { EditionId } from '@/lib/catalog';
+
 /**
  * 首页控制台预览里的数字（占位）。区块只负责画，数字都从这里取。
  * 标签文字在 homeHero.preview 里，这里只放数值与模型名。
@@ -26,14 +28,10 @@ export const PREVIEW_MODEL_SHARE: readonly { model: string; percent: number }[] 
   { model: 'DeepSeek V4 Pro', percent: 5 },
 ];
 
-/** 分组消费占比（%），环形图，合计 100；name 对应 groups.ts 的分组种类 */
-export const PREVIEW_GROUP_SPEND: readonly {
-  kind: 'general' | 'claude' | 'image';
-  percent: number;
-}[] = [
-  { kind: 'general', percent: 46 },
-  { kind: 'claude', percent: 38 },
-  { kind: 'image', percent: 16 },
+/** 分组消费占比（%），环形图，合计 100；一个版本就是一个分组 */
+export const PREVIEW_GROUP_SPEND: readonly { edition: EditionId; percent: number }[] = [
+  { edition: 'pro', percent: 72 },
+  { edition: 'personal', percent: 28 },
 ];
 
 /** 最近请求，表格从上到下 */

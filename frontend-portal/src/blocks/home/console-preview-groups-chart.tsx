@@ -4,18 +4,18 @@ import { localize } from '@/lib/catalog';
 import type { Localized } from '@/lib/catalog/types';
 import type { AppLocale } from '@/i18n/routing';
 
-/** 环形图每段的颜色，依次对应 PREVIEW_GROUP_SPEND 的三行 */
+/** 环形图每段的颜色，依次对应 PREVIEW_GROUP_SPEND 的各行（最多三段） */
 const SEGMENT_COLORS = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)'];
 
 /**
- * 分组消费占比环形图：半径 46、线宽 14 的三段弧，
+ * 分组消费占比环形图：半径 46、线宽 14 的多段弧，
  * 每段长度按 percent 占周长的比例用 strokeDasharray 画出，整体旋转 -90° 从顶部起笔。
  */
 export function ConsolePreviewGroupsChart({
   groups,
 }: {
   groups: readonly {
-    kind: 'general' | 'claude' | 'image';
+    id: string;
     percent: number;
     name: Localized;
   }[];
@@ -41,14 +41,14 @@ export function ConsolePreviewGroupsChart({
         aria-label={t('title')}
         className="size-[120px] shrink-0"
       >
-        {/* 三段弧的底色轨道，让不满 100% 时也看得出环形 */}
+        {/* 弧的底色轨道，让不满 100% 时也看得出环形 */}
         <circle cx="60" cy="60" r={RADIUS} fill="none" stroke="var(--muted)" strokeWidth="14" />
         {segments.map((segment, i) => {
           const color = SEGMENT_COLORS[i];
           if (!color) return null;
           return (
             <circle
-              key={segment.kind}
+              key={segment.id}
               cx="60"
               cy="60"
               r={RADIUS}
@@ -81,7 +81,7 @@ export function ConsolePreviewGroupsChart({
           const color = SEGMENT_COLORS[i];
           if (!color) return null;
           return (
-            <li key={segment.kind} className="flex items-center gap-2 text-xs">
+            <li key={segment.id} className="flex items-center gap-2 text-xs">
               <span
                 aria-hidden
                 className="size-2 shrink-0 rounded-full"
