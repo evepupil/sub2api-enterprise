@@ -1,4 +1,4 @@
-# Nexus API 客户官网 —— 站点层规格（唯一事实来源）
+# Codu 客户官网 —— 站点层规格（唯一事实来源）
 
 > 所有实现会话动手前先读完本文件，再读 `design/` 下属于自己那一页的规格。本文件和 `design/*.md` 是契约，**实现会话不得修改**。
 > 这份规格故意写满：这类站该有的东西先全部摆上，数据先编。删减是主控验收时的事，实现会话只负责按规格做出来。
@@ -295,7 +295,7 @@
         每个链接 <li> 内：href 以 / 开头用 Link，'#' 用 <a>，类名 text-sm text-muted-foreground transition-colors hover:text-foreground，文字 common.footer.links.<key>
     </div>
   </Container>
-  <p aria-hidden className="pointer-events-none select-none bg-gradient-to-b from-neutral-50 to-neutral-200 bg-clip-text pb-6 text-center text-[19vw] font-bold leading-[0.8] tracking-tighter text-transparent dark:from-neutral-950 dark:to-neutral-800 xl:text-[232px]">{SITE.wordmark}</p>
+  <p aria-hidden className="pointer-events-none select-none bg-gradient-to-b from-neutral-50 to-neutral-200 bg-clip-text pb-6 text-center text-[32vw] font-bold leading-[0.8] tracking-tighter text-transparent dark:from-neutral-950 dark:to-neutral-800 xl:text-[400px]">{SITE.wordmark}</p>
 </footer>
 ```
 
@@ -381,7 +381,7 @@ pnpm format:check  # prettier
 
 | 项 | 状态 |
 |---|---|
-| 品牌名 Nexus API、标志色块 | **编的**，沿用旧版临时品牌；只改 `src/lib/site.ts` |
+| 品牌名 Codu、标志色块 | 品牌名是用户定的（2026-10-03 由占位的 Nexus API 改名），改名只改 `src/lib/site.ts`；标志色块还是**编的** |
 | 30 个模型的型号、上线日期、上下文、协议 | 型号参考 onehop.ai 与本仓库后端认识的模型名（2026-10-03）；上线日期、协议支持为**编的** |
 | 官方价 | 由 onehop.ai 2026-10-03 公开价目反推（onehop 价 ÷ 其折扣），未逐个核对厂商官网 |
 | 三种通道的分组倍率（共享通道 ×0.15、专用通道 ×0.3、企业通道定制） | 用户 2026-10-03 给定，`src/lib/catalog/editions.ts`；只参与价格换算，官网页面不展示；单测锁住了换算结果 |

@@ -1,7 +1,7 @@
 import { addDays, TODAY, type OrgInvitation } from '@/lib/console';
 
 /** 邀请链接的注册地址（占位），后面拼上 ?org=邀请码 */
-export const INVITE_REGISTER_URL = 'https://nexus-api.example/register';
+export const INVITE_REGISTER_URL = 'https://codu.example/register';
 
 export type InviteExpiry = '7d' | '30d';
 

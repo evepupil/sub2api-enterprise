@@ -45,7 +45,7 @@ export function SiteFooter() {
       </Container>
       <p
         aria-hidden
-        className="pointer-events-none select-none bg-gradient-to-b from-neutral-50 to-neutral-200 bg-clip-text pb-6 text-center text-[19vw] font-bold leading-[0.8] tracking-tighter text-transparent dark:from-neutral-950 dark:to-neutral-800 xl:text-[232px]"
+        className="pointer-events-none select-none bg-gradient-to-b from-neutral-50 to-neutral-200 bg-clip-text pb-6 text-center text-[32vw] font-bold leading-[0.8] tracking-tighter text-transparent dark:from-neutral-950 dark:to-neutral-800 xl:text-[400px]"
       >
         {SITE.wordmark}
       </p>

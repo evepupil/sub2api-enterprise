@@ -23,15 +23,15 @@ export function buildSnippet(kind: SnippetKind, secret: string): string {
     case 'codex':
       return [
         '# ~/.codex/config.toml',
-        'model_provider = "nexus"',
+        'model_provider = "codu"',
         '',
-        '[model_providers.nexus]',
+        '[model_providers.codu]',
         `name = "${SITE.name}"`,
         `base_url = "${SITE.apiBase}/v1"`,
-        'env_key = "NEXUS_API_KEY"',
+        'env_key = "CODU_API_KEY"',
         '',
         '# shell',
-        `export NEXUS_API_KEY=${secret}`,
+        `export CODU_API_KEY=${secret}`,
       ].join('\n');
     case 'curl': {
       const body = JSON.stringify({

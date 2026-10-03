@@ -1,14 +1,14 @@
 /**
- * 站点级配置。品牌名是占位，换品牌只改这里（顶栏、页脚、水印字、页面标题都从这里取）。
+ * 站点级配置。品牌名 Codu，换品牌只改这里（顶栏、页脚、水印字、页面标题都从这里取）。
  */
 export const SITE = {
-  name: 'Nexus API',
+  name: 'Codu',
   /** 页脚底部的超大水印字 */
-  wordmark: 'NEXUS API',
+  wordmark: 'Codu',
   /** 版权年份固定写死，避免构建与浏览器时间不一致 */
   copyrightYear: 2026,
   /** 接口地址（占位），控制台的接入示例与「复制为 curl」用 */
-  apiBase: 'https://api.nexus-api.example',
+  apiBase: 'https://api.codu.example',
 } as const;
 
 export type NavKey = 'models' | 'pricing' | 'groups' | 'docs';

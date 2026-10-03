@@ -3,8 +3,8 @@
  * 被邀请人首次充值额外得到 5% 赠送。返利先冻结 7 天（覆盖退款窗口），到期后转入余额。
  */
 export const INVITE_PROGRAM = {
-  code: 'NX7QK2',
-  link: 'https://nexus-api.example/r/NX7QK2',
+  code: 'CD7QK2',
+  link: 'https://codu.example/r/CD7QK2',
   inviterRate: 0.1,
   inviteeBonusRate: 0.05,
   windowDays: 30,

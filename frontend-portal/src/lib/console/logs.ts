@@ -268,7 +268,7 @@ export function curlFor(log: RequestLog): string {
         : { model: log.modelId, stream: log.stream, messages: [{ role: 'user', content: '…' }] };
   return [
     `curl ${SITE.apiBase}${path} \\`,
-    `  -H "Authorization: Bearer $NEXUS_API_KEY" \\`,
+    `  -H "Authorization: Bearer $CODU_API_KEY" \\`,
     `  -H "Content-Type: application/json" \\`,
     `  -d '${JSON.stringify(body)}'`,
   ].join('\n');

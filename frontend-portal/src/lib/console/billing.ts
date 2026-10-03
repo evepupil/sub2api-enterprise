@@ -81,7 +81,7 @@ const CREDITS: readonly Omit<Transaction, 'id'>[] = [
     type: 'redeem',
     amountUsd: 20,
     method: null,
-    note: { zh: '兑换码 NX-SUMMER-20', en: 'Redeem code NX-SUMMER-20' },
+    note: { zh: '兑换码 CODU-SUMMER-20', en: 'Redeem code CODU-SUMMER-20' },
   },
   {
     ts: at('2026-08-15', 20),

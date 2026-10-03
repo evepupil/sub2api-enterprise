@@ -90,7 +90,7 @@ describe('密钥页规则', () => {
     const created = buildNewKey(
       draft({ quotaMode: 'custom', quota: '50', expiry: '90d' }),
       'pro',
-      'sk-nx-ABCDEFGH12345678',
+      'sk-ABCDEFGH12345678',
     );
     expect(created).toMatchObject({
       id: 'key-12345678',
@@ -118,11 +118,11 @@ describe('密钥页规则', () => {
     expect(keyQuotaRatio(toKeyRow(API_KEYS[0]!))).toBeNull();
     expect(keyQuotaRatio(toKeyRow(API_KEYS[2]!))).toBeCloseTo(32.79 / 50, 3);
     expect(groupLabel('pro', 'zh')).toBe('专用通道 ×0.3');
-    const snippet = buildSnippet('codex', 'sk-nx-test');
+    const snippet = buildSnippet('codex', 'sk-test');
     expect(snippet).toContain(`base_url = "${SITE.apiBase}/v1"`);
-    expect(snippet).toContain('export NEXUS_API_KEY=sk-nx-test');
-    expect(buildSnippet('claude', 'sk-nx-test')).toContain('ANTHROPIC_AUTH_TOKEN=sk-nx-test');
-    expect(generateKeySecret()).toMatch(/^sk-nx-[0-9A-Za-z]{40}$/);
+    expect(snippet).toContain('export CODU_API_KEY=sk-test');
+    expect(buildSnippet('claude', 'sk-test')).toContain('ANTHROPIC_AUTH_TOKEN=sk-test');
+    expect(generateKeySecret()).toMatch(/^sk-[0-9A-Za-z]{40}$/);
   });
 });
 
@@ -140,9 +140,7 @@ describe('组织页规则', () => {
   it('邀请码格式与有效期', () => {
     const code = generateInviteCode();
     expect(code).toMatch(/^ORG-[A-Z0-9]{4}-[A-Z0-9]{4}$/);
-    expect(inviteLink('ORG-AB12-CD34')).toBe(
-      'https://nexus-api.example/register?org=ORG-AB12-CD34',
-    );
+    expect(inviteLink('ORG-AB12-CD34')).toBe('https://codu.example/register?org=ORG-AB12-CD34');
     expect(buildInvitation(code, '7d')).toMatchObject({
       createdAt: '2026-10-03',
       expiresAt: '2026-10-10',
@@ -155,8 +153,8 @@ describe('组织页规则', () => {
 describe('账单页规则', () => {
   it('兑换码先去空白转大写再校验', () => {
     expect(checkRedeemCode('   ')).toEqual({ ok: false, reason: 'required' });
-    expect(checkRedeemCode('nx test 2026')).toEqual({ ok: false, reason: 'format' });
-    expect(checkRedeemCode(' nx-test-2026 ')).toEqual({ ok: true, code: 'NX-TEST-2026' });
+    expect(checkRedeemCode('codu test 2026')).toEqual({ ok: false, reason: 'format' });
+    expect(checkRedeemCode(' codu-test-2026 ')).toEqual({ ok: true, code: 'CODU-TEST-2026' });
   });
 
   it('金额、阈值、Webhook 地址', () => {
@@ -174,7 +172,7 @@ describe('账单页规则', () => {
 
   it('新流水并进账本后余额跟着变，赠送档位从高到低取', () => {
     const ledger = appendTransactions(LEDGER, [
-      newTransaction('redeem', 10, null, '兑换码 NX-TEST-2026'),
+      newTransaction('redeem', 10, null, '兑换码 CODU-TEST-2026'),
     ]);
     expect(ledger).toHaveLength(LEDGER.length + 1);
     expect(ledger[0]?.type).toBe('redeem');

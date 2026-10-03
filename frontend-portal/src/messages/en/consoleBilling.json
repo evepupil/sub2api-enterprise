@@ -15,7 +15,7 @@
   },
   "redeem": {
     "title": "Redeem code",
-    "placeholder": "e.g. NX-XXXX-XXXX",
+    "placeholder": "e.g. CODU-XXXX-XXXX",
     "submit": "Redeem",
     "success": "{amount} credited"
   },

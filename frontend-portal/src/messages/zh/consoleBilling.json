@@ -15,7 +15,7 @@
   },
   "redeem": {
     "title": "兑换码",
-    "placeholder": "例如 NX-XXXX-XXXX",
+    "placeholder": "例如 CODU-XXXX-XXXX",
     "submit": "兑换",
     "success": "已到账 {amount}"
   },

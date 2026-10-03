@@ -41,7 +41,7 @@ export interface ApiKey {
 }
 
 const random = createRandom('console-keys');
-const secret = () => `sk-nx-${randomToken(random, 40)}`;
+const secret = () => `sk-${randomToken(random, 40)}`;
 
 export const API_KEYS: readonly ApiKey[] = [
   {
@@ -132,7 +132,7 @@ export function keyActiveOn(key: ApiKey, day: string): boolean {
   return true;
 }
 
-/** 打码：sk-nx-Ab3…9XyZ（前 9 位 + 末 4 位） */
+/** 打码：sk-Ab3xY9…9XyZ（前 9 位 + 末 4 位） */
 export function maskKey(value: string): string {
   return `${value.slice(0, 9)}…${value.slice(-4)}`;
 }

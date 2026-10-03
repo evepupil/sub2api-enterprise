@@ -95,7 +95,7 @@ describe('密钥', () => {
   it('打码保留前 9 位与末 4 位', () => {
     const key = API_KEYS[0]!;
     expect(maskKey(key.secret)).toBe(`${key.secret.slice(0, 9)}…${key.secret.slice(-4)}`);
-    expect(key.secret.startsWith('sk-nx-')).toBe(true);
+    expect(key.secret.startsWith('sk-')).toBe(true);
   });
 
   it('按名称、密钥末尾与状态搜索', () => {
