@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { SegmentedControl } from '@/components/ui/segmented-control';
-import { Link } from '@/i18n/navigation';
+import { Link, useRouter } from '@/i18n/navigation';
 import { REGISTRATION } from '@/lib/site';
 import { useUrlState } from '@/lib/use-url-state';
 
@@ -20,7 +20,7 @@ const ACCOUNT_VALUES = ['personal', 'organization'] as const;
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-/** 提交成功后的加载时长（规格：1200ms 后按钮恢复），卸载时清掉定时器 */
+/** 提交成功后的加载时长，结束后进入控制台（后端未接，只做前端校验）；卸载时清掉定时器 */
 const SUBMIT_DELAY_MS = 1200;
 
 type RegisterField = 'orgName' | 'email' | 'password' | 'invite';
@@ -42,6 +42,7 @@ const FIELD_INPUT_ID: Record<RegisterField, string> = {
  */
 export function RegisterPanel() {
   const t = useTranslations('auth');
+  const router = useRouter();
   const [account, setAccount] = useUrlState('account', ACCOUNT_VALUES, 'personal');
   const [values, setValues] = useState({ orgName: '', email: '', password: '', invite: '' });
   const [errors, setErrors] = useState<RegisterErrors>({});
@@ -109,9 +110,9 @@ export function RegisterPanel() {
       document.getElementById(FIELD_INPUT_ID[firstField])?.focus();
       return;
     }
-    // 校验通过：进入加载态 1.2 秒再恢复，不跳转、不弹提示
+    // 校验通过：按钮加载 1.2 秒后进入控制台（占位，不调用接口、不弹提示）
     setSubmitting(true);
-    timerRef.current = setTimeout(() => setSubmitting(false), SUBMIT_DELAY_MS);
+    timerRef.current = setTimeout(() => router.push('/console/usage'), SUBMIT_DELAY_MS);
   };
 
   const describedBy = (field: keyof RegisterErrors, id: string) =>
