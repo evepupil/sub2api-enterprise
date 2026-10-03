@@ -1,0 +1,50 @@
+{
+  "meta": {
+    "title": "用量"
+  },
+  "stats": {
+    "tokens": "Token",
+    "cacheHit": "缓存命中 {percent}",
+    "tokenParts": "{input} 输入 · {cache} 缓存 · {output} 输出",
+    "requests": "请求",
+    "success": "成功 {percent}",
+    "latency": "平均耗时",
+    "ttft": "首字 {value}",
+    "cost": "消费",
+    "runRate": "约 {amount}/月",
+    "images": "生图 {count, number} 张"
+  },
+  "activity": {
+    "title": "活动",
+    "aria": "最近一年的每日用量",
+    "cell": "{day} · {tokens} Token · {cost}",
+    "idle": "{day} · 无调用",
+    "less": "少",
+    "more": "多",
+    "mon": "周一",
+    "wed": "周三",
+    "fri": "周五",
+    "activeDays": "活跃天数",
+    "streak": "最长连续",
+    "streakValue": "{count} 天",
+    "rangeCost": "本期消费",
+    "topDay": "最活跃日",
+    "topDaySub": "{tokens} Token · {cost}"
+  },
+  "detail": {
+    "title": "用量明细",
+    "metric": "明细指标",
+    "tokens": "Token",
+    "requests": "请求数",
+    "cost": "费用",
+    "byModel": "按模型",
+    "byKey": "按 API 密钥",
+    "byGroup": "按通道",
+    "ariaModel": "按模型的用量",
+    "ariaKey": "按 API 密钥的用量",
+    "ariaGroup": "按通道的用量",
+    "total": "总计",
+    "other": "其他",
+    "empty": "所选时间内没有调用"
+  }
+}

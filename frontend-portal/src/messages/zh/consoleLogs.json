@@ -1,0 +1,81 @@
+{
+  "meta": {
+    "title": "日志"
+  },
+  "export": "导出 CSV",
+  "filters": {
+    "time": "时间",
+    "key": "API 密钥",
+    "model": "模型",
+    "status": "状态",
+    "type": "类型",
+    "stream": "流式",
+    "requestId": "请求 ID",
+    "search": "按请求 ID 搜索",
+    "all": "全部",
+    "success": "成功",
+    "error": "失败",
+    "text": "文本",
+    "image": "生图",
+    "streamOn": "流式",
+    "streamOff": "非流式",
+    "clear": "清除筛选"
+  },
+  "table": {
+    "time": "时间",
+    "tz": "UTC+8",
+    "model": "模型",
+    "tokens": "Token",
+    "cost": "成本",
+    "duration": "耗时",
+    "group": "通道",
+    "status": "状态",
+    "input": "输入",
+    "output": "输出",
+    "cache": "缓存读取",
+    "images": "{count} 张",
+    "ttft": "首字 {value}",
+    "success": "成功",
+    "more": "更多操作"
+  },
+  "menu": {
+    "copyId": "复制请求 ID",
+    "copyCurl": "复制为 curl",
+    "detail": "查看详情",
+    "copied": "已复制"
+  },
+  "empty": "没有符合条件的请求",
+  "detail": {
+    "time": "时间",
+    "requestId": "请求 ID",
+    "key": "API 密钥",
+    "group": "通道",
+    "model": "模型",
+    "type": "类型",
+    "stream": "流式",
+    "status": "状态",
+    "finish": "结束原因",
+    "inputTokens": "输入 Token",
+    "cacheTokens": "缓存读取 Token",
+    "outputTokens": "输出 Token",
+    "images": "图片",
+    "cost": "成本",
+    "duration": "总耗时",
+    "ttft": "首字耗时",
+    "client": "调用方",
+    "example": "请求示例",
+    "yes": "是",
+    "no": "否"
+  },
+  "errors": {
+    "upstream_timeout": "上游超时",
+    "rate_limited": "触发限流",
+    "context_length_exceeded": "超出上下文长度"
+  },
+  "finish": {
+    "stop": "正常结束",
+    "length": "达到长度上限",
+    "tool_calls": "工具调用",
+    "error": "出错"
+  }
+}

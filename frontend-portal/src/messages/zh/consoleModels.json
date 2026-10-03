@@ -1,0 +1,58 @@
+{
+  "meta": {
+    "title": "模型"
+  },
+  "scope": {
+    "label": "模型范围",
+    "all": "全部",
+    "favorites": "收藏"
+  },
+  "filters": {
+    "type": "类型",
+    "provider": "厂商",
+    "context": "上下文",
+    "protocol": "协议",
+    "search": "搜索",
+    "searchPlaceholder": "模型名或厂商",
+    "all": "全部",
+    "text": "文本",
+    "image": "生图",
+    "ctx200k": "≥ 200K",
+    "ctx1m": "≥ 1M",
+    "clear": "清除筛选"
+  },
+  "sort": {
+    "label": "排序",
+    "latest": "最新",
+    "priceAsc": "价格从低到高",
+    "priceDesc": "价格从高到低",
+    "context": "上下文长度"
+  },
+  "group": "通道",
+  "currency": {
+    "label": "币种",
+    "usd": "美元",
+    "cny": "人民币",
+    "note": "按 1 美元 = ¥{rate} 折算，钱包按美元扣费"
+  },
+  "table": {
+    "model": "模型",
+    "price": "价格",
+    "discount": "折扣",
+    "type": "类型",
+    "provider": "厂商",
+    "protocols": "协议",
+    "context": "上下文",
+    "perMTokens": "每百万 Token",
+    "longContext": "超过 {threshold}：{input} / {output}",
+    "perImageFrom": "{price} / 张起",
+    "perImageApprox": "≈ {price} / 张",
+    "custom": "定制",
+    "new": "新",
+    "try": "试一试",
+    "favorite": "收藏",
+    "unfavorite": "取消收藏"
+  },
+  "empty": "没有符合条件的模型",
+  "emptyFavorites": "还没有收藏的模型"
+}

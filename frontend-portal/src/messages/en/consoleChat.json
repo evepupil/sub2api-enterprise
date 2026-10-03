@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "title": "Chat"
+  },
+  "newChat": "New chat",
+  "model": "Model",
+  "key": "API key",
+  "pricing": "Input {input} · Output {output} per 1M tokens",
+  "empty": "Start a conversation",
+  "input": "Message",
+  "placeholder": "Type a message. Enter to send, Shift + Enter for a new line",
+  "count": "{count} / {max}",
+  "send": "Send",
+  "stop": "Stop",
+  "copy": "Copy reply",
+  "you": "You"
+}

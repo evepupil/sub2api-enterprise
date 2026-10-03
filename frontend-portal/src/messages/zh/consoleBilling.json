@@ -1,0 +1,82 @@
+{
+  "meta": {
+    "title": "账单"
+  },
+  "balance": {
+    "label": "可用余额",
+    "low": "余额低于提醒阈值 {threshold}，请及时充值，以免影响调用。",
+    "runway": "按近 {span} 天日均 {avg} 计算，约可用 {days} 天",
+    "recharge": "充值"
+  },
+  "stats": {
+    "recharged": "近 {span} 天充值",
+    "bonus": "近 {span} 天赠送与兑换",
+    "consumed": "近 {span} 天消费"
+  },
+  "redeem": {
+    "title": "兑换码",
+    "placeholder": "例如 NX-XXXX-XXXX",
+    "submit": "兑换",
+    "success": "已到账 {amount}"
+  },
+  "alert": {
+    "title": "余额提醒",
+    "threshold": "提醒阈值",
+    "email": "邮件提醒",
+    "webhook": "Webhook",
+    "webhookUrl": "Webhook 地址",
+    "save": "保存",
+    "saved": "已保存"
+  },
+  "txn": {
+    "title": "交易记录",
+    "type": "类型",
+    "amount": "金额",
+    "min": "最小",
+    "max": "最大",
+    "search": "流水 ID",
+    "columns": {
+      "time": "时间",
+      "amount": "金额",
+      "type": "类型",
+      "note": "说明",
+      "balance": "余额"
+    },
+    "notes": {
+      "redeem": "兑换码 {code}",
+      "topup": "{method}充值",
+      "bonus": "充值满 {min} 赠送 {rate}"
+    }
+  },
+  "types": {
+    "all": "全部",
+    "recharge": "充值",
+    "gift": "赠送",
+    "redeem": "兑换",
+    "consume": "消费",
+    "refund": "退还"
+  },
+  "methods": {
+    "alipay": "支付宝",
+    "wechat": "微信支付",
+    "stripe": "银行卡"
+  },
+  "recharge": {
+    "title": "充值",
+    "amounts": "充值金额",
+    "custom": "自定义金额",
+    "bonus": "赠送 {amount}",
+    "tier": "满 {min} 赠送 {rate}",
+    "tierJoin": "，",
+    "method": "支付方式",
+    "total": "到账 {amount}",
+    "submit": "去支付"
+  },
+  "errors": {
+    "redeemRequired": "请输入兑换码",
+    "redeemFormat": "兑换码格式不正确",
+    "amountRange": "请输入 {min} 到 {max} 之间的金额",
+    "webhookUrl": "请输入 https 开头的地址"
+  },
+  "empty": "没有符合条件的流水"
+}

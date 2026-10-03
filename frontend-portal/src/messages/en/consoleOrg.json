@@ -1,0 +1,94 @@
+{
+  "meta": {
+    "title": "Organization"
+  },
+  "actions": {
+    "invite": "Invite member",
+    "adjustQuota": "Adjust quota",
+    "disable": "Disable",
+    "enable": "Enable",
+    "remove": "Remove",
+    "revoke": "Revoke",
+    "generate": "Generate invitation code",
+    "done": "Done",
+    "copyOrgId": "Copy organization ID",
+    "copyCode": "Copy invitation code",
+    "copyLink": "Copy invitation link"
+  },
+  "info": {
+    "orgId": "Organization ID",
+    "createdOn": "Created {date}",
+    "yourRole": "Your role"
+  },
+  "stats": {
+    "members": "Members",
+    "membersSub": "Active / total",
+    "monthUsed": "Spend this month",
+    "quotaTotal": "Total member quota",
+    "quotaTotalSub": "Per month, excluding unlimited members",
+    "groups": "Available channels",
+    "groupsValue": "{count}",
+    "groupsSeparator": ", "
+  },
+  "roles": {
+    "admin": "Admin",
+    "member": "Member"
+  },
+  "members": {
+    "title": "Members",
+    "searchPlaceholder": "Search by name or email",
+    "noResults": "No members match your search",
+    "unlimited": "Unlimited",
+    "exhausted": "Used up",
+    "columns": {
+      "member": "Member",
+      "role": "Role",
+      "quota": "Monthly quota",
+      "keys": "Keys",
+      "status": "Status",
+      "joined": "Joined"
+    },
+    "status": {
+      "active": "Active",
+      "disabled": "Disabled"
+    }
+  },
+  "quota": {
+    "title": "Adjust monthly quota for {name}",
+    "modeLabel": "Monthly quota",
+    "unlimited": "Unlimited",
+    "custom": "Custom",
+    "amount": "Monthly amount"
+  },
+  "remove": {
+    "title": "Remove member “{name}”?",
+    "description": "Their API keys will be disabled immediately."
+  },
+  "invitations": {
+    "title": "Invitation codes",
+    "empty": "No invitation codes yet",
+    "columns": {
+      "code": "Code",
+      "created": "Created",
+      "expires": "Valid until",
+      "status": "Status",
+      "usedBy": "Used by"
+    },
+    "status": {
+      "active": "Valid",
+      "used": "Used",
+      "expired": "Expired"
+    }
+  },
+  "invite": {
+    "title": "Invite member",
+    "expiry": "Validity",
+    "days7": "7 days",
+    "days30": "30 days",
+    "code": "Invitation code",
+    "link": "Invitation link"
+  },
+  "errors": {
+    "quotaRange": "Enter an amount between {min} and {max}"
+  }
+}

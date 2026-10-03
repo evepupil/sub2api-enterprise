@@ -1,0 +1,84 @@
+{
+  "meta": {
+    "title": "API 密钥"
+  },
+  "actions": {
+    "create": "创建密钥",
+    "connect": "接入",
+    "edit": "编辑",
+    "pause": "暂停",
+    "resume": "启用",
+    "delete": "删除",
+    "reveal": "显示密钥",
+    "hide": "隐藏密钥",
+    "copySecret": "复制密钥",
+    "done": "完成"
+  },
+  "filters": {
+    "searchPlaceholder": "搜索名称或密钥末尾",
+    "statusLabel": "按状态筛选",
+    "allStatuses": "全部状态"
+  },
+  "table": {
+    "name": "名称",
+    "secret": "密钥",
+    "group": "通道",
+    "status": "状态",
+    "usage": "用量",
+    "quota": "额度",
+    "expiry": "有效期",
+    "createdOn": "创建于 {date}",
+    "usageLast30": "近 30 天 {requests} 次 · {cost}",
+    "usageToday": "今日 {requests} 次 · {cost}",
+    "unlimited": "不限",
+    "permanent": "永久"
+  },
+  "status": {
+    "active": "启用",
+    "paused": "已暂停",
+    "expired": "已过期"
+  },
+  "form": {
+    "name": "名称",
+    "group": "通道",
+    "quota": "额度",
+    "quotaUnlimited": "不限",
+    "quotaCustom": "自定义",
+    "expiry": "有效期",
+    "expiryNever": "永久",
+    "expiryKeep": "保持原日期（{date}）",
+    "expiry30d": "30 天",
+    "expiry90d": "90 天",
+    "expiry1y": "1 年"
+  },
+  "create": {
+    "title": "创建 API 密钥",
+    "submit": "创建",
+    "doneTitle": "密钥已创建"
+  },
+  "edit": {
+    "title": "编辑密钥",
+    "groupHint": "更换通道需要新建密钥"
+  },
+  "usage": {
+    "title": "接入 {name}",
+    "clientLabel": "接入方式",
+    "claude": "Claude Code",
+    "codex": "Codex CLI",
+    "curl": "curl",
+    "copy": "复制代码"
+  },
+  "delete": {
+    "title": "删除密钥「{name}」？",
+    "description": "删除后使用这个密钥的请求会立即失败，且无法恢复。"
+  },
+  "errors": {
+    "nameRequired": "请输入名称",
+    "nameTooLong": "名称最多 {max} 个字",
+    "quotaRange": "请输入 {min} 到 {max} 之间的金额"
+  },
+  "empty": {
+    "title": "还没有 API 密钥",
+    "noResults": "没有符合条件的密钥"
+  }
+}

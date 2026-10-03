@@ -1,0 +1,50 @@
+{
+  "meta": {
+    "title": "Usage"
+  },
+  "stats": {
+    "tokens": "Tokens",
+    "cacheHit": "{percent} cache hits",
+    "tokenParts": "{input} in · {cache} cached · {output} out",
+    "requests": "Requests",
+    "success": "{percent} succeeded",
+    "latency": "Avg latency",
+    "ttft": "{value} to first token",
+    "cost": "Spend",
+    "runRate": "≈ {amount}/mo",
+    "images": "{count, plural, one {# image} other {# images}}"
+  },
+  "activity": {
+    "title": "Activity",
+    "aria": "Daily usage over the past year",
+    "cell": "{day} · {tokens} tokens · {cost}",
+    "idle": "{day} · no requests",
+    "less": "Less",
+    "more": "More",
+    "mon": "Mon",
+    "wed": "Wed",
+    "fri": "Fri",
+    "activeDays": "Active days",
+    "streak": "Longest streak",
+    "streakValue": "{count, plural, one {# day} other {# days}}",
+    "rangeCost": "Spend in range",
+    "topDay": "Busiest day",
+    "topDaySub": "{tokens} tokens · {cost}"
+  },
+  "detail": {
+    "title": "Breakdown",
+    "metric": "Metric",
+    "tokens": "Tokens",
+    "requests": "Requests",
+    "cost": "Cost",
+    "byModel": "By model",
+    "byKey": "By API key",
+    "byGroup": "By channel",
+    "ariaModel": "Usage by model",
+    "ariaKey": "Usage by API key",
+    "ariaGroup": "Usage by channel",
+    "total": "Total",
+    "other": "Other",
+    "empty": "No requests in this range"
+  }
+}

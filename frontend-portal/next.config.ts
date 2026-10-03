@@ -29,6 +29,9 @@ const nextConfig = (phase: string): NextConfig =>
       return [
         { source: '/zh', destination: '/', permanent: false },
         { source: '/zh/:path*', destination: '/:path*', permanent: false },
+        // 控制台没有单独的首页，进来先看用量
+        { source: '/console', destination: '/console/usage', permanent: false },
+        { source: '/en/console', destination: '/en/console/usage', permanent: false },
       ];
     },
     async rewrites() {

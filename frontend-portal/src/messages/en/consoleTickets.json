@@ -1,0 +1,73 @@
+{
+  "meta": {
+    "title": "Tickets"
+  },
+  "actions": {
+    "create": "New ticket"
+  },
+  "filter": {
+    "label": "Filter by status",
+    "all": "All statuses"
+  },
+  "status": {
+    "open": "In progress",
+    "awaiting": "Awaiting your reply",
+    "resolved": "Resolved",
+    "closed": "Closed"
+  },
+  "category": {
+    "api": "API & requests",
+    "billing": "Billing & invoices",
+    "account": "Account & organization",
+    "other": "Other"
+  },
+  "table": {
+    "id": "ID",
+    "subject": "Subject",
+    "category": "Category",
+    "status": "Status",
+    "updatedAt": "Updated"
+  },
+  "empty": {
+    "none": {
+      "title": "No tickets yet",
+      "action": "Submit your first ticket"
+    },
+    "filtered": {
+      "title": "No tickets with this status",
+      "action": "View all"
+    }
+  },
+  "detail": {
+    "createdAt": "Created {time}",
+    "request": "Related request",
+    "copyRequest": "Copy request ID",
+    "support": "Support · {time}",
+    "you": "You · {time}",
+    "closed": "This ticket is closed",
+    "reply": {
+      "label": "Reply",
+      "placeholder": "Add details or reply to support",
+      "resolve": "Mark as resolved",
+      "reopen": "Reopen",
+      "send": "Send"
+    }
+  },
+  "form": {
+    "title": "New ticket",
+    "subject": "Subject",
+    "category": "Category",
+    "request": "Related request ID",
+    "requestPlaceholder": "req_…",
+    "body": "Description",
+    "counter": "{count} / {max}",
+    "submit": "Submit",
+    "errors": {
+      "subjectRequired": "Enter a subject",
+      "subjectTooLong": "Subject can be up to {max} characters",
+      "requestPrefix": "Request IDs start with {prefix}",
+      "bodyRequired": "Describe the problem you ran into",
+      "bodyTooShort": "Write at least {min} characters"
+    }
+  }
+}

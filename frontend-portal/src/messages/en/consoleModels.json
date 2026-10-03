@@ -1,0 +1,58 @@
+{
+  "meta": {
+    "title": "Models"
+  },
+  "scope": {
+    "label": "Scope",
+    "all": "All",
+    "favorites": "Favorites"
+  },
+  "filters": {
+    "type": "Type",
+    "provider": "Provider",
+    "context": "Context",
+    "protocol": "Protocol",
+    "search": "Search",
+    "searchPlaceholder": "Model or provider",
+    "all": "All",
+    "text": "Text",
+    "image": "Image",
+    "ctx200k": "≥ 200K",
+    "ctx1m": "≥ 1M",
+    "clear": "Clear filters"
+  },
+  "sort": {
+    "label": "Sort",
+    "latest": "Newest",
+    "priceAsc": "Price: low to high",
+    "priceDesc": "Price: high to low",
+    "context": "Context length"
+  },
+  "group": "Channel",
+  "currency": {
+    "label": "Currency",
+    "usd": "USD",
+    "cny": "CNY",
+    "note": "Converted at $1 = ¥{rate}; your wallet is billed in USD"
+  },
+  "table": {
+    "model": "Model",
+    "price": "Price",
+    "discount": "Discount",
+    "type": "Type",
+    "provider": "Provider",
+    "protocols": "Protocols",
+    "context": "Context",
+    "perMTokens": "per 1M tokens",
+    "longContext": "Over {threshold}: {input} / {output}",
+    "perImageFrom": "from {price} / image",
+    "perImageApprox": "≈ {price} / image",
+    "custom": "Custom",
+    "new": "New",
+    "try": "Try it",
+    "favorite": "Favorite",
+    "unfavorite": "Remove favorite"
+  },
+  "empty": "No matching models",
+  "emptyFavorites": "No favorites yet"
+}

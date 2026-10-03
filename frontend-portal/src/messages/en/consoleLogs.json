@@ -1,0 +1,81 @@
+{
+  "meta": {
+    "title": "Logs"
+  },
+  "export": "Export CSV",
+  "filters": {
+    "time": "Time",
+    "key": "API key",
+    "model": "Model",
+    "status": "Status",
+    "type": "Type",
+    "stream": "Streaming",
+    "requestId": "Request ID",
+    "search": "Search by request ID",
+    "all": "All",
+    "success": "Succeeded",
+    "error": "Failed",
+    "text": "Text",
+    "image": "Image",
+    "streamOn": "Streaming",
+    "streamOff": "Non-streaming",
+    "clear": "Clear filters"
+  },
+  "table": {
+    "time": "Time",
+    "tz": "UTC+8",
+    "model": "Model",
+    "tokens": "Tokens",
+    "cost": "Cost",
+    "duration": "Duration",
+    "group": "Channel",
+    "status": "Status",
+    "input": "Input",
+    "output": "Output",
+    "cache": "Cache read",
+    "images": "{count, plural, one {# image} other {# images}}",
+    "ttft": "TTFT {value}",
+    "success": "Succeeded",
+    "more": "More actions"
+  },
+  "menu": {
+    "copyId": "Copy request ID",
+    "copyCurl": "Copy as curl",
+    "detail": "View details",
+    "copied": "Copied"
+  },
+  "empty": "No matching requests",
+  "detail": {
+    "time": "Time",
+    "requestId": "Request ID",
+    "key": "API key",
+    "group": "Channel",
+    "model": "Model",
+    "type": "Type",
+    "stream": "Streaming",
+    "status": "Status",
+    "finish": "Finish reason",
+    "inputTokens": "Input tokens",
+    "cacheTokens": "Cache read tokens",
+    "outputTokens": "Output tokens",
+    "images": "Images",
+    "cost": "Cost",
+    "duration": "Total duration",
+    "ttft": "Time to first token",
+    "client": "Client",
+    "example": "Example request",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "errors": {
+    "upstream_timeout": "Upstream timeout",
+    "rate_limited": "Rate limited",
+    "context_length_exceeded": "Context too long"
+  },
+  "finish": {
+    "stop": "Completed",
+    "length": "Hit max tokens",
+    "tool_calls": "Tool call",
+    "error": "Error"
+  }
+}

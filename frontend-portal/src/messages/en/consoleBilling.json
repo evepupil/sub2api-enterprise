@@ -1,0 +1,82 @@
+{
+  "meta": {
+    "title": "Billing"
+  },
+  "balance": {
+    "label": "Available balance",
+    "low": "Your balance is below the alert threshold of {threshold}. Top up soon to avoid interrupting API calls.",
+    "runway": "Based on your {span}-day average of {avg} per day, about {days, plural, one {# day} other {# days}} of usage left",
+    "recharge": "Top up"
+  },
+  "stats": {
+    "recharged": "Top-ups, last {span} days",
+    "bonus": "Bonuses and redemptions, last {span} days",
+    "consumed": "Usage, last {span} days"
+  },
+  "redeem": {
+    "title": "Redeem code",
+    "placeholder": "e.g. NX-XXXX-XXXX",
+    "submit": "Redeem",
+    "success": "{amount} credited"
+  },
+  "alert": {
+    "title": "Balance alert",
+    "threshold": "Alert threshold",
+    "email": "Email alert",
+    "webhook": "Webhook",
+    "webhookUrl": "Webhook URL",
+    "save": "Save",
+    "saved": "Saved"
+  },
+  "txn": {
+    "title": "Transactions",
+    "type": "Type",
+    "amount": "Amount",
+    "min": "Min",
+    "max": "Max",
+    "search": "Transaction ID",
+    "columns": {
+      "time": "Time",
+      "amount": "Amount",
+      "type": "Type",
+      "note": "Note",
+      "balance": "Balance"
+    },
+    "notes": {
+      "redeem": "Redeem code {code}",
+      "topup": "{method} top-up",
+      "bonus": "{rate} bonus on a {min} top-up"
+    }
+  },
+  "types": {
+    "all": "All",
+    "recharge": "Top-up",
+    "gift": "Bonus",
+    "redeem": "Redemption",
+    "consume": "Usage",
+    "refund": "Refund"
+  },
+  "methods": {
+    "alipay": "Alipay",
+    "wechat": "WeChat Pay",
+    "stripe": "Card"
+  },
+  "recharge": {
+    "title": "Top up",
+    "amounts": "Top-up amount",
+    "custom": "Custom amount",
+    "bonus": "Bonus {amount}",
+    "tier": "{rate} bonus at {min}+",
+    "tierJoin": ", ",
+    "method": "Payment method",
+    "total": "You receive {amount}",
+    "submit": "Continue to payment"
+  },
+  "errors": {
+    "redeemRequired": "Enter a redeem code",
+    "redeemFormat": "Invalid redeem code format",
+    "amountRange": "Enter an amount between {min} and {max}",
+    "webhookUrl": "Enter an address starting with https"
+  },
+  "empty": "No matching transactions"
+}

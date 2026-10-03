@@ -511,3 +511,12 @@ export const MODELS: readonly Model[] = [
     image: { kind: 'per-token', perMTokens: 30 },
   },
 ];
+
+const MODEL_BY_ID = new Map(MODELS.map((model) => [model.id, model]));
+
+/** 按调用名取模型；占位数据里的模型名都来自本目录，找不到说明数据写错了 */
+export function getModel(id: string): Model {
+  const model = MODEL_BY_ID.get(id);
+  if (!model) throw new Error(`unknown model: ${id}`);
+  return model;
+}

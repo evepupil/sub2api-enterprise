@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "title": "对话"
+  },
+  "newChat": "新对话",
+  "model": "模型",
+  "key": "API 密钥",
+  "pricing": "输入 {input} · 输出 {output} / 百万 Token",
+  "empty": "开始一段对话",
+  "input": "消息",
+  "placeholder": "输入消息，Enter 发送，Shift + Enter 换行",
+  "count": "{count} / {max}",
+  "send": "发送",
+  "stop": "停止",
+  "copy": "复制回复",
+  "you": "你"
+}

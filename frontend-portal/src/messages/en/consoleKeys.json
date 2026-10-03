@@ -1,0 +1,84 @@
+{
+  "meta": {
+    "title": "API keys"
+  },
+  "actions": {
+    "create": "Create key",
+    "connect": "Connect",
+    "edit": "Edit",
+    "pause": "Pause",
+    "resume": "Resume",
+    "delete": "Delete",
+    "reveal": "Show key",
+    "hide": "Hide key",
+    "copySecret": "Copy key",
+    "done": "Done"
+  },
+  "filters": {
+    "searchPlaceholder": "Search by name or key suffix",
+    "statusLabel": "Filter by status",
+    "allStatuses": "All statuses"
+  },
+  "table": {
+    "name": "Name",
+    "secret": "Key",
+    "group": "Channel",
+    "status": "Status",
+    "usage": "Usage",
+    "quota": "Quota",
+    "expiry": "Expires",
+    "createdOn": "Created {date}",
+    "usageLast30": "Last 30 days: {count, plural, one {{requests} request} other {{requests} requests}} · {cost}",
+    "usageToday": "Today: {count, plural, one {{requests} request} other {{requests} requests}} · {cost}",
+    "unlimited": "Unlimited",
+    "permanent": "Never"
+  },
+  "status": {
+    "active": "Active",
+    "paused": "Paused",
+    "expired": "Expired"
+  },
+  "form": {
+    "name": "Name",
+    "group": "Channel",
+    "quota": "Quota",
+    "quotaUnlimited": "Unlimited",
+    "quotaCustom": "Custom",
+    "expiry": "Expiry",
+    "expiryNever": "Never",
+    "expiryKeep": "Keep current date ({date})",
+    "expiry30d": "30 days",
+    "expiry90d": "90 days",
+    "expiry1y": "1 year"
+  },
+  "create": {
+    "title": "Create API key",
+    "submit": "Create",
+    "doneTitle": "Key created"
+  },
+  "edit": {
+    "title": "Edit key",
+    "groupHint": "To change the channel, create a new key"
+  },
+  "usage": {
+    "title": "Connect {name}",
+    "clientLabel": "Client",
+    "claude": "Claude Code",
+    "codex": "Codex CLI",
+    "curl": "curl",
+    "copy": "Copy snippet"
+  },
+  "delete": {
+    "title": "Delete key “{name}”?",
+    "description": "Requests that use this key will fail immediately after deletion. This cannot be undone."
+  },
+  "errors": {
+    "nameRequired": "Enter a name",
+    "nameTooLong": "Name must be {max} characters or fewer",
+    "quotaRange": "Enter an amount between {min} and {max}"
+  },
+  "empty": {
+    "title": "No API keys yet",
+    "noResults": "No keys match your filters"
+  }
+}

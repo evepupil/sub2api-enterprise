@@ -1,0 +1,80 @@
+{
+  "meta": {
+    "title": "Console"
+  },
+  "nav": {
+    "label": "Console navigation",
+    "chat": "Chat",
+    "usage": "Usage",
+    "models": "Models",
+    "logs": "Logs",
+    "keys": "API keys",
+    "billing": "Billing",
+    "invite": "Referrals",
+    "organization": "Organization",
+    "docs": "Docs",
+    "tickets": "Tickets",
+    "openMenu": "Open menu",
+    "collapse": "Collapse sidebar",
+    "expand": "Expand sidebar"
+  },
+  "user": {
+    "menu": "Account menu",
+    "settings": "Account settings",
+    "site": "Back to website",
+    "logout": "Log out"
+  },
+  "notifications": {
+    "label": "Notifications",
+    "title": "Notifications"
+  },
+  "announcement": {
+    "label": "Announcements",
+    "view": "View",
+    "close": "Dismiss announcement",
+    "goto": "Announcement {index}"
+  },
+  "range": {
+    "label": "Date range",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "last7d": "Last 7 days",
+    "last30d": "Last 30 days",
+    "thisMonth": "This month",
+    "all": "All time",
+    "apply": "Apply",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "w1": "Mo",
+    "w2": "Tu",
+    "w3": "We",
+    "w4": "Th",
+    "w5": "Fr",
+    "w6": "Sa",
+    "w7": "Su"
+  },
+  "table": {
+    "total": "{total} total",
+    "perPage": "{size} / page",
+    "pageSize": "Rows per page",
+    "prev": "Previous page",
+    "next": "Next page",
+    "page": "Page {page}",
+    "actions": "Actions"
+  },
+  "actions": {
+    "refresh": "Refresh",
+    "copy": "Copy",
+    "copied": "Copied",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "close": "Close",
+    "clearFilters": "Clear filters"
+  },
+  "filters": {
+    "all": "All",
+    "noResults": "No matching records"
+  }
+}

@@ -9,6 +9,7 @@ import type { ReactNode } from 'react';
 import { Providers } from '@/components/providers';
 import { routing } from '@/i18n/routing';
 import { SITE } from '@/lib/site';
+import { loadMessages, pickMessages, SITE_NAMESPACES } from '@/messages';
 
 import '../globals.css';
 
@@ -49,7 +50,8 @@ export default async function LocaleLayout({
       suppressHydrationWarning
     >
       <body className="bg-background text-foreground font-sans antialiased">
-        <NextIntlClientProvider>
+        {/* 浏览器里只带官网的文案；控制台布局会换成控制台自己的一组 */}
+        <NextIntlClientProvider messages={pickMessages(loadMessages(locale), SITE_NAMESPACES)}>
           <Providers>{children}</Providers>
         </NextIntlClientProvider>
       </body>

@@ -33,6 +33,11 @@
   --chart-2: #60a5fa;
   --chart-3: #bfdbfe;
   --chart-4: #e11d48;
+  /* 多系列图表（控制台明细图）补充色，「其他」用 chart-muted */
+  --chart-5: #10b981;
+  --chart-6: #f59e0b;
+  --chart-7: #8b5cf6;
+  --chart-muted: #d4d4d4;
   /* 语义色：*-graphic 只用于图形（色块、圆点、可用率格），不做文字 */
   --success: #15803d;
   --success-soft: #dcfce7;
@@ -82,6 +87,10 @@
   --chart-2: #60a5fa;
   --chart-3: #1e3a8a;
   --chart-4: #fb7185;
+  --chart-5: #34d399;
+  --chart-6: #fbbf24;
+  --chart-7: #a78bfa;
+  --chart-muted: #525252;
   --success: #4ade80;
   --success-soft: rgba(34, 197, 94, 0.14);
   --success-graphic: #22c55e;
@@ -123,6 +132,10 @@
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-chart-6: var(--chart-6);
+  --color-chart-7: var(--chart-7);
+  --color-chart-muted: var(--chart-muted);
   --color-success: var(--success);
   --color-success-soft: var(--success-soft);
   --color-success-graphic: var(--success-graphic);

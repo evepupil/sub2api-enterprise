@@ -7,6 +7,8 @@ export const SITE = {
   wordmark: 'NEXUS API',
   /** 版权年份固定写死，避免构建与浏览器时间不一致 */
   copyrightYear: 2026,
+  /** 接口地址（占位），控制台的接入示例与「复制为 curl」用 */
+  apiBase: 'https://api.nexus-api.example',
 } as const;
 
 /**

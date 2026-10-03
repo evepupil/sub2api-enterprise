@@ -1,0 +1,64 @@
+{
+  "meta": {
+    "title": "账户设置"
+  },
+  "profile": {
+    "title": "个人资料",
+    "name": "名称",
+    "email": "邮箱",
+    "verified": "已验证",
+    "saved": "已保存",
+    "errors": {
+      "nameRequired": "请输入名称",
+      "nameTooLong": "名称最多 {max} 个字"
+    }
+  },
+  "password": {
+    "title": "登录密码",
+    "current": "当前密码",
+    "new": "新密码",
+    "confirm": "确认新密码",
+    "show": "显示密码",
+    "hide": "隐藏密码",
+    "save": "修改密码",
+    "saved": "密码已修改",
+    "errors": {
+      "currentRequired": "请输入当前密码",
+      "newTooShort": "新密码至少 {min} 位",
+      "newSameAsCurrent": "新密码不能与当前密码相同",
+      "confirmMismatch": "两次输入的密码不一致"
+    }
+  },
+  "twoFactor": {
+    "title": "两步验证",
+    "description": "登录时除了密码，还要输入验证器 App 里的 {digits} 位动态码。",
+    "on": "已开启",
+    "off": "未开启",
+    "setup": {
+      "title": "开启两步验证",
+      "manualKey": "也可以手动输入密钥",
+      "copyKey": "复制密钥",
+      "code": "验证码",
+      "confirm": "确认开启",
+      "errors": {
+        "codeInvalid": "请输入 {digits} 位数字验证码"
+      }
+    },
+    "disable": {
+      "title": "关闭两步验证？",
+      "description": "关闭后登录只需要密码。",
+      "confirm": "关闭"
+    }
+  },
+  "connections": {
+    "title": "第三方账号",
+    "notBound": "未绑定",
+    "bind": "绑定",
+    "unbind": "解绑",
+    "unbindDialog": {
+      "title": "解绑 Google 账号？",
+      "description": "解绑后将无法使用 Google 登录。",
+      "confirm": "解绑"
+    }
+  }
+}

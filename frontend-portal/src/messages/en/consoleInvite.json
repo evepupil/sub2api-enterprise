@@ -1,0 +1,43 @@
+{
+  "meta": {
+    "title": "Referrals"
+  },
+  "link": {
+    "label": "Your referral link",
+    "share": "Share"
+  },
+  "share": {
+    "copyLink": "Copy referral link",
+    "copyCode": "Copy referral code {code}",
+    "copyText": "Generate share message",
+    "text": "I use {site} to call Claude, GPT, Gemini and more. Sign up with my link and get an extra {bonus} on your first top-up: {link}"
+  },
+  "rules": {
+    "inviter": "<b>You:</b> Within {window, plural, one {# day} other {# days}} after a friend signs up, you earn a {rate} rebate on each of their top-ups.",
+    "invitee": "<b>Your friend:</b> Receives a {bonus} bonus on their first top-up.",
+    "payout": "<b>Payout:</b> Rebates are held for {freeze, plural, one {# day} other {# days}}, then credited to your balance automatically."
+  },
+  "stats": {
+    "total": "Total rebates",
+    "released": "Credited",
+    "frozen": "On hold",
+    "invited": "Invited",
+    "effective": "{count} of them topped up"
+  },
+  "invitees": {
+    "title": "Referral history",
+    "columns": {
+      "user": "User",
+      "registeredAt": "Signed up",
+      "recharged": "Top-ups in first {days, plural, one {# day} other {# days}}",
+      "rebate": "Rebate",
+      "status": "Status"
+    },
+    "status": {
+      "pending": "No top-up yet",
+      "frozen": "On hold",
+      "released": "Credited"
+    },
+    "empty": "No referrals yet"
+  }
+}

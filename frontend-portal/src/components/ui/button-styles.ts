@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'link' | 'inverse';
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'link' | 'inverse' | 'danger';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 const BASE =
@@ -20,6 +20,8 @@ const VARIANTS: Record<ButtonVariant, string> = {
   ghost: 'text-foreground hover:bg-muted active:bg-muted/80',
   link: 'h-auto rounded-none px-0 text-foreground underline-offset-4 hover:underline',
   inverse: 'bg-white text-neutral-900 shadow-pill hover:bg-neutral-100 active:bg-neutral-200',
+  // 删除等危险操作；暗色下底色变浅，文字跟着换成主色前景，保证对比度
+  danger: 'bg-danger text-primary-foreground hover:bg-danger/90 active:bg-danger/80',
 };
 
 /**

@@ -1,0 +1,64 @@
+{
+  "meta": {
+    "title": "Account settings"
+  },
+  "profile": {
+    "title": "Profile",
+    "name": "Name",
+    "email": "Email",
+    "verified": "Verified",
+    "saved": "Saved",
+    "errors": {
+      "nameRequired": "Enter your name",
+      "nameTooLong": "Name can be up to {max} characters"
+    }
+  },
+  "password": {
+    "title": "Password",
+    "current": "Current password",
+    "new": "New password",
+    "confirm": "Confirm new password",
+    "show": "Show password",
+    "hide": "Hide password",
+    "save": "Change password",
+    "saved": "Password changed",
+    "errors": {
+      "currentRequired": "Enter your current password",
+      "newTooShort": "New password must be at least {min} characters",
+      "newSameAsCurrent": "New password must differ from the current one",
+      "confirmMismatch": "The two passwords do not match"
+    }
+  },
+  "twoFactor": {
+    "title": "Two-factor authentication",
+    "description": "Besides your password, signing in requires a {digits}-digit code from your authenticator app.",
+    "on": "On",
+    "off": "Off",
+    "setup": {
+      "title": "Turn on two-factor authentication",
+      "manualKey": "Or enter this key manually",
+      "copyKey": "Copy key",
+      "code": "Verification code",
+      "confirm": "Turn on",
+      "errors": {
+        "codeInvalid": "Enter the {digits}-digit verification code"
+      }
+    },
+    "disable": {
+      "title": "Turn off two-factor authentication?",
+      "description": "After this, signing in requires only your password.",
+      "confirm": "Turn off"
+    }
+  },
+  "connections": {
+    "title": "Connected accounts",
+    "notBound": "Not connected",
+    "bind": "Connect",
+    "unbind": "Disconnect",
+    "unbindDialog": {
+      "title": "Disconnect your Google account?",
+      "description": "You will no longer be able to sign in with Google.",
+      "confirm": "Disconnect"
+    }
+  }
+}
