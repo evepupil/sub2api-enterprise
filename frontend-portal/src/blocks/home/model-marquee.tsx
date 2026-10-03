@@ -54,7 +54,7 @@ export function ModelMarquee() {
           })}
         </div>
         <div className="mt-10 flex justify-center">
-          <Link href="/models" data-catalog-more className={buttonClass({ variant: 'secondary' })}>
+          <Link href="/catalog" data-catalog-more className={buttonClass({ variant: 'secondary' })}>
             {t('catalog.more')}
             <ArrowRight />
           </Link>

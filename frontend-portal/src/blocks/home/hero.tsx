@@ -24,7 +24,7 @@ export function HomeHero() {
       <Container className="relative flex flex-col items-center text-center">
         <div className="max-w-full animate-fade-up" style={delay(0)}>
           <Link
-            href="/models?type=image"
+            href="/catalog?type=image"
             data-hero-badge
             className="group inline-flex max-w-full items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-sm font-medium text-foreground shadow-pill transition-colors hover:bg-muted"
           >

@@ -12,7 +12,7 @@ const matches = (path: string) => new RegExp(`^/${pattern}$`).test(path);
 describe('中文地址改写', () => {
   it('不带前缀的中文页面地址改写到 /zh', () => {
     for (const path of [
-      '/models',
+      '/catalog',
       '/pricing',
       '/channels',
       '/docs',
@@ -27,9 +27,9 @@ describe('中文地址改写', () => {
   it('英文、已带 zh 前缀、框架资源、接口和带扩展名的文件不改写', () => {
     for (const path of [
       '/en',
-      '/en/models',
+      '/en/catalog',
       '/zh',
-      '/zh/models',
+      '/zh/catalog',
       '/_next/static/chunk.js',
       '/api/health',
       '/providers/openai.svg',

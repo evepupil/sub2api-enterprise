@@ -22,7 +22,7 @@ export async function DocsPlaceholder() {
           {t('docs.title')}
         </h1>
         <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-          <Link href="/models" className={buttonClass()}>
+          <Link href="/catalog" className={buttonClass()}>
             {tCommon('actions.viewModels')}
           </Link>
           <Link href="/pricing" className={buttonClass({ variant: 'secondary' })}>

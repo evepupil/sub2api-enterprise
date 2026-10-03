@@ -37,7 +37,7 @@
 | 页面 | 路由 | 用户来干什么 | 首屏核心动作 | 参照页 | 区块下限 | 分路 |
 |---|---|---|---|---|---|---|
 | 首页 | `/` | 了解服务、注册 | 「免费注册」「查看价格」 | 模板首页 | 7 + 顶栏页脚 | L1 L2 L3 |
-| 模型 | `/models` | 选模型、看价格和可用率 | 通道切换、搜索、筛选 | onehop 模型页 | 2（筛选器内含 5 个区域） | L4 |
+| 模型 | `/catalog` | 选模型、看价格和可用率 | 通道切换、搜索、筛选 | onehop 模型页 | 2（筛选器内含 5 个区域） | L4 |
 | 价格 | `/pricing` | 查单价 | 通道切换、币种切换 | onehop 价格页 | 4 | L5 |
 | 通道 | `/channels` | 看三种通道的权益差别 | 看三张通道卡、对比特权、查看定价 | 模板价格页 | 5 | L6 |
 | 登录 | `/login` | 登录（个人与组织成员同一入口） | 填邮箱和密码 | 模板登录页 | 2 | L7 |
@@ -45,7 +45,7 @@
 | 文档 | `/docs` | 占位 | 无 | 无 | 1 | L7 |
 | 404 | 任意不存在地址 | 回到站内 | 「返回首页」 | 无 | 1 | L7 |
 
-英文版地址前加 `/en`（`/en/models`），由框架处理，区块不用管。
+英文版地址前加 `/en`（`/en/catalog`），由框架处理，区块不用管。模型页用 `/catalog` 而不是 `/models`：官网和后端以后合并在同一个域名下，后端已有 `GET /models` 接口。
 
 ---
 
@@ -168,7 +168,7 @@
 | 路由 | 文件 | 页面标题 | 渲染的区块（按顺序） |
 |---|---|---|---|
 | `/` | `src/app/[locale]/(site)/page.tsx` | 根布局默认标题 | HomeHero、ConsolePreview、ProviderLogos、FeaturesBento、FeatureGrid、ModelMarquee、HomeCta |
-| `/models` | `src/app/[locale]/(site)/models/page.tsx` | `models.meta.title` | ModelsHero、ModelsExplorer |
+| `/catalog` | `src/app/[locale]/(site)/catalog/page.tsx` | `models.meta.title` | ModelsHero、ModelsExplorer |
 | `/pricing` | `src/app/[locale]/(site)/pricing/page.tsx` | `pricing.meta.title` | PricingHero、PricingTables、PricingNotes、PricingFaq |
 | `/channels` | `src/app/[locale]/(site)/channels/page.tsx` | `groups.meta.title` | GroupsHero、GroupCards、PrivilegeTable、GroupsFaq、GroupsLogos |
 | `/docs` | `src/app/[locale]/(site)/docs/page.tsx` | `misc.meta.docsTitle` | DocsPlaceholder |
