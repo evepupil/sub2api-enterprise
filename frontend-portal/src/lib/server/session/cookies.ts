@@ -79,6 +79,11 @@ export function clearedCookieWrites(names: readonly string[], secure: boolean): 
 
 export const SESSION_COOKIE_NAMES = [ACCESS_COOKIE, REFRESH_COOKIE] as const;
 
+/** 请求里有没有任何登录凭证 cookie；只看在不在，凭证是否还有效由后端判断 */
+export function hasSessionCookie(cookies: { has(name: string): boolean }): boolean {
+  return SESSION_COOKIE_NAMES.some((name) => cookies.has(name));
+}
+
 /** 后端登录或续期接口的 data 里取出凭证；缺字段时返回 null */
 export function tokenPairFrom(data: unknown): TokenPair | null {
   if (typeof data !== 'object' || data === null) return null;

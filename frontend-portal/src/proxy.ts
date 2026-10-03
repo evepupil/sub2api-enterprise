@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
-import { ACCESS_COOKIE, REFRESH_COOKIE } from '@/lib/server/session/cookies';
+import { hasSessionCookie } from '@/lib/server/session/cookies';
 import { publicOriginFor } from '@/lib/server/session/origin';
 import { loginRedirectFor } from '@/lib/session/guard';
 
@@ -12,9 +12,7 @@ import { loginRedirectFor } from '@/lib/session/guard';
  * 跳转地址按用户浏览器看到的域名拼（经反向代理或隧道时看转发头），不能用服务端自己看到的内网地址。
  */
 export function proxy(request: NextRequest) {
-  if (request.cookies.has(ACCESS_COOKIE) || request.cookies.has(REFRESH_COOKIE)) {
-    return NextResponse.next();
-  }
+  if (hasSessionCookie(request.cookies)) return NextResponse.next();
   const { pathname, search } = request.nextUrl;
   const target = new URL(
     loginRedirectFor(pathname, search),

@@ -61,8 +61,10 @@ describe('控制台用量接口', () => {
     expect(backend.calls).toEqual([]);
   });
 
-  it('没登录返回 401；后端说太频繁原样返回 429', async () => {
+  it('没登录返回 401（参数不对也先报没登录）；后端说太频繁原样返回 429', async () => {
     expect((await route.GET(get('from=2026-09-01&to=2026-09-30', ''))).status).toBe(401);
+    expect((await route.GET(get('', ''))).status).toBe(401);
+    expect(backend.calls).toEqual([]);
     backend.respond = () => ({
       ok: false,
       error: { status: 429, reason: 'RATE_LIMITED', message: '' },
