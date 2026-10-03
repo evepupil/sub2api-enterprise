@@ -15,7 +15,7 @@ import {
 
 /**
  * 顶部四张数字卡：Token、请求、平均耗时、消费。
- * 数字都跟着所选时间范围变；days 用来把本期消费折算成「每月约多少」。
+ * 数字都跟着所选时间范围变；消费卡的大数字是本期计费，右上角用 days 折算成「每月约多少」。
  */
 export function UsageStats({ summary, days }: { summary: UsageSummary; days: number }) {
   const t = useTranslations('consoleUsage');
@@ -50,8 +50,7 @@ export function UsageStats({ summary, days }: { summary: UsageSummary; days: num
         label={t('stats.cost')}
         aside={t('stats.runRate', { amount: formatUsd(monthlyRunRate(summary.costUsd, days)) })}
         value={formatUsd(summary.costUsd)}
-        // 生图张数传数字：千分位和英文单复数交给文案里的格式处理
-        sub={t('stats.images', { count: summary.images })}
+        sub={t('stats.billed')}
       />
     </div>
   );

@@ -1,4 +1,10 @@
-import { BALANCE_ALERT, formatInteger, formatUsd, RECHARGE_LIMITS } from '@/lib/console';
+import {
+  BALANCE_ALERT,
+  formatInteger,
+  formatUsd,
+  RECHARGE_LIMITS,
+  USD_PREFIX,
+} from '@/lib/console';
 
 /** 余额提醒设置：和数据层初始值同一个形状 */
 export type AlertSettings = typeof BALANCE_ALERT;
@@ -61,7 +67,7 @@ export function isHttpsUrl(text: string): boolean {
   }
 }
 
-/** 档位、限额这类整数金额写成 $200、$10,000（不带小数）；有小数时退回通用写法 */
+/** 档位、限额这类整数金额写成 US$200、US$10,000（不带小数）；有小数时退回通用写法 */
 export function formatUsdWhole(usd: number): string {
-  return Number.isInteger(usd) ? `$${formatInteger(usd)}` : formatUsd(usd);
+  return Number.isInteger(usd) ? `${USD_PREFIX}${formatInteger(usd)}` : formatUsd(usd);
 }

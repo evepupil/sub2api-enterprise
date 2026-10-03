@@ -438,7 +438,7 @@ pnpm format:check  # prettier
 |---|---|
 | `CONSOLE_NOW`、`TODAY`、`DEFAULT_RANGE`、`presetRange(p)`、`customRange(a, b)`、`rangeDays(r)`、`inRange(day, r)`、`isSingleDay(r)`、`DateRange`、`RANGE_PRESETS` | 固定的「现在」（北京时间 2026-10-03 14:32）与日期范围 |
 | `dayKey(ts)`、`formatDateTime(ts)`、`formatDateTimeShort(ts)`、`formatDayLabel(day, locale)`、`formatMonthLabel(month, locale)`、`formatMonthTitle(y, m, locale)`、`formatHour(h)` | 时间显示（一律北京时间） |
-| `formatCompact(n)`、`formatInteger(n)`、`formatUsd(usd)`、`formatSignedUsd(usd)`、`formatDuration(ms)`、`formatPercent(r, digits?)`、`maskEmail(e)` | 数字、金额（美元）、耗时、百分比 |
+| `formatCompact(n)`、`formatInteger(n)`、`formatUsd(usd)`、`formatSignedUsd(usd)`、`formatDuration(ms)`、`formatPercent(r, digits?)`、`maskEmail(e)` | 数字、金额（美元，前缀写 `US$`，如 `US$142.97`；导出常量 `USD_PREFIX`）、耗时、百分比 |
 | `USAGE_RECORDS`、`recordsInRange(r)`、`summarize(records)`、`breakdown(records, r, dimension, metric, max?)`、`dailyTotals()`、`activityStats(totals, r)`、`heatmap(totals)`、`monthlyRunRate(cost, days)`、`keyUsage(keyId)`、`OTHER_SERIES`、`USAGE_METRICS` | 用量与图表数据 |
 | `REQUEST_LOGS`、`filterLogs(logs, filter)`、`logsToCsv(logs)`、`curlFor(log)`、`LogFilter`、`RequestLog` | 请求日志 |
 | `API_KEYS`、`getKey(id)`、`maskKey(secret)`、`searchKeys(keys, q, status)`、`KEY_STATUSES`、`USED_MODEL_IDS` | API 密钥 |
@@ -452,12 +452,12 @@ pnpm format:check  # prettier
 
 模型、厂商、版本与价格照旧从 `@/lib/catalog` 取（`MODELS`、`getModel`、`getProvider`、`getEdition`、`EDITIONS`、`textPrice`、`imagePrice`、`textPriceAt`、`imagePriceAt`、`editionDiscount`、`formatRatio`、`filterModels`、`facetCounts`、`PROTOCOL_LABELS`、`USD_CNY_RATE`、`formatMoney` 等）。版本名用 `getEdition(id).name[locale]`。
 
-单测算出的关键数字（交互检查会用）：近 30 天请求 41,198、花费 $142.97、Token 250.3M、缓存命中 62%；今天请求 492；日志 240 条，其中失败 8 条、生图 24 条、今天 11 条；余额 $129.68；近 30 天充值 1 笔 $100.00、流水 31 条；密钥 5 个；组织成员 5 人。
+单测算出的关键数字（交互检查会用）：近 30 天请求 41,198、花费 US$142.97、Token 250.3M、缓存命中 62%；今天请求 492；日志 240 条，其中失败 8 条、生图 24 条、今天 11 条；余额 US$129.68；近 30 天充值 1 笔 US$100.00、流水 31 条；密钥 5 个；组织成员 5 人。
 
 ### 10.4 控制台实现守则（在第 7 章之外）
 
 - 页面区块全部 `'use client'`，状态用本地 `useState`（对话页的模型参数除外，见页面规格）；不发任何网络请求，不用 `Math.random()`、`Date.now()`、`new Date()` 生成显示用的数据（新建密钥、邀请码这类一次性随机串可以用 `crypto.getRandomValues`，只在点击事件里调用）。
-- 时间一律用 `formatDateTime` 一类函数（北京时间），金额一律 `formatUsd`，Token 一律 `formatCompact`。
+- 时间一律用 `formatDateTime` 一类函数（北京时间），金额一律 `formatUsd`（写作 US$，不要自己拼「$」），Token 一律 `formatCompact`。模型单价沿用官网价格表的写法（`formatMoney`，`$` / `¥`）。
 - 新增、编辑、删除只改本页的本地列表；刷新按钮转 600ms 圈后恢复；表单提交先校验（所有出错字段同时标红，焦点落第一个），通过后加载 800–1200ms 再给结果。
 - 每个列表都要有空状态（筛选无结果时给「清除筛选」）；长文本截断；手机 375 宽页面不横向溢出（宽表格在 `TableShell` 里横向滚动，筛选栏折成一到两列）。
 - 只写标题，不写页面描述句；面板标题能省就省；不写「示意」「暂不支持」「即将上线」之类的话。

@@ -88,13 +88,13 @@ describe('控制台数字格式', () => {
   });
 
   it('美元金额按大小取精度', () => {
-    expect(formatUsd(1284.523)).toBe('$1,284.52');
-    expect(formatUsd(0.0412)).toBe('$0.0412');
-    expect(formatUsd(0.002117)).toBe('$0.002117');
-    expect(formatUsd(0)).toBe('$0.00');
-    expect(formatUsd(-12.3)).toBe('-$12.30');
-    expect(formatSignedUsd(100)).toBe('+$100.00');
-    expect(formatSignedUsd(-1.5)).toBe('-$1.50');
+    expect(formatUsd(1284.523)).toBe('US$1,284.52');
+    expect(formatUsd(0.0412)).toBe('US$0.0412');
+    expect(formatUsd(0.002117)).toBe('US$0.002117');
+    expect(formatUsd(0)).toBe('US$0.00');
+    expect(formatUsd(-12.3)).toBe('-US$12.30');
+    expect(formatSignedUsd(100)).toBe('+US$100.00');
+    expect(formatSignedUsd(-1.5)).toBe('-US$1.50');
   });
 
   it('耗时、百分比、邮箱打码', () => {

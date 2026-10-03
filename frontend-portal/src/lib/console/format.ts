@@ -1,6 +1,9 @@
 /**
- * 控制台的数字格式。金额一律美元（钱包按美元结算）。
+ * 控制台的数字格式。金额一律美元（钱包按美元结算），前缀写 US$，和其他用「$」的币种区分开。
  */
+
+/** 金额前缀：US$142.97 */
+export const USD_PREFIX = 'US$';
 
 /** 去掉小数末尾多余的 0（只处理带小数点的数字串，整数原样返回） */
 const trim = (text: string) => (text.includes('.') ? text.replace(/\.?0+$/, '') : text);
@@ -36,22 +39,22 @@ export function formatInteger(value: number): string {
 }
 
 /**
- * 美元金额：≥ 1 保留两位小数加千分位（$1,284.52）；
- * 0.01–1 保留四位（$0.0412）；更小的保留六位（$0.002117），都去掉末尾多余的 0。
+ * 美元金额：≥ 1 保留两位小数加千分位（US$1,284.52）；
+ * 0.01–1 保留四位（US$0.0412）；更小的保留六位（US$0.002117），都去掉末尾多余的 0。
  */
 export function formatUsd(usd: number): string {
   const abs = Math.abs(usd);
   const sign = usd < 0 ? '-' : '';
-  if (abs === 0) return '$0.00';
+  if (abs === 0) return `${USD_PREFIX}0.00`;
   if (abs >= 1) {
-    return `${sign}$${abs.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return `${sign}${USD_PREFIX}${abs.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
   const digits = abs >= 0.01 ? 4 : 6;
   const text = trim(abs.toFixed(digits));
-  return `${sign}$${text === '0' ? abs.toExponential(1) : text}`;
+  return `${sign}${USD_PREFIX}${text === '0' ? abs.toExponential(1) : text}`;
 }
 
-/** 带正负号的金额，流水用：+$100.00 / -$12.34 */
+/** 带正负号的金额，流水用：+US$100.00 / -US$12.34 */
 export function formatSignedUsd(usd: number): string {
   return usd > 0 ? `+${formatUsd(usd)}` : formatUsd(usd);
 }

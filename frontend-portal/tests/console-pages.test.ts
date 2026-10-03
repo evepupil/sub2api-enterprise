@@ -168,8 +168,8 @@ describe('账单页规则', () => {
     expect(isThresholdValid(null)).toBe(false);
     expect(isHttpsUrl('https://hooks.example.com/x')).toBe(true);
     expect(isHttpsUrl('http://hooks.example.com')).toBe(false);
-    expect(formatUsdWhole(10000)).toBe('$10,000');
-    expect(formatUsdWhole(9.5)).toBe('$9.50');
+    expect(formatUsdWhole(10000)).toBe('US$10,000');
+    expect(formatUsdWhole(9.5)).toBe('US$9.50');
   });
 
   it('新流水并进账本后余额跟着变，赠送档位从高到低取', () => {

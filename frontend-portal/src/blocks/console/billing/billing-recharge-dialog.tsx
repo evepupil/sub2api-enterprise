@@ -37,7 +37,7 @@ const PRESET = {
 
 const FORM_ID = 'recharge-form';
 
-/** 赠送档位按金额从低到高排好，拼成「满 $200 赠送 5%，满 $500 赠送 10%」 */
+/** 赠送档位按金额从低到高排好，拼成「满 US$200 赠送 5%，满 US$500 赠送 10%」 */
 const ASCENDING_TIERS = [...RECHARGE_BONUS_TIERS].sort((a, b) => a.minUsd - b.minUsd);
 
 /**

@@ -12,7 +12,7 @@
     "ttft": "首字 {value}",
     "cost": "消费",
     "runRate": "约 {amount}/月",
-    "images": "生图 {count, number} 张"
+    "billed": "本期计费"
   },
   "activity": {
     "title": "活动",

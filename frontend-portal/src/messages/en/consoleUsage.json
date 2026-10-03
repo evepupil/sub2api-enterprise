@@ -12,7 +12,7 @@
     "ttft": "{value} to first token",
     "cost": "Spend",
     "runRate": "≈ {amount}/mo",
-    "images": "{count, plural, one {# image} other {# images}}"
+    "billed": "Billed this period"
   },
   "activity": {
     "title": "Activity",

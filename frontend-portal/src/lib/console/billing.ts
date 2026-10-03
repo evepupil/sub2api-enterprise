@@ -74,7 +74,7 @@ const CREDITS: readonly Omit<Transaction, 'id'>[] = [
     type: 'gift',
     amountUsd: 10,
     method: null,
-    note: { zh: '充值满 $200 赠送 5%', en: '5% bonus on a $200 top-up' },
+    note: { zh: '充值满 US$200 赠送 5%', en: '5% bonus on a US$200 top-up' },
   },
   {
     ts: at('2026-07-01', 9),
@@ -95,7 +95,7 @@ const CREDITS: readonly Omit<Transaction, 'id'>[] = [
     type: 'gift',
     amountUsd: 10,
     method: null,
-    note: { zh: '充值满 $200 赠送 5%', en: '5% bonus on a $200 top-up' },
+    note: { zh: '充值满 US$200 赠送 5%', en: '5% bonus on a US$200 top-up' },
   },
   {
     ts: at('2026-09-02', 11),
@@ -233,7 +233,7 @@ export function isLowBalance(balanceUsd: number, thresholdUsd: number): boolean 
 /** 充值档位（美元） */
 export const RECHARGE_PRESETS: readonly number[] = [10, 50, 100, 500];
 
-/** 充值赠送（占位）：满 $200 送 5%，满 $500 送 10% */
+/** 充值赠送（占位）：满 US$200 送 5%，满 US$500 送 10% */
 export const RECHARGE_BONUS_TIERS: readonly { minUsd: number; rate: number }[] = [
   { minUsd: 500, rate: 0.1 },
   { minUsd: 200, rate: 0.05 },

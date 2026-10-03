@@ -19,7 +19,7 @@ const records30 = recordsInRange(last30);
 const sum30 = summarize(records30);
 
 describe('用量记录（固定种子）', () => {
-  it('从开通日到今天，近 30 天花费约 $143', () => {
+  it('从开通日到今天，近 30 天花费约 US$143', () => {
     expect(USAGE_RECORDS[0]?.day).toBe('2026-04-12');
     expect(USAGE_RECORDS.at(-1)?.day).toBe('2026-10-03');
     expect(sum30.costUsd).toBeCloseTo(142.97, 2);
