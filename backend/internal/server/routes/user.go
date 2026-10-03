@@ -113,6 +113,8 @@ func RegisterUserRoutes(
 			usage.GET("/dashboard/trend", h.Usage.DashboardTrend)
 			usage.GET("/dashboard/models", h.Usage.DashboardModels)
 			usage.GET("/dashboard/snapshot-v2", h.Usage.DashboardSnapshotV2)
+			// 官网控制台用量页：合计与按天（小时）× 模型 / 密钥 / 分组的拆分一次给齐
+			usage.GET("/dashboard/overview", h.Usage.DashboardOverview)
 			usage.POST("/dashboard/api-keys-usage", h.Usage.DashboardAPIKeysUsage)
 		}
 
