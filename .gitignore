@@ -145,6 +145,9 @@ docs/*
 !docs/技术设计.md
 !docs/架构设计.md
 !docs/roadmap.md
+!docs/前端设计.md
+!docs/前端设计/
+!docs/前端设计/**
 !docs/模块设计/
 !docs/模块设计/*.md
 !docs/legal/
