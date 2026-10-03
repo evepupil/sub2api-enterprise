@@ -21,6 +21,8 @@ import {
 } from '@/lib/console/time';
 import { cn } from '@/lib/utils';
 
+import { CONTROL_BUTTON } from './control-button';
+
 type Translator = ReturnType<typeof useTranslations<'console'>>;
 
 /** 范围按钮上的文字：预设显示名称，自定义显示起止日期 */
@@ -114,7 +116,7 @@ export function DateRangePicker({
           aria-label={t('range.label')}
           className={buttonClass({
             variant: 'secondary',
-            className: cn('h-10 justify-between gap-2 rounded-md px-3', className),
+            className: cn(CONTROL_BUTTON, 'justify-between gap-2 px-3', className),
           })}
         >
           <CalendarDays aria-hidden />

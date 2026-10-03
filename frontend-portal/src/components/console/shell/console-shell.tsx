@@ -12,11 +12,12 @@ import { Sheet } from '../dialog';
 import { AnnouncementBar } from './announcement-bar';
 import { ConsoleSidebar } from './console-sidebar';
 import { NotificationsMenu } from './notifications-menu';
-import { Avatar } from './user-menu';
+import { UserMenu } from './user-menu';
 
 /**
  * 控制台外壳：顶部公告条 + 左侧边栏 + 右侧内容区。整屏固定高度，只有内容区滚动。
- * 桌面端侧边栏可收起成图标栏；大屏以下侧边栏换成左侧抽屉，由顶部一条手机栏的菜单按钮打开，换页自动关闭。
+ * 桌面端侧边栏可收起成图标栏；大屏以下侧边栏换成左侧抽屉，由顶部一条手机栏的菜单按钮打开，换页自动关闭；
+ * 手机栏右侧的头像点开的是同一个账号菜单。
  */
 export function ConsoleShell({ children }: { children: ReactNode }) {
   const t = useTranslations('console');
@@ -60,7 +61,7 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
             <Brand />
             <span className="flex-1" />
             <NotificationsMenu side="bottom" />
-            <Avatar className="size-7" />
+            <UserMenu placement="bar" />
           </div>
           <main
             id="main"

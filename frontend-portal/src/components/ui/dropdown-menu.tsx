@@ -40,6 +40,25 @@ export function DropdownMenuItem({
   return <DropdownMenuPrimitive.Item className={cn(ITEM_CLASS, className)} {...props} />;
 }
 
+/**
+ * 分段式单选项：几个并排放进一行（如头像菜单里的语言、主题），选中项黑底白字，与分段控件一致。
+ * 方向键上下会依次经过每一块；外层的 RadioGroup 自己负责排成一行。
+ */
+export function DropdownMenuSegmentItem({
+  className,
+  ...props
+}: ComponentProps<typeof DropdownMenuPrimitive.RadioItem>) {
+  return (
+    <DropdownMenuPrimitive.RadioItem
+      className={cn(
+        'cursor-pointer select-none whitespace-nowrap rounded-md px-2.5 py-1 text-xs font-medium text-muted-foreground outline-none transition-colors data-[highlighted]:text-foreground data-[highlighted]:ring-2 data-[highlighted]:ring-foreground/15 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground data-[state=checked]:shadow-button',
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
 /** 单选项：选中项右侧显示对勾。 */
 export function DropdownMenuRadioItem({
   className,

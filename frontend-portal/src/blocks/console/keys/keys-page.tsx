@@ -6,6 +6,7 @@ import { useState } from 'react';
 
 import { ConfirmDialog } from '@/components/console/dialog';
 import { ConsolePage } from '@/components/console/console-page';
+import { CONTROL_BUTTON } from '@/components/console/control-button';
 import { RefreshButton } from '@/components/console/refresh-button';
 import { EmptyState } from '@/components/console/empty-state';
 import { SearchInput } from '@/components/console/filter-field';
@@ -77,7 +78,7 @@ export function KeysPage() {
       actions={
         <>
           <RefreshButton />
-          <Button data-create-key onClick={openCreate}>
+          <Button className={CONTROL_BUTTON} data-create-key onClick={openCreate}>
             <Plus aria-hidden />
             {t('actions.create')}
           </Button>

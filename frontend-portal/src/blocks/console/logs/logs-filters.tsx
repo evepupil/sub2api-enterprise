@@ -3,6 +3,7 @@
 import { Download } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
+import { CONTROL_BUTTON } from '@/components/console/control-button';
 import { DateRangePicker } from '@/components/console/date-range-picker';
 import { FilterField, SearchInput } from '@/components/console/filter-field';
 import { Panel } from '@/components/console/panel';
@@ -136,13 +137,13 @@ export function LogsFilters({
           />
         </FilterField>
         {dirty ? (
-          <Button variant="ghost" className="h-10" data-clear-filters onClick={onClear}>
+          <Button variant="ghost" className={CONTROL_BUTTON} data-clear-filters onClick={onClear}>
             {t('filters.clear')}
           </Button>
         ) : null}
         <Button
           variant="secondary"
-          className="h-10"
+          className={CONTROL_BUTTON}
           data-export
           disabled={rows.length === 0}
           onClick={() => downloadCsv(logsToCsv(rows), `logs-${TODAY}.csv`)}

@@ -1,7 +1,7 @@
 'use client';
 
 import { ChevronDown, Languages } from 'lucide-react';
-import { hasLocale, useLocale, useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 import { buttonClass } from '@/components/ui/button-styles';
 import {
@@ -11,8 +11,8 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { usePathname, useRouter } from '@/i18n/navigation';
 import { type AppLocale, routing } from '@/i18n/routing';
+import { useSwitchLocale } from '@/i18n/use-switch-locale';
 import { cn } from '@/lib/utils';
 
 /** 顶栏上的简称。语言名按各自的写法固定显示，不随界面语言翻译。 */
@@ -31,15 +31,9 @@ export function LanguageSwitcher({
 }) {
   const t = useTranslations('common');
   const locale = useLocale();
-  const pathname = usePathname();
-  const router = useRouter();
+  const switchLocale = useSwitchLocale();
 
   const names: Record<AppLocale, string> = { zh: t('language.zh'), en: t('language.en') };
-
-  const handleChange = (next: string) => {
-    if (!hasLocale(routing.locales, next) || next === locale) return;
-    router.replace(`${pathname}${window.location.search}`, { locale: next, scroll: false });
-  };
 
   return (
     <DropdownMenu modal={false}>
@@ -64,7 +58,7 @@ export function LanguageSwitcher({
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align={full ? 'start' : 'end'}>
-        <DropdownMenuRadioGroup value={locale} onValueChange={handleChange}>
+        <DropdownMenuRadioGroup value={locale} onValueChange={switchLocale}>
           {routing.locales.map((code) => (
             <DropdownMenuRadioItem key={code} value={code} data-lang={code}>
               {names[code]}

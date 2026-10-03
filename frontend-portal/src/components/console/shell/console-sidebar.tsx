@@ -4,8 +4,6 @@ import { ArrowRight, PanelLeftClose, PanelLeftOpen, Sparkles } from 'lucide-reac
 import { useTranslations } from 'next-intl';
 
 import { Brand } from '@/components/layout/brand';
-import { LanguageSwitcher } from '@/components/layout/language-switcher';
-import { ThemeToggle } from '@/components/layout/theme-toggle';
 import { buttonClass } from '@/components/ui/button-styles';
 import { Link, usePathname } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
@@ -15,7 +13,7 @@ import { NotificationsMenu } from './notifications-menu';
 import { UserMenu } from './user-menu';
 
 /**
- * 控制台侧边栏：品牌与收起按钮、深色「对话」入口、菜单、底部账号菜单与通知 / 语言 / 主题。
+ * 控制台侧边栏：品牌与收起按钮、深色「对话」入口、菜单、底部头像菜单（含语言与主题切换）与通知。
  * collapsed 为真时只显示图标（悬停有原生提示），桌面端可收起；手机端放进左侧抽屉，不收起。
  * 交互检查：菜单项 data-nav={key}，当前页带 aria-current="page"，收起按钮 data-sidebar-toggle。
  */
@@ -114,13 +112,14 @@ export function ConsoleSidebar({
         </ul>
       </nav>
 
-      <div className={cn('shrink-0 space-y-2 border-t border-border', collapsed ? 'p-2' : 'p-3')}>
-        <UserMenu collapsed={collapsed} />
-        <div className={cn('flex items-center gap-1', collapsed ? 'flex-col' : 'justify-between')}>
-          <NotificationsMenu />
-          {collapsed ? null : <LanguageSwitcher />}
-          <ThemeToggle />
-        </div>
+      <div
+        className={cn(
+          'flex shrink-0 items-center gap-1 border-t border-border',
+          collapsed ? 'flex-col p-2' : 'p-3',
+        )}
+      >
+        <UserMenu placement={collapsed ? 'rail' : 'sidebar'} />
+        <NotificationsMenu />
       </div>
     </div>
   );

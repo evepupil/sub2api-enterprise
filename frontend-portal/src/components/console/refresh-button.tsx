@@ -6,12 +6,14 @@ import { useEffect, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 
+import { CONTROL_BUTTON } from './control-button';
+
 /** 转圈时长：数据是占位的，转一下给出「已刷新」的反馈就够了 */
 const REFRESH_MS = 600;
 
 /**
  * 标题行右侧的刷新按钮：点击后图标转 600ms，期间按钮禁用，防止连点。
- * 高 40px，和旁边的日期范围按钮、搜索框齐平。交互检查找 data-refresh。
+ * 高 40px、小圆角，和旁边的日期范围按钮、搜索框齐平。交互检查找 data-refresh。
  */
 export function RefreshButton({ onRefresh }: { onRefresh?: () => void }) {
   const t = useTranslations('console');
@@ -38,7 +40,7 @@ export function RefreshButton({ onRefresh }: { onRefresh?: () => void }) {
   return (
     <Button
       variant="secondary"
-      className="h-10"
+      className={CONTROL_BUTTON}
       data-refresh
       disabled={refreshing}
       aria-busy={refreshing ? 'true' : undefined}

@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 
 import { ConsolePage } from '@/components/console/console-page';
+import { CONTROL_BUTTON } from '@/components/console/control-button';
 import { Button } from '@/components/ui/button';
 import type { AppLocale } from '@/i18n/routing';
 import { CHAT_MODEL_IDS, DEFAULT_CHAT_MODEL } from '@/lib/console';
@@ -33,7 +34,12 @@ export function ChatPage() {
       id="chat"
       title={t('meta.title')}
       actions={
-        <Button variant="secondary" data-new-chat onClick={() => chat.reset()}>
+        <Button
+          variant="secondary"
+          className={CONTROL_BUTTON}
+          data-new-chat
+          onClick={() => chat.reset()}
+        >
           <SquarePen aria-hidden />
           {t('newChat')}
         </Button>

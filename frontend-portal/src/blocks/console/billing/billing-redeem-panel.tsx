@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useState, type FormEvent } from 'react';
 
+import { CONTROL_BUTTON } from '@/components/console/control-button';
 import { Panel } from '@/components/console/panel';
 import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
@@ -91,7 +92,7 @@ export function BillingRedeemPanel({ onRedeemed }: { onRedeemed: (code: string) 
               }}
               className="min-w-0 flex-1 font-mono uppercase placeholder:normal-case"
             />
-            <Button type="submit" data-redeem-submit loading={loading} className="h-10">
+            <Button type="submit" data-redeem-submit loading={loading} className={CONTROL_BUTTON}>
               {t('redeem.submit')}
             </Button>
           </div>

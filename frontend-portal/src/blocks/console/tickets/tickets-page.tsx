@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
 import { ConsolePage } from '@/components/console/console-page';
+import { CONTROL_BUTTON } from '@/components/console/control-button';
 import { EmptyState } from '@/components/console/empty-state';
 import { Select, type SelectOption } from '@/components/console/select';
 import { Button } from '@/components/ui/button';
@@ -66,7 +67,7 @@ export function TicketsPage() {
       id="tickets"
       title={t('meta.title')}
       actions={
-        <Button data-create-ticket onClick={() => setCreateOpen(true)}>
+        <Button className={CONTROL_BUTTON} data-create-ticket onClick={() => setCreateOpen(true)}>
           <Plus aria-hidden />
           {t('actions.create')}
         </Button>

@@ -3,6 +3,7 @@
 import { Check, ChevronDown, Share2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
+import { CONTROL_BUTTON } from '@/components/console/control-button';
 import { useCopy } from '@/components/console/copy-button';
 import { buttonClass } from '@/components/ui/button-styles';
 import {
@@ -54,7 +55,7 @@ export function InviteShareMenu() {
         <button
           type="button"
           data-invite-share
-          className={buttonClass({ variant: 'secondary', className: 'h-10' })}
+          className={buttonClass({ variant: 'secondary', className: CONTROL_BUTTON })}
         >
           <Share2 aria-hidden />
           {t('link.share')}
