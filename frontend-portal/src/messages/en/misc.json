@@ -1,0 +1,13 @@
+{
+  "meta": {
+    "docsTitle": "Docs",
+    "notFoundTitle": "Page not found"
+  },
+  "docs": {
+    "title": "Docs"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "home": "Back to home"
+  }
+}

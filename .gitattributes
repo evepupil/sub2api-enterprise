@@ -23,3 +23,10 @@ Dockerfile text eol=lf
 
 # 调研资料里的 JSON 固定使用 LF
 /docs/调研/2026-09-26-AI-API服务站/**/*.json text eol=lf
+
+# 客户官网的文档、文案与样式固定使用 LF
+/frontend-portal/**/*.md text eol=lf
+/frontend-portal/**/*.json text eol=lf
+/frontend-portal/**/*.css text eol=lf
+/frontend-portal/**/*.mjs text eol=lf
+/frontend-portal/**/*.html text eol=lf

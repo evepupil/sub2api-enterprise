@@ -1,0 +1,69 @@
+{
+  "badge": "Image API is live: GPT Image 2.5 and the full Nano Banana family",
+  "titleLine1": "Text, Image and Code Models",
+  "titleLine2": "Through a Single API",
+  "subtitle": "Claude, GPT, Gemini, DeepSeek and {count} leading models behind one endpoint, billed by usage,<br></br> with Personal, Pro and Enterprise service levels.",
+  "primaryCta": "Get started",
+  "secondaryCta": "View pricing",
+  "preview": {
+    "nav": {
+      "overview": "Overview",
+      "keys": "API keys",
+      "usage": "Usage",
+      "billing": "Billing",
+      "groups": "Groups",
+      "members": "Members",
+      "settings": "Settings"
+    },
+    "title": "Overview",
+    "search": "Search models or keys",
+    "edition": "Pro",
+    "stats": {
+      "spend": {
+        "title": "Spend this month",
+        "desc": "Across all groups"
+      },
+      "requests": {
+        "title": "Requests",
+        "desc": "Last 30 days"
+      },
+      "tokens": {
+        "title": "Token usage",
+        "desc": "Input and output combined"
+      },
+      "availability": {
+        "title": "Availability",
+        "desc": "Pro · last 30 days",
+        "target": "Target {value}%"
+      }
+    },
+    "charts": {
+      "daily": {
+        "title": "Requests, last 14 days",
+        "unit": "In thousands",
+        "start": "14 days ago",
+        "mid": "7 days ago",
+        "end": "Today"
+      },
+      "models": {
+        "title": "Calls by model",
+        "range": "Last 30 days"
+      },
+      "groups": {
+        "title": "Spend by group",
+        "edition": "Pro",
+        "center": "groups"
+      }
+    },
+    "recent": {
+      "title": "Recent requests",
+      "time": "Time",
+      "model": "Model",
+      "tokens": "Tokens",
+      "cost": "Cost",
+      "status": "Status",
+      "ok": "Success",
+      "failed": "Failed"
+    }
+  }
+}

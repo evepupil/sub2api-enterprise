@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "title": "Groups and ratios",
+    "description": "Group ratios and privileges for every edition. Billed price = base model price × group ratio."
+  },
+  "hero": {
+    "title": "Groups and ratios",
+    "subtitle": "Every API key is bound to a group. Billed price = base model price × group ratio, with no subscription fees."
+  },
+  "cards": {
+    "popular": "Most popular",
+    "ratioSuffix": "ratio",
+    "sla": "{value}% availability target",
+    "rpm": "{value} requests per minute per key",
+    "customLimits": "Concurrency and limits by contract",
+    "support": "Support response within {hours} h",
+    "use": "Use this group"
+  },
+  "ratio": {
+    "title": "How ratios work",
+    "subtitle": "The same model costs differently across groups only by its ratio.",
+    "billed": "Billed price",
+    "base": "Base model price",
+    "ratio": "Group ratio",
+    "baseNote": "The base price is the Personal General group (×1.0) price.",
+    "examplesTitle": "{edition} group examples",
+    "group": "Group",
+    "example": "Example",
+    "basePrice": "Base price",
+    "ratioColumn": "Ratio",
+    "input": "input",
+    "perImage": "per image",
+    "result": "Billed"
+  },
+  "compare": {
+    "title": "Compare editions",
+    "included": "Included",
+    "excluded": "Not included"
+  },
+  "faq": {
+    "title": "FAQ",
+    "items": {
+      "q1": "How do groups relate to editions?",
+      "a1": "Editions set channel quality and the availability target; groups set which models you can use and at what ratio. Each edition has four groups.",
+      "q2": "Can one account use multiple groups?",
+      "a2": "Yes. Each API key is bound to one group, and one account can create multiple keys for different purposes.",
+      "q3": "Will ratios change over time?",
+      "a3": "Ratio changes are announced on this page in advance; consumption already incurred is not affected.",
+      "q4": "Can organization members choose their own group?",
+      "a4": "Members can only create keys within the group range authorized by the organization admin.",
+      "q5": "How do I enable the Dedicated group?",
+      "a5": "Contact sales — channels, ratios and availability are set by contract."
+    }
+  },
+  "logos": {
+    "title": "Every group draws on the same catalog",
+    "subtitle": "Models from {count} leading providers, billed at your group's ratio."
+  }
+}

@@ -1,0 +1,248 @@
+@import 'tailwindcss';
+
+/* 暗色主题由 next-themes 写在 <html class="dark"> 上 */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * 设计令牌（与 docs/前端设计.md 一一对应，改这里必须同步改文档）。
+ * 亮色取自 Aceternity AI SaaS Template 实测值：白底、近黑字、neutral 灰阶、黑色胶囊按钮。
+ */
+:root {
+  --background: #ffffff;
+  --foreground: #0a0a0a;
+  --card: #ffffff;
+  --surface: #fafafa;
+  --muted: #f5f5f5;
+  --muted-foreground: #525252;
+  --subtle-foreground: #737373;
+  --border: #e5e5e5;
+  --border-strong: #d4d4d4;
+  --primary: #171717;
+  --primary-foreground: #ffffff;
+  /* 重点卡与深色号召块 */
+  --navy: #0f172a;
+  --navy-2: #1e293b;
+  --navy-foreground: #f8fafc;
+  --navy-muted: #94a3b8;
+  /* 背景网格与光线 */
+  --grid-line: #f0f0f0;
+  --grid-dot: #e5e5e5;
+  --beam: #a3a3a3;
+  /* 图表，只用于图形 */
+  --chart-1: #2563eb;
+  --chart-2: #60a5fa;
+  --chart-3: #bfdbfe;
+  --chart-4: #e11d48;
+  /* 语义色：*-graphic 只用于图形（色块、圆点、可用率格），不做文字 */
+  --success: #15803d;
+  --success-soft: #dcfce7;
+  --success-graphic: #22c55e;
+  --warning: #b45309;
+  --warning-soft: #fef3c7;
+  --warning-graphic: #f59e0b;
+  --danger: #dc2626;
+  --danger-soft: #fee2e2;
+  --danger-graphic: #ef4444;
+  --info: #1d4ed8;
+  --info-soft: #dbeafe;
+  /* 阴影 */
+  --elev-card:
+    0 1px 1px rgba(0, 0, 0, 0.05), 0 4px 6px rgba(34, 42, 53, 0.04),
+    0 24px 68px rgba(47, 48, 55, 0.05), 0 2px 3px rgba(0, 0, 0, 0.04);
+  --elev-nav:
+    0 0 24px rgba(34, 42, 53, 0.06), 0 1px 1px rgba(0, 0, 0, 0.05),
+    0 0 0 1px rgba(34, 42, 53, 0.04), 0 0 4px rgba(34, 42, 53, 0.08),
+    0 16px 68px rgba(47, 48, 55, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --elev-button:
+    inset 0 -1px 0 0 rgba(255, 255, 255, 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.25);
+  --elev-pill: 0 6px 16px -4px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.04);
+  --elev-featured: 0 24px 48px -12px rgba(15, 23, 42, 0.35);
+}
+
+.dark {
+  --background: #0a0a0a;
+  --foreground: #fafafa;
+  --card: #111111;
+  --surface: #0f0f0f;
+  --muted: #1a1a1a;
+  --muted-foreground: #a3a3a3;
+  --subtle-foreground: #8c8c8c;
+  --border: #262626;
+  --border-strong: #404040;
+  --primary: #fafafa;
+  --primary-foreground: #0a0a0a;
+  --navy: #101a30;
+  --navy-2: #1e293b;
+  --navy-foreground: #f8fafc;
+  --navy-muted: #94a3b8;
+  --grid-line: #161616;
+  --grid-dot: #262626;
+  --beam: #737373;
+  --chart-1: #3b82f6;
+  --chart-2: #60a5fa;
+  --chart-3: #1e3a8a;
+  --chart-4: #fb7185;
+  --success: #4ade80;
+  --success-soft: rgba(34, 197, 94, 0.14);
+  --success-graphic: #22c55e;
+  --warning: #fbbf24;
+  --warning-soft: rgba(245, 158, 11, 0.14);
+  --warning-graphic: #f59e0b;
+  --danger: #f87171;
+  --danger-soft: rgba(239, 68, 68, 0.14);
+  --danger-graphic: #ef4444;
+  --info: #93c5fd;
+  --info-soft: rgba(59, 130, 246, 0.16);
+  --elev-card: 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --elev-nav: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 16px 40px rgba(0, 0, 0, 0.5);
+  --elev-button: inset 0 -1px 0 0 rgba(0, 0, 0, 0.12), inset 0 1px 0 0 rgba(255, 255, 255, 0.4);
+  --elev-pill: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 8px 20px rgba(0, 0, 0, 0.5);
+  --elev-featured: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 24px 48px -12px rgba(0, 0, 0, 0.6);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-surface: var(--surface);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-subtle-foreground: var(--subtle-foreground);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-navy: var(--navy);
+  --color-navy-2: var(--navy-2);
+  --color-navy-foreground: var(--navy-foreground);
+  --color-navy-muted: var(--navy-muted);
+  --color-grid-line: var(--grid-line);
+  --color-grid-dot: var(--grid-dot);
+  --color-beam: var(--beam);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-success-graphic: var(--success-graphic);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-warning-graphic: var(--warning-graphic);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-graphic: var(--danger-graphic);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+
+  --font-sans:
+    var(--font-geist-sans), 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC',
+    ui-sans-serif, system-ui, sans-serif;
+  --font-mono:
+    var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono',
+    monospace;
+
+  --shadow-card: var(--elev-card);
+  --shadow-nav: var(--elev-nav);
+  --shadow-button: var(--elev-button);
+  --shadow-pill: var(--elev-pill);
+  --shadow-featured: var(--elev-featured);
+
+  --animate-marquee-x: marquee-x var(--marquee-duration, 40s) linear infinite;
+  --animate-marquee-y: marquee-y var(--marquee-duration, 40s) linear infinite;
+  --animate-beam-x: beam-x var(--beam-duration, 8s) linear var(--beam-delay, 0s) infinite;
+  --animate-beam-y: beam-y var(--beam-duration, 8s) linear var(--beam-delay, 0s) infinite;
+  --animate-fade-up: fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 首屏载入：纯 CSS，HTML 一到就播放，不依赖水合 */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 跑马灯：轨道里放两份相同内容，平移一半正好首尾相接 */
+@keyframes marquee-x {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes marquee-y {
+  to {
+    transform: translateY(-50%);
+  }
+}
+
+/* 背景网格上流动的光线 */
+@keyframes beam-x {
+  from {
+    transform: translateX(-160px);
+  }
+  to {
+    transform: translateX(var(--beam-travel, 1440px));
+  }
+}
+
+@keyframes beam-y {
+  from {
+    transform: translateY(-160px);
+  }
+  to {
+    transform: translateY(var(--beam-travel, 900px));
+  }
+}
+
+/* 深色号召块与重点卡的颗粒质感 */
+@utility bg-noise {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+}
+
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: var(--border);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background: rgba(37, 99, 235, 0.18);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--foreground);
+    outline-offset: 2px;
+  }
+}
+
+/* 减少动态效果：跑马灯、光线、地球自转全部停下 */
+@media (prefers-reduced-motion: reduce) {
+  [data-marquee-track],
+  [data-beam],
+  .animate-fade-up {
+    animation: none !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}

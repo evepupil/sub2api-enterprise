@@ -1,0 +1,69 @@
+{
+  "badge": "生图 API 已上线：GPT Image 2.5 与 Nano Banana 全系",
+  "titleLine1": "文本、图像与代码模型",
+  "titleLine2": "一个 API 全部调用",
+  "subtitle": "Claude、GPT、Gemini、DeepSeek 等 {count} 个主流模型统一接入、按量计费，<br></br>个人版、专业版、企业版三档服务等级按需选择。",
+  "primaryCta": "免费注册",
+  "secondaryCta": "查看价格",
+  "preview": {
+    "nav": {
+      "overview": "概览",
+      "keys": "API 密钥",
+      "usage": "用量",
+      "billing": "账单",
+      "groups": "分组",
+      "members": "组织成员",
+      "settings": "设置"
+    },
+    "title": "概览",
+    "search": "搜索模型或密钥",
+    "edition": "专业版",
+    "stats": {
+      "spend": {
+        "title": "本月消费",
+        "desc": "全部分组合计"
+      },
+      "requests": {
+        "title": "请求次数",
+        "desc": "近 30 天"
+      },
+      "tokens": {
+        "title": "Token 用量",
+        "desc": "输入与输出合计"
+      },
+      "availability": {
+        "title": "可用率",
+        "desc": "专业版 · 近 30 天",
+        "target": "目标 {value}%"
+      }
+    },
+    "charts": {
+      "daily": {
+        "title": "近 14 天调用量",
+        "unit": "单位：千次",
+        "start": "14 天前",
+        "mid": "7 天前",
+        "end": "今天"
+      },
+      "models": {
+        "title": "模型调用占比",
+        "range": "近 30 天"
+      },
+      "groups": {
+        "title": "分组消费占比",
+        "edition": "专业版",
+        "center": "个分组"
+      }
+    },
+    "recent": {
+      "title": "最近请求",
+      "time": "时间",
+      "model": "模型",
+      "tokens": "Token",
+      "cost": "费用",
+      "status": "状态",
+      "ok": "成功",
+      "failed": "失败"
+    }
+  }
+}

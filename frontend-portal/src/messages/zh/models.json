@@ -1,0 +1,50 @@
+{
+  "meta": {
+    "title": "模型",
+    "description": "30 个主流文本与生图模型，按个人版、专业版、企业版查看价格、上下文与可用率。"
+  },
+  "hero": {
+    "title": "所有模型，一个 API 调用",
+    "subtitle": "用一个密钥、一个地址、一张账单，调用 OpenAI、Anthropic、Gemini 协议下的 {count} 个模型。"
+  },
+  "filters": {
+    "toggle": "筛选",
+    "context": "上下文长度",
+    "contextAll": "全部",
+    "providers": "厂商",
+    "protocols": "支持协议",
+    "clear": "清除筛选"
+  },
+  "toolbar": {
+    "models": "个模型",
+    "search": "搜索模型名、调用名或厂商"
+  },
+  "sort": {
+    "label": "排序",
+    "latest": "最新上线",
+    "price-asc": "价格从低到高",
+    "price-desc": "价格从高到低",
+    "context": "上下文最长"
+  },
+  "types": {
+    "label": "模型类型",
+    "all": "全部",
+    "text": "文本",
+    "image": "生图"
+  },
+  "empty": {
+    "title": "没有符合条件的模型"
+  },
+  "card": {
+    "new": "新",
+    "image": "生图",
+    "copy": "复制调用名",
+    "inputOutput": "输入 / 输出",
+    "perImage": "每张",
+    "estimate": "约每张",
+    "context": "上下文",
+    "uptime": "近 24 小时可用率",
+    "uptimeLabel": "近 24 小时可用率 {percent}%",
+    "pricing": "查看价格"
+  }
+}

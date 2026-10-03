@@ -1,0 +1,50 @@
+{
+  "meta": {
+    "title": "Models",
+    "description": "30 leading text and image models with prices, context and availability for Personal, Pro and Enterprise."
+  },
+  "hero": {
+    "title": "Every model, one API",
+    "subtitle": "One key, one base URL and one bill for {count} models across the OpenAI, Anthropic and Gemini protocols."
+  },
+  "filters": {
+    "toggle": "Filters",
+    "context": "Context length",
+    "contextAll": "All",
+    "providers": "Providers",
+    "protocols": "Protocols",
+    "clear": "Clear filters"
+  },
+  "toolbar": {
+    "models": "models",
+    "search": "Search by name, model ID or provider"
+  },
+  "sort": {
+    "label": "Sort",
+    "latest": "Newest",
+    "price-asc": "Price: low to high",
+    "price-desc": "Price: high to low",
+    "context": "Longest context"
+  },
+  "types": {
+    "label": "Model type",
+    "all": "All",
+    "text": "Text",
+    "image": "Image"
+  },
+  "empty": {
+    "title": "No models match these filters"
+  },
+  "card": {
+    "new": "New",
+    "image": "Image",
+    "copy": "Copy model ID",
+    "inputOutput": "Input / Output",
+    "perImage": "Per image",
+    "estimate": "Est. per image",
+    "context": "context",
+    "uptime": "24h availability",
+    "uptimeLabel": "24h availability {percent}%",
+    "pricing": "View pricing"
+  }
+}

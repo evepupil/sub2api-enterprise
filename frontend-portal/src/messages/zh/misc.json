@@ -1,0 +1,13 @@
+{
+  "meta": {
+    "docsTitle": "文档",
+    "notFoundTitle": "页面不存在"
+  },
+  "docs": {
+    "title": "文档"
+  },
+  "notFound": {
+    "title": "页面不存在",
+    "home": "返回首页"
+  }
+}

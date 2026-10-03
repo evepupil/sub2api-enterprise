@@ -1,0 +1,44 @@
+{
+  "providers": {
+    "title": "Every major model provider, in one place",
+    "subtitle": "Models from OpenAI, Anthropic, Google, DeepSeek and {count} providers in total, on one key and one bill."
+  },
+  "features": {
+    "title": "From text to images, one platform",
+    "subtitle": "Chat, coding and image generation share one key and one bill, and new models are callable on launch day.",
+    "imageCard": {
+      "title": "Generate images from text",
+      "desc": "The full GPT Image and Nano Banana lineups, with image-to-image and inpainting, billed per image or per token.",
+      "prompts": {
+        "p1": "Minimalist concrete architecture with a curved staircase, black-and-white film look",
+        "p2": "Portrait of a woman on a rainy street at night, cinematic black-and-white photography",
+        "p3": "Glass perfume bottle on a stone pedestal, side window light, luxury advertising style",
+        "p4": "A little robot reading by the window in soft morning light",
+        "p5": "Turn the second image into color, keep the composition unchanged",
+        "p6": "Generate 4 product hero shots from different angles"
+      }
+    },
+    "chatCard": {
+      "title": "One endpoint, any model",
+      "desc": "Switch between Claude, GPT and Gemini by changing one model name — no new keys, no code changes.",
+      "messages": {
+        "m1": "Summarize this API doc into three key points",
+        "m2": "Done: authentication, rate limits, and error codes.",
+        "m3": "Switch to another model and write an English version",
+        "m4": "Done. Three key points, same structure.",
+        "m5": "Add a product cover image",
+        "m6": "Generated 1 image at 1024×1024."
+      }
+    },
+    "groupsCard": {
+      "title": "Group routing, public ratios",
+      "desc": "Every key is bound to a group. Billed price = base model price × group ratio.",
+      "panelTitle": "Groups",
+      "add": "New"
+    },
+    "protocolsCard": {
+      "title": "Works with the protocols and tools you use",
+      "desc": "OpenAI, Anthropic and Gemini protocols work as-is; coding tools and frameworks only need a new base URL."
+    }
+  }
+}

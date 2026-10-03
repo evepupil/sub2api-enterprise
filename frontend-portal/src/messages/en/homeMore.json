@@ -1,0 +1,50 @@
+{
+  "capabilities": {
+    "developers": {
+      "title": "Built for developers",
+      "desc": "Compatible with official SDKs; migration only takes a new base URL and key."
+    },
+    "latency": {
+      "title": "Low-latency forwarding",
+      "desc": "Streaming responses are relayed chunk by chunk instead of being buffered in full."
+    },
+    "billing": {
+      "title": "Pay as you go",
+      "desc": "No subscription and no monthly fee — usage-based charges with exportable statements."
+    },
+    "editions": {
+      "title": "Three service levels",
+      "desc": "Personal, Pro and Enterprise editions, each with its own availability target."
+    },
+    "failover": {
+      "title": "Automatic failover",
+      "desc": "Requests automatically retry on backup channels when an upstream fails."
+    },
+    "organizations": {
+      "title": "Organizations and members",
+      "desc": "Organizations top up centrally and assign quotas and groups per member."
+    },
+    "ratios": {
+      "title": "Public group ratios",
+      "desc": "Each group's ratio and available models are published on the pricing page."
+    },
+    "invoices": {
+      "title": "Invoicing",
+      "desc": "Pro and Enterprise editions support bank transfer and invoicing."
+    }
+  },
+  "catalog": {
+    "title": "{count} models and counting",
+    "subtitle": "New models are added as soon as they launch, with prices and availability published alongside.",
+    "image": "Image",
+    "new": "New",
+    "input": "Input",
+    "more": "Browse all models"
+  },
+  "cta": {
+    "title": "Sign up and start building today",
+    "subtitle": "Personal and organization accounts are both welcome. Pay as you go and switch editions anytime.",
+    "primary": "Get started",
+    "secondary": "View pricing"
+  }
+}

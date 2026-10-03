@@ -1,0 +1,17 @@
+node_modules
+.next
+.next-build
+out
+build
+next-env.d.ts
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+coverage
+
+# 根仓库忽略 scripts 与 tests，新前端需要保留自己的脚本和单测
+!scripts/
+!scripts/**
+!tests/
+!tests/**
