@@ -12,7 +12,7 @@ import { Pagination, usePagination } from '@/components/console/pagination';
 import { Panel } from '@/components/console/panel';
 import { Select } from '@/components/console/select';
 import { Badge, type BadgeTone } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/console/button';
 import type { AppLocale } from '@/i18n/routing';
 import {
   DEFAULT_RANGE,

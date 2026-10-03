@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useState, type FormEvent } from 'react';
 
 import { Panel } from '@/components/console/panel';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/console/button';
 
 import { CHANGE_PASSWORD_MS, PASSWORD_MIN_LENGTH, RESULT_FLASH_MS } from './settings-config';
 import { SettingsFlash } from './settings-flash';

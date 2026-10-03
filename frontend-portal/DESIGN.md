@@ -129,7 +129,7 @@
 
 - 容器：`mx-auto w-full max-w-7xl px-4 md:px-8`（共享组件 `Container`）。
 - 区块纵向留白：`py-20 md:py-28`；首屏 `pt-20 pb-16 md:pt-32`；内页首屏 `pt-16 pb-12 md:pt-24 md:pb-16`。
-- 圆角：输入框、菜单项、小胶囊 `rounded-md`（6px）；卡片 `rounded-2xl`（16px）；大外框、号召块 `rounded-3xl`（24px）；按钮、徽标 `rounded-full`。例外：控制台里和输入框、下拉框排在同一行的按钮（标题行操作、筛选行）用 `rounded-md`、高 40，与旁边的控件齐平（`CONTROL_BUTTON`，见 10.2）。
+- 圆角：输入框、菜单项、小胶囊 `rounded-md`（6px）；卡片 `rounded-2xl`（16px）；大外框、号召块 `rounded-3xl`（24px）；官网按钮、徽标 `rounded-full`（和顶部菜单栏的胶囊一套）。控制台的按钮一律 `rounded-md`，和输入框、下拉框、菜单项一致（走 `@/components/console/button`，见 10.2）；和输入控件排在同一行的再统一高 40（`CONTROL_BUTTON`）。
 - 阴影（都是令牌）：`shadow-card`（模板卡片四层柔影）、`shadow-nav`（浮动顶栏）、`shadow-button`（主按钮内描边高光）、`shadow-pill`（首屏小胶囊）、`shadow-featured`（重点卡）。暗色下自动换成细描边。
 - 焦点：全局 `:focus-visible` 已是 2px `foreground` 描边；自定义控件不准 `outline-none` 后不给替代。
 - 断点：Tailwind 默认（sm 640、md 768、lg 1024、xl 1280）。验收看两档：手机 375、桌面 1440。顶栏在 `lg` 以下切成汉堡菜单。
@@ -237,7 +237,7 @@
 | 文件 | 导出 | 签名与样式 |
 |---|---|---|
 | `src/lib/utils.ts` | `cn` | `cn(...inputs: ClassValue[]): string`，即 `twMerge(clsx(inputs))` |
-| `src/components/ui/button-styles.ts`（无指令） | `buttonClass`、`ButtonVariant`、`ButtonSize` | `buttonClass(opts?: { variant?: 'primary' \| 'secondary' \| 'ghost' \| 'link' \| 'inverse'; size?: 'sm' \| 'md' \| 'lg'; block?: boolean; className?: string }): string`，默认 primary + md。基础：`inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-medium transition-[background-color,color,box-shadow,opacity] duration-150 disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0`。尺寸：sm `h-8 px-3 text-xs`；md `h-[38px] px-4 text-sm`；lg `h-11 px-6 text-sm md:text-base`。变体：primary `bg-primary text-primary-foreground shadow-button hover:bg-primary/90 active:bg-primary/80`；secondary `border border-border bg-card text-foreground shadow-card hover:bg-muted active:bg-muted/80`；ghost `text-foreground hover:bg-muted active:bg-muted/80`；link `h-auto rounded-none px-0 text-foreground underline-offset-4 hover:underline`；inverse `bg-white text-neutral-900 shadow-pill hover:bg-neutral-100 active:bg-neutral-200`。block 加 `w-full`。顺序：基础 → 尺寸 → 变体 → block → className，用 `cn` 合并（link 的 `px-0` 能盖掉尺寸的内边距） |
+| `src/components/ui/button-styles.ts`（无指令） | `buttonClass`、`ButtonVariant`、`ButtonSize`、`ButtonShape`、`ButtonClassOptions` | `buttonClass(opts?: { variant?: 'primary' \| 'secondary' \| 'ghost' \| 'link' \| 'inverse' \| 'danger'; size?: 'sm' \| 'md' \| 'lg'; shape?: 'pill' \| 'rounded'; block?: boolean; className?: string }): string`，默认 primary + md + pill。形状：pill `rounded-full`（官网），rounded `rounded-md`（控制台，经 `@/components/console/button` 固定）。基础：`inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-[background-color,color,box-shadow,opacity] duration-150 disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0`。尺寸：sm `h-8 px-3 text-xs`；md `h-[38px] px-4 text-sm`；lg `h-11 px-6 text-sm md:text-base`。变体：primary `bg-primary text-primary-foreground shadow-button hover:bg-primary/90 active:bg-primary/80`；secondary `border border-border bg-card text-foreground shadow-card hover:bg-muted active:bg-muted/80`；ghost `text-foreground hover:bg-muted active:bg-muted/80`；link `h-auto rounded-none px-0 text-foreground underline-offset-4 hover:underline`；inverse `bg-white text-neutral-900 shadow-pill hover:bg-neutral-100 active:bg-neutral-200`。block 加 `w-full`。顺序：基础 → 形状 → 尺寸 → 变体 → block → className，用 `cn` 合并（link 的 `px-0`、`rounded-none` 能盖掉尺寸的内边距和形状的圆角） |
 | `src/components/ui/button.tsx`（无指令） | `Button` | `<button>` 包一层：`ButtonHTMLAttributes<HTMLButtonElement> & { variant?; size?; block?; loading?: boolean }`，`type` 默认 `"button"`；`loading` 为真时禁用、`aria-busy="true"`、文字前加 `LoaderCircle` 带 `animate-spin`。跳转用 `<Link className={buttonClass(...)}>`，不要套 Button |
 | `src/components/ui/badge.tsx`（无指令） | `Badge`、`BadgeTone` | `HTMLAttributes<HTMLSpanElement> & { tone?: 'neutral' \| 'outline' \| 'success' \| 'warning' \| 'danger' \| 'info' \| 'dark' \| 'inverse' }`，默认 neutral。基础 `inline-flex shrink-0 items-center gap-1 self-start whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium leading-4`。tone：neutral `bg-muted text-muted-foreground`；outline `border border-border text-muted-foreground`；success `bg-success-soft text-success`；warning `bg-warning-soft text-warning`；danger `bg-danger-soft text-danger`；info `bg-info-soft text-info`；dark `bg-primary text-primary-foreground`；inverse `border border-white/15 bg-white/10 text-navy-foreground` |
 | `src/components/ui/container.tsx`（无指令） | `Container` | `{ as?: 'div' \| 'section' \| 'header' \| 'footer' \| 'nav'; className?; children }`，类名 `mx-auto w-full max-w-7xl px-4 md:px-8` |
@@ -423,7 +423,8 @@ pnpm format:check  # prettier
 | `DateRangePicker` | `date-range-picker.tsx` | `{ value: DateRange, onChange, today?, since?, align? }`；左侧常用范围立即生效，右侧月历自选后点「应用」；`today` / `since`（「全部」的起点）不传就是占位日期，接了后端的页面传真实的今天和账号创建日；`rangeLabel()` 可复用 |
 | `TableShell` / `Table` / `Th` / `Td` / `Tr` | `data-table.tsx` | 外框可带 `footer`（放分页）；`Table` 传 `minWidth` 让小屏横向滚动；`Th`/`Td` 支持 `align` 与 `sticky: 'left' \| 'right'`（固定首列或操作列） |
 | `RefreshButton` | `refresh-button.tsx` | 标题行刷新按钮（高 40、小圆角，转 600ms，`data-refresh`），可传 `onRefresh` |
-| `CONTROL_BUTTON` | `control-button.ts` | 和输入框、下拉框、日期范围排在同一行的按钮（标题行操作、筛选行按钮）叠加的类 `h-10 rounded-md`：`<Button className={CONTROL_BUTTON}>`；弹窗底部、面板里的主操作仍是胶囊按钮 |
+| `Button` / `buttonClass` | `button.tsx` | 控制台的按钮：官网按钮的同款颜色与尺寸，圆角固定 6px（`rounded-md`）。控制台代码只能从这里取按钮，直接引用 `@/components/ui/button`、`button-styles` 会被代码检查拦下（`eslint.config.mjs`） |
+| `CONTROL_BUTTON` | `control-button.ts` | 和输入框、下拉框、日期范围排在同一行的按钮（标题行操作、筛选行按钮）叠加的类 `h-10`：`<Button className={CONTROL_BUTTON}>` |
 | `Pagination` + `usePagination` | `pagination.tsx` | `const pager = usePagination(rows, resetKey)`，筛选条件变化（resetKey 变）自动回第 1 页；`<Pagination page={pager.page} pages={pager.pages} total={pager.total} pageSize={pager.pageSize} onPageChange={pager.setPage} onPageSizeChange={pager.setPageSize} />`，当前页数据在 `pager.items` |
 | `EmptyState` | `empty-state.tsx` | `{ id, icon, title, description?, action?, bordered? }`；`data-empty={id}`；表格内空状态传 `bordered={false}` |
 | `Dialog` / `Sheet` / `ConfirmDialog` | `dialog.tsx` | 居中弹窗 `data-dialog={id}`（`size: sm/md/lg`，`footer` 放按钮）；右侧抽屉 `data-sheet={id}`；确认弹窗确认按钮带 `data-confirm`，`tone="danger"` 时是红色按钮；`initialFocus` 传输入框 id 时打开后先聚焦它；关闭后焦点回到打开前的元素 |
@@ -434,7 +435,7 @@ pnpm format:check  # prettier
 | `Skeleton` | `skeleton.tsx` | 加载占位块 `{ className?, style? }`：浅灰圆角、轻轻呼吸（减少动效时不动），`data-skeleton`；尺寸和真实内容一样，加载完不跳动 |
 | 外壳件 | `shell/*` | 页面不用直接引用；`Avatar` 可在设置页复用 |
 
-官网已有的基础组件照用：`Button`（新增 `variant="danger"`）/ `buttonClass`、`Textarea`（`ui/textarea.tsx`，多行输入框，传 `footer` 时带字数底栏）、`Badge`、`Input`、`Field`、`SegmentedControl`、`DropdownMenu*`、`ProviderLogo`、`DiscountBadge`；切换语言用 `useSwitchLocale()`（`@/i18n/use-switch-locale`）。
+官网已有的基础组件照用（按钮除外，用上表的控制台按钮；`variant="danger"` 是红色按钮）：`Textarea`（`ui/textarea.tsx`，多行输入框，传 `footer` 时带字数底栏）、`Badge`、`Input`、`Field`、`SegmentedControl`、`DropdownMenu*`、`ProviderLogo`、`DiscountBadge`；切换语言用 `useSwitchLocale()`（`@/i18n/use-switch-locale`）。
 
 ### 10.3 控制台数据接口（`import { … } from '@/lib/console'`，一个字都不要改）
 

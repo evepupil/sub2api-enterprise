@@ -44,8 +44,8 @@ const THEMES = ['light', 'dark'] as const;
 export type UserMenuPlacement = 'sidebar' | 'rail' | 'bar';
 
 const TRIGGER_CLASS: Record<UserMenuPlacement, string> = {
-  sidebar: 'min-w-0 flex-1 gap-2.5 rounded-lg p-1.5 text-left',
-  rail: 'w-full justify-center rounded-lg p-1.5',
+  sidebar: 'min-w-0 flex-1 gap-2.5 rounded-md p-1.5 text-left',
+  rail: 'w-full justify-center rounded-md p-1.5',
   bar: 'shrink-0 rounded-full p-0.5',
 };
 

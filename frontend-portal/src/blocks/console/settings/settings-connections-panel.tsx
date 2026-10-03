@@ -5,7 +5,7 @@ import { useState } from 'react';
 
 import { ConfirmDialog } from '@/components/console/dialog';
 import { Panel } from '@/components/console/panel';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/console/button';
 import { CURRENT_USER } from '@/lib/console';
 import { cn } from '@/lib/utils';
 

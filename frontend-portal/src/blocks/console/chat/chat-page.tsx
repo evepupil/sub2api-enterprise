@@ -6,7 +6,7 @@ import { useState } from 'react';
 
 import { ConsolePage } from '@/components/console/console-page';
 import { CONTROL_BUTTON } from '@/components/console/control-button';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/console/button';
 import type { AppLocale } from '@/i18n/routing';
 import { CHAT_MODEL_IDS, DEFAULT_CHAT_MODEL } from '@/lib/console';
 import { useUrlState } from '@/lib/use-url-state';

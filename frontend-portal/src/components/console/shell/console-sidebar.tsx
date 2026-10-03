@@ -4,10 +4,10 @@ import { ArrowRight, PanelLeftClose, PanelLeftOpen, Sparkles } from 'lucide-reac
 import { useTranslations } from 'next-intl';
 
 import { Brand } from '@/components/layout/brand';
-import { buttonClass } from '@/components/ui/button-styles';
 import { Link, usePathname } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 
+import { buttonClass } from '../button';
 import { CONSOLE_NAV, isNavActive } from './nav-items';
 import { NotificationsMenu } from './notifications-menu';
 import { UserMenu } from './user-menu';
@@ -68,7 +68,7 @@ export function ConsoleSidebar({
           title={collapsed ? t('nav.chat') : undefined}
           className={buttonClass({
             block: true,
-            className: cn('h-10 rounded-lg', collapsed ? 'px-0' : 'justify-between px-3'),
+            className: cn('h-10', collapsed ? 'px-0' : 'justify-between px-3'),
           })}
         >
           <span className="flex items-center gap-2">
@@ -96,7 +96,7 @@ export function ConsoleSidebar({
                   aria-current={active ? 'page' : undefined}
                   title={collapsed ? label : undefined}
                   className={cn(
-                    'flex h-9 items-center gap-2.5 rounded-lg text-sm transition-colors',
+                    'flex h-9 items-center gap-2.5 rounded-md text-sm transition-colors',
                     collapsed ? 'justify-center' : 'px-2.5',
                     active
                       ? 'bg-muted font-medium text-foreground'

@@ -4,7 +4,7 @@ import { Send } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useRef, useState, type KeyboardEvent } from 'react';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/console/button';
 import { Textarea } from '@/components/ui/textarea';
 import { CHAT_INPUT_MAX } from '@/lib/console';
 

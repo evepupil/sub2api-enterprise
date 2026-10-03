@@ -8,7 +8,7 @@ import { DateRangePicker } from '@/components/console/date-range-picker';
 import { FilterField, SearchInput } from '@/components/console/filter-field';
 import { Panel } from '@/components/console/panel';
 import { Select, type SelectOption } from '@/components/console/select';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/console/button';
 import { getModel } from '@/lib/catalog';
 import {
   API_KEYS,

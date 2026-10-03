@@ -6,7 +6,7 @@ import { useState, type FormEvent } from 'react';
 
 import { Panel } from '@/components/console/panel';
 import { Switch } from '@/components/console/switch';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/console/button';
 import { Field } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { CURRENT_USER } from '@/lib/console';

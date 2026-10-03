@@ -1,11 +1,18 @@
 import { LoaderCircle } from 'lucide-react';
 import type { ButtonHTMLAttributes } from 'react';
 
-import { buttonClass, type ButtonSize, type ButtonVariant } from './button-styles';
+import {
+  buttonClass,
+  type ButtonShape,
+  type ButtonSize,
+  type ButtonVariant,
+} from './button-styles';
 
-type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;
   size?: ButtonSize;
+  /** 默认胶囊；控制台的按钮走 `@/components/console/button`，固定为小圆角 */
+  shape?: ButtonShape;
   block?: boolean;
   /** 提交中：禁用按钮并在文字前显示转圈 */
   loading?: boolean;
@@ -15,6 +22,7 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 export function Button({
   variant,
   size,
+  shape,
   block,
   loading = false,
   type = 'button',
@@ -26,7 +34,7 @@ export function Button({
   return (
     <button
       type={type}
-      className={buttonClass({ variant, size, block, className })}
+      className={buttonClass({ variant, size, shape, block, className })}
       disabled={disabled || loading}
       aria-busy={loading ? 'true' : undefined}
       {...rest}

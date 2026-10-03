@@ -6,7 +6,7 @@ import type { ButtonHTMLAttributes } from 'react';
 
 import { Td, Tr } from '@/components/console/data-table';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/console/button';
 import type { AppLocale } from '@/i18n/routing';
 import { formatUsd, quotaRatio, type OrgMember } from '@/lib/console';
 import { cn } from '@/lib/utils';

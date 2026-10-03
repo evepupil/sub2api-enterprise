@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 
 import { Panel } from '@/components/console/panel';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/console/button';
 import { formatUsd, type BillingSummary } from '@/lib/console';
 import { cn } from '@/lib/utils';
 

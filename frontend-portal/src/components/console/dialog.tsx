@@ -5,8 +5,9 @@ import { X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useRef, type ReactNode } from 'react';
 
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+
+import { Button } from './button';
 
 const OVERLAY = 'fixed inset-0 z-50 bg-black/40 backdrop-blur-[2px]';
 

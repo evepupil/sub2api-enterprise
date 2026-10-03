@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useRef, useState } from 'react';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/console/button';
 import { TICKET_LIMITS, type Ticket, type TicketStatus } from '@/lib/console';
 import { Textarea } from '@/components/ui/textarea';
 

@@ -4,8 +4,7 @@ import { RefreshCw } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 
-import { Button } from '@/components/ui/button';
-
+import { Button } from './button';
 import { CONTROL_BUTTON } from './control-button';
 
 /** 转圈时长：数据是占位的，转一下给出「已刷新」的反馈就够了 */

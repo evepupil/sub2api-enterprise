@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 
 import { CONTROL_BUTTON } from '@/components/console/control-button';
 import { useCopy } from '@/components/console/copy-button';
-import { buttonClass } from '@/components/ui/button-styles';
+import { buttonClass } from '@/components/console/button';
 import {
   DropdownMenu,
   DropdownMenuContent,

@@ -8,7 +8,7 @@ import { ConsolePage } from '@/components/console/console-page';
 import { CONTROL_BUTTON } from '@/components/console/control-button';
 import { EmptyState } from '@/components/console/empty-state';
 import { Select, type SelectOption } from '@/components/console/select';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/console/button';
 import {
   filterTickets,
   TICKET_STATUSES,

@@ -3,7 +3,6 @@
 import { Bell } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 
-import { buttonClass } from '@/components/ui/button-styles';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +15,8 @@ import type { AppLocale } from '@/i18n/routing';
 import { NOTIFICATIONS } from '@/lib/console/account';
 import { formatDateTimeShort } from '@/lib/console/time';
 import { cn } from '@/lib/utils';
+
+import { buttonClass } from '../button';
 
 /** 通知铃铛：有未读时右上角一个红点；菜单列出最近的通知，点了跳到相关页面。 */
 export function NotificationsMenu({ side = 'top' }: { side?: 'top' | 'bottom' }) {

@@ -4,7 +4,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useState, type FormEvent } from 'react';
 
 import { Dialog } from '@/components/console/dialog';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/console/button';
 import { Field } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { SegmentedControl } from '@/components/ui/segmented-control';

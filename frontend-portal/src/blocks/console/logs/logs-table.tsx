@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { Table, TableShell, Th } from '@/components/console/data-table';
 import { EmptyState } from '@/components/console/empty-state';
 import { Pagination, type usePagination } from '@/components/console/pagination';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/console/button';
 import type { RequestLog } from '@/lib/console';
 
 import { LogsTableRow } from './logs-table-row';

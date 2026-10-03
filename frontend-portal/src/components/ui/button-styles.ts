@@ -2,9 +2,25 @@ import { cn } from '@/lib/utils';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'link' | 'inverse' | 'danger';
 export type ButtonSize = 'sm' | 'md' | 'lg';
+/** 官网用胶囊按钮（pill）；控制台统一 6px 小圆角（rounded），走 `@/components/console/button` */
+export type ButtonShape = 'pill' | 'rounded';
+
+export interface ButtonClassOptions {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  shape?: ButtonShape;
+  block?: boolean;
+  className?: string;
+}
 
 const BASE =
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-medium transition-[background-color,color,box-shadow,opacity] duration-150 disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0';
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-[background-color,color,box-shadow,opacity] duration-150 disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0';
+
+const SHAPES: Record<ButtonShape, string> = {
+  pill: 'rounded-full',
+  // 和输入框、下拉框、菜单项同一个圆角
+  rounded: 'rounded-md',
+};
 
 const SIZES: Record<ButtonSize, string> = {
   sm: 'h-8 px-3 text-xs',
@@ -26,16 +42,10 @@ const VARIANTS: Record<ButtonVariant, string> = {
 
 /**
  * 按钮样式拼接：站内跳转的 <Link> 和 <button> 共用同一套外观。
- * 拼接顺序是 基础 → 尺寸 → 变体 → 整宽 → 自定义，后写的盖掉前面冲突的类（link 的 px-0 靠它盖掉尺寸的内边距）。
+ * 拼接顺序是 基础 → 形状 → 尺寸 → 变体 → 整宽 → 自定义，后写的盖掉前面冲突的类
+ * （link 的 px-0、rounded-none 靠它盖掉尺寸的内边距和形状的圆角）。
  */
-export function buttonClass(
-  opts: {
-    variant?: ButtonVariant;
-    size?: ButtonSize;
-    block?: boolean;
-    className?: string;
-  } = {},
-): string {
-  const { variant = 'primary', size = 'md', block = false, className } = opts;
-  return cn(BASE, SIZES[size], VARIANTS[variant], block && 'w-full', className);
+export function buttonClass(opts: ButtonClassOptions = {}): string {
+  const { variant = 'primary', size = 'md', shape = 'pill', block = false, className } = opts;
+  return cn(BASE, SHAPES[shape], SIZES[size], VARIANTS[variant], block && 'w-full', className);
 }

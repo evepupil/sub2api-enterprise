@@ -5,7 +5,7 @@ import { useState, type FormEvent } from 'react';
 
 import { CopyButton } from '@/components/console/copy-button';
 import { Dialog } from '@/components/console/dialog';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/console/button';
 import { Field } from '@/components/ui/field';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import type { AppLocale } from '@/i18n/routing';

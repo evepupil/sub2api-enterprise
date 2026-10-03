@@ -5,7 +5,7 @@ import { useState, type FormEvent } from 'react';
 
 import { Dialog } from '@/components/console/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/console/button';
 import { Field } from '@/components/ui/field';
 import type { AppLocale } from '@/i18n/routing';
 

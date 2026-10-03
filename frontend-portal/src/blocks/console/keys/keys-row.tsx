@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 
 import { Td, Tr } from '@/components/console/data-table';
 import { Badge, type BadgeTone } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/console/button';
 import type { AppLocale } from '@/i18n/routing';
 import { formatInteger, formatUsd, type KeyStatus } from '@/lib/console';
 

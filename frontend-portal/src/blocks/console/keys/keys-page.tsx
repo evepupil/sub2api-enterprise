@@ -12,7 +12,7 @@ import { EmptyState } from '@/components/console/empty-state';
 import { SearchInput } from '@/components/console/filter-field';
 import { Pagination, usePagination } from '@/components/console/pagination';
 import { Select, type SelectOption } from '@/components/console/select';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/console/button';
 import { API_KEYS, KEY_STATUSES, searchKeys, type KeyStatus } from '@/lib/console';
 
 import { KeysCreateDialog } from './keys-create-dialog';

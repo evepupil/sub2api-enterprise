@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { ConfirmDialog } from '@/components/console/dialog';
 import { ConsolePage } from '@/components/console/console-page';
 import { CONTROL_BUTTON } from '@/components/console/control-button';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/console/button';
 import type { AppLocale } from '@/i18n/routing';
 import { ORG_INVITATIONS, ORG_MEMBERS, type OrgInvitation, type OrgMember } from '@/lib/console';
 

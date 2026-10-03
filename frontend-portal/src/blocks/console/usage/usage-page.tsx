@@ -8,7 +8,7 @@ import { ConsolePage } from '@/components/console/console-page';
 import { DateRangePicker } from '@/components/console/date-range-picker';
 import { EmptyState } from '@/components/console/empty-state';
 import { RefreshButton } from '@/components/console/refresh-button';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/console/button';
 import {
   activityStats,
   heatmap,

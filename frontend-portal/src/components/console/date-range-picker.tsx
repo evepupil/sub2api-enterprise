@@ -5,8 +5,6 @@ import { CalendarDays, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-rea
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 
-import { Button } from '@/components/ui/button';
-import { buttonClass } from '@/components/ui/button-styles';
 import type { AppLocale } from '@/i18n/routing';
 import {
   ACCOUNT_SINCE,
@@ -22,6 +20,7 @@ import {
 } from '@/lib/console/time';
 import { cn } from '@/lib/utils';
 
+import { Button, buttonClass } from './button';
 import { CONTROL_BUTTON } from './control-button';
 
 type Translator = ReturnType<typeof useTranslations<'console'>>;

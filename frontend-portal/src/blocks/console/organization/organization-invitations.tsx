@@ -7,7 +7,7 @@ import { CopyButton } from '@/components/console/copy-button';
 import { Table, TableShell, Td, Th, Tr } from '@/components/console/data-table';
 import { EmptyState } from '@/components/console/empty-state';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/console/button';
 import type { InvitationStatus, OrgInvitation } from '@/lib/console';
 
 /** 有效的邀请码绿色；已使用和已过期都是正常结束，用灰色 */
