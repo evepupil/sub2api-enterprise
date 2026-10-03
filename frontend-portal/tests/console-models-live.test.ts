@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { parseFavorites, toggleFavorite } from '@/lib/console/live/models-favorites';
 import type { ConsoleChannel } from '@/lib/console/live/models-types';
 import {
+  allModelRows,
   catalogEntry,
   cnyPerUsd,
   filterRows,
@@ -239,6 +240,45 @@ describe('筛选与排序', () => {
 
   it('厂商选项只列出现过的', () => {
     expect(providersIn(rows).map((provider) => provider.id)).toEqual(['openai']);
+  });
+});
+
+describe('所有通道一张表', () => {
+  // 第三个通道：和高性能通道挂同一个模型、倍率更高
+  const premiumAgain: ConsoleChannel = {
+    ...premium,
+    id: '1',
+    name: 'default',
+    rate: 1,
+    defaultRate: 1,
+  };
+  const rows = allModelRows([standard, premium, premiumAgain]);
+
+  it('同一个模型在几个通道里就有几行，每行带通道名与倍率，键不重复', () => {
+    expect(rows).toHaveLength(5);
+    expect(new Set(rows.map((row) => row.key)).size).toBe(5);
+    const sonnet = rows.filter((row) => row.id === 'claude-sonnet-4-5');
+    expect(sonnet.map((row) => [row.channel.name, row.channel.rate])).toEqual([
+      ['高性能通道', 0.25],
+      ['default', 1],
+    ]);
+    expect(sonnet[1]?.price).toMatchObject({ input: 3, output: 15 });
+  });
+
+  it('同一个模型的几行挨着，倍率低的在前；关键词能搜通道名', () => {
+    const query: ModelsQuery = {
+      type: 'all',
+      provider: 'all',
+      context: 'all',
+      protocol: 'all',
+      query: '',
+      sort: 'latest',
+    };
+    const sorted = filterRows(rows, query).filter((row) => row.id === 'claude-sonnet-4-5');
+    expect(sorted.map((row) => row.channel.rate)).toEqual([0.25, 1]);
+    expect(
+      filterRows(rows, { ...query, query: '标准' }).every((row) => row.channel.id === '2'),
+    ).toBe(true);
   });
 });
 

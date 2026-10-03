@@ -22,7 +22,7 @@ export function clearFilters(q: ModelsQuery): ModelsQuery {
   return { ...DEFAULT_QUERY, sort: q.sort };
 }
 
-/** 分页回第一页的依据：通道、范围或任何筛选、排序条件变了，都从第 1 页重新看 */
-export function paginationKey(channelId: string, scope: ModelScope, q: ModelsQuery): string {
-  return [channelId, scope, q.type, q.provider, q.context, q.protocol, q.query, q.sort].join('|');
+/** 分页回第一页的依据：范围或任何筛选、排序条件变了，都从第 1 页重新看 */
+export function paginationKey(scope: ModelScope, q: ModelsQuery): string {
+  return [scope, q.type, q.provider, q.context, q.protocol, q.query, q.sort].join('|');
 }

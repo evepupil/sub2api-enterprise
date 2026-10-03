@@ -268,14 +268,13 @@ describe('对话页逐字输出', () => {
 });
 
 describe('模型页筛选条件', () => {
-  it('清除筛选保留排序；换通道、换范围或改筛选都回第 1 页', () => {
+  it('清除筛选保留排序；换范围或改筛选都回第 1 页', () => {
     expect(clearFilters({ ...DEFAULT_QUERY, type: 'image', sort: 'price-asc' })).toEqual({
       ...DEFAULT_QUERY,
       sort: 'price-asc',
     });
-    const base = paginationKey('2', 'all', DEFAULT_QUERY);
-    expect(paginationKey('3', 'all', DEFAULT_QUERY)).not.toBe(base);
-    expect(paginationKey('2', 'favorites', DEFAULT_QUERY)).not.toBe(base);
-    expect(paginationKey('2', 'all', { ...DEFAULT_QUERY, query: 'gpt' })).not.toBe(base);
+    const base = paginationKey('all', DEFAULT_QUERY);
+    expect(paginationKey('favorites', DEFAULT_QUERY)).not.toBe(base);
+    expect(paginationKey('all', { ...DEFAULT_QUERY, query: 'gpt' })).not.toBe(base);
   });
 });

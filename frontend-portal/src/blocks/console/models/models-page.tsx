@@ -12,8 +12,8 @@ import { SegmentedControl } from '@/components/ui/segmented-control';
 import { useConsoleModels } from '@/lib/console/live/models-client';
 import { useFavoriteModels } from '@/lib/console/live/models-favorites';
 import {
+  allModelRows,
   filterRows,
-  modelRows,
   providersIn,
   type LiveCurrency,
 } from '@/lib/console/live/models-view';
@@ -30,9 +30,10 @@ import { ModelsTable } from './models-table';
 import { ModelsToolbar } from './models-toolbar';
 
 /**
- * 控制台「模型」页（接后端）：账号能用的每个通道、通道里的模型与实付价都来自后端模型广场；
- * 展示名、厂商、协议、上下文来自官网目录。可以按类型、厂商、上下文、协议、关键词筛选，
- * 换通道和币种看价格，收藏常用模型（存在这台浏览器里），文本模型一键带着模型名去对话页试用。
+ * 控制台「模型」页（接后端）：账号能用的所有通道的模型摊在一张表里，每行写着通道名与倍率，
+ * 实付价按各自通道的倍率算（都来自后端模型广场）；展示名、厂商、协议、上下文来自官网目录。
+ * 可以按类型、厂商、上下文、协议、关键词（含通道名）筛选，换币种看价格，收藏常用模型（存在这台浏览器里），
+ * 文本模型一键带着模型名去对话页试用。
  */
 export function ConsoleModelsPage() {
   const t = useTranslations('consoleModels');
@@ -42,13 +43,9 @@ export function ConsoleModelsPage() {
 
   const [scope, setScope] = useState<ModelScope>('all');
   const [query, setQuery] = useState<ModelsQuery>(DEFAULT_QUERY);
-  const [channelId, setChannelId] = useState<string | null>(null);
   const [currency, setCurrency] = useState<LiveCurrency>('usd');
 
-  // 没选过通道时用第一个（后端按倍率从低到高排）
-  const channels = data?.channels ?? [];
-  const channel = channels.find((item) => item.id === channelId) ?? channels[0] ?? null;
-  const allRows = useMemo(() => (channel ? modelRows(channel) : []), [channel]);
+  const allRows = useMemo(() => allModelRows(data?.channels ?? []), [data]);
   const providers = useMemo(() => providersIn(allRows), [allRows]);
   const filtered = useMemo(() => filterRows(allRows, query), [allRows, query]);
   const rows =
@@ -84,7 +81,7 @@ export function ConsoleModelsPage() {
         <Skeleton className="h-96 w-full" />
       </div>
     );
-  } else if (!channel || !data) {
+  } else if (!data || allRows.length === 0) {
     body = <EmptyState id="models-none" icon={Layers} title={t('noModels')} />;
   } else {
     body = (
@@ -104,9 +101,6 @@ export function ConsoleModelsPage() {
           <ModelsToolbar
             sort={query.sort}
             onSortChange={(sort) => patchQuery({ sort })}
-            channels={channels}
-            channelId={channel.id}
-            onChannelChange={setChannelId}
             currency={currency}
             onCurrencyChange={setCurrency}
             rechargeMultiplier={data.rechargeMultiplier}
@@ -115,7 +109,7 @@ export function ConsoleModelsPage() {
 
         <ModelsTable
           rows={rows}
-          resetKey={paginationKey(channel.id, scope, query)}
+          resetKey={paginationKey(scope, query)}
           currency={currency}
           rechargeMultiplier={data.rechargeMultiplier}
           favorites={favorites}

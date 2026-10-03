@@ -13,10 +13,12 @@ import { PROTOCOL_LABELS, formatContext, getProvider } from '@/lib/catalog';
 import type { LiveCurrency, ModelRowView } from '@/lib/console/live/models-view';
 import { cn } from '@/lib/utils';
 
+import { ChannelCell } from './models-channel';
 import { ModelDiscount, ModelPrice } from './models-price';
 
 /**
- * 模型表的一行。第一列（模型）和最后一列（操作）固定，横向滚动时始终看得见；
+ * 模型表的一行：一个通道里的一个模型（同一个模型在几个通道里就有几行）。
+ * 第一列（模型）和最后一列（操作）固定，横向滚动时始终看得见；
  * 手机宽度下第一列不固定，否则它一列就占满屏幕，其余列没法看。
  * 单元格内容一律不换行（whitespace-nowrap），宽度不够时由表格整体横向滚动。
  * 官网目录里没有的模型：没有厂商标志、协议列「—」、上下文「—」。
@@ -39,7 +41,7 @@ export function ModelRow({
   const t = useTranslations('consoleModels');
 
   return (
-    <Tr>
+    <Tr data-model-row={row.key}>
       <Td sticky="left" className="min-w-60 whitespace-nowrap max-sm:static">
         <div className="flex items-center gap-3">
           <button
@@ -70,6 +72,10 @@ export function ModelRow({
             ) : null}
           </div>
         </div>
+      </Td>
+
+      <Td>
+        <ChannelCell channel={row.channel} />
       </Td>
 
       <Td align="right" className="whitespace-nowrap">

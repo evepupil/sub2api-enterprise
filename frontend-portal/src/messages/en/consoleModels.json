@@ -13,7 +13,7 @@
     "context": "Context",
     "protocol": "Protocol",
     "search": "Search",
-    "searchPlaceholder": "Model or provider",
+    "searchPlaceholder": "Model, provider or channel",
     "all": "All",
     "text": "Text",
     "image": "Image",
@@ -28,7 +28,6 @@
     "priceDesc": "Price: high to low",
     "context": "Context length"
   },
-  "group": "Channel",
   "currency": {
     "label": "Currency",
     "usd": "USD",
@@ -37,6 +36,7 @@
   },
   "table": {
     "model": "Model",
+    "channel": "Channel",
     "price": "Price",
     "discount": "Discount",
     "type": "Type",

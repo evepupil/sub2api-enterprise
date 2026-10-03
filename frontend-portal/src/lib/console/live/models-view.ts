@@ -17,6 +17,7 @@ import type { ChannelModel, ConsoleChannel, TimeWindow, TokenRates } from './mod
 
 /**
  * 控制台模型页：后端通道数据 + 官网模型目录 → 表格里的一行。纯函数，单测锁住。
+ * 所有通道的模型摊在同一张表里（2026-10-04 用户要求），每行是「一个通道里的一个模型」，带着通道名与倍率。
  * 价格、官方价、计费方式来自后端；展示名、厂商、类型、协议、上下文、「新」标记来自官网目录，
  * 目录里没有的模型显示原名，厂商按模型名猜，协议按后端平台推，上下文未知。
  */
@@ -41,7 +42,19 @@ export interface PriceWindow extends TimeWindow {
   weekdaysOnly: boolean;
 }
 
+/** 这一行属于哪个通道 */
+export interface RowChannel {
+  id: string;
+  name: string;
+  /** 生效倍率（专属倍率优先） */
+  rate: number;
+}
+
 export interface ModelRowView {
+  /** 通道 ID + 模型名，表格里唯一 */
+  key: string;
+  channel: RowChannel;
+  /** 调用时填的模型名 */
   id: string;
   name: string;
   provider: ProviderId | null;
@@ -179,6 +192,8 @@ function toRow(model: ChannelModel, channel: ConsoleChannel): ModelRowView {
     })) ?? []),
   ];
   return {
+    key: `${channel.id}:${model.id}`,
+    channel: { id: channel.id, name: channel.name, rate: channel.rate },
     id: model.id,
     name: meta?.name ?? model.id,
     provider: meta?.provider ?? inferProvider(model.id),
@@ -200,6 +215,11 @@ export function modelRows(channel: ConsoleChannel): ModelRowView[] {
   return channel.models.map((model) => toRow(model, channel));
 }
 
+/** 所有通道的模型摊成一张表：同一个模型在几个通道里就有几行，价格按各自通道的倍率算 */
+export function allModelRows(channels: readonly ConsoleChannel[]): ModelRowView[] {
+  return channels.flatMap(modelRows);
+}
+
 const CONTEXT_MIN: Record<ContextFilter, number> = { all: 0, '200k': 200_000, '1m': 1_000_000 };
 const PROVIDER_NAME = new Map(PROVIDERS.map((provider) => [provider.id, provider.name]));
 
@@ -211,7 +231,11 @@ function compareNullable(a: number | null, b: number | null, direction: 1 | -1):
 }
 
 function comparator(sort: SortKey): (a: ModelRowView, b: ModelRowView) => number {
-  const byName = (a: ModelRowView, b: ModelRowView) => a.id.localeCompare(b.id);
+  // 同一个模型的几行挨着放，倍率低的通道在前
+  const byName = (a: ModelRowView, b: ModelRowView) =>
+    a.id.localeCompare(b.id) ||
+    a.channel.rate - b.channel.rate ||
+    a.channel.name.localeCompare(b.channel.name);
   switch (sort) {
     case 'latest':
       return (a, b) =>
@@ -231,7 +255,7 @@ function comparator(sort: SortKey): (a: ModelRowView, b: ModelRowView) => number
   }
 }
 
-/** 按类型、厂商、上下文、协议、关键词筛选后排序；上下文未知的模型在按上下文筛选时不出现 */
+/** 按类型、厂商、上下文、协议、关键词（模型名、厂商、通道名）筛选后排序；上下文未知的模型在按上下文筛选时不出现 */
 export function filterRows(rows: readonly ModelRowView[], query: ModelsQuery): ModelRowView[] {
   const text = query.query.trim().toLowerCase();
   const minContext = CONTEXT_MIN[query.context];
@@ -245,6 +269,7 @@ export function filterRows(rows: readonly ModelRowView[], query: ModelsQuery): M
         (text === '' ||
           row.id.toLowerCase().includes(text) ||
           row.name.toLowerCase().includes(text) ||
+          row.channel.name.toLowerCase().includes(text) ||
           (row.provider !== null &&
             (PROVIDER_NAME.get(row.provider) ?? '').toLowerCase().includes(text))),
     )

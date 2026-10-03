@@ -13,7 +13,7 @@
     "context": "上下文",
     "protocol": "协议",
     "search": "搜索",
-    "searchPlaceholder": "模型名或厂商",
+    "searchPlaceholder": "模型名、厂商或通道",
     "all": "全部",
     "text": "文本",
     "image": "生图",
@@ -28,7 +28,6 @@
     "priceDesc": "价格从高到低",
     "context": "上下文长度"
   },
-  "group": "通道",
   "currency": {
     "label": "币种",
     "usd": "美元",
@@ -37,6 +36,7 @@
   },
   "table": {
     "model": "模型",
+    "channel": "通道",
     "price": "价格",
     "discount": "折扣",
     "type": "类型",
