@@ -391,7 +391,8 @@ pnpm format:check  # prettier
 | 首页控制台预览里的消费、请求数、图表 | **编的**，`src/lib/content/console-preview.ts` |
 | 首页四张黑白示例图 | AI 生成（imagegen，gpt-image），`public/showcase/` |
 | 厂商标志 | lobehub icons（MIT），`public/providers/`；谷歌登录按钮标志 `public/brands/google.svg` |
-| 登录、注册、谷歌登录 | 占位，不连后端；「邀请码注册」开关先写死为开启（`src/lib/site.ts` 的 `REGISTRATION`），接后端后改读公开设置 |
+| 登录 | 2026-10-03 接通后端：`src/app/api/portal/auth/*` 转发、`src/lib/server/` 调后端与凭证 cookie、`src/lib/session/` 浏览器端登录状态、`src/proxy.ts` 拦截没登录的控制台访问（做法见技术设计 18.1） |
+| 注册、找回密码、谷歌登录、人机验证 | 占位，不连后端；登录页暂不显示「忘记密码」与谷歌登录；「邀请码注册」开关先写死为开启（`src/lib/site.ts` 的 `REGISTRATION`），接后端后改读公开设置 |
 
 ---
 

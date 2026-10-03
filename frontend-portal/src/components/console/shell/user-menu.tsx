@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  Building2,
   ChevronsUpDown,
   House,
   Languages,
@@ -25,7 +26,8 @@ import {
 import { Link } from '@/i18n/navigation';
 import { type AppLocale, routing } from '@/i18n/routing';
 import { useSwitchLocale } from '@/i18n/use-switch-locale';
-import { CURRENT_USER } from '@/lib/console/account';
+import { avatarInitial, displayName } from '@/lib/session/display';
+import { useSession } from '@/lib/session/session-provider';
 import { cn } from '@/lib/utils';
 
 /** 语言名按各自的写法固定显示，不随界面语言翻译 */
@@ -56,20 +58,26 @@ const CONTENT_POSITION: Record<
   bar: { side: 'bottom', align: 'end' },
 };
 
-/** 头像：深色圆底加名字的首字 */
+/** 头像：深色圆底加当前用户显示名的首字；还没读到用户时是浅色空圆 */
 export function Avatar({ className }: { className?: string }) {
-  const locale = useLocale() as AppLocale;
+  const { user } = useSession();
   return (
     <span
       aria-hidden
       className={cn(
-        'flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground',
+        'flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold',
+        user ? 'bg-primary text-primary-foreground' : 'bg-muted',
         className,
       )}
     >
-      {CURRENT_USER.initials[locale]}
+      {user ? avatarInitial(displayName(user)) : null}
     </span>
   );
+}
+
+/** 还没读到用户时，名字和邮箱的位置放两条浅色占位条，宽度和真实内容相近，读到后不跳动 */
+function TextPlaceholder({ className }: { className: string }) {
+  return <span aria-hidden className={cn('block rounded bg-muted', className)} />;
 }
 
 /** 菜单里的一行：左边图标加名字，右边一组分段单选，点一下就切换（选完菜单关闭） */
@@ -117,7 +125,8 @@ function MenuSegmentRow({
 }
 
 /**
- * 账号菜单：名字与邮箱；账户设置、返回官网；语言与主题切换；退出登录。
+ * 账号菜单：当前登录用户的名字、邮箱与所属组织；账户设置、返回官网；语言与主题切换；退出登录。
+ * 用户信息来自登录状态（SessionProvider），退出登录会通知后端作废凭证再回到登录页。
  * 侧栏底部和手机顶栏各放一个，样子与弹出方向见 UserMenuPlacement。
  * 交互检查：触发按钮 data-user-menu={placement}，菜单项 data-user-item，语言与主题行 data-user-row。
  */
@@ -127,7 +136,9 @@ export function UserMenu({ placement = 'sidebar' }: { placement?: UserMenuPlacem
   const locale = useLocale() as AppLocale;
   const switchLocale = useSwitchLocale();
   const { resolvedTheme, setTheme } = useTheme();
-  const name = CURRENT_USER.name[locale];
+  const session = useSession();
+  const user = session.user;
+  const name = user ? displayName(user) : '';
   const position = CONTENT_POSITION[placement];
 
   return (
@@ -145,11 +156,22 @@ export function UserMenu({ placement = 'sidebar' }: { placement?: UserMenuPlacem
           <Avatar />
           {placement === 'sidebar' ? (
             <>
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-medium text-foreground">{name}</span>
-                <span className="block truncate text-xs text-subtle-foreground">
-                  {CURRENT_USER.email}
-                </span>
+              <span className="min-w-0 flex-1" data-user-identity>
+                {user ? (
+                  <>
+                    <span className="block truncate text-sm font-medium text-foreground">
+                      {name}
+                    </span>
+                    <span className="block truncate text-xs text-subtle-foreground">
+                      {user.email}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <TextPlaceholder className="h-3.5 w-20" />
+                    <TextPlaceholder className="mt-1.5 h-3 w-32" />
+                  </>
+                )}
               </span>
               <ChevronsUpDown aria-hidden className="size-4 shrink-0 text-subtle-foreground" />
             </>
@@ -157,9 +179,26 @@ export function UserMenu({ placement = 'sidebar' }: { placement?: UserMenuPlacem
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent side={position.side} align={position.align} className="w-64">
-        <div className="px-3 py-2">
-          <p className="truncate text-sm font-medium text-foreground">{name}</p>
-          <p className="truncate text-xs text-subtle-foreground">{CURRENT_USER.email}</p>
+        <div className="px-3 py-2" data-user-summary>
+          {user ? (
+            <>
+              <p className="truncate text-sm font-medium text-foreground">{name}</p>
+              <p className="truncate text-xs text-subtle-foreground">{user.email}</p>
+              {user.organization ? (
+                <p className="mt-1 flex min-w-0 items-center gap-1 text-xs text-subtle-foreground">
+                  <Building2 aria-hidden className="size-3 shrink-0" />
+                  <span className="truncate" data-user-org>
+                    {user.organization.name}
+                  </span>
+                </p>
+              ) : null}
+            </>
+          ) : (
+            <>
+              <TextPlaceholder className="h-3.5 w-20" />
+              <TextPlaceholder className="mt-1.5 h-3 w-32" />
+            </>
+          )}
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
@@ -192,11 +231,9 @@ export function UserMenu({ placement = 'sidebar' }: { placement?: UserMenuPlacem
           options={THEMES.map((theme) => ({ value: theme, label: tc(`theme.${theme}`) }))}
         />
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link href="/login" data-user-item="logout">
-            <LogOut aria-hidden className="size-4" />
-            {t('user.logout')}
-          </Link>
+        <DropdownMenuItem data-user-item="logout" onSelect={() => void session.signOut()}>
+          <LogOut aria-hidden className="size-4" />
+          {t('user.logout')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
