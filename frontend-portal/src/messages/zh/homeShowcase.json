@@ -31,9 +31,9 @@
       }
     },
     "groupsCard": {
-      "title": "按分组调度，倍率公开",
-      "desc": "每个密钥绑定一个分组，实际扣费 = 官方价 × 分组倍率。",
-      "panelTitle": "分组",
+      "title": "三种通道，按需选用",
+      "desc": "每个密钥绑定一个通道，不同用途可以用不同通道。",
+      "panelTitle": "通道",
       "add": "新建"
     },
     "protocolsCard": {

@@ -13,8 +13,8 @@
       "desc": "No subscription and no monthly fee — usage-based charges with exportable statements."
     },
     "editions": {
-      "title": "Three service levels",
-      "desc": "Personal, Pro and Enterprise editions, each with its own availability target."
+      "title": "Three channels",
+      "desc": "Shared, Dedicated and Enterprise channels, each with its own availability target."
     },
     "failover": {
       "title": "Automatic failover",
@@ -22,15 +22,15 @@
     },
     "organizations": {
       "title": "Organizations and members",
-      "desc": "Organizations top up centrally and assign quotas and groups per member."
+      "desc": "Organizations top up centrally and assign quotas per member."
     },
     "ratios": {
-      "title": "Public group ratios",
-      "desc": "Each group's ratio and available models are published on the pricing page."
+      "title": "Public pricing",
+      "desc": "Every model's price on each channel is published on the pricing page."
     },
     "invoices": {
       "title": "Invoicing",
-      "desc": "Pro and Enterprise editions support bank transfer and invoicing."
+      "desc": "The Dedicated and Enterprise channels support bank transfer and invoicing."
     }
   },
   "catalog": {
@@ -43,7 +43,7 @@
   },
   "cta": {
     "title": "Sign up and start building today",
-    "subtitle": "Personal and organization accounts are both welcome. Pay as you go and switch editions anytime.",
+    "subtitle": "Personal and organization accounts are both welcome. Pay as you go and switch channels anytime.",
     "primary": "Get started",
     "secondary": "View pricing"
   }

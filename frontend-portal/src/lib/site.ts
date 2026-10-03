@@ -19,11 +19,11 @@ export const REGISTRATION: { invitationCodeRequired: boolean } = {
 
 export type NavKey = 'models' | 'pricing' | 'groups' | 'docs';
 
-/** 顶栏菜单，顺序即显示顺序；文字取 common.nav.<key> */
+/** 顶栏菜单，顺序即显示顺序；文字取 common.nav.<key>（groups 这个键对应「通道」页） */
 export const NAV_ITEMS: readonly { key: NavKey; href: string }[] = [
   { key: 'models', href: '/models' },
   { key: 'pricing', href: '/pricing' },
-  { key: 'groups', href: '/groups' },
+  { key: 'groups', href: '/channels' },
   { key: 'docs', href: '/docs' },
 ];
 
@@ -49,7 +49,7 @@ export const FOOTER_COLUMNS: readonly {
     links: [
       { key: 'models', href: '/models' },
       { key: 'pricing', href: '/pricing' },
-      { key: 'groups', href: '/groups' },
+      { key: 'groups', href: '/channels' },
       { key: 'docs', href: '/docs' },
     ],
   },

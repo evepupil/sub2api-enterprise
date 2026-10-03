@@ -2,7 +2,7 @@ import { FaqList } from '@/components/ui/faq-list';
 import { Container } from '@/components/ui/container';
 import { useTranslations } from 'next-intl';
 
-/** 分组页常见问题：左栏标题，右栏手风琴（展开状态由共享 FaqList 管理）。 */
+/** 通道页常见问题：左栏标题，右栏手风琴（展开状态由共享 FaqList 管理）。 */
 export function GroupsFaq() {
   const t = useTranslations('groups');
 

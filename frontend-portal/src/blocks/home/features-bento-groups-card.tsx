@@ -6,7 +6,7 @@ import { useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { buttonClass } from '@/components/ui/button-styles';
-import { EDITIONS, formatRatio, getEdition, localize, type EditionId } from '@/lib/catalog';
+import { EDITIONS, getEdition, localize, type EditionId } from '@/lib/catalog';
 import { cn } from '@/lib/utils';
 
 /** 开关轨道与圆钮的样式：按状态取完整类名，不做字符串拼接。 */
@@ -20,7 +20,7 @@ const KNOB: Record<'on' | 'off', string> = {
   off: 'translate-x-0.5',
 };
 
-/** 面板里的一行：分组（版本）名 + 倍率 + 渠道 + 可点的假开关。 */
+/** 面板里的一行：通道名 + 可用率目标 + 一句话定位 + 可点的假开关。 */
 function GroupRow(props: { edition: EditionId; on: boolean; onToggle: () => void }) {
   const locale = useLocale();
   const group = getEdition(props.edition);
@@ -28,9 +28,9 @@ function GroupRow(props: { edition: EditionId; on: boolean; onToggle: () => void
   return (
     <div className="flex items-center gap-3 border-b border-border px-4 py-3 last:border-b-0">
       <Badge tone="outline">{localize(group.name, locale)}</Badge>
-      <span className="font-mono text-xs text-foreground">{formatRatio(group.ratio, locale)}</span>
+      <span className="font-mono text-xs text-foreground">{`${group.slaTarget.toFixed(1)}%`}</span>
       <span className="min-w-0 flex-1 truncate text-xs text-muted-foreground">
-        {localize(group.channel, locale)}
+        {localize(group.summary, locale)}
       </span>
       {/* 开关只是行内的演示控件：按钮语义完整，键盘可达，焦点态走全局样式 */}
       <button
@@ -56,11 +56,11 @@ function GroupRow(props: { edition: EditionId; on: boolean; onToggle: () => void
   );
 }
 
-/** C 分组卡：分组面板，三个版本各一行，开关默认前两行开、最后一行关，点击切换。 */
+/** C 通道卡：通道面板，三种通道各一行，开关默认前两行开、最后一行关，点击切换。 */
 export function FeaturesBentoGroupsCard() {
   const t = useTranslations('homeShowcase.features.groupsCard');
 
-  // 开关状态只存在本地：键是版本 id，默认前两行开
+  // 开关状态只存在本地：键是通道 id，默认前两行开
   const [state, setState] = useState<Partial<Record<EditionId, boolean>>>(() =>
     Object.fromEntries(EDITIONS.map((edition, i) => [edition.id, i < 2])),
   );

@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 
 import { PROVIDERS } from '@/lib/catalog';
 
-/** 厂商标志墙：所有分组共用同一份模型目录。 */
+/** 厂商标志墙：所有通道共用同一份模型目录。 */
 export function GroupsLogos() {
   const t = useTranslations('groups');
 

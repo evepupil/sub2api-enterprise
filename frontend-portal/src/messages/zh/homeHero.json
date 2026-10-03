@@ -2,7 +2,7 @@
   "badge": "生图 API 已上线：GPT Image 2.5 与 Nano Banana 全系",
   "titleLine1": "文本、图像与代码模型",
   "titleLine2": "一个 API 全部调用",
-  "subtitle": "Claude、GPT、Gemini、DeepSeek 等 {count} 个主流模型统一接入、按量计费，<br></br>个人版、专业版、企业版三档服务等级按需选择。",
+  "subtitle": "Claude、GPT、Gemini、DeepSeek 等 {count} 个主流模型统一接入、按量计费，<br></br>共享、专用、企业三种通道按需选择。",
   "primaryCta": "免费注册",
   "secondaryCta": "查看价格",
   "preview": {
@@ -11,17 +11,17 @@
       "keys": "API 密钥",
       "usage": "用量",
       "billing": "账单",
-      "groups": "分组",
+      "groups": "通道",
       "members": "组织成员",
       "settings": "设置"
     },
     "title": "概览",
     "search": "搜索模型或密钥",
-    "edition": "专业版",
+    "edition": "专用通道",
     "stats": {
       "spend": {
         "title": "本月消费",
-        "desc": "全部分组合计"
+        "desc": "全部通道合计"
       },
       "requests": {
         "title": "请求次数",
@@ -33,7 +33,7 @@
       },
       "availability": {
         "title": "可用率",
-        "desc": "专业版 · 近 30 天",
+        "desc": "专用通道 · 近 30 天",
         "target": "目标 {value}%"
       }
     },
@@ -50,9 +50,9 @@
         "range": "近 30 天"
       },
       "groups": {
-        "title": "分组消费占比",
+        "title": "通道消费占比",
         "range": "近 30 天",
-        "center": "个分组"
+        "center": "个通道"
       }
     },
     "recent": {

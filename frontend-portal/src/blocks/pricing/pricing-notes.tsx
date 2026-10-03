@@ -1,18 +1,18 @@
-import { Coins, Image as ImageIcon, ImagePlus, Layers, Percent, Wallet } from 'lucide-react';
+import { Coins, Image as ImageIcon, ImagePlus, Layers, Route, Wallet } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { Link } from '@/i18n/navigation';
 import { IMAGE_TOKENS_PER_IMAGE, USD_CNY_RATE } from '@/lib/catalog';
 import { Container } from '@/components/ui/container';
 
-/** 计费说明：六条小卡，两列网格。金额口径、汇率与版本倍率都在这里讲清楚。 */
+/** 计费说明：六条小卡，两列网格。金额口径、汇率与通道差别都在这里讲清楚。 */
 export function PricingNotes() {
   const t = useTranslations('pricing');
 
-  // 富文本那条：分组页是站内链接，用 t.rich 渲染成 Link
+  // 富文本那条：通道页是站内链接，用 t.rich 渲染成 Link
   const editions = t.rich('notes.editions', {
     link: (chunks) => (
-      <Link href="/groups" className="font-medium text-foreground underline underline-offset-4">
+      <Link href="/channels" className="font-medium text-foreground underline underline-offset-4">
         {chunks}
       </Link>
     ),
@@ -63,7 +63,7 @@ export function PricingNotes() {
             data-note="editions"
             className="flex gap-3 rounded-2xl border border-border bg-card p-5 text-sm leading-6 text-muted-foreground"
           >
-            <Percent className="mt-1 size-4 shrink-0 text-foreground" />
+            <Route className="mt-1 size-4 shrink-0 text-foreground" />
             <span>{editions}</span>
           </li>
         </ul>

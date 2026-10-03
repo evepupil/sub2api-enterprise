@@ -1,12 +1,12 @@
 {
   "meta": {
     "tagline": "Enterprise AI Model API",
-    "description": "One API for Claude, GPT, Gemini and other leading text models, plus GPT Image and Nano Banana image models. Choose Personal, Pro or Enterprise."
+    "description": "One API for Claude, GPT, Gemini and other leading text models, plus GPT Image and Nano Banana image models. Choose the Shared, Dedicated or Enterprise channel."
   },
   "nav": {
     "models": "Models",
     "pricing": "Pricing",
-    "groups": "Groups",
+    "groups": "Channels",
     "docs": "Docs",
     "login": "Log in",
     "register": "Sign up",
@@ -23,7 +23,7 @@
     "toggle": "Toggle color theme"
   },
   "edition": {
-    "label": "Service edition"
+    "label": "Channel"
   },
   "actions": {
     "getStarted": "Get started",
@@ -47,7 +47,7 @@
     "links": {
       "models": "Models",
       "pricing": "Pricing",
-      "groups": "Groups",
+      "groups": "Channels",
       "docs": "Docs",
       "about": "About",
       "contact": "Contact",
@@ -59,8 +59,6 @@
   },
   "editionSummary": {
     "sla": "Availability",
-    "channel": "Channel",
-    "rpm": "Requests per minute",
-    "ratio": "Group ratio"
+    "rpm": "Requests per minute"
   }
 }

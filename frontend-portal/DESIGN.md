@@ -10,14 +10,14 @@
 
 ## 0. 定位与参照
 
-一个面向个人开发者和企业的 AI 模型 API 服务站官网：一个 API 调用 Claude、GPT、Gemini 等文本模型和 GPT Image、Nano Banana 等生图模型，按量付费，分个人版、专业版、企业版三个服务版本（可用率承诺、渠道质量和价格不同）。本次只做官网：首页、模型、价格、分组、登录、注册，文档入口占位，控制台不做，后端不接。
+一个面向个人开发者和企业的 AI 模型 API 服务站官网：一个 API 调用 Claude、GPT、Gemini 等文本模型和 GPT Image、Nano Banana 等生图模型，按量付费，分共享通道、专用通道、企业通道三种通道（可用率承诺、资源质量和价格不同；一个通道就是后端的一个分组，代码里沿用 edition 这个名字）。本次只做官网：首页、模型、价格、通道、登录、注册，文档入口占位，控制台不做，后端不接。
 
 用户来这里干这几件事：
 
 1. 在首页弄清楚这是什么服务、能调哪些模型、怎么收费，然后注册。
-2. 在模型页按厂商、协议、上下文筛选模型，切换三个版本看每个模型的价格和近 24 小时可用率。
-3. 在价格页按版本、按币种查每个模型的输入、输出、缓存和生图单价。
-4. 在分组页看三个版本（一个版本就是一个分组）的倍率和特权，弄清「实际扣费 = 官方价 × 分组倍率」。
+2. 在模型页按厂商、协议、上下文筛选模型，切换三种通道看每个模型的价格和近 24 小时可用率。
+3. 在价格页按通道、按币种查每个模型的输入、输出、缓存和生图单价。
+4. 在通道页看三种通道的权益差别（可用率目标、限额、工单时限与特权，不展示倍率），点「查看定价」去价格页看单价。
 5. 登录（个人与组织成员同一入口），注册个人账号或创建组织。
 
 目标观感：**像素级复刻 Aceternity「AI SaaS Template」（Every AI）的观感，内容全部换成我们的。** 白底近黑字、Geist 字体、超大加粗标题、黑色胶囊按钮、带光线流动的网格背景、滚动后浮起的胶囊顶栏、深色重点卡、页脚超大水印字；暗色主题整体反转。
@@ -25,7 +25,7 @@
 | 参照 | 抄什么 |
 |---|---|
 | Aceternity AI SaaS Template 首页 `ai-saas-template-aceternity.vercel.app` | 全站视觉与首页结构：顶栏（左品牌加菜单、右主题按钮/登录/注册胶囊，滚动后变成浮动胶囊）；首屏（网格加光线背景、带投影的小胶囊公告、两行 96px 标题、20px 灰色副标题、黑色「Get started」加「Contact us →」）；首屏下方带大圆角外框的控制台截图；「Trusted by」四个标志轮换；「Packed with features」带虚线分隔的四格拼贴（生图卡、聊天手机卡、开关列表卡、地球加技术胶囊跑马灯卡）；4×2 特性格（图标、标题、说明，悬停左侧出现竖条）；三列纵向滚动的评价卡瀑布流；深色带颗粒的号召块；页脚（品牌、版权、三列链接、底部超大浅灰渐变水印字） |
-| 同模板 `/pricing` | 分组页：居中标题、Monthly/Yearly 黑底分段切换、四张并排套餐卡（第三张深蓝渐变重点卡、白色按钮）、带对勾圆点的特权列表、逐行对勾的对比表、底部标志墙 |
+| 同模板 `/pricing` | 通道页：居中标题、Monthly/Yearly 黑底分段切换、四张并排套餐卡（第三张深蓝渐变重点卡、白色按钮）、带对勾圆点的特权列表、逐行对勾的对比表、底部标志墙 |
 | 同模板 `/login`、`/signup` | 登录注册：左半屏表单（品牌、标题、标签加输入框、黑色整宽按钮、分隔线「Or continue with」、第三方登录整宽按钮、条款小字），右半屏浅灰底加虚线框，中间叠放头像加一句话 |
 | onehop.ai `/models` | 模型页的信息组织：左侧筛选栏（上下文长度、厂商、支持协议，每项带数量）、顶部模型数量加搜索框加排序下拉、分类标签（全部/文本/图像带数量）、三列模型卡（厂商标志与名称、模型名、调用名、一句描述、协议标签、上下文、价格加折扣标、可用率与 24 格状态条） |
 | onehop.ai `/pricing` | 价格页的信息组织：币种切换（美元/人民币）、按厂商分段的价目表（模型、输入、输出、上下文，超长上下文档写在模型名下面一行）、生图价目表（每张价或每百万 Token 价，按 Token 计费的给「≈ 每张」估算）、表下注释、常见问题 |
@@ -37,9 +37,9 @@
 | 页面 | 路由 | 用户来干什么 | 首屏核心动作 | 参照页 | 区块下限 | 分路 |
 |---|---|---|---|---|---|---|
 | 首页 | `/` | 了解服务、注册 | 「免费注册」「查看价格」 | 模板首页 | 7 + 顶栏页脚 | L1 L2 L3 |
-| 模型 | `/models` | 选模型、看价格和可用率 | 版本切换、搜索、筛选 | onehop 模型页 | 2（筛选器内含 5 个区域） | L4 |
-| 价格 | `/pricing` | 查单价 | 版本切换、币种切换 | onehop 价格页 | 4 | L5 |
-| 分组 | `/groups` | 看分组倍率与特权 | 看三张版本卡、对比特权 | 模板价格页 | 6 | L6 |
+| 模型 | `/models` | 选模型、看价格和可用率 | 通道切换、搜索、筛选 | onehop 模型页 | 2（筛选器内含 5 个区域） | L4 |
+| 价格 | `/pricing` | 查单价 | 通道切换、币种切换 | onehop 价格页 | 4 | L5 |
+| 通道 | `/channels` | 看三种通道的权益差别 | 看三张通道卡、对比特权、查看定价 | 模板价格页 | 5 | L6 |
 | 登录 | `/login` | 登录（个人与组织成员同一入口） | 填邮箱和密码 | 模板登录页 | 2 | L7 |
 | 注册 | `/register` | 个人注册或创建组织 | 个人/创建组织切换、填表 | 模板注册页 | 2 | L7 |
 | 文档 | `/docs` | 占位 | 无 | 无 | 1 | L7 |
@@ -168,7 +168,7 @@
 | `/` | `src/app/[locale]/(site)/page.tsx` | 根布局默认标题 | HomeHero、ConsolePreview、ProviderLogos、FeaturesBento、FeatureGrid、ModelMarquee、HomeCta |
 | `/models` | `src/app/[locale]/(site)/models/page.tsx` | `models.meta.title` | ModelsHero、ModelsExplorer |
 | `/pricing` | `src/app/[locale]/(site)/pricing/page.tsx` | `pricing.meta.title` | PricingHero、PricingTables、PricingNotes、PricingFaq |
-| `/groups` | `src/app/[locale]/(site)/groups/page.tsx` | `groups.meta.title` | GroupsHero、GroupCards、RatioExplainer、PrivilegeTable、GroupsFaq、GroupsLogos |
+| `/channels` | `src/app/[locale]/(site)/channels/page.tsx` | `groups.meta.title` | GroupsHero、GroupCards、PrivilegeTable、GroupsFaq、GroupsLogos |
 | `/docs` | `src/app/[locale]/(site)/docs/page.tsx` | `misc.meta.docsTitle` | DocsPlaceholder |
 | `/login` | `src/app/[locale]/(auth)/login/page.tsx` | `auth.meta.loginTitle` | 两栏：LoginPanel、AuthShowcase |
 | `/register` | `src/app/[locale]/(auth)/register/page.tsx` | `auth.meta.registerTitle` | 两栏：RegisterPanel、AuthShowcase |
@@ -176,7 +176,7 @@
 
 - `(site)` 组的布局 `src/app/[locale]/(site)/layout.tsx` 渲染 `SiteHeader` → `<main id="main">` → `SiteFooter`；`(auth)` 组的布局只有 `<main id="main" className="min-h-dvh">`，没有顶栏页脚（和模板登录页一致）。
 - 每个页面开头 `const locale = await initPage(params)`（`@/i18n/page`），有标题的页面写 `generateMetadata`。
-- 每个区块组件**具名导出 + 默认导出双份**，**不接收任何参数**，自带最外层 `<section>`（锚点 `id`、底色、纵向留白）。页内几个区块之间共享的状态（当前版本、币种）一律走网址参数（见 4.4），不靠参数传递。顶栏靠 `usePathname()` 自己判断当前页，也不接收参数。
+- 每个区块组件**具名导出 + 默认导出双份**，**不接收任何参数**，自带最外层 `<section>`（锚点 `id`、底色、纵向留白）。页内几个区块之间共享的状态（当前通道、币种）一律走网址参数（见 4.4），不靠参数传递。顶栏靠 `usePathname()` 自己判断当前页，也不接收参数。
 
 ### 4.2 区块清单
 
@@ -208,16 +208,15 @@
 | P3 | 计费说明 | `PricingNotes` | `src/blocks/pricing/pricing-notes.tsx` | `notes` | background | L5 |
 | P4 | 常见问题 | `PricingFaq` | `src/blocks/pricing/pricing-faq.tsx` | `faq` | surface | L5 |
 
-分组页（`design/分组.md`），最重要的区块：G2。
+通道页（`design/分组.md`，区块与文案命名空间沿用 groups），最重要的区块：G2。
 
 | # | 区块 | 组件 | 文件 | 锚点 | 底色 | 路 |
 |---|---|---|---|---|---|---|
 | G1 | 页首 | `GroupsHero` | `src/blocks/groups/groups-hero.tsx` | `groups-hero` | background + 网格光线 | L6 |
-| G2 | 分组卡 | `GroupCards` | `src/blocks/groups/group-cards.tsx` | `group-cards` | background | L6 |
-| G3 | 倍率说明 | `RatioExplainer` | `src/blocks/groups/ratio-explainer.tsx` | `ratio` | surface | L6 |
-| G4 | 特权对比 | `PrivilegeTable` | `src/blocks/groups/privilege-table.tsx` | `compare` | background | L6 |
-| G5 | 常见问题 | `GroupsFaq` | `src/blocks/groups/groups-faq.tsx` | `faq` | background | L6 |
-| G6 | 厂商标志 | `GroupsLogos` | `src/blocks/groups/groups-logos.tsx` | `providers` | background | L6 |
+| G2 | 通道卡 | `GroupCards` | `src/blocks/groups/group-cards.tsx` | `group-cards` | background | L6 |
+| G3 | 特权对比 | `PrivilegeTable` | `src/blocks/groups/privilege-table.tsx` | `compare` | background | L6 |
+| G4 | 常见问题 | `GroupsFaq` | `src/blocks/groups/groups-faq.tsx` | `faq` | background | L6 |
+| G5 | 厂商标志 | `GroupsLogos` | `src/blocks/groups/groups-logos.tsx` | `providers` | background | L6 |
 
 登录注册与其他（`design/登录注册.md`），最重要的区块：A1。
 
@@ -254,13 +253,13 @@
 | `src/components/catalog/provider-logo-cloud.tsx`（`'use client'`） | `ProviderLogoCloud` | `{ className?: string }`。两组：A `openai anthropic google deepseek`，B `moonshot zhipu minimax qwen`，每 3000ms 换一组（减少动态效果时停在 A）。外层 `grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-4`，`data-logo-cloud`，`data-logo-set="0"`/`"1"`。每格 `flex h-14 items-center justify-center`，里面 `AnimatePresence mode="wait" initial={false}`（首组直接显示，不等水合）按厂商 id 换 `motion.div`：`initial={{ opacity: 0, y: 12, filter: 'blur(8px)' }}`、`animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}`、`exit={{ opacity: 0, y: -12, filter: 'blur(8px)' }}`、`transition={{ duration: 0.45, delay: 格序号 × 0.08, ease: [0.22,1,0.36,1] }}`；内容 `flex items-center gap-3`：`ProviderLogo size={32}` + `<span className="text-xl font-semibold tracking-tight text-foreground/85 md:text-2xl">{厂商名}</span>` |
 | `src/components/catalog/discount-badge.tsx`（无指令） | `DiscountBadge` | `{ discount: number \| null; locale: AppLocale; className? }`：`formatDiscount` 为空时返回 `null`；否则 `<Badge tone="success" data-discount className={className}>{文字}</Badge>` |
 | `src/components/catalog/edition-switcher.tsx`（`'use client'`） | `EditionSwitcher` | `{ className?: string; size?: 'sm' \| 'md' }`。读写 `useEdition()`，渲染 `SegmentedControl name="edition"`，选项来自 `EDITIONS`，标签 `edition.name[locale]`，`ariaLabel` 取 `common.edition.label` |
-| `src/components/catalog/edition-summary.tsx`（`'use client'`） | `EditionSummary` | `{ className?: string }`。读 `useEdition()`，一行四项，外层 `flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm`，`data-edition-summary`。每项 `<span className="inline-flex items-center gap-1.5"><span className="text-subtle-foreground">{标签}</span><span data-summary={key} className="font-medium tabular-nums text-foreground">{值}</span></span>`。四项：`sla` 值 `${slaTarget.toFixed(1)}%`；`channel` 值 `channel[locale]`；`rpm` 值 `rpm.toLocaleString('en-US')`；`ratio` 值 `formatRatio(edition.ratio, locale)`（企业版显示「定制」）。标签取 `common.editionSummary.<key>` |
+| `src/components/catalog/edition-summary.tsx`（`'use client'`） | `EditionSummary` | `{ className?: string }`。读 `useEdition()`，一行两项，外层 `flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm`，`data-edition-summary`。每项 `<span className="inline-flex items-center gap-1.5"><span className="text-subtle-foreground">{标签}</span><span data-summary={key} className="font-medium tabular-nums text-foreground">{值}</span></span>`。两项：`sla` 值 `${slaTarget.toFixed(1)}%`；`rpm` 值 `rpm.toLocaleString('en-US')`。通道名已在切换器上，倍率不在官网展示。标签取 `common.editionSummary.<key>` |
 | `src/components/layout/brand.tsx`（无指令） | `Brand` | `{ className?: string }`：`<Link href="/" className="flex items-center gap-2 text-sm font-medium text-foreground">`，前面一个 `aria-hidden` 的 `block h-5 w-6 rounded-md bg-primary` 色块（模板同款黑色圆角块），后面 `SITE.name` |
 | `src/components/layout/theme-toggle.tsx`（`'use client'`） | `ThemeToggle` | `{ className?: string }`：`<button type="button" data-theme-toggle aria-label={common.theme.toggle} className={buttonClass({ variant: 'ghost', size: 'sm', className: 'size-9 px-0 text-muted-foreground hover:text-foreground' })}>`，里面 `Sun className="size-4 dark:hidden"` 和 `Moon className="hidden size-4 dark:block"`，点击 `setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')` |
 | `src/components/layout/language-switcher.tsx`（`'use client'`） | `LanguageSwitcher` | `{ className?: string; full?: boolean }`。触发按钮 `data-lang-trigger`，`aria-label={common.language.label}`，类名 `buttonClass({ variant: 'ghost', size: 'sm', className: 'h-9 gap-1.5 px-3 text-muted-foreground hover:text-foreground' })`，内容 `Languages` 图标 + 文字（full 时显示 `简体中文`/`English`，否则 `中文`/`EN`）+ `ChevronDown size-3.5`。菜单是 `DropdownMenuRadioGroup value={locale}`，两项 `zh`「简体中文」、`en`「English」，每项 `data-lang={code}`。切换时 `router.replace(\`${pathname}${window.location.search}\`, { locale: next, scroll: false })`（`useRouter`、`usePathname` 来自 `@/i18n/navigation`），保留 `?edition=` 等参数 |
 | `src/components/layout/site-header.tsx`（`'use client'`） | `SiteHeader` | 无参数。见 4.5 |
 | `src/components/layout/site-footer.tsx`（无指令） | `SiteFooter` | 无参数。见 4.6 |
-| `src/components/layout/page-hero.tsx`（无指令） | `PageHero` | `{ id: string; title: ReactNode; subtitle?: ReactNode; children?: ReactNode; className? }`：`<section id={id} className={cn('relative overflow-hidden pt-16 pb-12 md:pt-24 md:pb-16', className)}>` + `<GridBeams />` + `<Container className="relative">` + `<SectionHeading as="h1" title subtitle />` + children 时 `<div className="mt-8 flex flex-col items-center gap-5">{children}</div>`。模型、价格、分组三页的页首都用它 |
+| `src/components/layout/page-hero.tsx`（无指令） | `PageHero` | `{ id: string; title: ReactNode; subtitle?: ReactNode; children?: ReactNode; className? }`：`<section id={id} className={cn('relative overflow-hidden pt-16 pb-12 md:pt-24 md:pb-16', className)}>` + `<GridBeams />` + `<Container className="relative">` + `<SectionHeading as="h1" title subtitle />` + children 时 `<div className="mt-8 flex flex-col items-center gap-5">{children}</div>`。模型、价格、通道三页的页首都用它 |
 
 ### 4.4 页内与跨区块状态（主控已写好，直接用）
 
@@ -309,7 +308,7 @@
 - [design/首页.md](design/首页.md) —— H1–H7
 - [design/模型.md](design/模型.md) —— M1–M2
 - [design/价格.md](design/价格.md) —— P1–P4
-- [design/分组.md](design/分组.md) —— G1–G6
+- [design/分组.md](design/分组.md) —— G1–G5（通道页）
 - [design/登录注册.md](design/登录注册.md) —— A1–A3、X1–X2
 
 ---
@@ -371,7 +370,7 @@ pnpm format:check  # prettier
 | L3 首页下半 | `src/blocks/home/feature-grid*.tsx`、`src/blocks/home/model-marquee*.tsx`、`src/blocks/home/home-cta*.tsx`、`src/messages/{zh,en}/homeMore.json` |
 | L4 模型页 | `src/blocks/models/**`、`src/messages/{zh,en}/models.json` |
 | L5 价格页 | `src/blocks/pricing/**`、`src/messages/{zh,en}/pricing.json` |
-| L6 分组页 | `src/blocks/groups/**`、`src/messages/{zh,en}/groups.json` |
+| L6 通道页 | `src/blocks/groups/**`、`src/messages/{zh,en}/groups.json` |
 | L7 登录注册与其他 | `src/blocks/auth/**`、`src/blocks/misc/**`、`src/messages/{zh,en}/auth.json`、`src/messages/{zh,en}/misc.json` |
 
 ---
@@ -383,8 +382,8 @@ pnpm format:check  # prettier
 | 品牌名 Nexus API、标志色块 | **编的**，沿用旧版临时品牌；只改 `src/lib/site.ts` |
 | 30 个模型的型号、上线日期、上下文、协议 | 型号参考 onehop.ai 与本仓库后端认识的模型名（2026-10-03）；上线日期、协议支持为**编的** |
 | 官方价 | 由 onehop.ai 2026-10-03 公开价目反推（onehop 价 ÷ 其折扣），未逐个核对厂商官网 |
-| 三个版本的分组倍率（个人版 ×0.15、专业版 ×0.3、企业版定制） | 用户 2026-10-03 给定，`src/lib/catalog/editions.ts`；单测锁住了换算结果 |
-| 可用率目标、渠道类型、RPM、并发、组织成员上限、工单响应时限、分组卡特权清单、特权对比各项 | **编的**，`editions.ts`、`groups.ts` |
+| 三种通道的分组倍率（共享通道 ×0.15、专用通道 ×0.3、企业通道定制） | 用户 2026-10-03 给定，`src/lib/catalog/editions.ts`；只参与价格换算，官网页面不展示；单测锁住了换算结果 |
+| 可用率目标、RPM、并发、组织成员上限、工单响应时限、通道卡特权清单、特权对比各项 | **编的**，`editions.ts`、`groups.ts` |
 | 近 24 小时可用率与状态格 | **编的**，固定种子生成（`uptime.ts`），接监测后替换 |
 | 人民币汇率 7.1、按 Token 计费生图的每张估算 1290 Token | **编的**，`pricing.ts` |
 | 首页控制台预览里的消费、请求数、图表 | **编的**，`src/lib/content/console-preview.ts` |
@@ -402,11 +401,11 @@ pnpm format:check  # prettier
 |---|---|
 | `MODELS: readonly Model[]` | 30 个模型（23 文本、7 生图），字段见 `types.ts` |
 | `PROVIDERS`、`getProvider(id)` | 8 个厂商：名称、标志路径、是否单色 |
-| `EDITIONS`、`EDITION_IDS`、`getEdition(id)`、`isEditionId(v)` | 三个版本（即三个分组）：名称、一句话、分组倍率（企业版 null 即定制）、可用率目标、渠道、RPM、并发、工单时限、是否重点卡、按钮类型 |
-| `editionRatio(edition)`、`ratioLabel(r)`、`ratioText(r)`、`formatRatio(r, locale)`、`GROUP_HIGHLIGHTS`、`PRIVILEGE_ROWS` | 分组倍率（×0.15 / 定制）、分组卡独有特权、特权对比 |
-| `textPrice(model, edition)`、`textPriceAt(model, k)` | 文本单价（美元 / 百万 Token）：input、output、cacheRead、longContext；= 官方价 × 分组倍率，定制版本返回 null；`k = 1` 即官方价 |
+| `EDITIONS`、`EDITION_IDS`、`getEdition(id)`、`isEditionId(v)` | 三种通道（即三个分组，名称为共享通道 / 专用通道 / 企业通道）：名称、一句话、分组倍率（企业通道 null 即定制）、可用率目标、RPM、并发、工单时限、是否重点卡、按钮类型（查看定价 / 联系销售） |
+| `editionRatio(edition)`、`ratioLabel(r)`、`ratioText(r)`、`formatRatio(r, locale)`、`GROUP_HIGHLIGHTS`、`PRIVILEGE_ROWS` | 分组倍率（×0.15 / 定制，价格换算与控制台用）、通道卡独有特权、特权对比（11 行，不含倍率） |
+| `textPrice(model, edition)`、`textPriceAt(model, k)` | 文本单价（美元 / 百万 Token）：input、output、cacheRead、longContext；= 官方价 × 分组倍率，定制通道返回 null；`k = 1` 即官方价 |
 | `imagePrice(model, edition)`、`imagePriceAt(model, k)` | 生图价：按张（resolutions、from）或按 Token（perMTokens、estimatedPerImage）；规则同上 |
-| `editionDiscount(edition)`、`formatDiscount(d, locale)` | 版本折扣与折扣标文字（「1.5折」/「85% off」，定制或不打折时 null） |
+| `editionDiscount(edition)`、`formatDiscount(d, locale)` | 通道折扣与折扣标文字（「1.5折」/「85% off」，定制或不打折时 null） |
 | `formatMoney(usd, currency)`、`formatAmount(n)`、`convert(usd, currency)`、`USD_CNY_RATE` | 金额（`$0.6` / `¥4.26`） |
 | `formatContext(tokens)`、`localize(value, locale)` | 上下文、中英文字段 |
 | `isNewModel(model)`、`CATALOG_AS_OF`、`IMAGE_TOKENS_PER_IMAGE` | 「新」标记（30 天内上线的 7 个） |
@@ -415,4 +414,4 @@ pnpm format:check  # prettier
 
 其他：`SITE`、`NAV_ITEMS`、`FOOTER_COLUMNS`（`@/lib/site`）；`PREVIEW_*`（`@/lib/content/console-preview`）；`useEdition`、`useCurrency`（`@/lib/use-catalog-state`）；`useUrlState`、`useUrlList`、`useUrlText`（`@/lib/use-url-state`）；`initPage`、`LocaleParams`（`@/i18n/page`）。
 
-单测算出的几个关键数字（交互检查会用）：全部 30 / 文本 23 / 生图 7；厂商 OpenAI 10、Anthropic 6、Google 8；只看 Anthropic 文本 6 个；上下文 ≥1M 共 21 个；搜「nano」4 个、搜「gemini」8 个；默认排序第一个 Claude Sonnet 5.5；文本按价格从低到高第一个 GPT-6 Luna；Claude Sonnet 5.5 输入单价 个人 $0.3、专业 $0.6、企业版定制（无单价），人民币个人 ¥2.13；折扣标 个人 1.5折、专业 3折、企业版不显示。
+单测算出的几个关键数字（交互检查会用）：全部 30 / 文本 23 / 生图 7；厂商 OpenAI 10、Anthropic 6、Google 8；只看 Anthropic 文本 6 个；上下文 ≥1M 共 21 个；搜「nano」4 个、搜「gemini」8 个；默认排序第一个 Claude Sonnet 5.5；文本按价格从低到高第一个 GPT-6 Luna；Claude Sonnet 5.5 输入单价 共享通道 $0.3、专用通道 $0.6、企业通道定制（无单价），人民币共享通道 ¥2.13；折扣标 共享通道 1.5折、专用通道 3折、企业通道不显示。

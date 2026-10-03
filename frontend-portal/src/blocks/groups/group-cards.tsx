@@ -3,7 +3,7 @@ import { EDITIONS } from '@/lib/catalog';
 
 import { GroupCardsCard } from './group-cards-card';
 
-/** 分组卡：三个版本就是三个分组，并排三张，专业版是深蓝重点卡，企业版联系销售。 */
+/** 通道卡：三种通道就是三个分组，并排三张，专用通道是深蓝重点卡，企业通道联系销售。 */
 export function GroupCards() {
   return (
     <section id="group-cards" className="pb-20 md:pb-28">

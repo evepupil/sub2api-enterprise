@@ -5,7 +5,7 @@ import { buttonClass } from '@/components/ui/button-styles';
 import { Container } from '@/components/ui/container';
 import { Link } from '@/i18n/navigation';
 
-/** 倍率按合同定制的版本（企业版）没有公开单价：价目表的位置换成一张联系销售卡。 */
+/** 按合同定价的通道（企业通道）没有公开单价：价目表的位置换成一张联系销售卡。 */
 export function PricingCustom() {
   const t = useTranslations('pricing');
   const common = useTranslations('common');
@@ -29,7 +29,7 @@ export function PricingCustom() {
             <a href="#" data-price-contact className={buttonClass()}>
               {common('actions.contactSales')}
             </a>
-            <Link href="/groups" className={buttonClass({ variant: 'secondary' })}>
+            <Link href="/channels" className={buttonClass({ variant: 'secondary' })}>
               {t('custom.compare')}
               <ArrowRight />
             </Link>

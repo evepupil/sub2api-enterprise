@@ -57,8 +57,8 @@ describe('模型目录', () => {
   });
 });
 
-describe('版本价格 = 官方价 × 分组倍率', () => {
-  it('Claude Sonnet 5.5（官方 2 / 10）：个人 0.3 / 1.5，专业 0.6 / 3，企业版定制没有单价', () => {
+describe('通道价格 = 官方价 × 分组倍率', () => {
+  it('Claude Sonnet 5.5（官方 2 / 10）：共享 0.3 / 1.5，专用 0.6 / 3，企业通道定制没有单价', () => {
     const m = model('claude-sonnet-5-5');
     expect(textPrice(m, 'personal')).toEqual({
       input: 0.3,
@@ -108,14 +108,14 @@ describe('版本价格 = 官方价 × 分组倍率', () => {
     expect(textPrice(model('gpt-image-2'), 'personal')).toBeNull();
   });
 
-  it('定制版本排序按官方价', () => {
+  it('定制通道排序按官方价', () => {
     expect(priceSortKey(model('claude-sonnet-5-5'), 'enterprise')).toBe(2);
     expect(priceSortKey(model('claude-sonnet-5-5'), 'pro')).toBe(0.6);
   });
 });
 
 describe('折扣标', () => {
-  it('个人版 1.5折、专业版 3折，企业版定制不显示', () => {
+  it('共享通道 1.5折、专用通道 3折，企业通道定制不显示', () => {
     expect(formatDiscount(editionDiscount('personal'), 'zh')).toBe('1.5折');
     expect(formatDiscount(editionDiscount('pro'), 'zh')).toBe('3折');
     expect(formatDiscount(editionDiscount('personal'), 'en')).toBe('85% off');

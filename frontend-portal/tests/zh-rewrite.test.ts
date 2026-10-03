@@ -14,7 +14,7 @@ describe('中文地址改写', () => {
     for (const path of [
       '/models',
       '/pricing',
-      '/groups',
+      '/channels',
       '/docs',
       '/login',
       '/register',

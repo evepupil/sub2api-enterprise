@@ -14,7 +14,7 @@ import {
 } from '@/lib/catalog';
 import { cn } from '@/lib/utils';
 
-/** 重点版本（专业版）那一列整列铺 muted 底色，表头圆上角、最后一行圆下角 */
+/** 重点通道（专用通道）那一列整列铺 muted 底色，表头圆上角、最后一行圆下角 */
 const COL_CELL = 'bg-muted';
 
 function CellValue({ value }: { value: PrivilegeCell }) {
@@ -38,7 +38,7 @@ function CellValue({ value }: { value: PrivilegeCell }) {
   return <span className="tabular-nums text-muted-foreground">{localize(value, locale)}</span>;
 }
 
-/** 版本特权对比：逐行对比三个版本，重点版本（与分组卡的深色卡一致）整列高亮。 */
+/** 通道特权对比：逐行对比三种通道的权益（不含倍率），重点通道（与通道卡的深色卡一致）整列高亮。 */
 export function PrivilegeTable() {
   const t = useTranslations('groups');
   const common = useTranslations('common');

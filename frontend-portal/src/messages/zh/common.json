@@ -1,12 +1,12 @@
 {
   "meta": {
     "tagline": "企业级 AI 模型 API",
-    "description": "一个 API 调用 Claude、GPT、Gemini 等主流文本模型与 GPT Image、Nano Banana 生图模型，个人版、专业版、企业版按需选择。"
+    "description": "一个 API 调用 Claude、GPT、Gemini 等主流文本模型与 GPT Image、Nano Banana 生图模型，共享、专用、企业三种通道按需选择。"
   },
   "nav": {
     "models": "模型",
     "pricing": "价格",
-    "groups": "分组",
+    "groups": "通道",
     "docs": "文档",
     "login": "登录",
     "register": "注册",
@@ -23,7 +23,7 @@
     "toggle": "切换明暗主题"
   },
   "edition": {
-    "label": "服务版本"
+    "label": "通道"
   },
   "actions": {
     "getStarted": "免费注册",
@@ -47,7 +47,7 @@
     "links": {
       "models": "模型",
       "pricing": "价格",
-      "groups": "分组",
+      "groups": "通道",
       "docs": "文档",
       "about": "关于我们",
       "contact": "联系我们",
@@ -59,8 +59,6 @@
   },
   "editionSummary": {
     "sla": "可用率目标",
-    "channel": "渠道",
-    "rpm": "单密钥每分钟请求",
-    "ratio": "分组倍率"
+    "rpm": "单密钥每分钟请求"
   }
 }

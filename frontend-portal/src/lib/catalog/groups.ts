@@ -4,8 +4,8 @@ import { getEdition } from './editions';
 import type { EditionId, Localized } from './types';
 
 /**
- * 分组倍率与特权（占位数据）。一个版本就是一个分组，倍率存在版本数据里（editions.ts）；
- * 这里放倍率的取值与写法、分组卡上各版本的特权清单、三个版本的特权对比表。
+ * 通道倍率与特权（占位数据）。一个通道就是一个分组，倍率存在通道数据里（editions.ts）；
+ * 这里放倍率的取值与写法（价格换算和控制台用，官网通道页不展示倍率）、通道卡上的特权清单、三种通道的特权对比表。
  */
 
 const text = (zh: string, en: string = zh): Localized => ({ zh, en });
@@ -29,7 +29,7 @@ export function formatRatio(ratio: number | null, locale: AppLocale): string {
   return ratioText(ratio)[locale];
 }
 
-/** 分组卡特权清单里各版本独有的几条，排在渠道、可用率、限额、工单之后 */
+/** 通道卡特权清单里各通道独有的几条，排在限额、工单之后 */
 export const GROUP_HIGHLIGHTS: Record<EditionId, readonly Localized[]> = {
   personal: [
     text('全部文本与生图模型', 'Every text and image model'),
@@ -64,30 +64,12 @@ const hours = (id: EditionId): Localized => {
   return text(`${h} 小时`, `${h} ${h === 1 ? 'hour' : 'hours'}`);
 };
 
-/** 三个版本的特权对比（分组页对比表），倍率与额度直接从数据推出，不另写一份 */
+/** 三种通道的特权对比（通道页对比表），只比权益不比倍率；可用率与额度直接从数据推出，不另写一份 */
 export const PRIVILEGE_ROWS: readonly PrivilegeRow[] = [
-  {
-    id: 'ratio',
-    label: text('分组倍率', 'Group ratio'),
-    values: {
-      personal: ratioText(editionRatio('personal')),
-      pro: ratioText(editionRatio('pro')),
-      enterprise: ratioText(editionRatio('enterprise')),
-    },
-  },
   {
     id: 'sla',
     label: text('可用率目标', 'Availability target'),
     values: { personal: sla('personal'), pro: sla('pro'), enterprise: sla('enterprise') },
-  },
-  {
-    id: 'channel',
-    label: text('渠道类型', 'Channel'),
-    values: {
-      personal: getEdition('personal').channel,
-      pro: getEdition('pro').channel,
-      enterprise: getEdition('enterprise').channel,
-    },
   },
   {
     id: 'rpm',

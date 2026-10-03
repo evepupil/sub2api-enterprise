@@ -1,11 +1,11 @@
 {
   "meta": {
     "title": "Pricing",
-    "description": "Pay-as-you-go model prices: input, output, cache and image prices for all three editions on one page."
+    "description": "Pay-as-you-go model prices: input, output, cache and image prices for all three channels on one page."
   },
   "hero": {
     "title": "One transparent price list",
-    "subtitle": "Pay as you go with no subscriptions or monthly fees. What you see is exactly what the selected edition is billed.",
+    "subtitle": "Pay as you go with no subscriptions or monthly fees. What you see is exactly what the selected channel is billed.",
     "currency": "Currency",
     "usd": "USD $",
     "cny": "CNY ¥"
@@ -39,28 +39,28 @@
     "longContext": "When the input of a single request exceeds the context threshold of a model, the whole request is billed at the long-context price.",
     "edit": "Image-to-image and inpainting also count the tokens of the input image, usually a small share of the total.",
     "currency": "CNY prices are converted at $1 = ¥{rate} for reference only; wallets are always charged in USD.",
-    "editions": "Prices on this page = official price × the group ratio of the selected edition; Enterprise is set by contract. Ratios for every edition are listed on the <link>groups page</link>."
+    "editions": "Prices on this page are what the selected channel is billed; the Enterprise channel is priced by contract. See how the channels differ on the <link>channels page</link>."
   },
   "faq": {
     "title": "FAQ",
     "items": {
       "q1": "Is the price on this page what I actually pay?",
-      "a1": "Yes. The displayed price = official price × the group ratio of the selected edition, and every charge is itemized in the console.",
-      "q2": "Why do prices differ across editions?",
-      "a2": "Editions correspond to different channel quality and availability targets: Personal runs on shared channels, Pro on premium channels with priority scheduling, and Enterprise on dedicated channels with a contractual availability agreement.",
+      "a1": "Yes. The displayed price is what the selected channel is billed, and every charge is itemized in the console.",
+      "q2": "Why do prices differ across channels?",
+      "a2": "Channels come with different capacity quality and availability targets: Shared runs on capacity shared by many users, Dedicated on premium capacity with priority scheduling, and Enterprise is set up for a single company with an availability agreement.",
       "q3": "Are there subscription fees or minimum spend?",
       "a3": "No. Usage is deducted from your balance as it happens; there is no monthly fee.",
       "q4": "Am I charged for failed image requests?",
       "a4": "Requests that fail upstream are not billed. Successful generations are billed per image or per token.",
       "q5": "Can I get invoices?",
-      "a5": "Pro and Enterprise support bank transfer and VAT invoices.",
+      "a5": "The Dedicated and Enterprise channels support bank transfer and VAT invoices.",
       "q6": "How are CNY prices calculated?",
       "a6": "They are converted at the fixed rate noted on the page, for reference only. Billing is in USD."
     }
   },
   "custom": {
-    "title": "Enterprise pricing is set by contract",
-    "desc": "Dedicated channels, custom ratios and an availability agreement, quoted on your usage.",
-    "compare": "Compare editions"
+    "title": "Enterprise channel pricing is set by contract",
+    "desc": "Capacity set up for you and an availability agreement, quoted on your usage.",
+    "compare": "Compare channels"
   }
 }

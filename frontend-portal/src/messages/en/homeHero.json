@@ -2,7 +2,7 @@
   "badge": "Image API is live: GPT Image 2.5 and the full Nano Banana family",
   "titleLine1": "Text, Image and Code Models",
   "titleLine2": "Through a Single API",
-  "subtitle": "Claude, GPT, Gemini, DeepSeek and {count} leading models behind one endpoint, billed by usage,<br></br> with Personal, Pro and Enterprise service levels.",
+  "subtitle": "Claude, GPT, Gemini, DeepSeek and {count} leading models behind one endpoint, billed by usage,<br></br> on the Shared, Dedicated or Enterprise channel.",
   "primaryCta": "Get started",
   "secondaryCta": "View pricing",
   "preview": {
@@ -11,17 +11,17 @@
       "keys": "API keys",
       "usage": "Usage",
       "billing": "Billing",
-      "groups": "Groups",
+      "groups": "Channels",
       "members": "Members",
       "settings": "Settings"
     },
     "title": "Overview",
     "search": "Search models or keys",
-    "edition": "Pro",
+    "edition": "Dedicated",
     "stats": {
       "spend": {
         "title": "Spend this month",
-        "desc": "Across all groups"
+        "desc": "Across all channels"
       },
       "requests": {
         "title": "Requests",
@@ -33,7 +33,7 @@
       },
       "availability": {
         "title": "Availability",
-        "desc": "Pro · last 30 days",
+        "desc": "Dedicated · last 30 days",
         "target": "Target {value}%"
       }
     },
@@ -50,9 +50,9 @@
         "range": "Last 30 days"
       },
       "groups": {
-        "title": "Spend by group",
+        "title": "Spend by channel",
         "range": "Last 30 days",
-        "center": "groups"
+        "center": "channels"
       }
     },
     "recent": {

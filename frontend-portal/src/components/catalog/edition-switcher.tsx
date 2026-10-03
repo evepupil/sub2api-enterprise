@@ -6,7 +6,7 @@ import { SegmentedControl } from '@/components/ui/segmented-control';
 import { EDITIONS, localize } from '@/lib/catalog';
 import { useEdition } from '@/lib/use-catalog-state';
 
-/** 服务版本切换（个人版 / 专业版 / 企业版），选择存在网址 ?edition= 里，同页所有读它的区块一起变。 */
+/** 通道切换（共享通道 / 专用通道 / 企业通道），选择存在网址 ?edition= 里，同页所有读它的区块一起变。 */
 export function EditionSwitcher({ className, size }: { className?: string; size?: 'sm' | 'md' }) {
   const t = useTranslations('common');
   const locale = useLocale();

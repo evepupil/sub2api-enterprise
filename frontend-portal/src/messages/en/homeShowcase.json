@@ -31,9 +31,9 @@
       }
     },
     "groupsCard": {
-      "title": "Group routing, public ratios",
-      "desc": "Every key is bound to a group. Billed price = official price × group ratio.",
-      "panelTitle": "Groups",
+      "title": "Three channels, one per key",
+      "desc": "Every key is bound to a channel, so different jobs can use different channels.",
+      "panelTitle": "Channels",
       "add": "New"
     },
     "protocolsCard": {

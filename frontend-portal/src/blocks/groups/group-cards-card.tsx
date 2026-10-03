@@ -4,7 +4,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
 import { CheckList } from '@/components/ui/check-list';
 import { buttonClass } from '@/components/ui/button-styles';
-import { formatRatio, GROUP_HIGHLIGHTS, localize, type Edition } from '@/lib/catalog';
+import { GROUP_HIGHLIGHTS, localize, type Edition } from '@/lib/catalog';
 import { cn } from '@/lib/utils';
 import { Link } from '@/i18n/navigation';
 
@@ -20,7 +20,7 @@ const NAME_COLOR: Record<'plain' | 'featured', string> = {
   featured: 'text-white',
 };
 
-const RATIO_COLOR: Record<'plain' | 'featured', string> = {
+const FIGURE_COLOR: Record<'plain' | 'featured', string> = {
   plain: 'text-foreground',
   featured: 'text-white',
 };
@@ -36,8 +36,8 @@ const SUFFIX_COLOR: Record<'plain' | 'featured', string> = {
 };
 
 /**
- * 单张分组卡（一个版本）：倍率、说明、特权清单、底部整宽按钮，三张卡等高、按钮靠底对齐。
- * previous 是上一档版本，清单第一条写「包含上一档全部特权」（模板同款写法）。
+ * 单张通道卡：可用率目标（大号数字）、说明、特权清单、底部整宽按钮，三张卡等高、按钮靠底对齐。
+ * 通道页只比权益，不展示倍率。previous 是上一档通道，清单第一条写「包含上一档全部特权」（模板同款写法）。
  */
 export function GroupCardsCard({ edition, previous }: { edition: Edition; previous?: Edition }) {
   const t = useTranslations('groups');
@@ -45,11 +45,9 @@ export function GroupCardsCard({ edition, previous }: { edition: Edition; previo
   const locale = useLocale();
   const variant: 'plain' | 'featured' = edition.featured ? 'featured' : 'plain';
 
-  // 清单：上一档全部特权 → 渠道 → 可用率 → 限额 → 工单 → 本版本独有的几条
+  // 清单：上一档全部特权 → 限额 → 工单 → 本通道独有的几条
   const items: ReactNode[] = [
     ...(previous ? [t('cards.includes', { edition: localize(previous.name, locale) })] : []),
-    localize(edition.channel, locale),
-    t('cards.sla', { value: edition.slaTarget.toFixed(1) }),
     edition.ratio === null
       ? t('cards.customLimits')
       : t('cards.rpm', { value: edition.rpm.toLocaleString('en-US') }),
@@ -78,17 +76,15 @@ export function GroupCardsCard({ edition, previous }: { edition: Edition; previo
       </div>
       <div className="relative mt-6 flex items-baseline gap-2">
         <span
-          data-group-ratio={edition.id}
+          data-group-sla={edition.id}
           className={cn(
             'text-4xl font-semibold tracking-tight tabular-nums md:text-5xl',
-            RATIO_COLOR[variant],
+            FIGURE_COLOR[variant],
           )}
         >
-          {formatRatio(edition.ratio, locale)}
+          {`${edition.slaTarget.toFixed(1)}%`}
         </span>
-        {edition.ratio !== null ? (
-          <span className={cn('text-sm', SUFFIX_COLOR[variant])}>{t('cards.ratioSuffix')}</span>
-        ) : null}
+        <span className={cn('text-sm', SUFFIX_COLOR[variant])}>{t('cards.slaLabel')}</span>
       </div>
       <p className={cn('relative mt-4 min-h-10 text-sm', DESC_COLOR[variant])}>
         {localize(edition.summary, locale)}
@@ -109,8 +105,12 @@ export function GroupCardsCard({ edition, previous }: { edition: Edition; previo
             {common('actions.contactSales')}
           </a>
         ) : (
+          // 查看定价：价格页默认就是共享通道，其余通道带上 ?edition=
           <Link
-            href="/register"
+            href={{
+              pathname: '/pricing',
+              query: edition.id === 'personal' ? {} : { edition: edition.id },
+            }}
             data-group-cta={edition.id}
             className={buttonClass({
               variant: edition.featured ? 'inverse' : 'primary',

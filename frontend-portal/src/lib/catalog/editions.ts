@@ -1,30 +1,29 @@
 import type { EditionId, Localized } from './types';
 
 /**
- * 三个服务版本（占位数据）。一个版本就是一个分组：API 密钥绑定哪个分组，
- * 就按哪个版本的渠道、可用率目标和倍率计费，实际扣费 = 官方价 × 分组倍率。
+ * 三种通道（占位数据）：共享通道、专用通道、企业通道。一个通道就是后端的一个分组：
+ * API 密钥绑定哪个分组，就按哪个通道的可用率目标、限额和倍率计费，实际扣费 = 官方价 × 分组倍率。
+ * 代码里沿用 edition（版本）这个名字和 personal / pro / enterprise 这组 id，页面上统一叫「通道」。
  */
 export interface Edition {
   id: EditionId;
   name: Localized;
-  /** 一句话定位，用于分组卡与版本说明 */
+  /** 一句话定位，用于通道卡与首页通道面板 */
   summary: Localized;
-  /** 分组倍率（相对官方价）：0.15 即官方价的 15%；null 表示按合同定制 */
+  /** 分组倍率（相对官方价）：0.15 即官方价的 15%；null 表示按合同定制。官网页面只用它算价格，不单独展示 */
   ratio: number | null;
   /** 可用率目标，百分数 */
   slaTarget: number;
-  /** 渠道类型 */
-  channel: Localized;
   /** 单个密钥每分钟请求数上限 */
   rpm: number;
   /** 单个账号并发上限 */
   concurrency: number;
   /** 工单首次响应时限，小时 */
   supportHours: number;
-  /** 分组页用深色重点卡（每页一张） */
+  /** 通道页用深色重点卡（每页一张） */
   featured: boolean;
-  /** 分组卡按钮：注册使用 / 联系销售 */
-  cta: 'register' | 'contact';
+  /** 通道卡按钮：查看定价 / 联系销售 */
+  cta: 'pricing' | 'contact';
 }
 
 export const EDITION_IDS: readonly EditionId[] = ['personal', 'pro', 'enterprise'];
@@ -32,46 +31,43 @@ export const EDITION_IDS: readonly EditionId[] = ['personal', 'pro', 'enterprise
 export const EDITIONS: readonly Edition[] = [
   {
     id: 'personal',
-    name: { zh: '个人版', en: 'Personal' },
+    name: { zh: '共享通道', en: 'Shared' },
     summary: {
-      zh: '共享渠道，按量付费，适合个人开发与日常调用。',
-      en: 'Shared channels, pay as you go, built for individual developers and everyday calls.',
+      zh: '多人共用资源，按量付费，适合个人开发与日常调用。',
+      en: 'Shared capacity, pay as you go, built for individual developers and everyday calls.',
     },
     ratio: 0.15,
     slaTarget: 99.0,
-    channel: { zh: '共享渠道池', en: 'Shared pool' },
     rpm: 60,
     concurrency: 10,
     supportHours: 48,
     featured: false,
-    cta: 'register',
+    cta: 'pricing',
   },
   {
     id: 'pro',
-    name: { zh: '专业版', en: 'Pro' },
+    name: { zh: '专用通道', en: 'Dedicated' },
     summary: {
-      zh: '优选渠道与优先调度，适合团队和生产环境。',
-      en: 'Premium channels with priority scheduling, built for teams and production.',
+      zh: '优选资源与优先调度，适合团队和生产环境。',
+      en: 'Premium capacity with priority scheduling, built for teams and production.',
     },
     ratio: 0.3,
     slaTarget: 99.5,
-    channel: { zh: '优选渠道', en: 'Premium channels' },
     rpm: 600,
     concurrency: 50,
     supportHours: 12,
     featured: true,
-    cta: 'register',
+    cta: 'pricing',
   },
   {
     id: 'enterprise',
-    name: { zh: '企业版', en: 'Enterprise' },
+    name: { zh: '企业通道', en: 'Enterprise' },
     summary: {
-      zh: '专属渠道与合同级可用率，适合规模化和合规要求高的企业。',
-      en: 'Dedicated channels and contractual availability for enterprises at scale.',
+      zh: '为企业单独开设，可用率按合同约定，适合规模化和合规要求高的企业。',
+      en: 'Set up for a single enterprise with contractual availability, built for scale and compliance.',
     },
     ratio: null,
     slaTarget: 99.9,
-    channel: { zh: '专属渠道', en: 'Dedicated channels' },
     rpm: 3000,
     concurrency: 300,
     supportHours: 1,
