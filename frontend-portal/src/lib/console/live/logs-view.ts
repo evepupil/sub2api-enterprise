@@ -79,7 +79,7 @@ export interface CostBreakdown {
   lines: CostLine[];
   tier: CostTier;
   rate: number;
-  /** 没乘倍率的费用（sub2api 里叫「原始」） */
+  /** 官方价：没乘倍率的费用（sub2api 里叫「原始」） */
   original: number;
   /** 实际扣费 */
   billed: number;
@@ -157,7 +157,7 @@ function imageLines(row: LogRow): CostLine[] {
 /**
  * 费用明细（用户 2026-10-04 要求和 sub2api 使用记录里费用旁的悬浮明细一致）：
  * 先列有的分项费用；按 Token 计费的再列由这次费用反算的单价，生图列张数、尺寸和单张价格，
- * 其余（按次、视频）列单次价格；然后是缓存费用。下面是服务档位、倍率、原始与实际扣费。
+ * 其余（按次、视频）列单次价格；然后是缓存费用。下面是服务档位、倍率、官方价与实际扣费。
  */
 export function costBreakdown(row: LogRow): CostBreakdown {
   const { costs, tokens, images } = row;

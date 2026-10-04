@@ -79,8 +79,8 @@
       "flex": "Flex"
     },
     "rate": "Rate",
-    "original": "Original",
-    "billed": "User billed"
+    "original": "Official price",
+    "billed": "Charged"
   },
   "menu": {
     "copyId": "Copy request ID",

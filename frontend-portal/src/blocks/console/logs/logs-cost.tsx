@@ -40,7 +40,7 @@ function TierValue({ tier }: { tier: CostTier }) {
 
 /**
  * 费用明细卡片：内容和 sub2api 使用记录里费用旁的悬浮明细一致（用户 2026-10-04 要求），样式用控制台的卡片。
- * 上半是分项费用、单价（生图是张数、尺寸与单张价格），下半是服务档位、倍率、原始与用户扣费。
+ * 上半是分项费用、单价（生图是张数、尺寸与单张价格），下半是服务档位、倍率、官方价与实际扣费（sub2api 叫原始与用户扣费，2026-10-04 用户要求和日志详情统一）。
  */
 function CostDetails({ row }: { row: LogRow }) {
   const t = useTranslations('consoleLogs');

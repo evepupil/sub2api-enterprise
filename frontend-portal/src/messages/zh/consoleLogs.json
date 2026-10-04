@@ -79,8 +79,8 @@
       "flex": "Flex"
     },
     "rate": "倍率",
-    "original": "原始",
-    "billed": "用户扣费"
+    "original": "官方价",
+    "billed": "实际扣费"
   },
   "menu": {
     "copyId": "复制请求 ID",
