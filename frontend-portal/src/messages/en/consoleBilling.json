@@ -4,57 +4,73 @@
   },
   "balance": {
     "label": "Available balance",
-    "low": "Your balance is below the alert threshold of {threshold}. Top up soon to avoid interrupting API calls.",
-    "runway": "Based on your {span}-day average of {avg} per day, about {days, plural, one {# day} other {# days}} of usage left",
+    "low": "Your balance is low and may interrupt requests. Please top up soon.",
+    "runway": "About {days, plural, one {# day} other {# days}} left at the current pace · {avg}/day",
     "recharge": "Top up"
   },
   "stats": {
-    "recharged": "Top-ups, last {span} days",
-    "bonus": "Bonuses and redemptions, last {span} days",
-    "consumed": "Usage, last {span} days"
+    "recharged": "Total top-ups",
+    "bonus": "Total bonuses",
+    "consumed": "Total spend"
   },
   "redeem": {
     "title": "Redeem code",
-    "placeholder": "e.g. CODU-XXXX-XXXX",
+    "placeholder": "Enter a redeem code",
     "submit": "Redeem",
-    "success": "{amount} credited"
-  },
-  "alert": {
-    "title": "Balance alert",
-    "threshold": "Alert threshold",
-    "email": "Email alert",
-    "webhook": "Webhook",
-    "webhookUrl": "Webhook URL",
-    "save": "Save",
-    "saved": "Saved"
+    "credited": "{amount} credited",
+    "done": "Redeemed"
   },
   "txn": {
     "title": "Transactions",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
     "type": "Type",
-    "amount": "Amount",
+    "source": "Source",
+    "search": "Order number or code",
+    "amount": "Amount (US$)",
     "min": "Min",
     "max": "Max",
-    "search": "Transaction ID",
     "columns": {
-      "time": "Time",
+      "time": "Date",
       "amount": "Amount",
-      "type": "Type",
-      "note": "Note",
+      "type": "Type / method",
+      "note": "Details",
       "balance": "Balance"
     },
     "notes": {
-      "redeem": "Redeem code {code}",
-      "topup": "{method} top-up",
-      "bonus": "{rate} bonus on a {min} top-up"
+      "order": "Order {ref}",
+      "code": "Redeem code {ref}",
+      "promo": "Promo code {ref}",
+      "affiliate": "Referral rebates moved to balance",
+      "admin": "Balance adjusted by an admin",
+      "refund": "Refund for order {ref}"
     }
   },
   "types": {
     "all": "All",
     "recharge": "Top-up",
-    "gift": "Bonus",
-    "redeem": "Redemption",
-    "consume": "Usage",
+    "redeem": "Redeem code",
+    "promo": "Promo code",
+    "affiliate": "Referral rebate",
+    "admin": "Admin adjustment",
     "refund": "Refund"
+  },
+  "sources": {
+    "all": "All",
+    "alipay": "Alipay",
+    "alipay_direct": "Alipay",
+    "wxpay": "WeChat Pay",
+    "wxpay_direct": "WeChat Pay",
+    "stripe": "Stripe",
+    "card": "Card",
+    "link": "Link",
+    "easypay": "EasyPay",
+    "airwallex": "Airwallex",
+    "online": "Online payment",
+    "redeem_code": "Redeem code",
+    "promo_code": "Promo code",
+    "affiliate": "Referral",
+    "admin": "Admin"
   },
   "methods": {
     "alipay": "Alipay",
@@ -74,9 +90,21 @@
   },
   "errors": {
     "redeemRequired": "Enter a redeem code",
-    "redeemFormat": "Invalid redeem code format",
+    "redeem": {
+      "not_found": "This code does not exist",
+      "used": "This code has already been used",
+      "expired": "This code has expired",
+      "busy": "This code is being processed. Try again shortly",
+      "too_many": "Too many attempts. Try again later",
+      "unavailable": "Service unavailable. Try again later"
+    },
     "amountRange": "Enter an amount between {min} and {max}",
-    "webhookUrl": "Enter an address starting with https"
+    "tooMany": "Too many requests. Try again shortly",
+    "unavailable": "Couldn't load the data. Try again later",
+    "retry": "Retry"
   },
-  "empty": "No matching transactions"
+  "empty": {
+    "none": "No transactions yet",
+    "filtered": "No transactions match these filters"
+  }
 }

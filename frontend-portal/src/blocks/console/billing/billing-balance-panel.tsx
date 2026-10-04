@@ -1,61 +1,76 @@
 'use client';
 
-import { Plus, TriangleAlert } from 'lucide-react';
+import { Plus, RotateCw, TriangleAlert } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 
-import { Panel } from '@/components/console/panel';
 import { Button } from '@/components/console/button';
-import { formatUsd, type BillingSummary } from '@/lib/console';
+import { Panel } from '@/components/console/panel';
+import { Skeleton } from '@/components/console/skeleton';
+import { formatUsd } from '@/lib/console';
+import type { BalanceSummary } from '@/lib/console/live/billing-types';
+import { balanceOutlook, isLowBalance } from '@/lib/console/live/billing-view';
 import { cn } from '@/lib/utils';
 
 /**
- * 汇总里的一格：小标签加一个数字。
- * 标签允许换行（英文标签较长、窄屏放不下时不截断），数字贴着格子底部，
- * 这样同一行三格里即使只有一个标签换了行，三个数字也在同一条线上。
+ * 累计三格里的一格：小标签加一个数字。还没拿到数据时数字位置放一条占位块。
+ * 标签允许换行（英文标签较长、窄屏放不下时不截断），数字贴着格子底部，三个数字始终在同一条线上。
  */
 function SummaryCell({
+  id,
   label,
   value,
   valueClassName,
 }: {
+  id: string;
   label: ReactNode;
-  value: ReactNode;
+  value: string | null;
   valueClassName?: string;
 }) {
   return (
-    <div className="flex min-w-0 flex-col justify-between gap-1">
+    <div
+      data-stat={id}
+      className="flex min-w-0 flex-col justify-between gap-1 sm:px-6 sm:first:pl-0"
+    >
       <p className="break-words text-xs text-subtle-foreground">{label}</p>
-      <p
-        className={cn('truncate text-lg font-medium tabular-nums text-foreground', valueClassName)}
-      >
-        {value}
-      </p>
+      {value === null ? (
+        <Skeleton className="h-7 w-24" />
+      ) : (
+        <p
+          data-stat-value
+          className={cn(
+            'truncate text-lg font-medium tabular-nums text-foreground',
+            valueClassName,
+          )}
+        >
+          {value}
+        </p>
+      )}
     </div>
   );
 }
 
 /**
- * 余额面板：大号余额、充值入口、近期充值 / 赠送 / 消费三项合计。
- * 余额低于提醒阈值时，面板顶部出现提醒条，余额也跟着变成警示色。
+ * 余额卡：大号可用余额、按当前速度的可用天数与日均、充值入口，下面是开户以来的累计充值、赠送、消耗。
+ * 余额偏低（低于 US$1 或撑不过 3 天）时顶部出提示条，余额变成警示色。summary 为 null 时还在取；
+ * 取不到时（error 不为 null 且手里没有旧数据）在余额位置给出原因与重试。
  */
 export function BillingBalancePanel({
   summary,
-  spanDays,
-  low,
-  thresholdUsd,
+  error,
+  onRetry,
   onRecharge,
 }: {
-  summary: BillingSummary;
-  /** 汇总覆盖的天数（近 30 天） */
-  spanDays: number;
-  low: boolean;
-  thresholdUsd: number;
+  summary: BalanceSummary | null;
+  error: 'too_many' | 'unavailable' | null;
+  onRetry: () => void;
   onRecharge: () => void;
 }) {
   const t = useTranslations('consoleBilling');
-  const hasBonus = summary.bonusUsd > 0;
-  const hasConsumed = summary.consumedUsd > 0;
+  const low = summary !== null && isLowBalance(summary);
+  const outlook = summary === null ? null : balanceOutlook(summary);
+  const hasBonus = summary !== null && summary.bonusUsd > 0;
+  const hasConsumed = summary !== null && summary.consumedUsd > 0;
 
   return (
     <Panel id="balance">
@@ -66,30 +81,43 @@ export function BillingBalancePanel({
           className="mb-5 flex items-start gap-2 rounded-xl border border-warning/30 bg-warning-soft px-4 py-3 text-sm text-warning"
         >
           <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />
-          <span className="min-w-0">
-            {t('balance.low', { threshold: formatUsd(thresholdUsd) })}
-          </span>
+          <span className="min-w-0">{t('balance.low')}</span>
         </div>
       ) : null}
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <p className="text-sm text-muted-foreground">{t('balance.label')}</p>
-          <p
-            data-balance
-            className={cn(
-              'mt-1 truncate text-4xl font-semibold tracking-tight tabular-nums',
-              low ? 'text-warning' : 'text-foreground',
-            )}
-          >
-            {formatUsd(summary.balanceUsd)}
-          </p>
-          {summary.runwayDays !== null ? (
-            <p className="mt-2 text-sm text-muted-foreground">
+          {summary === null && error !== null ? (
+            <div
+              role="alert"
+              className="mt-2 flex flex-wrap items-center gap-3 text-sm text-muted-foreground"
+            >
+              <span>{error === 'too_many' ? t('errors.tooMany') : t('errors.unavailable')}</span>
+              <Button variant="secondary" size="sm" data-balance-retry onClick={onRetry}>
+                <RotateCw aria-hidden />
+                {t('errors.retry')}
+              </Button>
+            </div>
+          ) : summary === null ? (
+            <Skeleton className="mt-2 h-10 w-48" />
+          ) : (
+            <p
+              data-balance
+              className={cn(
+                'mt-1 truncate text-4xl font-semibold tracking-tight tabular-nums',
+                low ? 'text-warning' : 'text-foreground',
+              )}
+            >
+              {formatUsd(summary.balanceUsd)}
+            </p>
+          )}
+          {/* 最近没有消耗时算不出可用天数，这一行不显示 */}
+          {outlook?.runwayDays != null ? (
+            <p data-runway className="mt-2 text-sm text-muted-foreground">
               {t('balance.runway', {
-                span: spanDays,
-                avg: formatUsd(summary.dailyAvgUsd),
-                days: summary.runwayDays,
+                days: outlook.runwayDays,
+                avg: formatUsd(outlook.dailyAvgUsd),
               })}
             </p>
           ) : null}
@@ -100,21 +128,34 @@ export function BillingBalancePanel({
         </Button>
       </div>
 
-      <div className="mt-6 grid gap-4 border-t border-border pt-5 sm:grid-cols-3">
+      <div className="mt-6 grid gap-4 border-t border-border pt-5 sm:grid-cols-3 sm:gap-0 sm:divide-x sm:divide-border">
         <SummaryCell
-          label={t('stats.recharged', { span: spanDays })}
-          value={formatUsd(summary.rechargedUsd)}
+          id="recharged"
+          label={t('stats.recharged')}
+          value={summary === null ? null : formatUsd(summary.rechargedUsd)}
         />
-        {/* 没有赠送、没有消费时不加正负号，也不染色 */}
+        {/* 没有赠送、没有消耗时不加正负号，也不染色 */}
         <SummaryCell
-          label={t('stats.bonus', { span: spanDays })}
-          value={hasBonus ? `+${formatUsd(summary.bonusUsd)}` : formatUsd(summary.bonusUsd)}
+          id="bonus"
+          label={t('stats.bonus')}
+          value={
+            summary === null
+              ? null
+              : hasBonus
+                ? `+${formatUsd(summary.bonusUsd)}`
+                : formatUsd(summary.bonusUsd)
+          }
           valueClassName={hasBonus ? 'text-success' : undefined}
         />
         <SummaryCell
-          label={t('stats.consumed', { span: spanDays })}
+          id="consumed"
+          label={t('stats.consumed')}
           value={
-            hasConsumed ? `-${formatUsd(summary.consumedUsd)}` : formatUsd(summary.consumedUsd)
+            summary === null
+              ? null
+              : hasConsumed
+                ? `-${formatUsd(summary.consumedUsd)}`
+                : formatUsd(summary.consumedUsd)
           }
         />
       </div>

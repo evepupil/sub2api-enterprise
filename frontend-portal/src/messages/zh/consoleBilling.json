@@ -4,57 +4,73 @@
   },
   "balance": {
     "label": "可用余额",
-    "low": "余额低于提醒阈值 {threshold}，请及时充值，以免影响调用。",
-    "runway": "按近 {span} 天日均 {avg} 计算，约可用 {days} 天",
+    "low": "余额偏低，可能影响调用，请尽快充值。",
+    "runway": "按当前速度约可用 {days} 天 · 日均 {avg}",
     "recharge": "充值"
   },
   "stats": {
-    "recharged": "近 {span} 天充值",
-    "bonus": "近 {span} 天赠送与兑换",
-    "consumed": "近 {span} 天消费"
+    "recharged": "累计充值",
+    "bonus": "累计赠送",
+    "consumed": "累计消耗"
   },
   "redeem": {
     "title": "兑换码",
-    "placeholder": "例如 CODU-XXXX-XXXX",
+    "placeholder": "输入兑换码",
     "submit": "兑换",
-    "success": "已到账 {amount}"
-  },
-  "alert": {
-    "title": "余额提醒",
-    "threshold": "提醒阈值",
-    "email": "邮件提醒",
-    "webhook": "Webhook",
-    "webhookUrl": "Webhook 地址",
-    "save": "保存",
-    "saved": "已保存"
+    "credited": "已到账 {amount}",
+    "done": "兑换成功"
   },
   "txn": {
     "title": "交易记录",
-    "type": "类型",
-    "amount": "金额",
-    "min": "最小",
-    "max": "最大",
-    "search": "流水 ID",
+    "prevMonth": "上一月",
+    "nextMonth": "下一月",
+    "type": "交易类型",
+    "source": "来源",
+    "search": "订单号或兑换码",
+    "amount": "金额范围（US$）",
+    "min": "最小值",
+    "max": "最大值",
     "columns": {
-      "time": "时间",
+      "time": "日期",
       "amount": "金额",
-      "type": "类型",
+      "type": "类型 / 方式",
       "note": "说明",
       "balance": "余额"
     },
     "notes": {
-      "redeem": "兑换码 {code}",
-      "topup": "{method}充值",
-      "bonus": "充值满 {min} 赠送 {rate}"
+      "order": "订单 {ref}",
+      "code": "兑换码 {ref}",
+      "promo": "优惠码 {ref}",
+      "affiliate": "邀请返利转入余额",
+      "admin": "管理员调整余额",
+      "refund": "订单 {ref} 退款"
     }
   },
   "types": {
     "all": "全部",
     "recharge": "充值",
-    "gift": "赠送",
-    "redeem": "兑换",
-    "consume": "消费",
-    "refund": "退还"
+    "redeem": "兑换码",
+    "promo": "优惠码",
+    "affiliate": "邀请返利",
+    "admin": "管理员调整",
+    "refund": "退款"
+  },
+  "sources": {
+    "all": "全部",
+    "alipay": "支付宝",
+    "alipay_direct": "支付宝",
+    "wxpay": "微信支付",
+    "wxpay_direct": "微信支付",
+    "stripe": "Stripe",
+    "card": "银行卡",
+    "link": "Link",
+    "easypay": "易支付",
+    "airwallex": "Airwallex",
+    "online": "在线支付",
+    "redeem_code": "兑换码",
+    "promo_code": "优惠码",
+    "affiliate": "邀请返利",
+    "admin": "管理员"
   },
   "methods": {
     "alipay": "支付宝",
@@ -74,9 +90,21 @@
   },
   "errors": {
     "redeemRequired": "请输入兑换码",
-    "redeemFormat": "兑换码格式不正确",
+    "redeem": {
+      "not_found": "兑换码不存在",
+      "used": "这个兑换码已经用过了",
+      "expired": "兑换码已过期",
+      "busy": "这个兑换码正在处理，请稍后再试",
+      "too_many": "尝试次数过多，请稍后再试",
+      "unavailable": "服务暂时不可用，请稍后再试"
+    },
     "amountRange": "请输入 {min} 到 {max} 之间的金额",
-    "webhookUrl": "请输入 https 开头的地址"
+    "tooMany": "查询太频繁，请稍后再试",
+    "unavailable": "数据暂时取不到，请稍后再试",
+    "retry": "重试"
   },
-  "empty": "没有符合条件的流水"
+  "empty": {
+    "none": "还没有交易记录",
+    "filtered": "没有符合条件的记录"
+  }
 }

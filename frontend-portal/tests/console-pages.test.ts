@@ -1,15 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  appendTransactions,
-  bonusTierFor,
-  newTransaction,
-} from '@/blocks/console/billing/billing-ledger';
-import {
-  checkRedeemCode,
   formatUsdWhole,
-  isHttpsUrl,
-  isThresholdValid,
   parseRechargeAmount,
   roundCents,
 } from '@/blocks/console/billing/billing-rules';
@@ -54,7 +46,7 @@ import {
   validateTicketDraft,
   withStatus,
 } from '@/blocks/console/tickets/tickets-logic';
-import { API_KEYS, CHAT_REPLIES, CHAT_SAMPLE, LEDGER, ORG_MEMBERS, TICKETS } from '@/lib/console';
+import { API_KEYS, CHAT_REPLIES, CHAT_SAMPLE, ORG_MEMBERS, TICKETS } from '@/lib/console';
 import { SITE } from '@/lib/site';
 
 const draft = (patch: Partial<KeyDraft> = {}): KeyDraft => ({
@@ -150,36 +142,14 @@ describe('组织页规则', () => {
   });
 });
 
-describe('账单页规则', () => {
-  it('兑换码先去空白转大写再校验', () => {
-    expect(checkRedeemCode('   ')).toEqual({ ok: false, reason: 'required' });
-    expect(checkRedeemCode('codu test 2026')).toEqual({ ok: false, reason: 'format' });
-    expect(checkRedeemCode(' codu-test-2026 ')).toEqual({ ok: true, code: 'CODU-TEST-2026' });
-  });
-
-  it('金额、阈值、Webhook 地址', () => {
+describe('账单页充值弹窗的金额规则', () => {
+  it('自定义金额取到分并落在限额内，整数金额不带小数', () => {
     expect(roundCents(10.005)).toBe(10.01);
     expect(parseRechargeAmount('4.99')).toBeNull();
     expect(parseRechargeAmount('5')).toBe(5);
     expect(parseRechargeAmount('10001')).toBeNull();
-    expect(isThresholdValid(0)).toBe(true);
-    expect(isThresholdValid(null)).toBe(false);
-    expect(isHttpsUrl('https://hooks.example.com/x')).toBe(true);
-    expect(isHttpsUrl('http://hooks.example.com')).toBe(false);
     expect(formatUsdWhole(10000)).toBe('US$10,000');
     expect(formatUsdWhole(9.5)).toBe('US$9.50');
-  });
-
-  it('新流水并进账本后余额跟着变，赠送档位从高到低取', () => {
-    const ledger = appendTransactions(LEDGER, [
-      newTransaction('redeem', 10, null, '兑换码 CODU-TEST-2026'),
-    ]);
-    expect(ledger).toHaveLength(LEDGER.length + 1);
-    expect(ledger[0]?.type).toBe('redeem');
-    expect(ledger[0]?.balanceUsd).toBeCloseTo((LEDGER[0]?.balanceUsd ?? 0) + 10, 6);
-    expect(bonusTierFor(100)).toBeUndefined();
-    expect(bonusTierFor(300)?.rate).toBe(0.05);
-    expect(bonusTierFor(800)?.rate).toBe(0.1);
   });
 });
 

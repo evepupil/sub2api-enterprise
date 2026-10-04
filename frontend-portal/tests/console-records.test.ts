@@ -2,22 +2,15 @@ import { describe, expect, it } from 'vitest';
 
 import {
   API_KEYS,
-  BALANCE_USD,
-  billingSummary,
-  buildLedger,
   csvCell,
   curlFor,
   DEFAULT_RANGE,
   filterLogs,
   filterTickets,
-  filterTransactions,
   INVITEES,
   inviteStats,
-  isLowBalance,
-  LEDGER,
   logsToCsv,
   maskKey,
-  monthRange,
   ORG_MEMBERS,
   orgSummary,
   presetRange,
@@ -108,66 +101,11 @@ describe('密钥', () => {
   });
 });
 
-describe('账单', () => {
-  it('余额由流水逐条累加，任何时候都不为负', () => {
-    expect(BALANCE_USD).toBeCloseTo(129.68, 2);
-    expect(Math.min(...LEDGER.map((entry) => entry.balanceUsd))).toBeGreaterThanOrEqual(0);
-    expect(LEDGER[0]!.ts).toBeGreaterThanOrEqual(LEDGER.at(-1)!.ts);
-  });
-
-  it('流水累加', () => {
-    const ledger = buildLedger([
-      { id: 'b', ts: 2, type: 'consume', amountUsd: -3, method: null, note: { zh: '', en: '' } },
-      {
-        id: 'a',
-        ts: 1,
-        type: 'recharge',
-        amountUsd: 10,
-        method: 'alipay',
-        note: { zh: '', en: '' },
-      },
-    ]);
-    expect(ledger.map((e) => [e.id, e.balanceUsd])).toEqual([
-      ['b', 7],
-      ['a', 10],
-    ]);
-  });
-
-  it('近 30 天汇总与可用天数', () => {
-    const summary = billingSummary(LEDGER, presetRange('last30d'));
-    expect(summary.rechargedUsd).toBe(100);
-    expect(summary.consumedUsd).toBeCloseTo(142.97, 2);
-    expect(summary.runwayDays).toBe(27);
-    expect(isLowBalance(summary.balanceUsd, 20)).toBe(false);
-    expect(isLowBalance(12, 20)).toBe(true);
-  });
-
-  it('流水筛选', () => {
-    const range = presetRange('all');
-    const recharges = filterTransactions(LEDGER, {
-      range,
-      type: 'recharge',
-      minUsd: null,
-      maxUsd: null,
-      query: '',
-    });
-    expect(recharges.map((e) => e.amountUsd)).toEqual([100, 200, 200, 100]);
-    const big = filterTransactions(LEDGER, {
-      range,
-      type: 'all',
-      minUsd: 150,
-      maxUsd: null,
-      query: '',
-    });
-    expect(big.every((e) => Math.abs(e.amountUsd) >= 150)).toBe(true);
-  });
-
-  it('充值赠送与月份范围', () => {
+describe('充值弹窗', () => {
+  it('充值赠送按档位从高到低取', () => {
     expect(rechargeBonus(100)).toBe(0);
     expect(rechargeBonus(200)).toBe(10);
     expect(rechargeBonus(500)).toBe(50);
-    expect(monthRange(2026, 9)).toEqual({ preset: null, from: '2026-09-01', to: '2026-09-30' });
-    expect(monthRange(2026, 10).to).toBe('2026-10-03');
   });
 });
 

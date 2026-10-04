@@ -22,7 +22,7 @@ import { BillingPayMethods } from './billing-pay-methods';
 import { formatUsdWhole, parseRechargeAmount, roundCents } from './billing-rules';
 import { useTimers } from './billing-timers';
 
-/** 去支付的加载时长，结束后到账 */
+/** 去支付的加载时长；还没接真实支付，转完就关掉弹窗 */
 const PAY_DELAY_MS = 1200;
 
 /** 默认选中第二档（档位表至少有两档时），没有就退到第一档 */
@@ -41,29 +41,21 @@ const FORM_ID = 'recharge-form';
 const ASCENDING_TIERS = [...RECHARGE_BONUS_TIERS].sort((a, b) => a.minUsd - b.minUsd);
 
 /**
- * 充值弹窗：选档位或填自定义金额、选支付方式，点「去支付」加载 1.2 秒后到账。
+ * 充值弹窗：选档位或填自定义金额、选支付方式，点「去支付」。还没接真实支付（用户 2026-10-04 确认），
+ * 这里只是界面：转 1.2 秒后关掉弹窗，余额不变；以后照 sub2api 原来的下单流程接。
  * 只在打开时才挂载表单，所以每次打开都是一份全新的选择，不需要手动重置。
  */
 export function BillingRechargeDialog({
   open,
   onOpenChange,
-  onPaid,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** 支付成功：到账金额（不含赠送）和所选支付方式 */
-  onPaid: (amountUsd: number, method: PaymentMethod) => void;
 }) {
-  return open ? <RechargeDialogBody onOpenChange={onOpenChange} onPaid={onPaid} /> : null;
+  return open ? <RechargeDialogBody onOpenChange={onOpenChange} /> : null;
 }
 
-function RechargeDialogBody({
-  onOpenChange,
-  onPaid,
-}: {
-  onOpenChange: (open: boolean) => void;
-  onPaid: (amountUsd: number, method: PaymentMethod) => void;
-}) {
+function RechargeDialogBody({ onOpenChange }: { onOpenChange: (open: boolean) => void }) {
   const t = useTranslations('consoleBilling');
   const tc = useTranslations('console');
   const [preset, setPreset] = useState<number | null>(DEFAULT_PRESET);
@@ -93,10 +85,7 @@ function RechargeDialogBody({
       return;
     }
     setPaying(true);
-    schedule('pay', PAY_DELAY_MS, () => {
-      onPaid(amount, method);
-      onOpenChange(false);
-    });
+    schedule('pay', PAY_DELAY_MS, () => onOpenChange(false));
   };
 
   return (
