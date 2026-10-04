@@ -60,19 +60,21 @@ func TestEmailOAuthAuto_SnapshotsPlatformQuotaDefaults(t *testing.T) {
 		quotaRepo,
 	)
 
-	user, err := svc.createEmailOAuthUser(
+	user, err := svc.createEmailOAuthUserWithOrganization(
 		context.Background(),
 		"newoauth@example.com",
 		"newoauth",
 		"github",
 		"", // invitationCode
 		"", // affiliateCode
+		"", // organizationName：个人注册
+		"", // organizationMemberName
 	)
 	require.NoError(t, err)
 	require.NotNil(t, user)
 	require.Equal(t, int64(88), user.ID)
 
-	require.Len(t, quotaRepo.bulkInsertCalls, 1, "createEmailOAuthUser must snapshot platform quotas via BulkInsertInitial")
+	require.Len(t, quotaRepo.bulkInsertCalls, 1, "createEmailOAuthUserWithOrganization must snapshot platform quotas via BulkInsertInitial")
 
 	records := quotaRepo.bulkInsertCalls[0]
 	var geminiRecord *UserPlatformQuotaRecord

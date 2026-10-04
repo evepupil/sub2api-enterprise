@@ -94,12 +94,12 @@ func (r *adminOrganizationRepoStub) Get(_ context.Context, organizationID int64)
 	return &copyValue, nil
 }
 
-type groupRepoStub struct {
+type organizationGroupByIDRepoStub struct {
 	GroupRepository
 	groups map[int64]*Group
 }
 
-func (r *groupRepoStub) GetByID(_ context.Context, id int64) (*Group, error) {
+func (r *organizationGroupByIDRepoStub) GetByID(_ context.Context, id int64) (*Group, error) {
 	group, ok := r.groups[id]
 	if !ok {
 		return nil, ErrGroupNotFound
@@ -256,7 +256,7 @@ func newAdminOrganizationFixture() (*AdminOrganizationService, *organizationGrou
 		},
 		memberIDs: map[int64][]int64{5: {1, 2, 3}},
 	}
-	groupRepo := &groupRepoStub{groups: map[int64]*Group{
+	groupRepo := &organizationGroupByIDRepoStub{groups: map[int64]*Group{
 		11: {ID: 11},
 		12: {ID: 12, IsExclusive: true},
 	}}

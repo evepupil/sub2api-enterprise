@@ -378,6 +378,22 @@ func (m *mockBillingCache) BatchGetUserPlatformQuotaCache(context.Context, []Use
 	return nil, nil
 }
 
+func (m *mockBillingCache) GetOrganizationMemberSpending(context.Context, int64) (float64, error) {
+	return 0, nil
+}
+
+func (m *mockBillingCache) SetOrganizationMemberSpending(context.Context, int64, float64, *time.Time) error {
+	return nil
+}
+
+func (m *mockBillingCache) IncrOrganizationMemberSpending(context.Context, int64, float64) error {
+	return nil
+}
+
+func (m *mockBillingCache) InvalidateOrganizationMemberSpending(context.Context, int64) error {
+	return nil
+}
+
 // --- 测试 ---
 
 func TestUpdateBalance_Success(t *testing.T) {
