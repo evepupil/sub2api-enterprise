@@ -26,7 +26,7 @@
     "monthUsed": "Spend this month",
     "quotaTotal": "Total member quota",
     "quotaTotalSub": "Per month, excluding unlimited members",
-    "groups": "Available channels",
+    "groups": "Available groups",
     "groupsValue": "{count}",
     "groupsSeparator": ", "
   },

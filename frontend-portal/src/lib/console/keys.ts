@@ -3,7 +3,7 @@ import type { EditionId } from '@/lib/catalog';
 import { createRandom, randomToken } from './random';
 
 /**
- * API 密钥（占位数据）。每个密钥绑定一个分组（页面上叫通道），按该通道的倍率计费。
+ * API 密钥（占位数据）。每个密钥绑定一个分组，按该分组的倍率计费。
  * share / mix 只给用量生成器用：这个密钥占全账号调用量的比例，以及它调用各模型的比例。
  */
 

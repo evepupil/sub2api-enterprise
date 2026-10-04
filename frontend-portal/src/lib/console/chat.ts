@@ -24,8 +24,8 @@ export const CHAT_SAMPLE: readonly ChatMessage[] = [
     id: 'c-1',
     role: 'user',
     content: {
-      zh: '用三句话解释通道是怎么计费的。',
-      en: 'Explain how channels are billed in three sentences.',
+      zh: '用三句话解释分组是怎么计费的。',
+      en: 'Explain how groups are billed in three sentences.',
     },
     model: null,
   },
@@ -33,8 +33,8 @@ export const CHAT_SAMPLE: readonly ChatMessage[] = [
     id: 'c-2',
     role: 'assistant',
     content: {
-      zh: '每个 API 密钥都绑定一个通道，分共享通道、专用通道和企业通道三种。实际扣费等于模型的官方价乘以通道倍率，比如共享通道倍率 0.15，就是官方价的 15%。倍率越高的通道，资源越好，可用率承诺也越高。',
-      en: 'Every API key is bound to a channel: Shared, Dedicated or Enterprise. The billed price is the official price times the channel ratio, so Shared at 0.15 costs 15% of the official price. Channels with higher ratios get better capacity and availability targets.',
+      zh: '每个 API 密钥都绑定一个分组，分共享、专用和企业三种。实际扣费等于模型的官方价乘以分组倍率，比如共享分组倍率 0.15，就是官方价的 15%。倍率越高的分组，资源越好，可用率承诺也越高。',
+      en: 'Every API key is bound to a group: Shared, Dedicated or Enterprise. The billed price is the official price times the group ratio, so Shared at 0.15 costs 15% of the official price. Groups with higher ratios get better capacity and availability targets.',
     },
     model: 'claude-sonnet-5-5',
   },
@@ -47,8 +47,8 @@ export const CHAT_REPLIES: readonly Localized[] = [
     en: 'This is a placeholder reply: the console chat does not call the API yet. Once connected, replies will stream from the selected model and key and show up in your logs.',
   },
   {
-    zh: '好的。换个模型只需要改调用名，密钥和代码都不用动；不同模型的价格按你所用通道的倍率计算。',
-    en: 'Sure. Switching models only changes the model name; keys and code stay the same, and prices follow your channel ratio.',
+    zh: '好的。换个模型只需要改调用名，密钥和代码都不用动；不同模型的价格按你所用分组的倍率计算。',
+    en: 'Sure. Switching models only changes the model name; keys and code stay the same, and prices follow your group ratio.',
   },
 ];
 

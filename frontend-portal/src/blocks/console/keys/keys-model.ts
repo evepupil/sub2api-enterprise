@@ -99,7 +99,7 @@ export function statusAfterEdit(status: KeyStatus, expiresAt: string | null): Ke
   return expiresAt === null || expiresAt >= TODAY ? 'active' : 'expired';
 }
 
-/** 新建密钥：状态启用、用量为 0，通道创建后不能再改 */
+/** 新建密钥：状态启用、用量为 0，分组创建后不能再改 */
 export function buildNewKey(draft: KeyDraft, group: EditionId, secret: string): KeyRow {
   // 编号取密钥末尾的一段，不再另外生成随机数
   const suffix = secret.slice(-8).toLowerCase();
@@ -120,7 +120,7 @@ export function buildNewKey(draft: KeyDraft, group: EditionId, secret: string): 
   };
 }
 
-/** 保存编辑：名称、额度、有效期可改，通道与密钥本身不变 */
+/** 保存编辑：名称、额度、有效期可改，分组与密钥本身不变 */
 export function applyKeyEdit(row: KeyRow, draft: KeyDraft): KeyRow {
   const expiresAt = resolveExpiry(draft.expiry, row.expiresAt);
   return {
@@ -155,7 +155,7 @@ export function keyQuotaRatio(row: KeyRow): number | null {
   return Math.min(1, row.usage.totalCostUsd / row.quotaUsd);
 }
 
-/** 通道的显示名：通道名加倍率，如「专用通道 ×0.3」 */
+/** 分组的显示名：分组名加倍率，如「专用通道 ×0.3」 */
 export function groupLabel(group: EditionId, locale: AppLocale): string {
   const edition = getEdition(group);
   return `${edition.name[locale]} ${formatRatio(edition.ratio, locale)}`;

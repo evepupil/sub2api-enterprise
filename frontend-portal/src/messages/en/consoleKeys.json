@@ -22,7 +22,7 @@
   "table": {
     "name": "Name",
     "secret": "Key",
-    "group": "Channel",
+    "group": "Group",
     "status": "Status",
     "usage": "Usage",
     "quota": "Quota",
@@ -40,7 +40,7 @@
   },
   "form": {
     "name": "Name",
-    "group": "Channel",
+    "group": "Group",
     "quota": "Quota",
     "quotaUnlimited": "Unlimited",
     "quotaCustom": "Custom",
@@ -58,7 +58,7 @@
   },
   "edit": {
     "title": "Edit key",
-    "groupHint": "To change the channel, create a new key"
+    "groupHint": "To change the group, create a new key"
   },
   "usage": {
     "title": "Connect {name}",

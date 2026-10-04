@@ -2,13 +2,13 @@ import type { EditionId, Localized } from '@/lib/catalog';
 
 /**
  * 组织（占位数据）。当前账号是组织管理员：组织统一付费，成员按月配额消费，
- * 成员只能在组织授权的通道（分组）里创建密钥。
+ * 成员只能在组织授权的分组里创建密钥。
  */
 export const ORGANIZATION: {
   id: string;
   name: Localized;
   createdAt: string;
-  /** 组织可用的通道（分组） */
+  /** 组织可用的分组 */
   groups: readonly EditionId[];
 } = {
   id: 'acme-ai',

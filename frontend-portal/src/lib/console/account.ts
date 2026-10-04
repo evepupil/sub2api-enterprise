@@ -8,7 +8,7 @@ export const CURRENT_USER: {
   email: string;
   /** 头像里显示的字 */
   initials: Localized;
-  /** 新建密钥时默认选中的通道（分组） */
+  /** 新建密钥时默认选中的分组 */
   defaultGroup: EditionId;
 } = {
   name: { zh: '林舟', en: 'Lin Zhou' },
@@ -45,7 +45,7 @@ export const ANNOUNCEMENTS: readonly Announcement[] = [
   {
     id: 'a-invoice',
     text: {
-      zh: '9 月账单已出，专用通道与企业通道可通过工单申请发票。',
+      zh: '9 月账单已出，专用分组与企业分组可通过工单申请发票。',
       en: 'September bills are ready. Dedicated and Enterprise customers can request invoices via a ticket.',
     },
     href: '/console/tickets',

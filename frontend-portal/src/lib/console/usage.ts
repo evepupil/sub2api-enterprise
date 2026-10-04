@@ -20,7 +20,7 @@ import {
 
 /**
  * 用量（占位数据）：从开通日到今天，每天 × 每个密钥 × 每个模型一条汇总记录。
- * 金额按密钥所在通道的价格（官方价 × 通道倍率）算，和官网价目表对得上。
+ * 金额按密钥所在分组的价格（官方价 × 分组倍率）算，和官网价目表对得上。
  * 用量页的数字卡、热力图、明细图都从这份记录推出来，彼此一致。
  */
 export interface UsageRecord {
@@ -104,7 +104,7 @@ const HOLIDAY = { from: '2026-07-20', to: '2026-07-26' };
 
 const round6 = (x: number) => Math.round(x * 1e6) / 1e6;
 
-/** 按通道价格算一段用量的花费；billableShare 是计费请求的占比（失败请求不计费） */
+/** 按分组价格算一段用量的花费；billableShare 是计费请求的占比（失败请求不计费） */
 export function usageCost(
   modelId: UsedModelId,
   group: EditionId,
@@ -277,7 +277,7 @@ export interface UsageBucket {
 }
 
 export interface UsageSeries {
-  /** 模型调用名 / 密钥 id / 通道 id；合并后的其余部分为 'other' */
+  /** 模型调用名 / 密钥 id / 分组 id；合并后的其余部分为 'other' */
   id: string;
   total: number;
   values: number[];

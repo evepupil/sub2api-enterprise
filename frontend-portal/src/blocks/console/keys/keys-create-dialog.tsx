@@ -25,7 +25,7 @@ const SUBMIT_DELAY_MS = 800;
 
 const EMPTY_DRAFT: KeyDraft = { name: '', quotaMode: 'unlimited', quota: '', expiry: 'never' };
 
-/** 默认通道取当前用户的默认通道；它不在组织授权的通道里时退到第一个可用通道 */
+/** 默认分组取当前用户的默认分组；它不在组织授权的分组里时退到第一个可用分组 */
 const DEFAULT_GROUP: EditionId = ORGANIZATION.groups.includes(CURRENT_USER.defaultGroup)
   ? CURRENT_USER.defaultGroup
   : (ORGANIZATION.groups[0] ?? CURRENT_USER.defaultGroup);

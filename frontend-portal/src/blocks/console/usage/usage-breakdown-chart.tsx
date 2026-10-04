@@ -35,7 +35,7 @@ const VALUE_FORMAT: Record<UsageMetric, (value: number) => string> = {
 };
 
 /**
- * 用量明细的一张堆叠柱状图：一个维度（模型 / 密钥 / 通道）的后端拆分数据，
+ * 用量明细的一张堆叠柱状图：一个维度（模型 / 密钥 / 分组）的后端拆分数据，
  * 范围只有一天时按 24 小时出柱子，其余按天出柱子。系列名由调用方给。
  */
 export function UsageBreakdownChart({

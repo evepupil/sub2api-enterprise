@@ -12,12 +12,12 @@ import { seriesNames } from '@/lib/console/live/usage-view';
 
 import { UsageBreakdownChart } from './usage-breakdown-chart';
 
-/** 没有通道的请求，后端给的通道 ID 是 0 */
+/** 没有分组的请求，后端给的分组 ID 是 0 */
 const NO_GROUP_ID = '0';
 
 /**
  * 用量明细：一个指标开关（Token / 请求数 / 费用）控制下面三张图，
- * 分别按模型、按 API 密钥、按通道看同一段时间的用量构成。
+ * 分别按模型、按 API 密钥、按分组看同一段时间的用量构成。
  * overview 为 null 时还在加载，三张图的位置显示同样高度的占位块。
  */
 export function UsageBreakdown({
@@ -35,7 +35,7 @@ export function UsageBreakdown({
 
   const metricOptions = USAGE_METRICS.map((value) => ({ value, label: t(`detail.${value}`) }));
 
-  // 图例里的名字：模型就是调用时的模型名；密钥、通道用后端给的名字
+  // 图例里的名字：模型就是调用时的模型名；密钥、分组用后端给的名字
   const keyNames = useMemo(() => seriesNames(overview?.series.key ?? []), [overview]);
   const groupNames = useMemo(() => seriesNames(overview?.series.group ?? []), [overview]);
   const keyName = (id: string) => keyNames.get(id) ?? `#${id}`;

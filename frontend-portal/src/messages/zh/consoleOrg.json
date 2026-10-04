@@ -26,7 +26,7 @@
     "monthUsed": "本月消费",
     "quotaTotal": "成员配额合计",
     "quotaTotalSub": "每月，不含不限额成员",
-    "groups": "可用通道",
+    "groups": "可用分组",
     "groupsValue": "{count} 个",
     "groupsSeparator": "、"
   },

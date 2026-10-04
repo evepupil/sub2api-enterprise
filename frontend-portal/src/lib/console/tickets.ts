@@ -98,16 +98,16 @@ export const TICKETS: readonly Ticket[] = [
         from: 'user',
         ts: at('2026-09-14', 11, 2),
         body: {
-          zh: '新加入的成员点创建密钥时提示没有可用通道。',
-          en: 'New members see “no available channel” when creating a key.',
+          zh: '新加入的成员点创建密钥时提示没有可用分组。',
+          en: 'New members see “no available group” when creating a key.',
         },
       },
       {
         from: 'support',
         ts: at('2026-09-15', 17, 45),
         body: {
-          zh: '需要组织管理员在成员管理里给他们授权通道，授权后能否正常创建？',
-          en: 'An organization admin needs to grant them a channel under Members. Does it work after that?',
+          zh: '需要组织管理员在成员管理里给他们授权分组，授权后能否正常创建？',
+          en: 'An organization admin needs to grant them a group under Members. Does it work after that?',
         },
       },
     ],

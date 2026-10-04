@@ -27,7 +27,7 @@ export interface KeysRowHandlers {
   onDelete: () => void;
 }
 
-/** 密钥表的一行：名称、密钥、通道、状态、用量、额度、有效期，最右一列固定放操作 */
+/** 密钥表的一行：名称、密钥、分组、状态、用量、额度、有效期，最右一列固定放操作 */
 export function KeysRow({
   row,
   revealed,

@@ -30,9 +30,9 @@ export interface UsageOverviewBucket {
   costUsd: number;
 }
 
-/** 一个时间段里某个系列（模型 / 密钥 / 通道）的用量 */
+/** 一个时间段里某个系列（模型 / 密钥 / 分组）的用量 */
 export interface UsageOverviewPoint extends UsageOverviewBucket {
-  /** 模型是模型名；密钥、通道是后端 ID 的字符串（没有通道的请求是 '0'） */
+  /** 模型是模型名；密钥、分组是后端 ID 的字符串（没有分组的请求是 '0'） */
   id: string;
   name: string;
 }

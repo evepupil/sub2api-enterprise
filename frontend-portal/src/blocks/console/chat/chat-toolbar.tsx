@@ -22,8 +22,8 @@ const KEY_OPTIONS: SelectOption<string>[] = CHAT_KEYS.map((key) => ({
 }));
 
 /**
- * 对话工具条：选模型、选密钥，右边写出所选密钥所在的通道和该通道下这个模型的价格。
- * 价格 = 官方价 × 通道倍率，让人发消息之前就知道大概花多少钱。
+ * 对话工具条：选模型、选密钥，右边写出所选密钥所在的分组和该分组下这个模型的价格。
+ * 价格 = 官方价 × 分组倍率，让人发消息之前就知道大概花多少钱。
  */
 export function ChatToolbar({
   model,
@@ -41,7 +41,7 @@ export function ChatToolbar({
 
   const apiKey = CHAT_KEYS.find((key) => key.id === keyId) ?? CHAT_KEYS[0];
   const edition = apiKey ? getEdition(apiKey.group) : null;
-  // 倍率按合同定制的通道没有固定单价，只显示通道标签
+  // 倍率按合同定制的分组没有固定单价，只显示分组标签
   const price = apiKey ? textPrice(getModel(model), apiKey.group) : null;
 
   return (

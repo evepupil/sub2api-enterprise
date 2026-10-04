@@ -39,14 +39,14 @@
     "cost": "Cost",
     "byModel": "By model",
     "byKey": "By API key",
-    "byGroup": "By channel",
+    "byGroup": "By group",
     "ariaModel": "Usage by model",
     "ariaKey": "Usage by API key",
-    "ariaGroup": "Usage by channel",
+    "ariaGroup": "Usage by group",
     "total": "Total",
     "other": "Other",
     "empty": "No requests in this range",
-    "noGroup": "No channel"
+    "noGroup": "No group"
   },
   "error": {
     "unavailable": "Usage couldn't be loaded",
