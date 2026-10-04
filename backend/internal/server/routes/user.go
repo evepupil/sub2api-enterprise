@@ -39,6 +39,9 @@ func RegisterUserRoutes(
 			user.POST("/auth-identities/bind/start", h.User.StartIdentityBinding)
 			user.GET("/api-keys/:id/usage/daily", panelRateLimiter.Heavy(), h.Usage.GetMyAPIKeyDailyUsage)
 			user.GET("/platform-quotas", h.User.GetMyPlatformQuotas)
+			// 官网控制台账单页：余额卡与余额流水（要汇总使用记录，按重查询限流）
+			user.GET("/balance/summary", panelRateLimiter.Heavy(), h.Redeem.GetBalanceSummary)
+			user.GET("/balance/ledger", panelRateLimiter.Heavy(), h.Redeem.GetBalanceLedger)
 
 			// 通知邮箱管理
 			notifyEmail := user.Group("/notify-email")
