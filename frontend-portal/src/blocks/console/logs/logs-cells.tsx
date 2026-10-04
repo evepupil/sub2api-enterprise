@@ -7,18 +7,10 @@ import { GroupWithRate } from '@/components/console/group-rate';
 import { Badge, type BadgeTone } from '@/components/ui/badge';
 import { formatDuration, formatInteger } from '@/lib/console';
 import type { LogRow } from '@/lib/console/live/logs-types';
-import {
-  formatUnitPrice,
-  logExtras,
-  outputSpeed,
-  tierOf,
-  unitPrices,
-  type LogExtra,
-  type TierKey,
-} from '@/lib/console/live/logs-view';
+import { fastModeOf, outputSpeed } from '@/lib/console/live/logs-view';
 
 /**
- * 日志表里信息多的几格：密钥（含分组与倍率）、Token、耗时、计费。
+ * 日志表里信息多的几格：密钥（含分组与倍率）、Token、耗时，以及模型名旁的 Fast 标签（费用格见 logs-cost）。
  * 每格第一行是主要信息，第二行小字补充；一律不换行，宽度不够时整表横向滚动。
  */
 
@@ -99,45 +91,14 @@ export function DurationCell({ row }: { row: LogRow }) {
   );
 }
 
-const TIER_TONE: Record<TierKey, BadgeTone> = {
-  standard: 'outline',
-  priority: 'info',
-  flex: 'neutral',
-};
-
-/** 第一行计费档，后面「+N」把长上下文计价、推理强度、生图张数收起来（悬停看全部）；第二行官方价单价 */
-export function BillingCell({ row }: { row: LogRow }) {
+/** 开了 Fast（或 Ultrafast）的调用在模型名旁标一下：后端默认按两倍计费，客户能看出这条为什么贵 */
+export function FastBadge({ serviceTier }: { serviceTier: string | null }) {
   const t = useTranslations('consoleLogs');
-  const tier = tierOf(row.serviceTier);
-  const prices = unitPrices(row);
-  const extras = logExtras(row).map((extra: LogExtra) => {
-    if (extra.kind === 'longContext') return t('table.extra.longContext');
-    if (extra.kind === 'reasoning') return t('table.extra.reasoning', { value: extra.value });
-    return extra.size
-      ? t('table.extra.imagesWithSize', { count: extra.count, size: extra.size })
-      : t('table.extra.images', { count: extra.count });
-  });
+  const mode = fastModeOf(serviceTier);
+  if (mode === null) return null;
   return (
-    <div className="space-y-1 whitespace-nowrap">
-      <div className="flex items-center gap-1.5">
-        <Badge tone={tier ? TIER_TONE[tier] : 'outline'}>
-          {tier ? t(`table.tier.${tier}`) : row.serviceTier}
-        </Badge>
-        {extras.length > 0 ? (
-          <Badge tone="neutral" title={extras.join('；')} data-log-extras={extras.length}>
-            {t('table.moreCount', { count: extras.length })}
-            <span className="sr-only">{extras.join('；')}</span>
-          </Badge>
-        ) : null}
-      </div>
-      {prices.input !== null || prices.output !== null ? (
-        <div className="text-xs tabular-nums text-subtle-foreground">
-          {t('table.unitPrice', {
-            input: formatUnitPrice(prices.input),
-            output: formatUnitPrice(prices.output),
-          })}
-        </div>
-      ) : null}
-    </div>
+    <Badge tone="warning" data-log-fast={mode}>
+      {t(mode === 'fast' ? 'table.fast' : 'table.ultrafast')}
+    </Badge>
   );
 }

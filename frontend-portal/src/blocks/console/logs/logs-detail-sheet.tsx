@@ -9,9 +9,11 @@ import { Sheet } from '@/components/console/dialog';
 import { GroupWithRate } from '@/components/console/group-rate';
 import { formatDateTime, formatDuration, formatInteger, formatUsd } from '@/lib/console';
 import type { LogRow } from '@/lib/console/live/logs-types';
-import { curlExample, tierOf } from '@/lib/console/live/logs-view';
+import { curlExample } from '@/lib/console/live/logs-view';
 import { catalogEntry, inferProvider } from '@/lib/console/live/models-view';
 import { cn } from '@/lib/utils';
+
+import { FastBadge } from './logs-cells';
 
 /** 没有值时的占位（例如非流式请求没有首字耗时） */
 const NONE = '—';
@@ -37,7 +39,6 @@ function DetailRow({
 function LogDetailBody({ log }: { log: LogRow }) {
   const t = useTranslations('consoleLogs');
   const provider = catalogEntry(log.model)?.provider ?? inferProvider(log.model);
-  const tier = tierOf(log.serviceTier);
   const curl = curlExample(log);
   const number = (value: number) => <span className="tabular-nums">{formatInteger(value)}</span>;
 
@@ -69,14 +70,12 @@ function LogDetailBody({ log }: { log: LogRow }) {
           <span className="inline-flex items-center gap-2">
             {provider ? <ProviderLogo provider={provider} size={16} /> : null}
             <span className="font-mono">{log.model}</span>
+            <FastBadge serviceTier={log.serviceTier} />
           </span>
         </DetailRow>
         {log.reasoningEffort ? (
           <DetailRow label={t('detail.reasoning')}>{log.reasoningEffort}</DetailRow>
         ) : null}
-        <DetailRow label={t('detail.tier')}>
-          {tier ? t(`table.tier.${tier}`) : log.serviceTier}
-        </DetailRow>
         {log.endpoint ? (
           <DetailRow label={t('detail.endpoint')} mono>
             {log.endpoint}
@@ -92,8 +91,8 @@ function LogDetailBody({ log }: { log: LogRow }) {
         {log.images.count > 0 ? (
           <DetailRow label={t('detail.images')}>
             {log.images.size
-              ? t('table.extra.imagesWithSize', { count: log.images.count, size: log.images.size })
-              : t('table.extra.images', { count: log.images.count })}
+              ? t('detail.imagesWithSize', { count: log.images.count, size: log.images.size })
+              : t('detail.imageCount', { count: log.images.count })}
           </DetailRow>
         ) : null}
         <DetailRow label={t('detail.officialCost')}>

@@ -7,6 +7,7 @@ import type {
   LogStream,
   LogType,
 } from '@/lib/console/live/logs-types';
+import { fastModeOf, type FastMode } from '@/lib/console/live/logs-view';
 import { DEFAULT_PAGE_SIZE, PAGE_SIZES } from '@/lib/console/pagination';
 import { formatDateTime } from '@/lib/console/time';
 
@@ -86,6 +87,17 @@ export function usageLogsPath(filters: LogFilters, page: number, pageSize: numbe
   return `/usage?${params.toString()}`;
 }
 
+/** 各计费尺寸的张数（{ "1K": 2 }）：只留正整数 */
+function sizeBreakdown(value: unknown): Record<string, number> {
+  if (!isRecord(value)) return {};
+  return Object.fromEntries(
+    Object.entries(value).filter(
+      (entry): entry is [string, number] =>
+        typeof entry[1] === 'number' && Number.isInteger(entry[1]) && entry[1] > 0,
+    ),
+  );
+}
+
 /** 后端一条使用记录 → 日志行；缺了 ID 或时间这种关键字段时返回 null */
 export function toLogRow(raw: unknown): LogRow | null {
   if (!isRecord(raw)) return null;
@@ -111,7 +123,7 @@ export function toLogRow(raw: unknown): LogRow | null {
     serviceTier: text(raw.service_tier),
     endpoint: text(raw.inbound_endpoint),
     stream: raw.stream === true,
-    billingMode: text(raw.billing_mode) ?? 'token',
+    billingMode: text(raw.billing_mode),
     tokens: {
       input: count(raw.input_tokens),
       output: count(raw.output_tokens),
@@ -129,7 +141,18 @@ export function toLogRow(raw: unknown): LogRow | null {
     longContext: raw.long_context_billing_applied === true,
     durationMs: num(raw.duration_ms),
     firstTokenMs: num(raw.first_token_ms),
-    images: { count: count(raw.image_count), size: text(raw.image_size) },
+    images: {
+      count: count(raw.image_count),
+      size: text(raw.image_size),
+      inputSize: text(raw.image_input_size),
+      outputSize: text(raw.image_output_size),
+      sizeSource: text(raw.image_size_source),
+      breakdown: sizeBreakdown(raw.image_size_breakdown),
+      inputTokens: count(raw.image_input_tokens),
+      inputCost: count(raw.image_input_cost),
+      outputTokens: count(raw.image_output_tokens),
+      outputCost: count(raw.image_output_cost),
+    },
     userAgent: text(raw.user_agent),
     ip: text(raw.ip_address),
   };
@@ -166,7 +189,8 @@ export interface LogsCsvLabels {
   yes: string;
   no: string;
   noGroup: string;
-  tiers: { standard: string; priority: string; flex: string };
+  /** 「Fast 模式」一列的写法；普通调用留空 */
+  fast: Record<FastMode, string>;
 }
 
 /** 单元格转义：有逗号、引号、换行的加引号；以 = + - @ 开头的前面加单引号，防止表格软件当公式执行 */
@@ -177,11 +201,9 @@ function csvCell(value: string | number | null): string {
   return /[",\r\n]/.test(cell) ? `"${cell.replace(/"/g, '""')}"` : cell;
 }
 
-function tierLabel(tier: string | null, labels: LogsCsvLabels): string {
-  if (tier === null) return labels.tiers.standard;
-  if (tier === 'priority') return labels.tiers.priority;
-  if (tier === 'flex') return labels.tiers.flex;
-  return tier;
+function fastLabel(serviceTier: string | null, labels: LogsCsvLabels): string | null {
+  const mode = fastModeOf(serviceTier);
+  return mode === null ? null : labels.fast[mode];
 }
 
 /** 日志行 → CSV 文本（北京时间；金额是美元，保留 6 位小数） */
@@ -195,7 +217,7 @@ export function logsCsv(rows: readonly LogRow[], labels: LogsCsvLabels): string 
       row.rate,
       row.model,
       row.reasoningEffort,
-      tierLabel(row.serviceTier, labels),
+      fastLabel(row.serviceTier, labels),
       row.stream ? labels.yes : labels.no,
       row.tokens.input,
       row.tokens.output,

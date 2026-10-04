@@ -396,7 +396,7 @@ pnpm format:check  # prettier
 | 找回密码、谷歌登录、人机验证 | 不连后端，入口不显示；后端开了人机验证时，注册失败提示联系管理员 |
 | 控制台用量页 | 2026-10-03 接通后端，显示登录账号自己的真实用量：后端用量总览接口（技术设计 18.2）、官网转发 `src/app/api/portal/console/usage/`、取数与换算 `src/lib/console/live/` |
 | 控制台模型页 | 2026-10-04 接通后端：分组、模型、实付价、官方价来自后端模型广场（技术设计 18.3），官网转发 `src/app/api/portal/console/models/`、换算 `src/lib/console/live/models-*.ts`；展示名、厂商、协议、上下文仍取官网目录（见上面「30 个模型」一行） |
-| 控制台日志页 | 2026-10-04 接通后端：登录账号计费成功的调用（后端 `/api/v1/usage`，技术设计 18.4），官网转发 `src/app/api/portal/console/logs/`（列表、筛选选项、导出 CSV）、换算 `src/lib/console/live/logs-*.ts`。用量、模型、日志三页以外的控制台页面仍是占位数据（**编的**） |
+| 控制台日志页 | 2026-10-04 接通后端：登录账号计费成功的调用（后端 `/api/v1/usage`，技术设计 18.4），官网转发 `src/app/api/portal/console/logs/`（列表、筛选选项、导出 CSV）、换算 `src/lib/console/live/logs-*.ts`；费用旁的费用明细、模型旁的 Fast 标签都按后端记录算。用量、模型、日志三页以外的控制台页面仍是占位数据（**编的**） |
 
 ---
 
@@ -436,6 +436,7 @@ pnpm format:check  # prettier
 | `ActivityHeatmap` | `charts/activity-heatmap.tsx` | 活跃热力图 `{ data: Heatmap, monthLabel, cellTitle, ariaLabel, lessLabel, moreLabel, weekdayLabels }` |
 | `GroupWithRate` / `RateBadge` | `group-rate.tsx` | 分组名 + 倍率徽标 `{ name, rate, className? }`（只要徽标用 `RateBadge`）；徽标 `data-group-rate`，颜色按倍率分档：低于 ×0.2 绿、低于 ×0.5 蓝、低于 ×1 橙、×1 灰、高于 ×1 红（`rateTone`）。模型页、日志页共用 |
 | `Skeleton` | `skeleton.tsx` | 加载占位块 `{ className?, style? }`：浅灰圆角、轻轻呼吸（减少动效时不动），`data-skeleton`；尺寸和真实内容一样，加载完不跳动 |
+| `InfoPopover` | `info-popover.tsx` | 「i」图标 + 悬浮说明卡片 `{ name, label, align?, className?, children }`：鼠标移上去显示、移开收起，点一下固定（再点、点别处、Esc 收起），触屏点开；卡片在图标下方（默认右对齐图标），靠边自动挪回屏幕内；卡片里只放说明，不放可点的东西。图标 `data-info-popover={name}`，卡片 `data-info-popover-panel`。日志页费用明细在用 |
 | 外壳件 | `shell/*` | 页面不用直接引用；`Avatar` 可在设置页复用 |
 
 官网已有的基础组件照用（按钮除外，用上表的控制台按钮；`variant="danger"` 是红色按钮）：`Textarea`（`ui/textarea.tsx`，多行输入框，传 `footer` 时带字数底栏）、`Badge`、`Input`、`Field`、`SegmentedControl`、`DropdownMenu*`、`ProviderLogo`、`DiscountBadge`；切换语言用 `useSwitchLocale()`（`@/i18n/use-switch-locale`）。

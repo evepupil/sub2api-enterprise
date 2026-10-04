@@ -3,12 +3,14 @@ import { describe, expect, it } from 'vitest';
 import { DEFAULT_SELECTION, isDefaultSelection } from '@/blocks/console/logs/logs-types';
 import type { LogRow } from '@/lib/console/live/logs-types';
 import {
+  costBreakdown,
+  costTier,
   curlExample,
-  formatUnitPrice,
-  logExtras,
+  fastModeOf,
+  formatPerMillion,
+  formatPreciseUsd,
   outputSpeed,
-  tierOf,
-  unitPrices,
+  type CostBreakdown,
 } from '@/lib/console/live/logs-view';
 import { parseDateRange } from '@/lib/server/sub2api/date-range';
 import {
@@ -149,6 +151,33 @@ describe('后端记录 → 日志行', () => {
     expect(JSON.stringify(row)).not.toContain('sk-secret');
   });
 
+  it('生图字段：各尺寸张数只留正整数；没写计费方式时为 null', () => {
+    const image = toLogRow({
+      ...RAW,
+      billing_mode: undefined,
+      image_count: 3,
+      image_size: '2K',
+      image_size_source: 'output',
+      image_output_size: '2048x2048',
+      image_size_breakdown: { '1K': 1, '2K': 2, '4K': 0, bad: 'x' },
+      image_output_tokens: 1000,
+      image_output_cost: 0.04,
+    });
+    expect(image?.billingMode).toBeNull();
+    expect(image?.images).toEqual({
+      count: 3,
+      size: '2K',
+      inputSize: null,
+      outputSize: '2048x2048',
+      sizeSource: 'output',
+      breakdown: { '1K': 1, '2K': 2 },
+      inputTokens: 0,
+      inputCost: 0,
+      outputTokens: 1000,
+      outputCost: 0.04,
+    });
+  });
+
   it('没有分组时分组为空；密钥对象缺了用 #ID；缺 ID 或时间的记录丢掉', () => {
     const bare = toLogRow({ ...RAW, group_id: null, group: undefined, api_key: undefined });
     expect(bare?.group).toBeNull();
@@ -176,27 +205,156 @@ describe('后端记录 → 日志行', () => {
   });
 });
 
-describe('日志行上的计算', () => {
-  it('官方价单价 = 分项费用 ÷ Token 数 × 一百万；算不出来为 null', () => {
-    expect(unitPrices(row)).toEqual({ input: 2.5, output: 15 });
-    expect(unitPrices({ ...row, costs: { ...row.costs, input: 0 } }).input).toBeNull();
-    expect(formatUnitPrice(2.5)).toBe('$2.5');
-    expect(formatUnitPrice(null)).toBe('—');
+/** 明细里各项的名字（按出现顺序） */
+const keysOf = (breakdown: CostBreakdown) => breakdown.lines.map((line) => line.key);
+
+/** 明细里某一项的值 */
+const valueOf = (breakdown: CostBreakdown, key: string) =>
+  breakdown.lines.find((line) => line.key === key)?.value;
+
+describe('费用明细（和 sub2api 使用记录的悬浮明细一致）', () => {
+  it('按 Token 计费：有的分项费用、按这次费用反算的每百万单价、缓存费用；下面是档位、倍率、原始、扣费', () => {
+    const breakdown = costBreakdown(row);
+    expect(keysOf(breakdown)).toEqual([
+      'inputCost',
+      'outputCost',
+      'inputPrice',
+      'outputPrice',
+      'cacheReadCost',
+    ]);
+    expect(valueOf(breakdown, 'inputCost')).toEqual({ type: 'usd', amount: 0.005 });
+    const input = valueOf(breakdown, 'inputPrice');
+    const output = valueOf(breakdown, 'outputPrice');
+    expect(input?.type === 'perMillion' ? input.amount : null).toBeCloseTo(2.5);
+    expect(output?.type === 'perMillion' ? output.amount : null).toBeCloseTo(15);
+    expect(breakdown).toMatchObject({
+      tier: { kind: 'known', tier: 'fast' },
+      rate: 0.3,
+      original: 0.01275,
+      billed: 0.003825,
+    });
   });
 
-  it('计费档、额外信息、输出速度', () => {
-    expect(tierOf(null)).toBe('standard');
-    expect(tierOf('priority')).toBe('priority');
-    expect(tierOf('scale')).toBeNull();
-    expect(logExtras(row)).toEqual([{ kind: 'reasoning', value: 'high' }]);
-    expect(
-      logExtras({
-        ...row,
-        longContext: true,
-        reasoningEffort: null,
-        images: { count: 2, size: '1K' },
-      }),
-    ).toEqual([{ kind: 'longContext' }, { kind: 'images', count: 2, size: '1K' }]);
+  it('费用为 0 的分项不列；没有输出费用时也不列输出单价', () => {
+    const free = costBreakdown({
+      ...row,
+      costs: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0.001, total: 0.001 },
+    });
+    // 输入单价只看有没有输入 Token（和 sub2api 一样），所以会是 $0
+    expect(keysOf(free)).toEqual(['inputPrice', 'cacheWriteCost']);
+    expect(valueOf(free, 'inputPrice')).toEqual({ type: 'perMillion', amount: 0 });
+  });
+
+  it('按 Token 计费的生图模型：图片的输入输出费用、单价单独列，文字部分扣掉图片 Token 再算', () => {
+    const breakdown = costBreakdown({
+      ...row,
+      tokens: { input: 100, output: 1200, cacheRead: 0, cacheWrite: 0 },
+      costs: { input: 0.0005, output: 0.002, cacheRead: 0, cacheWrite: 0, total: 0.0425 },
+      images: {
+        ...row.images,
+        count: 1,
+        outputTokens: 1000,
+        outputCost: 0.04,
+      },
+    });
+    expect(keysOf(breakdown)).toEqual([
+      'inputCost',
+      'outputCost',
+      'imageOutputCost',
+      'inputPrice',
+      'outputPrice',
+      'imageOutputPrice',
+    ]);
+    const text = valueOf(breakdown, 'outputPrice');
+    const image = valueOf(breakdown, 'imageOutputPrice');
+    expect(text?.type === 'perMillion' ? text.amount : null).toBeCloseTo(10);
+    expect(image?.type === 'perMillion' ? image.amount : null).toBeCloseTo(40);
+  });
+
+  it('按张计费的生图：张数、计费尺寸、尺寸来源、输入输出尺寸、各尺寸张数、单张价格、图片总价', () => {
+    const breakdown = costBreakdown({
+      ...row,
+      billingMode: 'image',
+      tokens: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+      costs: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0.08 },
+      images: {
+        ...row.images,
+        count: 2,
+        size: '2K',
+        sizeSource: 'output',
+        outputSize: '2048x2048',
+        breakdown: { '2K': 2 },
+      },
+    });
+    expect(breakdown.lines).toEqual([
+      { key: 'imageCount', value: { type: 'images', count: 2 } },
+      { key: 'imageBillingSize', value: { type: 'text', text: '2K' } },
+      { key: 'imageSizeSource', value: { type: 'note', note: 'sourceOutput' } },
+      { key: 'imageInputSize', value: { type: 'note', note: 'unknown' } },
+      { key: 'imageOutputSize', value: { type: 'text', text: '2048x2048' } },
+      { key: 'imageSizeBreakdown', value: { type: 'text', text: '2K x 2' } },
+      { key: 'imageUnitPrice', value: { type: 'usd', amount: 0.04 } },
+      { key: 'imageTotalPrice', value: { type: 'usd', amount: 0.08 } },
+    ]);
+  });
+
+  it('老的生图记录：尺寸不标准写「历史非标准」，没尺寸也没来源写未记录；没写计费方式也算生图', () => {
+    const legacy = costBreakdown({
+      ...row,
+      billingMode: null,
+      images: { ...row.images, count: 1, size: '1024x1024' },
+    });
+    expect(valueOf(legacy, 'imageBillingSize')).toEqual({ type: 'legacySize', size: '1024x1024' });
+    expect(valueOf(legacy, 'imageSizeSource')).toEqual({ type: 'note', note: 'sourceLegacy' });
+    const bare = costBreakdown({
+      ...row,
+      billingMode: 'image',
+      images: { ...row.images, count: 1 },
+    });
+    expect(valueOf(bare, 'imageBillingSize')).toEqual({ type: 'note', note: 'notRecorded' });
+    expect(valueOf(bare, 'imageSizeSource')).toEqual({ type: 'note', note: 'sourceMissing' });
+    expect(keysOf(bare)).not.toContain('imageSizeBreakdown');
+  });
+
+  it('按次计费（和视频）：列单次价格', () => {
+    const perRequest = costBreakdown({
+      ...row,
+      billingMode: 'per_request',
+      costs: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0.02 },
+    });
+    expect(perRequest.lines).toEqual([
+      { key: 'requestPrice', value: { type: 'usd', amount: 0.02 } },
+    ]);
+  });
+
+  it('服务档位：没写或 default 是 Standard，fast 与 priority 都是 Fast，认不出的原样', () => {
+    expect(costTier(null)).toEqual({ kind: 'known', tier: 'standard' });
+    expect(costTier('default')).toEqual({ kind: 'known', tier: 'standard' });
+    expect(costTier('fast')).toEqual({ kind: 'known', tier: 'fast' });
+    expect(costTier('Priority')).toEqual({ kind: 'known', tier: 'fast' });
+    expect(costTier('flex')).toEqual({ kind: 'known', tier: 'flex' });
+    expect(costTier('ultrafast')).toEqual({ kind: 'known', tier: 'ultrafast' });
+    expect(costTier('scale')).toEqual({ kind: 'raw', value: 'scale' });
+  });
+
+  it('金额 6 位小数，单价 4 位小数，算不出来的单价写「-」', () => {
+    expect(formatPreciseUsd(0.0032241)).toBe('US$0.003224');
+    expect(formatPerMillion(4)).toBe('US$4.0000');
+    expect(formatPerMillion(null)).toBe('-');
+  });
+});
+
+describe('日志行上的计算', () => {
+  it('Fast 模式：priority、fast 算 Fast，ultrafast 单独标；普通调用和 flex 不标', () => {
+    expect(fastModeOf('priority')).toBe('fast');
+    expect(fastModeOf(' Fast ')).toBe('fast');
+    expect(fastModeOf('ultrafast')).toBe('ultrafast');
+    expect(fastModeOf('flex')).toBeNull();
+    expect(fastModeOf('default')).toBeNull();
+    expect(fastModeOf(null)).toBeNull();
+  });
+
+  it('输出速度 = 输出 Token ÷ 总耗时；没有耗时为 null', () => {
     expect(outputSpeed(row)).toBe(125);
     expect(outputSpeed({ ...row, durationMs: null })).toBeNull();
   });
@@ -219,17 +377,19 @@ describe('导出 CSV', () => {
     yes: '是',
     no: '否',
     noGroup: '未分组',
-    tiers: { standard: '标准', priority: '优先', flex: '弹性' },
+    fast: { fast: 'Fast', ultrafast: 'Ultrafast' },
   };
 
-  it('时间按北京时间，金额 6 位小数，计费档写中文', () => {
+  it('时间按北京时间，金额 6 位小数，开了 Fast 的写 Fast、普通调用留空', () => {
     const [header, line] = logsCsv([row], labels).split('\r\n');
     expect(header).toBe('时间,请求 ID,密钥');
     expect(
       line?.startsWith(
-        '2026-10-04 15:05:34,req_abc,prod,高性能通道,0.3,gpt-5.4,high,优先,是,2000,500,1000,0,0.003825,0.012750,4000,900,/v1/responses',
+        '2026-10-04 15:05:34,req_abc,prod,高性能通道,0.3,gpt-5.4,high,Fast,是,2000,500,1000,0,0.003825,0.012750,4000,900,/v1/responses',
       ),
     ).toBe(true);
+    const plain = logsCsv([{ ...row, serviceTier: null }], labels).split('\r\n')[1] ?? '';
+    expect(plain).toContain(',high,,是,');
   });
 
   it('逗号、引号要转义；以 = + - @ 开头的加单引号，防止表格软件当公式执行', () => {

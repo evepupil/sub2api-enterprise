@@ -13,7 +13,7 @@ import { LogsTableRow } from './logs-table-row';
 import type { OpenLogDetail } from './logs-types';
 
 /** 表格最窄的宽度：再窄就在外框里横向滚动，不让页面横向溢出 */
-const TABLE_MIN_WIDTH = 1080;
+const TABLE_MIN_WIDTH = 920;
 
 /**
  * 调用记录表：表头、当前页的行、底部分页（分页由后端做，这里只上报翻页和每页条数）。
@@ -79,7 +79,6 @@ export function LogsTable({
             <Th>{t('table.tokens')}</Th>
             <Th align="right">{t('table.cost')}</Th>
             <Th>{t('table.duration')}</Th>
-            <Th>{t('table.billing')}</Th>
             <Th sticky="right" align="center">
               {tc('table.actions')}
             </Th>

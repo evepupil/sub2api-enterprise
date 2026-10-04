@@ -18,15 +18,18 @@ export interface LogRow {
   model: string;
   /** 请求里的推理强度（low / medium / high 等），没有为 null */
   reasoningEffort: string | null;
-  /** OpenAI 计费档：null 是标准，priority 是优先，flex 是弹性 */
+  /**
+   * 服务档位：priority / fast 是 Codex、Claude 的 Fast 模式（后端默认按两倍计费），ultrafast 是 Codex 的 Ultrafast，
+   * flex 是低价档；null 是标准
+   */
   serviceTier: string | null;
   /** 调用的接口路径，如 /v1/messages */
   endpoint: string | null;
   stream: boolean;
-  /** 计费方式：token / image / per_request / video */
-  billingMode: string;
+  /** 计费方式：token / image / per_request / video；老记录可能没有 */
+  billingMode: string | null;
   tokens: { input: number; output: number; cacheRead: number; cacheWrite: number };
-  /** 官方价口径的分项费用（美元，没乘倍率） */
+  /** 没乘倍率的分项费用（美元）；total 是费用明细里的「原始」 */
   costs: { input: number; output: number; cacheRead: number; cacheWrite: number; total: number };
   /** 实际扣费（美元） */
   actualCost: number;
@@ -34,9 +37,27 @@ export interface LogRow {
   longContext: boolean;
   durationMs: number | null;
   firstTokenMs: number | null;
-  images: { count: number; size: string | null };
+  images: LogImages;
   userAgent: string | null;
   ip: string | null;
+}
+
+/** 生图相关的记录（费用明细按 sub2api 的口径展示） */
+export interface LogImages {
+  count: number;
+  /** 计费尺寸：1K / 2K / 4K / mixed，老记录可能是别的写法或没有 */
+  size: string | null;
+  inputSize: string | null;
+  outputSize: string | null;
+  /** 计费尺寸从哪来：output / input / default / legacy */
+  sizeSource: string | null;
+  /** 各计费尺寸的张数，如 { '1K': 2 } */
+  breakdown: Record<string, number>;
+  /** 图片输入、输出的 Token 与费用（美元，没乘倍率），只有按 Token 计费的生图模型才有 */
+  inputTokens: number;
+  inputCost: number;
+  outputTokens: number;
+  outputCost: number;
 }
 
 export interface LogsPageData {

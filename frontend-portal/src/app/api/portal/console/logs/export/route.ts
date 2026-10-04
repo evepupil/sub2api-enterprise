@@ -28,7 +28,7 @@ const CSV_COLUMNS = [
   'rate',
   'model',
   'reasoning',
-  'tier',
+  'fast',
   'stream',
   'inputTokens',
   'outputTokens',
@@ -48,7 +48,7 @@ function csvLabels(locale: 'zh' | 'en'): LogsCsvLabels {
     yes: messages.detail.yes,
     no: messages.detail.no,
     noGroup: messages.table.noGroup,
-    tiers: messages.table.tier,
+    fast: { fast: messages.table.fast, ultrafast: messages.table.ultrafast },
   };
 }
 
