@@ -1,53 +1,98 @@
 'use client';
 
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { useState, type FormEvent } from 'react';
 
-import { Dialog } from '@/components/console/dialog';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/console/button';
-import { Field } from '@/components/ui/field';
-import type { AppLocale } from '@/i18n/routing';
+import { ConfirmDialog, Dialog } from '@/components/console/dialog';
+import { updateKey } from '@/lib/console/live/keys-client';
+import type { KeyErrorReason, KeyGroupOption, LiveKey } from '@/lib/console/live/keys-types';
 
-import { useDelayedRun } from './keys-delay';
-import { KeyExpiryField, KeyNameField, KeyQuotaField } from './keys-form-fields';
+import {
+  KeyExpiryField,
+  KeyGroupField,
+  KeyIpField,
+  KeyNameField,
+  KeyQuotaField,
+  KeyRateLimitField,
+} from './keys-form-fields';
 import { useKeyForm } from './keys-form-state';
-import { applyKeyEdit, draftFromKey, groupLabel, type KeyRow } from './keys-model';
+import { draftFromKey, toUpdateInput } from './keys-model';
 
 const FORM_ID = 'edit-key-form';
 
-/** 保存后的加载时长，结束后才更新这一行并关闭弹窗 */
-const SAVE_DELAY_MS = 800;
+type ResetKind = 'quota' | 'rate';
 
 /**
- * 编辑密钥弹窗，只在打开时挂载：名称、额度、有效期可改。
- * 分组只读：密钥按所在分组的倍率计费，要换分组就新建一个密钥。
+ * 编辑密钥弹窗，只在打开时挂载。照 sub2api：名称、分组、IP 限制、额度、限速、有效期都能改；
+ * 设了额度时可以把已用额度清零，设了限速时可以把限速用量清零（要先确认，确认后马上生效，不用点保存）。
+ * 额度用完、已过期的密钥加了额度、清了已用额度或延了期，后端会自动恢复启用。
  */
 export function KeysEditDialog({
-  row,
+  keyRow,
+  groups,
+  groupsUnavailable,
+  today,
   onClose,
-  onSave,
+  onChanged,
 }: {
-  row: KeyRow;
+  keyRow: LiveKey;
+  groups: readonly KeyGroupOption[];
+  groupsUnavailable: boolean;
+  today: string;
   onClose: () => void;
-  onSave: (row: KeyRow) => void;
+  /** 保存或清零成功后通知列表重新读取 */
+  onChanged: () => void;
 }) {
   const t = useTranslations('consoleKeys');
   const tc = useTranslations('console');
-  const locale = useLocale() as AppLocale;
-  const { draft, errors, update, validate } = useKeyForm(draftFromKey(row));
+  // 清零后用后端回的新数据刷新弹窗里的已用量；表单草稿不动
+  const [current, setCurrent] = useState<LiveKey>(keyRow);
+  const { draft, errors, update, validate } = useKeyForm(
+    draftFromKey(keyRow, today),
+    'edit',
+    today,
+  );
   const [saving, setSaving] = useState(false);
-  const delay = useDelayedRun();
+  const [failure, setFailure] = useState<KeyErrorReason | null>(null);
+  const [confirm, setConfirm] = useState<ResetKind | null>(null);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (saving || !validate()) return;
     setSaving(true);
-    delay(() => {
-      onSave(applyKeyEdit(row, draft));
-      onClose();
-    }, SAVE_DELAY_MS);
+    setFailure(null);
+    const result = await updateKey(current.id, toUpdateInput(draft, current));
+    setSaving(false);
+    if (!result.ok) {
+      setFailure(result.reason);
+      return;
+    }
+    onChanged();
+    onClose();
   };
+
+  const reset = async (kind: ResetKind) => {
+    setFailure(null);
+    const result = await updateKey(
+      current.id,
+      kind === 'quota' ? { resetQuota: true } : { resetRateUsage: true },
+    );
+    if (!result.ok) {
+      setFailure(result.reason);
+      return;
+    }
+    setCurrent((before) => ({
+      ...before,
+      quotaUsed: result.data.quotaUsed,
+      rateUsage: result.data.rateUsage,
+      status: result.data.status,
+    }));
+    onChanged();
+  };
+
+  const hasRateLimit =
+    current.rateLimits.h5 > 0 || current.rateLimits.d1 > 0 || current.rateLimits.d7 > 0;
 
   return (
     <Dialog
@@ -68,30 +113,78 @@ export function KeysEditDialog({
         </>
       }
     >
-      <form id={FORM_ID} noValidate onSubmit={handleSubmit} className="space-y-5">
+      <form
+        id={FORM_ID}
+        noValidate
+        onSubmit={(event) => void handleSubmit(event)}
+        className="space-y-5"
+      >
         <KeyNameField
           value={draft.name}
           error={errors.name}
           onChange={(name) => update({ name })}
         />
-        <Field label={t('form.group')} htmlFor="key-group" hint={t('edit.groupHint')}>
-          <div>
-            <Badge tone="outline">{groupLabel(row.group, locale)}</Badge>
-          </div>
-        </Field>
+        <KeyGroupField
+          value={draft.groupId}
+          groups={groups}
+          current={current.group}
+          unavailable={groupsUnavailable}
+          error={errors.group}
+          onChange={(groupId) => update({ groupId })}
+        />
+        <KeyIpField
+          enabled={draft.ipLimit}
+          whitelist={draft.ipWhitelist}
+          blacklist={draft.ipBlacklist}
+          errors={errors}
+          onToggle={(ipLimit) => update({ ipLimit })}
+          onChange={update}
+        />
         <KeyQuotaField
-          mode={draft.quotaMode}
-          amount={draft.quota}
+          value={draft.quota}
           error={errors.quota}
-          onModeChange={(quotaMode) => update({ quotaMode })}
-          onAmountChange={(quota) => update({ quota })}
+          onChange={(quota) => update({ quota })}
+          used={current.quota > 0 ? { used: current.quotaUsed, limit: current.quota } : undefined}
+          onReset={() => setConfirm('quota')}
+        />
+        <KeyRateLimitField
+          enabled={draft.rateLimit}
+          values={draft}
+          errors={errors}
+          onToggle={(rateLimit) => update({ rateLimit })}
+          onChange={update}
+          usage={hasRateLimit ? current.rateUsage : undefined}
+          onReset={() => setConfirm('rate')}
         />
         <KeyExpiryField
-          value={draft.expiry}
-          keepDate={row.expiresAt}
-          onChange={(expiry) => update({ expiry })}
+          enabled={draft.expiry}
+          date={draft.expiryDate}
+          today={today}
+          mode="edit"
+          error={errors.expiryDate}
+          onToggle={(expiry) => update({ expiry })}
+          onChange={(expiryDate) => update({ expiryDate })}
         />
+        {failure ? (
+          <p role="alert" data-key-error={failure} className="text-sm text-danger">
+            {t(`errors.action.${failure}`)}
+          </p>
+        ) : null}
       </form>
+      <ConfirmDialog
+        id="reset-key-usage"
+        open={confirm !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirm(null);
+        }}
+        tone="default"
+        title={confirm === 'rate' ? t('reset.rateTitle') : t('reset.quotaTitle')}
+        description={confirm === 'rate' ? t('reset.rateDescription') : t('reset.quotaDescription')}
+        confirmLabel={t('reset.confirm')}
+        onConfirm={() => {
+          if (confirm) void reset(confirm);
+        }}
+      />
     </Dialog>
   );
 }

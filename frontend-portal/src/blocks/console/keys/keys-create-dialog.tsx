@@ -1,71 +1,72 @@
 'use client';
 
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { useState, type FormEvent } from 'react';
 
+import { Button } from '@/components/console/button';
 import { CopyButton } from '@/components/console/copy-button';
 import { Dialog } from '@/components/console/dialog';
-import { Button } from '@/components/console/button';
-import { Field } from '@/components/ui/field';
-import { SegmentedControl } from '@/components/ui/segmented-control';
-import type { AppLocale } from '@/i18n/routing';
-import type { EditionId } from '@/lib/catalog';
-import { CURRENT_USER, ORGANIZATION } from '@/lib/console';
+import { createKey } from '@/lib/console/live/keys-client';
+import type { KeyErrorReason, KeyGroupOption, LiveKey } from '@/lib/console/live/keys-types';
 
-import { useDelayedRun } from './keys-delay';
-import { KeyExpiryField, KeyNameField, KeyQuotaField } from './keys-form-fields';
+import {
+  KeyCustomKeyField,
+  KeyExpiryField,
+  KeyGroupField,
+  KeyIpField,
+  KeyNameField,
+  KeyQuotaField,
+  KeyRateLimitField,
+} from './keys-form-fields';
 import { useKeyForm } from './keys-form-state';
-import { buildNewKey, groupLabel, type KeyDraft, type KeyRow } from './keys-model';
-import { generateKeySecret } from './keys-secret';
+import { emptyDraft, toCreateInput } from './keys-model';
 
 const FORM_ID = 'create-key-form';
 
-/** 提交后的加载时长，结束后才给出新密钥 */
-const SUBMIT_DELAY_MS = 800;
-
-const EMPTY_DRAFT: KeyDraft = { name: '', quotaMode: 'unlimited', quota: '', expiry: 'never' };
-
-/** 默认分组取当前用户的默认分组；它不在组织授权的分组里时退到第一个可用分组 */
-const DEFAULT_GROUP: EditionId = ORGANIZATION.groups.includes(CURRENT_USER.defaultGroup)
-  ? CURRENT_USER.defaultGroup
-  : (ORGANIZATION.groups[0] ?? CURRENT_USER.defaultGroup);
-
 /**
- * 创建密钥弹窗，只在打开时挂载，所以每次打开都是一份空白草稿。
- * 提交成功后弹窗内容换成「密钥已创建」：完整密钥只在这里展示一次；
- * 弹窗关闭（点完成、关闭按钮、Esc 都算）时，新密钥才加进列表。
+ * 创建密钥弹窗，只在打开时挂载，所以每次打开都是一份空白草稿。表单照 sub2api：名称、分组必填，
+ * 自定义密钥、IP 限制、限速、有效期用开关打开，额度不填表示不限。
+ * 创建成功后弹窗内容换成「密钥已创建」：完整密钥只在这里显示一次；关掉弹窗时通知列表重新读取。
  */
 export function KeysCreateDialog({
+  groups,
+  groupsUnavailable,
+  today,
   onClose,
   onCreated,
 }: {
+  groups: readonly KeyGroupOption[];
+  groupsUnavailable: boolean;
+  /** 北京时间的今天，有效期从它算 */
+  today: string;
   onClose: () => void;
-  onCreated: (row: KeyRow) => void;
+  onCreated: () => void;
 }) {
   const t = useTranslations('consoleKeys');
   const tc = useTranslations('console');
-  const locale = useLocale() as AppLocale;
-  const { draft, errors, update, validate } = useKeyForm(EMPTY_DRAFT);
-  const [group, setGroup] = useState<EditionId>(DEFAULT_GROUP);
+  const { draft, errors, update, validate } = useKeyForm(
+    emptyDraft(today, groups),
+    'create',
+    today,
+  );
   const [submitting, setSubmitting] = useState(false);
-  const [created, setCreated] = useState<KeyRow | null>(null);
-  const delay = useDelayedRun();
+  const [failure, setFailure] = useState<KeyErrorReason | null>(null);
+  const [created, setCreated] = useState<LiveKey | null>(null);
 
   const finish = () => {
-    if (created) onCreated(created);
+    if (created) onCreated();
     onClose();
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (submitting || !validate()) return;
-    // 随机串在提交这一下里生成，加载结束后再展示
-    const row = buildNewKey(draft, group, generateKeySecret());
     setSubmitting(true);
-    delay(() => {
-      setCreated(row);
-      setSubmitting(false);
-    }, SUBMIT_DELAY_MS);
+    setFailure(null);
+    const result = await createKey(toCreateInput(draft, today));
+    setSubmitting(false);
+    if (result.ok) setCreated(result.data);
+    else setFailure(result.reason);
   };
 
   return (
@@ -106,32 +107,65 @@ export function KeysCreateDialog({
           <CopyButton name="new-key" value={created.secret} label={t('actions.copySecret')} />
         </div>
       ) : (
-        <form id={FORM_ID} noValidate onSubmit={handleSubmit} className="space-y-5">
+        <form
+          id={FORM_ID}
+          noValidate
+          onSubmit={(event) => void handleSubmit(event)}
+          className="space-y-5"
+        >
           <KeyNameField
             value={draft.name}
             error={errors.name}
             onChange={(name) => update({ name })}
           />
-          <Field label={t('form.group')} htmlFor="key-group">
-            <SegmentedControl
-              name="key-group"
-              value={group}
-              onChange={setGroup}
-              ariaLabel={t('form.group')}
-              options={ORGANIZATION.groups.map((id) => ({
-                value: id,
-                label: groupLabel(id, locale),
-              }))}
-            />
-          </Field>
-          <KeyQuotaField
-            mode={draft.quotaMode}
-            amount={draft.quota}
-            error={errors.quota}
-            onModeChange={(quotaMode) => update({ quotaMode })}
-            onAmountChange={(quota) => update({ quota })}
+          <KeyGroupField
+            value={draft.groupId}
+            groups={groups}
+            unavailable={groupsUnavailable}
+            error={errors.group}
+            onChange={(groupId) => update({ groupId })}
           />
-          <KeyExpiryField value={draft.expiry} onChange={(expiry) => update({ expiry })} />
+          <KeyCustomKeyField
+            enabled={draft.useCustomKey}
+            value={draft.customKey}
+            error={errors.customKey}
+            onToggle={(useCustomKey) => update({ useCustomKey })}
+            onChange={(customKey) => update({ customKey })}
+          />
+          <KeyIpField
+            enabled={draft.ipLimit}
+            whitelist={draft.ipWhitelist}
+            blacklist={draft.ipBlacklist}
+            errors={errors}
+            onToggle={(ipLimit) => update({ ipLimit })}
+            onChange={update}
+          />
+          <KeyQuotaField
+            value={draft.quota}
+            error={errors.quota}
+            onChange={(quota) => update({ quota })}
+          />
+          <KeyRateLimitField
+            enabled={draft.rateLimit}
+            values={draft}
+            errors={errors}
+            onToggle={(rateLimit) => update({ rateLimit })}
+            onChange={update}
+          />
+          <KeyExpiryField
+            enabled={draft.expiry}
+            date={draft.expiryDate}
+            today={today}
+            mode="create"
+            error={errors.expiryDate}
+            onToggle={(expiry) => update({ expiry })}
+            onChange={(expiryDate) => update({ expiryDate })}
+          />
+          {failure ? (
+            <p role="alert" data-key-error={failure} className="text-sm text-danger">
+              {t(`errors.action.${failure}`)}
+            </p>
+          ) : null}
         </form>
       )}
     </Dialog>

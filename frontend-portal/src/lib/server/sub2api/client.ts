@@ -21,7 +21,7 @@ export function backendOrigin(): string | null {
 }
 
 export interface BackendCall {
-  method: 'GET' | 'POST';
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
   /** 后端 /api/v1 之后的路径，如 /auth/login */
   path: string;
   /** JSON 请求体 */

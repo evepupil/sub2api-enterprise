@@ -6,15 +6,15 @@ import { useState } from 'react';
 import { CopyButton } from '@/components/console/copy-button';
 import { Dialog } from '@/components/console/dialog';
 import { SegmentedControl } from '@/components/ui/segmented-control';
+import type { LiveKey } from '@/lib/console/live/keys-types';
 
-import type { KeyRow } from './keys-model';
 import { buildSnippet, SNIPPET_KINDS, type SnippetKind } from './keys-snippets';
 
 /**
  * 接入示例弹窗，只在打开时挂载：Claude Code、Codex CLI、curl 三种写法，
  * 代码里的密钥一律是这一行的完整密钥（不受列表里「显示 / 隐藏」影响），一键复制整段。
  */
-export function KeysUsageDialog({ row, onClose }: { row: KeyRow; onClose: () => void }) {
+export function KeysUsageDialog({ row, onClose }: { row: LiveKey; onClose: () => void }) {
   const t = useTranslations('consoleKeys');
   const [kind, setKind] = useState<SnippetKind>('claude');
   const code = buildSnippet(kind, row.secret);

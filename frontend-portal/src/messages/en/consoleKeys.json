@@ -15,7 +15,7 @@
     "done": "Done"
   },
   "filters": {
-    "searchPlaceholder": "Search by name or key suffix",
+    "searchPlaceholder": "Search by name or key",
     "statusLabel": "Filter by status",
     "allStatuses": "All statuses"
   },
@@ -28,28 +28,44 @@
     "quota": "Quota",
     "expiry": "Expires",
     "createdOn": "Created {date}",
-    "usageLast30": "Last 30 days: {count, plural, one {{requests} request} other {{requests} requests}} · {cost}",
-    "usageToday": "Today: {count, plural, one {{requests} request} other {{requests} requests}} · {cost}",
+    "usageLast30": "Last 30 days: {requests} · {cost}",
+    "usageToday": "Today: {requests} · {cost}",
     "unlimited": "Unlimited",
-    "permanent": "Never"
+    "permanent": "Never",
+    "noGroup": "No group"
   },
   "status": {
     "active": "Active",
-    "paused": "Paused",
+    "inactive": "Paused",
+    "quota_exhausted": "Quota used up",
     "expired": "Expired"
   },
   "form": {
     "name": "Name",
     "group": "Group",
-    "quota": "Quota",
-    "quotaUnlimited": "Unlimited",
-    "quotaCustom": "Custom",
-    "expiry": "Expiry",
-    "expiryNever": "Never",
-    "expiryKeep": "Keep current date ({date})",
-    "expiry30d": "30 days",
-    "expiry90d": "90 days",
-    "expiry1y": "1 year"
+    "groupPlaceholder": "Choose a group",
+    "customKey": "Custom key",
+    "customKeyHint": "At least 16 characters: letters, digits, underscores and hyphens",
+    "ipLimit": "IP restriction",
+    "ipWhitelist": "Allowlist",
+    "ipBlacklist": "Blocklist",
+    "ipHint": "One IP or range per line, e.g. 203.0.113.5 or 10.0.0.0/8",
+    "quota": "Quota (US$)",
+    "quotaHint": "Leave empty or 0 for unlimited",
+    "quotaUsed": "Used {used} / {limit}",
+    "resetQuota": "Reset used quota",
+    "rateLimit": "Spend limits",
+    "rateLimitHint": "Most it can spend in each window, in US$. 0 means no limit.",
+    "rate5h": "5 hours",
+    "rate1d": "1 day",
+    "rate7d": "7 days",
+    "rateUsed": "Used {used}",
+    "resetRateUsage": "Reset spend-limit usage",
+    "expiry": "Expiration",
+    "expiryDays": "{days} days",
+    "expiryCustom": "Custom",
+    "expiryDate": "Expires on",
+    "expiryDateHint": "Stops working at the end of this day"
   },
   "create": {
     "title": "Create API key",
@@ -57,8 +73,7 @@
     "doneTitle": "Key created"
   },
   "edit": {
-    "title": "Edit key",
-    "groupHint": "To change the group, create a new key"
+    "title": "Edit key"
   },
   "usage": {
     "title": "Connect {name}",
@@ -66,19 +81,54 @@
     "claude": "Claude Code",
     "codex": "Codex CLI",
     "curl": "curl",
-    "copy": "Copy snippet"
+    "copy": "Copy code"
   },
   "delete": {
-    "title": "Delete key “{name}”?",
-    "description": "Requests that use this key will fail immediately after deletion. This cannot be undone."
+    "title": "Delete “{name}”?",
+    "description": "Requests using this key will fail right away. This can't be undone."
+  },
+  "reset": {
+    "quotaTitle": "Reset used quota to zero?",
+    "quotaDescription": "The key can spend its full quota again.",
+    "rateTitle": "Reset spend-limit usage to zero?",
+    "rateDescription": "The 5-hour, 1-day and 7-day windows all start from zero.",
+    "confirm": "Reset"
   },
   "errors": {
     "nameRequired": "Enter a name",
-    "nameTooLong": "Name must be {max} characters or fewer",
-    "quotaRange": "Enter an amount between {min} and {max}"
+    "nameTooLong": "Name is too long",
+    "groupRequired": "Choose a group",
+    "customKeyRequired": "Enter a custom key",
+    "customKeyTooShort": "At least {min} characters",
+    "customKeyTooLong": "At most {max} characters",
+    "customKeyInvalidChars": "Only letters, digits, underscores and hyphens",
+    "ipInvalid": "A line isn't an IP or range, or there are more than {max} entries",
+    "amountInvalid": "Enter an amount from 0 to {max}",
+    "expiryInvalid": "Pick a date",
+    "expiryPastCreate": "Pick a date after today",
+    "expiryPastEdit": "The date can't be in the past",
+    "expiryTooFar": "At most 10 years",
+    "groupsUnavailable": "Groups couldn't be loaded. Try again later.",
+    "action": {
+      "key_exists": "That custom key is taken. Try another one.",
+      "key_too_short": "The custom key needs at least 16 characters",
+      "key_invalid_chars": "The custom key can only use letters, digits, underscores and hyphens",
+      "invalid_ip": "The IP list has an address we can't read",
+      "group_not_allowed": "Your account can't use this group",
+      "not_found": "This key no longer exists. Refresh the page.",
+      "invalid": "Something in the form isn't right. Check it and try again.",
+      "forbidden": "You don't have permission to do this",
+      "too_many": "Too many requests. Try again shortly.",
+      "unavailable": "That didn't work. Try again later."
+    }
+  },
+  "loadError": {
+    "title": "Keys couldn't be loaded",
+    "tooMany": "Too many requests. Try again shortly.",
+    "retry": "Retry"
   },
   "empty": {
     "title": "No API keys yet",
-    "noResults": "No keys match your filters"
+    "noResults": "No matching keys"
   }
 }

@@ -15,7 +15,7 @@
     "done": "完成"
   },
   "filters": {
-    "searchPlaceholder": "搜索名称或密钥末尾",
+    "searchPlaceholder": "搜索名称或密钥",
     "statusLabel": "按状态筛选",
     "allStatuses": "全部状态"
   },
@@ -31,25 +31,41 @@
     "usageLast30": "近 30 天 {requests} 次 · {cost}",
     "usageToday": "今日 {requests} 次 · {cost}",
     "unlimited": "不限",
-    "permanent": "永久"
+    "permanent": "永久",
+    "noGroup": "未分组"
   },
   "status": {
     "active": "启用",
-    "paused": "已暂停",
+    "inactive": "已暂停",
+    "quota_exhausted": "额度用完",
     "expired": "已过期"
   },
   "form": {
     "name": "名称",
     "group": "分组",
-    "quota": "额度",
-    "quotaUnlimited": "不限",
-    "quotaCustom": "自定义",
+    "groupPlaceholder": "请选择分组",
+    "customKey": "自定义密钥",
+    "customKeyHint": "至少 16 位，只能用字母、数字、下划线和连字符",
+    "ipLimit": "IP 限制",
+    "ipWhitelist": "白名单",
+    "ipBlacklist": "黑名单",
+    "ipHint": "一行一个 IP 或网段，如 203.0.113.5、10.0.0.0/8",
+    "quota": "额度（US$）",
+    "quotaHint": "不填或填 0 表示不限",
+    "quotaUsed": "已用 {used} / {limit}",
+    "resetQuota": "重置已用额度",
+    "rateLimit": "限速",
+    "rateLimitHint": "这段时间内最多花多少美元，0 表示不限",
+    "rate5h": "5 小时",
+    "rate1d": "1 天",
+    "rate7d": "7 天",
+    "rateUsed": "已用 {used}",
+    "resetRateUsage": "重置限速用量",
     "expiry": "有效期",
-    "expiryNever": "永久",
-    "expiryKeep": "保持原日期（{date}）",
-    "expiry30d": "30 天",
-    "expiry90d": "90 天",
-    "expiry1y": "1 年"
+    "expiryDays": "{days} 天",
+    "expiryCustom": "自选",
+    "expiryDate": "到期日",
+    "expiryDateHint": "到期日当天结束后失效"
   },
   "create": {
     "title": "创建 API 密钥",
@@ -57,8 +73,7 @@
     "doneTitle": "密钥已创建"
   },
   "edit": {
-    "title": "编辑密钥",
-    "groupHint": "更换分组需要新建密钥"
+    "title": "编辑密钥"
   },
   "usage": {
     "title": "接入 {name}",
@@ -72,10 +87,45 @@
     "title": "删除密钥「{name}」？",
     "description": "删除后使用这个密钥的请求会立即失败，且无法恢复。"
   },
+  "reset": {
+    "quotaTitle": "把已用额度清零？",
+    "quotaDescription": "清零后这把密钥可以重新用满额度。",
+    "rateTitle": "把限速用量清零？",
+    "rateDescription": "5 小时、1 天、7 天的用量都从 0 开始算。",
+    "confirm": "清零"
+  },
   "errors": {
     "nameRequired": "请输入名称",
-    "nameTooLong": "名称最多 {max} 个字",
-    "quotaRange": "请输入 {min} 到 {max} 之间的金额"
+    "nameTooLong": "名称太长了",
+    "groupRequired": "请选择分组",
+    "customKeyRequired": "请输入自定义密钥",
+    "customKeyTooShort": "至少 {min} 位",
+    "customKeyTooLong": "最多 {max} 位",
+    "customKeyInvalidChars": "只能用字母、数字、下划线和连字符",
+    "ipInvalid": "有一行不是 IP 或网段，或者超过 {max} 条",
+    "amountInvalid": "请输入 0 到 {max} 之间的金额",
+    "expiryInvalid": "请选择到期日",
+    "expiryPastCreate": "到期日要晚于今天",
+    "expiryPastEdit": "到期日不能早于今天",
+    "expiryTooFar": "最长 10 年",
+    "groupsUnavailable": "分组暂时加载不出来，请稍后再试",
+    "action": {
+      "key_exists": "这个自定义密钥已被占用，换一个试试",
+      "key_too_short": "自定义密钥至少 16 位",
+      "key_invalid_chars": "自定义密钥只能用字母、数字、下划线和连字符",
+      "invalid_ip": "IP 名单里有认不出的地址",
+      "group_not_allowed": "你的账号不能用这个分组",
+      "not_found": "这把密钥已经不在了，刷新看看",
+      "invalid": "填写的内容有误，检查一下再试",
+      "forbidden": "没有权限做这个操作",
+      "too_many": "操作太频繁，请稍后再试",
+      "unavailable": "没有成功，请稍后再试"
+    }
+  },
+  "loadError": {
+    "title": "密钥暂时加载不出来",
+    "tooMany": "查询太频繁，请稍后再试",
+    "retry": "重试"
   },
   "empty": {
     "title": "还没有 API 密钥",

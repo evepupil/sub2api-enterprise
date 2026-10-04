@@ -6,21 +6,6 @@ import {
   roundCents,
 } from '@/blocks/console/billing/billing-rules';
 import { chatReducer, createChatState, STREAM_STEP } from '@/blocks/console/chat/chat-reducer';
-import {
-  applyKeyEdit,
-  buildNewKey,
-  draftFromKey,
-  groupLabel,
-  keyQuotaRatio,
-  parseQuota,
-  resolveExpiry,
-  statusAfterEdit,
-  toggleKeyStatus,
-  toKeyRow,
-  validateKeyDraft,
-  type KeyDraft,
-} from '@/blocks/console/keys/keys-model';
-import { generateKeySecret } from '@/blocks/console/keys/keys-secret';
 import { buildSnippet } from '@/blocks/console/keys/keys-snippets';
 import { clearFilters, DEFAULT_QUERY, paginationKey } from '@/blocks/console/models/models-state';
 import {
@@ -46,75 +31,15 @@ import {
   validateTicketDraft,
   withStatus,
 } from '@/blocks/console/tickets/tickets-logic';
-import { API_KEYS, CHAT_REPLIES, CHAT_SAMPLE, ORG_MEMBERS, TICKETS } from '@/lib/console';
+import { CHAT_REPLIES, CHAT_SAMPLE, ORG_MEMBERS, TICKETS } from '@/lib/console';
 import { SITE } from '@/lib/site';
 
-const draft = (patch: Partial<KeyDraft> = {}): KeyDraft => ({
-  name: '新密钥',
-  quotaMode: 'unlimited',
-  quota: '',
-  expiry: 'never',
-  ...patch,
-});
-
-describe('密钥页规则', () => {
-  it('表单校验：名称必填且最多 32 个字（按字符算），自定义额度要在 1 到 100000 之间', () => {
-    expect(validateKeyDraft(draft({ name: '  ' }))).toEqual({ name: 'required' });
-    expect(validateKeyDraft(draft({ name: '密'.repeat(32) }))).toEqual({});
-    expect(validateKeyDraft(draft({ name: '密'.repeat(33) }))).toEqual({ name: 'tooLong' });
-    expect(validateKeyDraft(draft({ quotaMode: 'custom', quota: '0' }))).toEqual({
-      quota: 'range',
-    });
-    expect(parseQuota('12.345')).toBe(12.35);
-    expect(parseQuota('abc')).toBeNull();
-  });
-
-  it('有效期换算与过期恢复', () => {
-    expect(resolveExpiry('never', '2026-12-31')).toBeNull();
-    expect(resolveExpiry('keep', '2026-12-31')).toBe('2026-12-31');
-    expect(resolveExpiry('30d', null)).toBe('2026-11-02');
-    expect(statusAfterEdit('expired', null)).toBe('active');
-    expect(statusAfterEdit('expired', '2026-10-01')).toBe('expired');
-    expect(statusAfterEdit('paused', null)).toBe('paused');
-  });
-
-  it('新建、编辑、暂停与启用', () => {
-    const created = buildNewKey(
-      draft({ quotaMode: 'custom', quota: '50', expiry: '90d' }),
-      'pro',
-      'sk-ABCDEFGH12345678',
-    );
-    expect(created).toMatchObject({
-      id: 'key-12345678',
-      status: 'active',
-      quotaUsd: 50,
-      expiresAt: '2027-01-01',
-      group: 'pro',
-    });
-    expect(created.usage.last30.requests).toBe(0);
-
-    const legacy = toKeyRow(API_KEYS[4]!);
-    expect(legacy.status).toBe('expired');
-    expect(applyKeyEdit(legacy, { ...draftFromKey(legacy), expiry: 'never' }).status).toBe(
-      'active',
-    );
-    expect(toggleKeyStatus(legacy)).toBe(legacy);
-
-    const prod = toKeyRow(API_KEYS[0]!);
-    const paused = toggleKeyStatus(prod);
-    expect(paused).toMatchObject({ status: 'paused', pausedAt: '2026-10-03' });
-    expect(toggleKeyStatus(paused)).toMatchObject({ status: 'active', pausedAt: null });
-  });
-
-  it('额度比例、通道名与接入示例', () => {
-    expect(keyQuotaRatio(toKeyRow(API_KEYS[0]!))).toBeNull();
-    expect(keyQuotaRatio(toKeyRow(API_KEYS[2]!))).toBeCloseTo(32.79 / 50, 3);
-    expect(groupLabel('pro', 'zh')).toBe('专用通道 ×0.3');
+describe('密钥页接入示例', () => {
+  it('地址取站点配置，密钥填这一行的完整密钥', () => {
     const snippet = buildSnippet('codex', 'sk-test');
     expect(snippet).toContain(`base_url = "${SITE.apiBase}/v1"`);
     expect(snippet).toContain('export CODU_API_KEY=sk-test');
     expect(buildSnippet('claude', 'sk-test')).toContain('ANTHROPIC_AUTH_TOKEN=sk-test');
-    expect(generateKeySecret()).toMatch(/^sk-[0-9A-Za-z]{40}$/);
   });
 });
 

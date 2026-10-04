@@ -11,13 +11,8 @@ import { RefreshButton } from '@/components/console/refresh-button';
 import { Skeleton } from '@/components/console/skeleton';
 import { presetRange, type DateRange, type RangePreset } from '@/lib/console';
 import { DEFAULT_PAGE_SIZE } from '@/lib/console/pagination';
-import {
-  downloadLogsCsv,
-  fetchLogOptions,
-  fetchLogs,
-  unavailable,
-  useLoadable,
-} from '@/lib/console/live/logs-client';
+import { unavailable, useLoadable } from '@/lib/console/live/loadable';
+import { downloadLogsCsv, fetchLogOptions, fetchLogs } from '@/lib/console/live/logs-client';
 import { useColumnPrefs } from '@/lib/console/live/column-prefs';
 import type { LogFilters, LogOptions, LogRow, LogsPageData } from '@/lib/console/live/logs-types';
 import { useLiveClock } from '@/lib/console/live/use-live-clock';

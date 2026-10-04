@@ -5,10 +5,16 @@ import { useTranslations } from 'next-intl';
 import type { ButtonHTMLAttributes } from 'react';
 
 import { CopyButton } from '@/components/console/copy-button';
-import { formatUsd, maskKey } from '@/lib/console';
+import { GroupWithRate } from '@/components/console/group-rate';
+import { formatInteger, formatUsd, maskKey } from '@/lib/console';
+import type { LiveKey } from '@/lib/console/live/keys-types';
 import { cn } from '@/lib/utils';
 
-import { keyQuotaRatio, type KeyRow } from './keys-model';
+import { consoleDate, quotaRatio } from './keys-model';
+
+/**
+ * 密钥表里的几格：图标按钮、密钥（打码 / 显示 / 复制）、分组、用量、额度、有效期。
+ */
 
 const ICON_BUTTON_TONES = {
   default: 'text-subtle-foreground hover:bg-muted hover:text-foreground',
@@ -55,7 +61,7 @@ export function KeysSecretCell({
   revealed,
   onToggleReveal,
 }: {
-  row: KeyRow;
+  row: LiveKey;
   revealed: boolean;
   onToggleReveal: () => void;
 }) {
@@ -81,13 +87,45 @@ export function KeysSecretCell({
   );
 }
 
+/** 分组列：分组名 + 倍率徽标（和模型页、日志页一样）；没有分组写「未分组」 */
+export function KeysGroupCell({ row }: { row: LiveKey }) {
+  const t = useTranslations('consoleKeys');
+  if (row.group === null) {
+    return <span className="text-subtle-foreground">{t('table.noGroup')}</span>;
+  }
+  return <GroupWithRate name={row.group.name} rate={row.group.rate} className="text-foreground" />;
+}
+
+/** 用量列：近 30 天、今天各一行（次数 · 花费）；用量统计读不到时写「—」 */
+export function KeysUsageCell({ row }: { row: LiveKey }) {
+  const t = useTranslations('consoleKeys');
+  if (row.usage === null) return <span className="text-subtle-foreground">—</span>;
+  const { last30, today } = row.usage;
+  return (
+    <div className="space-y-0.5 whitespace-nowrap text-xs tabular-nums text-muted-foreground">
+      <p>
+        {t('table.usageLast30', {
+          requests: formatInteger(last30.requests),
+          cost: formatUsd(last30.costUsd),
+        })}
+      </p>
+      <p>
+        {t('table.usageToday', {
+          requests: formatInteger(today.requests),
+          cost: formatUsd(today.costUsd),
+        })}
+      </p>
+    </div>
+  );
+}
+
 const QUOTA_FILL = { ok: 'bg-primary', full: 'bg-danger-graphic' } as const;
 
 /** 额度列：不限额显示无穷符号；有上限显示「已用 / 上限」和一条进度条，用满变红 */
-export function KeysQuotaCell({ row }: { row: KeyRow }) {
+export function KeysQuotaCell({ row }: { row: LiveKey }) {
   const t = useTranslations('consoleKeys');
-  const ratio = keyQuotaRatio(row);
-  if (ratio === null || row.quotaUsd === null) {
+  const ratio = quotaRatio(row);
+  if (ratio === null) {
     return (
       <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-muted-foreground">
         <InfinityIcon aria-hidden className="size-4" />
@@ -98,7 +136,7 @@ export function KeysQuotaCell({ row }: { row: KeyRow }) {
   return (
     <div className="w-36">
       <p className="whitespace-nowrap text-xs tabular-nums text-foreground">
-        {formatUsd(row.usage.totalCostUsd)} / {formatUsd(row.quotaUsd)}
+        {formatUsd(row.quotaUsed)} / {formatUsd(row.quota)}
       </p>
       {/* 数字已经写在上面，进度条只是辅助，读屏软件不用再读一遍 */}
       <div aria-hidden className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
@@ -108,5 +146,18 @@ export function KeysQuotaCell({ row }: { row: KeyRow }) {
         />
       </div>
     </div>
+  );
+}
+
+/** 有效期列：到期日（北京时间），永久的写「永久」，已过期的标红 */
+export function KeysExpiryCell({ row }: { row: LiveKey }) {
+  const t = useTranslations('consoleKeys');
+  if (row.expiresAt === null) {
+    return <span className="text-muted-foreground">{t('table.permanent')}</span>;
+  }
+  return (
+    <span className={row.status === 'expired' ? 'text-danger' : 'text-foreground'}>
+      {consoleDate(row.expiresAt)}
+    </span>
   );
 }

@@ -4,24 +4,27 @@ import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 
 import { Table, TableShell, Th } from '@/components/console/data-table';
+import type { LiveKey } from '@/lib/console/live/keys-types';
 
 import { KeysRow, type KeysRowHandlers } from './keys-row';
-import type { KeyRow } from './keys-model';
 
 /** 密钥表：整张表最小 1100 宽，小屏横向滚动，操作列固定在右侧 */
 export function KeysTable({
   rows,
   revealed,
+  busy,
   footer,
   handlers,
 }: {
   /** 当前页的行 */
-  rows: readonly KeyRow[];
+  rows: readonly LiveKey[];
   /** 正在显示完整密钥的行 */
-  revealed: ReadonlySet<string>;
+  revealed: ReadonlySet<number>;
+  /** 正在暂停 / 启用 / 删除的行，按钮先不让点 */
+  busy: ReadonlySet<number>;
   footer: ReactNode;
-  /** 每一行的操作，按密钥编号生成 */
-  handlers: (row: KeyRow) => KeysRowHandlers;
+  /** 每一行的操作，按密钥 ID 生成 */
+  handlers: (row: LiveKey) => KeysRowHandlers;
 }) {
   const t = useTranslations('consoleKeys');
   const tc = useTranslations('console');
@@ -44,7 +47,13 @@ export function KeysTable({
         </thead>
         <tbody>
           {rows.map((row) => (
-            <KeysRow key={row.id} row={row} revealed={revealed.has(row.id)} {...handlers(row)} />
+            <KeysRow
+              key={row.id}
+              row={row}
+              revealed={revealed.has(row.id)}
+              busy={busy.has(row.id)}
+              {...handlers(row)}
+            />
           ))}
         </tbody>
       </Table>

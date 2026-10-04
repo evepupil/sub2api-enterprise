@@ -16,7 +16,7 @@ export const USAGE_TIMEZONE = CONSOLE_TIMEZONE;
 export interface UsageQuery {
   from: string;
   to: string;
-  /** 要不要按模型 / 密钥 / 通道拆开（明细图要，热力图不要） */
+  /** 要不要按模型 / 密钥 / 分组拆开（明细图要，热力图不要） */
   detail: boolean;
 }
 
@@ -57,7 +57,7 @@ function toBucket(raw: Record<string, unknown>): UsageOverviewBucket | null {
   };
 }
 
-/** 模型系列用模型名当 ID；密钥、通道用后端 ID */
+/** 模型系列用模型名当 ID；密钥、分组用后端 ID */
 function toPoint(raw: Record<string, unknown>, idFromName: boolean): UsageOverviewPoint | null {
   const bucket = toBucket(raw);
   if (!bucket) return null;
