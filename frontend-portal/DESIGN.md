@@ -17,7 +17,7 @@
 1. 在首页弄清楚这是什么服务、能调哪些模型、怎么收费，然后注册。
 2. 在模型页按厂商、协议、上下文筛选模型，切换三种通道看每个模型的价格和近 24 小时可用率。
 3. 在价格页按通道、按币种查每个模型的输入、输出、缓存和生图单价。
-4. 在通道页看三种通道的权益差别（可用率目标、限额、工单时限与特权，不展示倍率），点「查看定价」去价格页看单价。
+4. 在通道页看三种通道的权益差别（可用率目标、限额、客服响应时限与特权，不展示倍率），点「查看定价」去价格页看单价。
 5. 登录（个人与组织成员同一入口），注册个人账号或创建组织。
 
 目标观感：**像素级复刻 Aceternity「AI SaaS Template」（Every AI）的观感，内容全部换成我们的。** 白底近黑字、Geist 字体、超大加粗标题、黑色胶囊按钮、带光线流动的网格背景、滚动后浮起的胶囊顶栏、深色重点卡、页脚超大水印字；暗色主题整体反转。
@@ -385,7 +385,7 @@ pnpm format:check  # prettier
 | 30 个模型的型号、上线日期、上下文、协议 | 型号参考 onehop.ai 与本仓库后端认识的模型名（2026-10-03）；上线日期、协议支持为**编的** |
 | 官方价 | 由 onehop.ai 2026-10-03 公开价目反推（onehop 价 ÷ 其折扣），未逐个核对厂商官网 |
 | 三种通道的分组倍率（共享通道 ×0.15、专用通道 ×0.3、企业通道定制） | 用户 2026-10-03 给定，`src/lib/catalog/editions.ts`；只参与价格换算，官网页面不展示；单测锁住了换算结果 |
-| 可用率目标、RPM、并发、组织成员上限、工单响应时限、通道卡特权清单、特权对比各项 | **编的**，`editions.ts`、`groups.ts` |
+| 可用率目标、RPM、并发、组织成员上限、客服响应时限、通道卡特权清单、特权对比各项 | **编的**，`editions.ts`、`groups.ts` |
 | 近 24 小时可用率与状态格 | **编的**，固定种子生成（`uptime.ts`），接监测后替换 |
 | 人民币汇率 7.1、按 Token 计费生图的每张估算 1290 Token | **编的**，`pricing.ts` |
 | 首页控制台预览 | 控制台用量页的截图，数字是控制台的占位数据（**编的**），`public/home/console-*.webp` |
@@ -458,7 +458,6 @@ pnpm format:check  # prettier
 | `REQUEST_LOGS`、`filterLogs(logs, filter)`、`logsToCsv(logs)`、`curlFor(log)`、`LogFilter`、`RequestLog` | 请求日志 |
 | `API_KEYS`、`getKey(id)`、`maskKey(secret)`、`searchKeys(keys, q, status)`、`KEY_STATUSES`、`USED_MODEL_IDS` | API 密钥 |
 | `RECHARGE_PRESETS`、`RECHARGE_BONUS_TIERS`、`rechargeBonus(a)`、`RECHARGE_LIMITS`、`PAYMENT_METHODS` | 充值弹窗的占位配置（账单页其余部分已接后端：`@/lib/console/live/billing-*`、`use-billing`） |
-| `TICKETS`、`filterTickets(list, status)`、`TICKET_STATUSES`、`TICKET_CATEGORIES`、`TICKET_LIMITS` | 工单 |
 | `CHAT_SAMPLE`、`CHAT_REPLIES`、`CHAT_MODEL_IDS`、`DEFAULT_CHAT_MODEL`、`CHAT_INPUT_MAX` | 对话页 |
 | `CURRENT_USER`、`ANNOUNCEMENTS`、`NOTIFICATIONS` | 当前用户、公告、通知 |
 | `paginate`、`pageButtons`、`PAGE_SIZES` | 分页（组件已封装） |
@@ -488,7 +487,7 @@ pnpm format:check  # prettier
 | C2 | 模型、对话 | `src/blocks/console/models/**`、`src/blocks/console/chat/**`、`src/messages/{zh,en}/consoleModels.json`、`consoleChat.json` | `design/控制台-模型与对话.md` |
 | C3 | API 密钥、组织 | `src/blocks/console/keys/**`、`src/blocks/console/organization/**`、`src/messages/{zh,en}/consoleKeys.json`、`consoleOrg.json` | `design/控制台-密钥与组织.md` |
 | C4 | 账单、邀请 | `src/blocks/console/billing/**`、`src/blocks/console/invite/**`、`src/messages/{zh,en}/consoleBilling.json`、`consoleInvite.json` | `design/控制台-账单与邀请.md` |
-| C5 | 工单、账户设置 | `src/blocks/console/tickets/**`、`src/blocks/console/settings/**`、`src/messages/{zh,en}/consoleTickets.json`、`consoleSettings.json` | `design/控制台-工单与设置.md` |
+| C5 | 联系我们（2026-10-04 由工单改成）、账户设置 | `src/blocks/console/support/**`、`src/blocks/console/settings/**`、`src/messages/{zh,en}/consoleSupport.json`、`consoleSettings.json` | `design/控制台-联系与设置.md` |
 
 页面入口文件（`src/app/[locale]/console/<页>/page.tsx`）和每页的占位区块（`src/blocks/console/<页>/<页>-page.tsx`，导出名不变）已由主控建好，各路把占位区块换成真实内容。
 

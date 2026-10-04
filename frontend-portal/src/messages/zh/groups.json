@@ -13,7 +13,7 @@
     "includes": "包含{edition}全部特权",
     "rpm": "单密钥每分钟 {value} 次请求",
     "customLimits": "并发与限额按合同约定",
-    "support": "工单 {hours} 小时内响应",
+    "support": "客服 {hours} 小时内响应",
     "use": "查看定价"
   },
   "compare": {

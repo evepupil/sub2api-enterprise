@@ -13,14 +13,7 @@ import {
   validatePasswordForm,
   validateProfileName,
 } from '@/blocks/console/settings/settings-validation';
-import {
-  appendUserReply,
-  buildTicket,
-  nextTicketId,
-  validateTicketDraft,
-  withStatus,
-} from '@/blocks/console/tickets/tickets-logic';
-import { CHAT_REPLIES, CHAT_SAMPLE, TICKETS } from '@/lib/console';
+import { CHAT_REPLIES, CHAT_SAMPLE } from '@/lib/console';
 
 describe('账单页充值弹窗的金额规则', () => {
   it('自定义金额取到分并落在限额内，整数金额不带小数', () => {
@@ -30,36 +23,6 @@ describe('账单页充值弹窗的金额规则', () => {
     expect(parseRechargeAmount('10001')).toBeNull();
     expect(formatUsdWhole(10000)).toBe('US$10,000');
     expect(formatUsdWhole(9.5)).toBe('US$9.50');
-  });
-});
-
-describe('工单页规则', () => {
-  const empty = { subject: '', category: 'api' as const, requestId: '', body: '' };
-
-  it('新建校验：所有出错字段一起返回', () => {
-    expect(validateTicketDraft(empty)).toEqual({
-      subject: 'subjectRequired',
-      body: 'bodyRequired',
-    });
-    expect(
-      validateTicketDraft({ ...empty, subject: '标题', requestId: 'abc', body: '太短' }),
-    ).toEqual({ requestId: 'requestPrefix', body: 'bodyTooShort' });
-  });
-
-  it('编号递增，回复后回到处理中', () => {
-    expect(nextTicketId(TICKETS)).toBe('T-1025');
-    expect(nextTicketId([])).toBe('T-1001');
-    const ticket = buildTicket(
-      { ...empty, subject: ' 测试工单 ', body: '生图接口返回 500 错误，请帮忙看看' },
-      TICKETS,
-    );
-    expect(ticket).toMatchObject({ id: 'T-1025', status: 'open', requestId: null });
-    expect(ticket.subject.zh).toBe('测试工单');
-    const resolved = withStatus(ticket, 'resolved');
-    expect(resolved.status).toBe('resolved');
-    const replied = appendUserReply(resolved, '又出现了');
-    expect(replied.status).toBe('open');
-    expect(replied.messages).toHaveLength(2);
   });
 });
 

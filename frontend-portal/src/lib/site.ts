@@ -9,6 +9,10 @@ export const SITE = {
   copyrightYear: 2026,
   /** 接口地址（占位），控制台的接入示例与「复制为 curl」用 */
   apiBase: 'https://api.codu.example',
+  /** 客服邮箱（Cloudflare 邮件转发到运营者邮箱）；控制台「联系我们」与页脚用 */
+  supportEmail: 'support@codu.xyz',
+  /** QQ 交流群号 */
+  qqGroup: '1095058028',
 } as const;
 
 export type NavKey = 'models' | 'pricing' | 'groups' | 'docs';
@@ -51,7 +55,7 @@ export const FOOTER_COLUMNS: readonly {
     key: 'company',
     links: [
       { key: 'about', href: '#' },
-      { key: 'contact', href: '#' },
+      { key: 'contact', href: `mailto:${SITE.supportEmail}` },
       { key: 'status', href: '#' },
     ],
   },

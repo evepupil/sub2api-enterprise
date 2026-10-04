@@ -6,14 +6,12 @@ import {
   curlFor,
   DEFAULT_RANGE,
   filterLogs,
-  filterTickets,
   logsToCsv,
   maskKey,
   presetRange,
   rechargeBonus,
   REQUEST_LOGS,
   searchKeys,
-  TICKETS,
   type LogFilter,
 } from '@/lib/console';
 
@@ -101,13 +99,5 @@ describe('充值弹窗', () => {
     expect(rechargeBonus(100)).toBe(0);
     expect(rechargeBonus(200)).toBe(10);
     expect(rechargeBonus(500)).toBe(50);
-  });
-});
-
-describe('工单', () => {
-  it('工单按状态筛选并按更新时间倒序', () => {
-    expect(filterTickets(TICKETS, 'all').map((t) => t.id)).toEqual(['T-1024', 'T-1019', 'T-1011']);
-    expect(filterTickets(TICKETS, 'resolved').map((t) => t.id)).toEqual(['T-1019']);
-    expect(filterTickets(TICKETS, 'closed')).toEqual([]);
   });
 });

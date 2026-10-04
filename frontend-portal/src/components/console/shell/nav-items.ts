@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 
 export type ConsoleNavKey =
-  'usage' | 'models' | 'logs' | 'keys' | 'billing' | 'invite' | 'organization' | 'docs' | 'tickets';
+  'usage' | 'models' | 'logs' | 'keys' | 'billing' | 'invite' | 'organization' | 'docs' | 'support';
 
 /**
  * 侧边栏菜单，顺序即显示顺序；文字取 console.nav.<key>。
@@ -27,7 +27,7 @@ export const CONSOLE_NAV: readonly { key: ConsoleNavKey; href: string; icon: Luc
   { key: 'invite', href: '/console/invite', icon: Gift },
   { key: 'organization', href: '/console/organization', icon: Users },
   { key: 'docs', href: '/docs', icon: BookOpen },
-  { key: 'tickets', href: '/console/tickets', icon: LifeBuoy },
+  { key: 'support', href: '/console/support', icon: LifeBuoy },
 ];
 
 /**

@@ -45,10 +45,10 @@ export const ANNOUNCEMENTS: readonly Announcement[] = [
   {
     id: 'a-invoice',
     text: {
-      zh: '9 月账单已出，专用分组与企业分组可通过工单申请发票。',
-      en: 'September bills are ready. Dedicated and Enterprise customers can request invoices via a ticket.',
+      zh: '9 月账单已出，专用分组与企业分组可联系我们申请发票。',
+      en: 'September bills are ready. Dedicated and Enterprise customers can contact us for invoices.',
     },
-    href: '/console/tickets',
+    href: '/console/support',
   },
 ];
 
@@ -62,16 +62,6 @@ export interface ConsoleNotification {
 }
 
 export const NOTIFICATIONS: readonly ConsoleNotification[] = [
-  {
-    id: 'n-1',
-    ts: dayStart('2026-10-03') + 10 * HOUR_MS + 5 * 60_000,
-    title: {
-      zh: '工单 T-1024 有新回复',
-      en: 'New reply on ticket T-1024',
-    },
-    href: '/console/tickets',
-    unread: true,
-  },
   {
     id: 'n-2',
     ts: dayStart('2026-10-01') + 9 * HOUR_MS,

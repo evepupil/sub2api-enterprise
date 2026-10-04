@@ -11,7 +11,7 @@ import enConsoleLogs from './en/consoleLogs.json';
 import enConsoleModels from './en/consoleModels.json';
 import enConsoleOrg from './en/consoleOrg.json';
 import enConsoleSettings from './en/consoleSettings.json';
-import enConsoleTickets from './en/consoleTickets.json';
+import enConsoleSupport from './en/consoleSupport.json';
 import enConsoleUsage from './en/consoleUsage.json';
 import enGroups from './en/groups.json';
 import enHomeHero from './en/homeHero.json';
@@ -31,7 +31,7 @@ import zhConsoleLogs from './zh/consoleLogs.json';
 import zhConsoleModels from './zh/consoleModels.json';
 import zhConsoleOrg from './zh/consoleOrg.json';
 import zhConsoleSettings from './zh/consoleSettings.json';
-import zhConsoleTickets from './zh/consoleTickets.json';
+import zhConsoleSupport from './zh/consoleSupport.json';
 import zhConsoleUsage from './zh/consoleUsage.json';
 import zhGroups from './zh/groups.json';
 import zhHomeHero from './zh/homeHero.json';
@@ -64,7 +64,7 @@ const zh = {
   consoleBilling: zhConsoleBilling,
   consoleInvite: zhConsoleInvite,
   consoleOrg: zhConsoleOrg,
-  consoleTickets: zhConsoleTickets,
+  consoleSupport: zhConsoleSupport,
   consoleSettings: zhConsoleSettings,
 };
 
@@ -90,7 +90,7 @@ const en: Messages = {
   consoleBilling: enConsoleBilling,
   consoleInvite: enConsoleInvite,
   consoleOrg: enConsoleOrg,
-  consoleTickets: enConsoleTickets,
+  consoleSupport: enConsoleSupport,
   consoleSettings: enConsoleSettings,
 };
 
@@ -125,7 +125,7 @@ export const CONSOLE_NAMESPACES = [
   'consoleBilling',
   'consoleInvite',
   'consoleOrg',
-  'consoleTickets',
+  'consoleSupport',
   'consoleSettings',
 ] as const satisfies readonly Namespace[];
 

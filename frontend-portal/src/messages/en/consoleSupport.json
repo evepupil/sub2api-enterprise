@@ -1,0 +1,15 @@
+{
+  "meta": {
+    "title": "Contact us"
+  },
+  "items": {
+    "email": {
+      "label": "Support email",
+      "copy": "Copy email"
+    },
+    "qq": {
+      "label": "QQ group",
+      "copy": "Copy group number"
+    }
+  }
+}
