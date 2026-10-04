@@ -45,6 +45,46 @@ export function redirectToLogin(): void {
   window.location.replace(loginRedirectFor(window.location.pathname, window.location.search));
 }
 
+/** 提交类操作的结果：成功带数据，失败带原因（原因由各页面写成一句话） */
+export type ActionResult<T, R extends string> = { ok: true; data: T } | { ok: false; reason: R };
+
+/**
+ * 提交一个改动到官网接口：官网接口给了认得的原因就用它，否则按状态码交给 fallback 归类；
+ * 登录失效时整页跳登录页。
+ */
+export async function sendPortalJson<T, R extends string>(
+  url: string,
+  method: 'POST' | 'PATCH' | 'PUT' | 'DELETE',
+  body: unknown,
+  accept: (payload: Record<string, unknown>) => T | null,
+  reasons: readonly R[],
+  fallback: (status: number) => R,
+): Promise<ActionResult<T, R>> {
+  try {
+    const response = await fetch(url, {
+      method,
+      credentials: 'same-origin',
+      cache: 'no-store',
+      headers: body === undefined ? undefined : { 'content-type': 'application/json' },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+    if (response.status === 401) {
+      redirectToLogin();
+      return { ok: false, reason: fallback(401) };
+    }
+    const payload: unknown = await response.json().catch(() => null);
+    if (response.ok && isRecord(payload) && payload.ok === true) {
+      const data = accept(payload);
+      return data === null ? { ok: false, reason: fallback(502) } : { ok: true, data };
+    }
+    const given = isRecord(payload) && isRecord(payload.error) ? payload.error.reason : null;
+    const known = reasons.find((reason) => reason === given);
+    return { ok: false, reason: known ?? fallback(response.status) };
+  } catch {
+    return { ok: false, reason: fallback(503) };
+  }
+}
+
 export interface Loadable<T> {
   /** 最近一次拿到的数据；换条件时先留着旧的 */
   data: T | null;

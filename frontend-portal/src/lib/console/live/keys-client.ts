@@ -1,6 +1,12 @@
 'use client';
 
-import { getPortalJson, isRecord, redirectToLogin, type FetchResult } from './loadable';
+import {
+  getPortalJson,
+  isRecord,
+  sendPortalJson,
+  type ActionResult,
+  type FetchResult,
+} from './loadable';
 import type {
   KeyCreateInput,
   KeyErrorReason,
@@ -53,7 +59,7 @@ export function fetchKeyGroups(signal?: AbortSignal): Promise<FetchResult<KeyGro
   );
 }
 
-export type KeyActionResult<T> = { ok: true; data: T } | { ok: false; reason: KeyErrorReason };
+export type KeyActionResult<T> = ActionResult<T, KeyErrorReason>;
 
 const REASONS: readonly KeyErrorReason[] = [
   'key_exists',
@@ -68,11 +74,8 @@ const REASONS: readonly KeyErrorReason[] = [
   'unavailable',
 ];
 
-/** 失败原因：官网接口给了认得的原因就用它，否则按状态码归类 */
-function reasonOf(status: number, body: unknown): KeyErrorReason {
-  const given = isRecord(body) && isRecord(body.error) ? body.error.reason : null;
-  const known = REASONS.find((reason) => reason === given);
-  if (known) return known;
+/** 官网接口没给认得的原因时，按状态码归类 */
+function fallbackReason(status: number): KeyErrorReason {
   if (status === 400) return 'invalid';
   if (status === 403) return 'forbidden';
   if (status === 404) return 'not_found';
@@ -80,33 +83,13 @@ function reasonOf(status: number, body: unknown): KeyErrorReason {
   return 'unavailable';
 }
 
-async function send<T>(
+function send<T>(
   url: string,
   method: 'POST' | 'PATCH' | 'DELETE',
   body: unknown,
   accept: (payload: Record<string, unknown>) => T | null,
 ): Promise<KeyActionResult<T>> {
-  try {
-    const response = await fetch(url, {
-      method,
-      credentials: 'same-origin',
-      cache: 'no-store',
-      headers: body === undefined ? undefined : { 'content-type': 'application/json' },
-      body: body === undefined ? undefined : JSON.stringify(body),
-    });
-    if (response.status === 401) {
-      redirectToLogin();
-      return { ok: false, reason: 'unavailable' };
-    }
-    const payload: unknown = await response.json().catch(() => null);
-    if (response.ok && isRecord(payload) && payload.ok === true) {
-      const data = accept(payload);
-      return data === null ? { ok: false, reason: 'unavailable' } : { ok: true, data };
-    }
-    return { ok: false, reason: reasonOf(response.status, payload) };
-  } catch {
-    return { ok: false, reason: 'unavailable' };
-  }
+  return sendPortalJson(url, method, body, accept, REASONS, fallbackReason);
 }
 
 const keyOf = (payload: Record<string, unknown>) =>
