@@ -452,7 +452,7 @@ pnpm format:check  # prettier
 | `CONSOLE_NOW`、`TODAY`、`DEFAULT_RANGE`、`presetRange(p, today?, since?)`、`customRange(a, b, today?)`、`rangeDays(r)`、`inRange(day, r)`、`isSingleDay(r)`、`DateRange`、`RANGE_PRESETS` | 固定的「现在」（北京时间 2026-10-03 14:32）与日期范围；`today` / `since` 不传就按固定日期算 |
 | `liveClockSnapshot()`、`parseLiveClock(s)`、`LiveClock` | 真实的今天与当前小时（北京时间），只给接了后端的页面用（经 `useLiveClock()`） |
 | `dayKey(ts)`、`formatDateTime(ts)`、`formatDateTimeShort(ts)`、`formatDayLabel(day, locale)`、`formatMonthLabel(month, locale)`、`formatMonthTitle(y, m, locale)`、`formatHour(h)` | 时间显示（一律北京时间） |
-| `formatCompact(n)`、`formatInteger(n)`、`formatUsd(usd)`、`formatSignedUsd(usd)`、`formatDuration(ms)`、`formatPercent(r, digits?)`、`maskEmail(e)` | 数字、金额（美元，前缀写 `US$`，如 `US$142.97`；导出常量 `USD_PREFIX`）、耗时、百分比 |
+| `formatCompact(n)`、`formatInteger(n)`、`formatUsd(usd)`、`formatSignedUsd(usd)`、`formatDuration(ms)`、`formatPercent(r, digits?)`、`maskEmail(e)` | 数字、金额（美元，前缀写 `US$`，如 `US$142.97`；不到 1 美元时去掉多余的 0 但至少留两位小数，如 `US$0.50`、`US$0.0412`；导出常量 `USD_PREFIX`）、耗时、百分比 |
 | `USAGE_RECORDS`、`recordsInRange(r)`、`summarize(records)`、`breakdown(records, r, dimension, metric, max?)`、`rankSeries(buckets, sums, max?)`、`dailyTotals()`、`activityStats(totals, r)`、`heatmap(totals, endDay?)`、`heatmapStart(endDay?)`、`monthlyRunRate(cost, days)`、`keyUsage(keyId)`、`OTHER_SERIES`、`USAGE_METRICS` | 用量与图表数据（占位数据与后端数据共用图表函数） |
 | `REQUEST_LOGS`、`filterLogs(logs, filter)`、`logsToCsv(logs)`、`curlFor(log)`、`LogFilter`、`RequestLog` | 请求日志 |
 | `API_KEYS`、`getKey(id)`、`maskKey(secret)`、`searchKeys(keys, q, status)`、`KEY_STATUSES`、`USED_MODEL_IDS` | API 密钥 |

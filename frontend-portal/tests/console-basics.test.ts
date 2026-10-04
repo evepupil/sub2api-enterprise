@@ -91,6 +91,11 @@ describe('控制台数字格式', () => {
     expect(formatUsd(1284.523)).toBe('US$1,284.52');
     expect(formatUsd(0.0412)).toBe('US$0.0412');
     expect(formatUsd(0.002117)).toBe('US$0.002117');
+    // 不到 1 美元的金额去掉多余的 0，但至少留两位小数
+    expect(formatUsd(0.5)).toBe('US$0.50');
+    expect(formatUsd(0.12)).toBe('US$0.12');
+    expect(formatUsd(0.0021)).toBe('US$0.0021');
+    expect(formatUsd(1e-9)).toBe('US$1.0e-9');
     expect(formatUsd(0)).toBe('US$0.00');
     expect(formatUsd(-12.3)).toBe('-US$12.30');
     expect(formatSignedUsd(100)).toBe('+US$100.00');
