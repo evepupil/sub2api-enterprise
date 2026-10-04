@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { sendVerifyCode } from '@/lib/auth/register-client';
+import { useCountdown } from '@/lib/auth/use-countdown';
 import type { AuthErrorReason } from '@/lib/session/types';
 
 const CODE_PATTERN = /^\d{6}$/;
@@ -36,17 +37,10 @@ export function RegisterVerifyStep({
   const [formError, setFormError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
-  const [countdown, setCountdown] = useState(0);
+  const { seconds: countdown, start: startCountdown } = useCountdown();
   const [submitting, setSubmitting] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const sentOnce = useRef(false);
-
-  // 倒计时每秒减一，到 0 停
-  useEffect(() => {
-    if (countdown <= 0) return;
-    const timer = setTimeout(() => setCountdown((value) => Math.max(value - 1, 0)), 1000);
-    return () => clearTimeout(timer);
-  }, [countdown]);
 
   const send = useCallback(async () => {
     setSending(true);
@@ -55,12 +49,12 @@ export function RegisterVerifyStep({
     setSending(false);
     if (result.ok) {
       setSent(true);
-      setCountdown(result.countdown);
+      startCountdown(result.countdown);
       inputRef.current?.focus();
     } else {
       setFormError(reasonMessage(result.reason));
     }
-  }, [email, reasonMessage]);
+  }, [email, reasonMessage, startCountdown]);
 
   // 进入这一步就发一次（开发模式下组件会挂载两次，只发一次）
   useEffect(() => {

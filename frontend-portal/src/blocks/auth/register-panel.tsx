@@ -4,9 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { AuthFormAlert } from '@/blocks/auth/auth-form-alert';
-import { Brand } from '@/components/layout/brand';
-import { LanguageSwitcher } from '@/components/layout/language-switcher';
-import { ThemeToggle } from '@/components/layout/theme-toggle';
+import { AuthPanelFrame } from '@/blocks/auth/auth-panel-frame';
 import { Button } from '@/components/ui/button';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { Link, useRouter } from '@/i18n/navigation';
@@ -207,129 +205,114 @@ export function RegisterPanel() {
       : t('register.submitPersonal');
 
   return (
-    <section id="register" className="flex min-h-dvh flex-col px-6 py-8 sm:px-12 lg:px-16 xl:px-24">
-      <div className="mx-auto flex w-full max-w-md flex-1 flex-col">
-        {/* 登录注册页没有顶栏，语言与主题切换放在表单顶栏这一行 */}
-        <div className="flex items-center justify-between">
-          <Brand />
-          <div className="flex items-center gap-1">
-            <LanguageSwitcher />
-            <ThemeToggle />
-          </div>
-        </div>
+    <AuthPanelFrame id="register">
+      {step === 'verify' ? (
+        <RegisterVerifyStep
+          email={values.email.trim()}
+          submitLabel={
+            creatingOrganization ? t('register.submitOrganization') : t('register.verify.submit')
+          }
+          reasonMessage={messages.reasonMessage}
+          onSubmit={submitRegistration}
+          onBack={() => setStep('form')}
+        />
+      ) : (
+        <>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+            {t('register.title')}
+          </h1>
 
-        <div className="flex flex-1 flex-col justify-center py-12">
-          {step === 'verify' ? (
-            <RegisterVerifyStep
-              email={values.email.trim()}
-              submitLabel={
-                creatingOrganization
-                  ? t('register.submitOrganization')
-                  : t('register.verify.submit')
-              }
-              reasonMessage={messages.reasonMessage}
-              onSubmit={submitRegistration}
-              onBack={() => setStep('form')}
-            />
+          {closed ? (
+            <p
+              data-register-closed
+              className="mt-8 rounded-md bg-muted px-4 py-3 text-sm text-muted-foreground"
+            >
+              {t('register.closed')}
+            </p>
           ) : (
             <>
-              <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-                {t('register.title')}
-              </h1>
-
-              {closed ? (
-                <p
-                  data-register-closed
-                  className="mt-8 rounded-md bg-muted px-4 py-3 text-sm text-muted-foreground"
-                >
-                  {t('register.closed')}
-                </p>
-              ) : (
-                <>
-                  {orgInvite ? null : (
-                    <SegmentedControl
-                      name="account"
-                      className="mt-6 [&>button]:flex-1 [&>button]:justify-center"
-                      value={account}
-                      onChange={switchAccount}
-                      ariaLabel={t('account.label')}
-                      options={[
-                        { value: 'personal', label: t('account.registerPersonal') },
-                        { value: 'organization', label: t('account.registerOrganization') },
-                      ]}
-                    />
-                  )}
-
-                  <form
-                    noValidate
-                    onSubmit={handleSubmit}
-                    className="mt-6 space-y-5"
-                    data-register-form
-                  >
-                    <RegisterFields
-                      settings={settings}
-                      values={values}
-                      errors={{
-                        orgName: messages.fieldError(errors.orgName),
-                        email: messages.fieldError(errors.email),
-                        password: messages.fieldError(errors.password),
-                        invite: messages.fieldError(errors.invite),
-                        memberName: messages.fieldError(errors.memberName),
-                      }}
-                      setValue={setValue}
-                      creatingOrganization={creatingOrganization}
-                      showMemberName={needsMemberName(context)}
-                      inviteStatus={messages.inviteStatus(invite.check)}
-                      promoStatus={messages.promoStatus(promo.check)}
-                    />
-
-                    <AuthFormAlert message={formError} />
-
-                    <Button
-                      type="submit"
-                      block
-                      loading={submitting}
-                      disabled={!loaded}
-                      data-register-submit
-                    >
-                      {submitLabel}
-                    </Button>
-                  </form>
-                </>
+              {orgInvite ? null : (
+                <SegmentedControl
+                  name="account"
+                  className="mt-6 [&>button]:flex-1 [&>button]:justify-center"
+                  value={account}
+                  onChange={switchAccount}
+                  ariaLabel={t('account.label')}
+                  options={[
+                    { value: 'personal', label: t('account.registerPersonal') },
+                    { value: 'organization', label: t('account.registerOrganization') },
+                  ]}
+                />
               )}
 
-              <p className="mt-4 text-center text-sm text-muted-foreground">
-                {t('register.hasAccount')}{' '}
-                <Link
-                  href="/login"
-                  data-to-login
-                  className="font-medium text-foreground hover:underline"
-                >
-                  {t('register.toLogin')}
-                </Link>
-              </p>
+              <form
+                noValidate
+                onSubmit={handleSubmit}
+                className="mt-6 space-y-5"
+                data-register-form
+              >
+                <RegisterFields
+                  settings={settings}
+                  values={values}
+                  errors={{
+                    orgName: messages.fieldError(errors.orgName),
+                    email: messages.fieldError(errors.email),
+                    password: messages.fieldError(errors.password),
+                    invite: messages.fieldError(errors.invite),
+                    memberName: messages.fieldError(errors.memberName),
+                  }}
+                  setValue={setValue}
+                  creatingOrganization={creatingOrganization}
+                  showMemberName={needsMemberName(context)}
+                  inviteStatus={messages.inviteStatus(invite.check)}
+                  promoStatus={messages.promoStatus(promo.check)}
+                />
 
-              {closed ? null : (
-                <p className="mt-8 text-center text-xs leading-5 text-subtle-foreground">
-                  {t.rich('register.terms', {
-                    terms: (chunks) => (
-                      <a href="#" className="underline underline-offset-4 hover:text-foreground">
-                        {chunks}
-                      </a>
-                    ),
-                    privacy: (chunks) => (
-                      <a href="#" className="underline underline-offset-4 hover:text-foreground">
-                        {chunks}
-                      </a>
-                    ),
-                  })}
-                </p>
-              )}
+                <AuthFormAlert message={formError} />
+
+                <Button
+                  type="submit"
+                  block
+                  loading={submitting}
+                  disabled={!loaded}
+                  data-register-submit
+                >
+                  {submitLabel}
+                </Button>
+              </form>
             </>
           )}
-        </div>
-      </div>
-    </section>
+
+          <p className="mt-4 text-center text-sm text-muted-foreground">
+            {t('register.hasAccount')}{' '}
+            <Link
+              href="/login"
+              data-to-login
+              className="font-medium text-foreground hover:underline"
+            >
+              {t('register.toLogin')}
+            </Link>
+          </p>
+
+          {closed ? null : (
+            <p className="mt-8 text-center text-xs leading-5 text-subtle-foreground">
+              {t.rich('register.terms', {
+                terms: (chunks) => (
+                  <a href="#" className="underline underline-offset-4 hover:text-foreground">
+                    {chunks}
+                  </a>
+                ),
+                privacy: (chunks) => (
+                  <a href="#" className="underline underline-offset-4 hover:text-foreground">
+                    {chunks}
+                  </a>
+                ),
+              })}
+            </p>
+          )}
+        </>
+      )}
+    </AuthPanelFrame>
   );
 }
 

@@ -4,20 +4,18 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { AuthFormAlert } from '@/blocks/auth/auth-form-alert';
+import { AuthPanelFrame } from '@/blocks/auth/auth-panel-frame';
 import { AuthPasswordInput } from '@/blocks/auth/auth-password-input';
 import { LoginTwoFactor } from '@/blocks/auth/login-two-factor';
-import { Brand } from '@/components/layout/brand';
-import { LanguageSwitcher } from '@/components/layout/language-switcher';
-import { ThemeToggle } from '@/components/layout/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Link, useRouter } from '@/i18n/navigation';
+import { EMAIL_PATTERN } from '@/lib/auth/register-form';
+import { useAuthSettings } from '@/lib/auth/use-auth-settings';
 import { signIn } from '@/lib/session/client';
 import { safeNextPath } from '@/lib/session/guard';
 import type { AuthErrorReason } from '@/lib/session/types';
-
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type LoginErrors = Partial<Record<'email' | 'password', string>>;
 
@@ -26,11 +24,13 @@ type Step = { kind: 'credentials' } | { kind: 'two_factor'; emailMasked: string 
 /**
  * 登录表单：个人与组织成员都用邮箱和密码登录，界面不区分账号类型。
  * 提交经官网服务器转给后端；成功后进控制台（有回跳地址就回到原来要去的页）。
- * 账号开了两步验证时切到第二步输入验证码。找回密码和谷歌登录还没接后端，入口先不显示。
+ * 账号开了两步验证时切到第二步输入验证码。后台开了找回密码时，密码框右上角有「忘记密码？」；
+ * 谷歌登录还没接后端，入口先不显示。
  */
 export function LoginPanel() {
   const t = useTranslations('auth');
   const router = useRouter();
+  const { settings } = useAuthSettings();
   const [step, setStep] = useState<Step>({ kind: 'credentials' });
   const [values, setValues] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState<LoginErrors>({});
@@ -117,98 +117,96 @@ export function LoginPanel() {
     errors[field] ? `${id}-error` : undefined;
 
   return (
-    <section id="login" className="flex min-h-dvh flex-col px-6 py-8 sm:px-12 lg:px-16 xl:px-24">
-      <div className="mx-auto flex w-full max-w-md flex-1 flex-col">
-        {/* 登录注册页没有顶栏，语言与主题切换放在表单顶栏这一行 */}
-        <div className="flex items-center justify-between">
-          <Brand />
-          <div className="flex items-center gap-1">
-            <LanguageSwitcher />
-            <ThemeToggle />
-          </div>
-        </div>
+    <AuthPanelFrame id="login">
+      {step.kind === 'two_factor' ? (
+        <LoginTwoFactor
+          emailMasked={step.emailMasked}
+          onSignedIn={enterConsole}
+          onExpired={(message) => {
+            setStep({ kind: 'credentials' });
+            setValues((current) => ({ ...current, password: '' }));
+            setFormError(message);
+          }}
+        />
+      ) : (
+        <>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+            {t('login.title')}
+          </h1>
 
-        <div className="flex flex-1 flex-col justify-center py-12">
-          {step.kind === 'two_factor' ? (
-            <LoginTwoFactor
-              emailMasked={step.emailMasked}
-              onSignedIn={enterConsole}
-              onExpired={(message) => {
-                setStep({ kind: 'credentials' });
-                setValues((current) => ({ ...current, password: '' }));
-                setFormError(message);
-              }}
+          <form noValidate onSubmit={handleSubmit} className="mt-8 space-y-5" data-login-form>
+            <Field label={t('fields.email')} htmlFor="email" error={errors.email}>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                data-login-email
+                autoComplete="email"
+                placeholder="name@company.com"
+                value={values.email}
+                onChange={(event) => setValue('email', event.target.value)}
+                aria-invalid={errors.email ? true : undefined}
+                aria-describedby={describedBy('email', 'email')}
+                className="min-w-0"
+              />
+            </Field>
+
+            <AuthPasswordInput
+              id="password"
+              name="password"
+              value={values.password}
+              onChange={(value) => setValue('password', value)}
+              error={errors.password}
+              autoComplete="current-password"
+              dataAttribute="data-login-password"
+              trailing={
+                settings.passwordResetEnabled ? (
+                  <Link
+                    href="/forgot-password"
+                    data-to-forgot
+                    className="text-sm text-muted-foreground hover:text-foreground"
+                  >
+                    {t('login.forgot')}
+                  </Link>
+                ) : undefined
+              }
             />
-          ) : (
-            <>
-              <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-                {t('login.title')}
-              </h1>
 
-              <form noValidate onSubmit={handleSubmit} className="mt-8 space-y-5" data-login-form>
-                <Field label={t('fields.email')} htmlFor="email" error={errors.email}>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    data-login-email
-                    autoComplete="email"
-                    placeholder="name@company.com"
-                    value={values.email}
-                    onChange={(event) => setValue('email', event.target.value)}
-                    aria-invalid={errors.email ? true : undefined}
-                    aria-describedby={describedBy('email', 'email')}
-                    className="min-w-0"
-                  />
-                </Field>
+            <AuthFormAlert message={formError} />
 
-                <AuthPasswordInput
-                  id="password"
-                  name="password"
-                  value={values.password}
-                  onChange={(value) => setValue('password', value)}
-                  error={errors.password}
-                  autoComplete="current-password"
-                  dataAttribute="data-login-password"
-                />
+            <Button type="submit" block loading={submitting} data-login-submit>
+              {t('login.submit')}
+            </Button>
+          </form>
 
-                <AuthFormAlert message={formError} />
+          <p className="mt-4 text-center text-sm text-muted-foreground">
+            {t('login.noAccount')}{' '}
+            <Link
+              href="/register"
+              data-to-register
+              className="font-medium text-foreground hover:underline"
+            >
+              {t('login.toRegister')}
+            </Link>
+          </p>
 
-                <Button type="submit" block loading={submitting} data-login-submit>
-                  {t('login.submit')}
-                </Button>
-              </form>
-
-              <p className="mt-4 text-center text-sm text-muted-foreground">
-                {t('login.noAccount')}{' '}
-                <Link
-                  href="/register"
-                  data-to-register
-                  className="font-medium text-foreground hover:underline"
-                >
-                  {t('login.toRegister')}
-                </Link>
-              </p>
-
-              <p className="mt-8 text-center text-xs leading-5 text-subtle-foreground">
-                {t.rich('login.terms', {
-                  terms: (chunks) => (
-                    <a href="#" className="underline underline-offset-4 hover:text-foreground">
-                      {chunks}
-                    </a>
-                  ),
-                  privacy: (chunks) => (
-                    <a href="#" className="underline underline-offset-4 hover:text-foreground">
-                      {chunks}
-                    </a>
-                  ),
-                })}
-              </p>
-            </>
-          )}
-        </div>
-      </div>
-    </section>
+          <p className="mt-8 text-center text-xs leading-5 text-subtle-foreground">
+            {t.rich('login.terms', {
+              terms: (chunks) => (
+                <a href="#" className="underline underline-offset-4 hover:text-foreground">
+                  {chunks}
+                </a>
+              ),
+              privacy: (chunks) => (
+                <a href="#" className="underline underline-offset-4 hover:text-foreground">
+                  {chunks}
+                </a>
+              ),
+            })}
+          </p>
+        </>
+      )}
+    </AuthPanelFrame>
   );
 }
 

@@ -8,12 +8,13 @@ import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
 
 /**
- * 登录、注册共用的密码输入框：受控值放在父组件，眼睛按钮只切换明文显示。
+ * 登录、注册、重置密码共用的密码输入框：受控值放在父组件，眼睛按钮只切换明文显示；标签默认「密码」。
  * 错误文字由 Field 渲染（id = `${htmlFor}-error`、role="alert"），输入框用 aria-describedby 指向它。
  */
 export function AuthPasswordInput({
   id,
   name,
+  label,
   value,
   onChange,
   error,
@@ -25,6 +26,8 @@ export function AuthPasswordInput({
 }: {
   id: string;
   name: string;
+  /** 不传时是「密码」 */
+  label?: string;
   value: string;
   onChange: (value: string) => void;
   error?: string | null;
@@ -32,7 +35,8 @@ export function AuthPasswordInput({
   autoComplete: 'current-password' | 'new-password';
   autoFocus?: boolean;
   /** 输入框上要挂的 data-* 检查钩子，如 data-login-password / data-register-password */
-  dataAttribute?: 'data-login-password' | 'data-register-password';
+  dataAttribute?:
+    'data-login-password' | 'data-register-password' | 'data-reset-password' | 'data-reset-confirm';
   /** 标签行右侧的内容，登录页放「忘记密码？」 */
   trailing?: ReactNode;
 }) {
@@ -43,7 +47,7 @@ export function AuthPasswordInput({
 
   return (
     <Field
-      label={t('fields.password')}
+      label={label ?? t('fields.password')}
       htmlFor={id}
       error={error}
       hint={error ? undefined : hint}

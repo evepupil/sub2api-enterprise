@@ -15,7 +15,8 @@ export const PASSWORD_MIN_LENGTH = 6;
 export const ORG_NAME_MAX_LENGTH = 100;
 export const MEMBER_NAME_MAX_LENGTH = 50;
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+/** 邮箱格式（只查有没有 @ 和点，严格校验交给后端）；登录、注册、找回密码共用 */
+export const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export interface RegisterValues {
   orgName: string;

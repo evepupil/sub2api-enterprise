@@ -42,6 +42,8 @@
 | 通道 | `/channels` | 看三种通道的权益差别 | 看三张通道卡、对比特权、查看定价 | 模板价格页 | 5 | L6 |
 | 登录 | `/login` | 登录（个人与组织成员同一入口） | 填邮箱和密码 | 模板登录页 | 2 | L7 |
 | 注册 | `/register` | 个人注册或创建组织 | 个人/创建组织切换、填表 | 模板注册页 | 2 | L7 |
+| 找回密码 | `/forgot-password` | 忘了密码，收重置链接 | 填邮箱 | sub2api 找回密码页 | 1 | L7 |
+| 重置密码 | `/reset-password` | 用邮件里的链接设新密码 | 填两遍新密码 | sub2api 重置密码页 | 1 | L7 |
 | 文档 | `/docs` | 占位 | 无 | 无 | 1 | L7 |
 | 404 | 任意不存在地址 | 回到站内 | 「返回首页」 | 无 | 1 | L7 |
 
@@ -393,7 +395,8 @@ pnpm format:check  # prettier
 | 厂商标志 | lobehub icons（MIT），`public/providers/`；谷歌登录按钮标志 `public/brands/google.svg` |
 | 登录 | 2026-10-03 接通后端：`src/app/api/portal/auth/*` 转发、`src/lib/server/` 调后端与凭证 cookie、`src/lib/session/` 浏览器端登录状态、`src/proxy.ts` 拦截没登录的控制台访问（做法见技术设计 18.1） |
 | 注册 | 2026-10-03 接通后端，规则与现有 sub2api 注册页一致：`src/app/api/portal/auth/{settings,register,send-verify-code,validate-invitation-code,validate-promo-code}` 转发、`src/lib/server/sub2api/public-settings.ts` 读后端公开开关、`src/lib/auth/` 注册规则（规格见 `design/登录注册.md` A2） |
-| 找回密码、谷歌登录、人机验证 | 不连后端，入口不显示；后端开了人机验证时，注册失败提示联系管理员 |
+| 找回密码 | 2026-10-05 接通后端，照 sub2api 原来的找回密码、重置密码两页：`src/app/api/portal/auth/{forgot-password,reset-password}` 转发、`src/lib/auth/password-reset*.ts` 规则与请求（规格见 `design/登录注册.md` A4、A5）；登录页的「忘记密码？」只在后台开了找回密码时显示 |
+| 谷歌登录、人机验证 | 不连后端，入口不显示；后端开了人机验证时，注册、找回密码失败提示联系管理员 |
 | 控制台用量页 | 2026-10-03 接通后端，显示登录账号自己的真实用量：后端用量总览接口（技术设计 18.2）、官网转发 `src/app/api/portal/console/usage/`、取数与换算 `src/lib/console/live/` |
 | 控制台模型页 | 2026-10-04 接通后端：分组、模型、实付价、官方价来自后端模型广场（技术设计 18.3），官网转发 `src/app/api/portal/console/models/`、换算 `src/lib/console/live/models-*.ts`；展示名、厂商、协议、上下文仍取官网目录（见上面「30 个模型」一行） |
 | 控制台日志页 | 2026-10-04 接通后端：登录账号计费成功的调用（后端 `/api/v1/usage`，技术设计 18.4），官网转发 `src/app/api/portal/console/logs/`（列表、筛选选项、导出 CSV）、换算 `src/lib/console/live/logs-*.ts`；费用旁的费用明细、模型旁的 Fast 标签都按后端记录算。用量、模型、日志、账单、邀请、密钥、组织几页以外的控制台页面仍是占位数据（**编的**） |
