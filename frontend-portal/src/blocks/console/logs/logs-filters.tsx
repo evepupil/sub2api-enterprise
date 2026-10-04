@@ -4,6 +4,7 @@ import { Download } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/console/button';
+import { ColumnPicker, type ColumnOption } from '@/components/console/column-picker';
 import { CONTROL_BUTTON } from '@/components/console/control-button';
 import { DateRangePicker } from '@/components/console/date-range-picker';
 import { FilterField } from '@/components/console/filter-field';
@@ -12,13 +13,14 @@ import { Select, type SelectOption } from '@/components/console/select';
 import type { DateRange } from '@/lib/console';
 import type { LogOptions, LogStream, LogType } from '@/lib/console/live/logs-types';
 
+import { DEFAULT_LOG_COLUMNS, LOG_COLUMNS, type LogColumn } from './logs-columns';
 import type { LogSelection } from './logs-types';
 
 /** 下拉里「全部」用的值（真实的密钥 ID、模型名不会是它） */
 const ALL = 'all';
 
 /**
- * 日志筛选栏：时间、密钥、模型、类型、流式五个条件，右下是清除筛选和导出 CSV。
+ * 日志筛选栏：时间、密钥、模型、类型、流式五个条件，右下是清除筛选、列设置和导出 CSV。
  * 密钥、模型的选项来自后端（账号的密钥、这段时间用过的模型）；任何条件变化都由上层重新取数并回到第 1 页。
  */
 export function LogsFilters({
@@ -34,6 +36,8 @@ export function LogsFilters({
   exportFailed,
   canExport,
   onExport,
+  columns,
+  onSaveColumns,
 }: {
   selection: LogSelection;
   /** 当前生效的时间范围（selection.range 为空时是默认的最近 30 天） */
@@ -49,6 +53,9 @@ export function LogsFilters({
   exportFailed: boolean;
   canExport: boolean;
   onExport: () => void;
+  /** 表格现在显示的列；在「列设置」里保存后通过 onSaveColumns 交回 */
+  columns: readonly LogColumn[];
+  onSaveColumns: (columns: LogColumn[]) => void;
 }) {
   const t = useTranslations('consoleLogs');
   const all = t('filters.all');
@@ -75,6 +82,12 @@ export function LogsFilters({
     { value: 'text', label: t('filters.text') },
     { value: 'image', label: t('filters.image') },
   ];
+  // 列设置的勾选项：时间固定显示
+  const columnOptions: ColumnOption<LogColumn>[] = LOG_COLUMNS.map((id) => ({
+    id,
+    label: t(`table.${id}`),
+    locked: id === 'time',
+  }));
   const streamOptions: SelectOption<LogStream>[] = [
     { value: 'all', label: all },
     { value: 'stream', label: t('filters.streamOn') },
@@ -143,6 +156,13 @@ export function LogsFilters({
             {t('filters.clear')}
           </Button>
         ) : null}
+        <ColumnPicker
+          name="logs"
+          columns={columnOptions}
+          visible={columns}
+          defaults={DEFAULT_LOG_COLUMNS}
+          onSave={onSaveColumns}
+        />
         <Button
           variant="secondary"
           className={CONTROL_BUTTON}

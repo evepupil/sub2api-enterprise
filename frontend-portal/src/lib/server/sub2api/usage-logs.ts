@@ -228,6 +228,7 @@ export function logsCsv(rows: readonly LogRow[], labels: LogsCsvLabels): string 
       row.durationMs,
       row.firstTokenMs,
       row.endpoint,
+      row.ip,
     ]
       .map(csvCell)
       .join(','),

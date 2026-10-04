@@ -437,6 +437,7 @@ pnpm format:check  # prettier
 | `GroupWithRate` / `RateBadge` | `group-rate.tsx` | 分组名 + 倍率徽标 `{ name, rate, className? }`（只要徽标用 `RateBadge`）；徽标 `data-group-rate`，颜色按倍率分档：低于 ×0.2 绿、低于 ×0.5 蓝、低于 ×1 橙、×1 灰、高于 ×1 红（`rateTone`）。模型页、日志页共用 |
 | `Skeleton` | `skeleton.tsx` | 加载占位块 `{ className?, style? }`：浅灰圆角、轻轻呼吸（减少动效时不动），`data-skeleton`；尺寸和真实内容一样，加载完不跳动 |
 | `InfoPopover` | `info-popover.tsx` | 「i」图标 + 悬浮说明卡片 `{ name, label, align?, className?, children }`：鼠标移上去显示、移开收起，点一下固定（再点、点别处、Esc 收起），触屏点开；卡片在图标下方（默认右对齐图标），靠边自动挪回屏幕内；卡片里只放说明，不放可点的东西。图标 `data-info-popover={name}`，卡片 `data-info-popover-panel`。日志页费用明细在用 |
+| `ColumnPicker` | `column-picker.tsx` | 表格的「列设置」按钮 + 勾选面板 `{ name, columns: { id, label, locked? }[], visible, defaults, onSave }`：勾好点「保存」才生效，「重置」回到默认勾选，锁定的列置灰不能取消；按钮高 40，和筛选行按钮排在一起。设置存在浏览器里用 `useColumnPrefs(config)`（`src/lib/console/live/column-prefs.ts`，config 放模块常量）。按钮 `data-column-picker={name}`，勾选框 `data-column={id}`，`data-columns-reset` / `data-columns-save`。日志页在用 |
 | 外壳件 | `shell/*` | 页面不用直接引用；`Avatar` 可在设置页复用 |
 
 官网已有的基础组件照用（按钮除外，用上表的控制台按钮；`variant="danger"` 是红色按钮）：`Textarea`（`ui/textarea.tsx`，多行输入框，传 `footer` 时带字数底栏）、`Badge`、`Input`、`Field`、`SegmentedControl`、`DropdownMenu*`、`ProviderLogo`、`DiscountBadge`；切换语言用 `useSwitchLocale()`（`@/i18n/use-switch-locale`）。

@@ -21,9 +21,11 @@
     "tz": "UTC+8",
     "key": "Key",
     "model": "Model",
+    "reasoning": "Reasoning",
     "tokens": "Tokens",
     "cost": "Cost",
     "duration": "Latency",
+    "ip": "IP",
     "more": "More actions",
     "noGroup": "No group",
     "cacheRead": "Cache read {count}",
@@ -139,6 +141,7 @@
     "officialCost": "Official price (US$)",
     "duration": "Total latency (ms)",
     "firstToken": "First token (ms)",
-    "endpoint": "Endpoint"
+    "endpoint": "Endpoint",
+    "ip": "IP address"
   }
 }

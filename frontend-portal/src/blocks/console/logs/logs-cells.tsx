@@ -91,6 +91,29 @@ export function DurationCell({ row }: { row: LogRow }) {
   );
 }
 
+/** 没有值时的占位 */
+function None() {
+  return <span className="text-subtle-foreground">—</span>;
+}
+
+/** 推理强度：请求里写的原样显示（low / medium / high 等），没写为「—」 */
+export function ReasoningCell({ row }: { row: LogRow }) {
+  return row.reasoningEffort ? (
+    <span className="whitespace-nowrap text-foreground">{row.reasoningEffort}</span>
+  ) : (
+    <None />
+  );
+}
+
+/** 调用方的 IP 地址，没记录为「—」 */
+export function IpCell({ row }: { row: LogRow }) {
+  return row.ip ? (
+    <span className="whitespace-nowrap font-mono text-xs text-foreground">{row.ip}</span>
+  ) : (
+    <None />
+  );
+}
+
 /** 开了 Fast（或 Ultrafast）的调用在模型名旁标一下：后端默认按两倍计费，客户能看出这条为什么贵 */
 export function FastBadge({ serviceTier }: { serviceTier: string | null }) {
   const t = useTranslations('consoleLogs');

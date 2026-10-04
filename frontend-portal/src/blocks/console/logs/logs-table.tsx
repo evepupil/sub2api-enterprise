@@ -9,24 +9,26 @@ import { EmptyState } from '@/components/console/empty-state';
 import { Pagination } from '@/components/console/pagination';
 import type { LogsPageData } from '@/lib/console/live/logs-types';
 
+import { logsTableMinWidth, type LogColumn } from './logs-columns';
 import { LogsTableRow } from './logs-table-row';
 import type { OpenLogDetail } from './logs-types';
 
-/** 表格最窄的宽度：再窄就在外框里横向滚动，不让页面横向溢出 */
-const TABLE_MIN_WIDTH = 920;
-
 /**
  * 调用记录表：表头、当前页的行、底部分页（分页由后端做，这里只上报翻页和每页条数）。
+ * 只画「列设置」里勾上的列，最窄宽度跟着列数变。
  * 没有符合条件的调用时，整个表体换成空状态，并给一个清除筛选的出口。
  */
 export function LogsTable({
   data,
+  columns,
   onPageChange,
   onPageSizeChange,
   onOpenDetail,
   onClear,
 }: {
   data: LogsPageData;
+  /** 要显示的列，按表格顺序 */
+  columns: readonly LogColumn[];
   onPageChange: (page: number) => void;
   onPageSizeChange: (pageSize: number) => void;
   onOpenDetail: OpenLogDetail;
@@ -53,6 +55,26 @@ export function LogsTable({
     );
   }
 
+  const header = (column: LogColumn) => {
+    switch (column) {
+      case 'time':
+        return (
+          <Th key={column} sticky="left" className="max-sm:static">
+            {t('table.time')}
+            <span className="ml-1.5 font-normal">{t('table.tz')}</span>
+          </Th>
+        );
+      case 'cost':
+        return (
+          <Th key={column} align="right">
+            {t('table.cost')}
+          </Th>
+        );
+      default:
+        return <Th key={column}>{t(`table.${column}`)}</Th>;
+    }
+  };
+
   return (
     <TableShell
       id="logs"
@@ -67,18 +89,10 @@ export function LogsTable({
         />
       }
     >
-      <Table minWidth={TABLE_MIN_WIDTH} aria-label={t('meta.title')}>
+      <Table minWidth={logsTableMinWidth(columns)} aria-label={t('meta.title')}>
         <thead>
           <tr>
-            <Th sticky="left" className="max-sm:static">
-              {t('table.time')}
-              <span className="ml-1.5 font-normal">{t('table.tz')}</span>
-            </Th>
-            <Th>{t('table.key')}</Th>
-            <Th>{t('table.model')}</Th>
-            <Th>{t('table.tokens')}</Th>
-            <Th align="right">{t('table.cost')}</Th>
-            <Th>{t('table.duration')}</Th>
+            {columns.map(header)}
             <Th sticky="right" align="center">
               {tc('table.actions')}
             </Th>
@@ -86,7 +100,7 @@ export function LogsTable({
         </thead>
         <tbody>
           {data.items.map((log) => (
-            <LogsTableRow key={log.id} log={log} onOpenDetail={onOpenDetail} />
+            <LogsTableRow key={log.id} log={log} columns={columns} onOpenDetail={onOpenDetail} />
           ))}
         </tbody>
       </Table>

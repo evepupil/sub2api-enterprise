@@ -60,7 +60,8 @@
     "prev": "Previous page",
     "next": "Next page",
     "page": "Page {page}",
-    "actions": "Actions"
+    "actions": "Actions",
+    "columns": "Columns"
   },
   "actions": {
     "refresh": "Refresh",
@@ -69,6 +70,7 @@
     "cancel": "Cancel",
     "confirm": "Confirm",
     "save": "Save",
+    "reset": "Reset",
     "delete": "Delete",
     "close": "Close",
     "clearFilters": "Clear filters"

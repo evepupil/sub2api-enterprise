@@ -18,12 +18,14 @@ import {
   unavailable,
   useLoadable,
 } from '@/lib/console/live/logs-client';
+import { useColumnPrefs } from '@/lib/console/live/column-prefs';
 import type { LogFilters, LogOptions, LogRow, LogsPageData } from '@/lib/console/live/logs-types';
 import { useLiveClock } from '@/lib/console/live/use-live-clock';
 import { usageSince } from '@/lib/console/live/usage-view';
 import { useSession } from '@/lib/session/session-provider';
 import { cn } from '@/lib/utils';
 
+import { LOG_COLUMN_PREFS } from './logs-columns';
 import { LogsDetailSheet } from './logs-detail-sheet';
 import { LogsFilters } from './logs-filters';
 import { LogsTable } from './logs-table';
@@ -39,7 +41,7 @@ const DEFAULT_PRESET: RangePreset = 'last30d';
 /**
  * 日志页（接后端）：登录账号自己的计费成功的调用，从新到旧。筛选栏决定看哪些调用，
  * 表格由后端分页；点模型名或「查看详情」从右侧抽屉看单条调用。换条件时先留着旧数据（变浅），
- * 新数据到了再换；取不到时整页显示出错与重试。
+ * 新数据到了再换；取不到时整页显示出错与重试。表格显示哪些列由「列设置」决定，存在这台浏览器里。
  */
 export function LogsPage() {
   const t = useTranslations('consoleLogs');
@@ -55,6 +57,7 @@ export function LogsPage() {
   const [exporting, setExporting] = useState(false);
   const [exportFailed, setExportFailed] = useState(false);
   const opener = useRef<HTMLElement | null>(null);
+  const [columns, saveColumns] = useColumnPrefs(LOG_COLUMN_PREFS);
 
   const today = clock?.today ?? null;
   const since = today === null ? null : usageSince(user?.createdAt ?? null, today);
@@ -156,6 +159,7 @@ export function LogsPage() {
       >
         <LogsTable
           data={data}
+          columns={columns}
           onPageChange={setPage}
           onPageSizeChange={(size) => {
             setPageSize(size);
@@ -183,6 +187,8 @@ export function LogsPage() {
         exportFailed={exportFailed}
         canExport={filters !== null && (data?.total ?? 0) > 0}
         onExport={() => void exportCsv()}
+        columns={columns}
+        onSaveColumns={saveColumns}
       />
       {body}
       <LogsDetailSheet log={detail} onClose={() => setDetail(null)} />

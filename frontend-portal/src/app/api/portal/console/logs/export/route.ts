@@ -39,6 +39,7 @@ const CSV_COLUMNS = [
   'duration',
   'firstToken',
   'endpoint',
+  'ip',
 ] as const;
 
 function csvLabels(locale: 'zh' | 'en'): LogsCsvLabels {

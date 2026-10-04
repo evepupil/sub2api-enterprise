@@ -21,9 +21,11 @@
     "tz": "UTC+8",
     "key": "密钥",
     "model": "模型",
+    "reasoning": "推理强度",
     "tokens": "Token",
     "cost": "费用",
     "duration": "耗时",
+    "ip": "IP",
     "more": "更多操作",
     "noGroup": "未分组",
     "cacheRead": "缓存读 {count}",
@@ -139,6 +141,7 @@
     "officialCost": "官方价 (US$)",
     "duration": "总耗时 (ms)",
     "firstToken": "首字耗时 (ms)",
-    "endpoint": "接口"
+    "endpoint": "接口",
+    "ip": "IP 地址"
   }
 }

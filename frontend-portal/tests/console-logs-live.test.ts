@@ -380,14 +380,12 @@ describe('导出 CSV', () => {
     fast: { fast: 'Fast', ultrafast: 'Ultrafast' },
   };
 
-  it('时间按北京时间，金额 6 位小数，开了 Fast 的写 Fast、普通调用留空', () => {
+  it('时间按北京时间，金额 6 位小数，开了 Fast 的写 Fast、普通调用留空，最后一列是 IP', () => {
     const [header, line] = logsCsv([row], labels).split('\r\n');
     expect(header).toBe('时间,请求 ID,密钥');
-    expect(
-      line?.startsWith(
-        '2026-10-04 15:05:34,req_abc,prod,高性能通道,0.3,gpt-5.4,high,Fast,是,2000,500,1000,0,0.003825,0.012750,4000,900,/v1/responses',
-      ),
-    ).toBe(true);
+    expect(line).toBe(
+      '2026-10-04 15:05:34,req_abc,prod,高性能通道,0.3,gpt-5.4,high,Fast,是,2000,500,1000,0,0.003825,0.012750,4000,900,/v1/responses,203.0.113.9',
+    );
     const plain = logsCsv([{ ...row, serviceTier: null }], labels).split('\r\n')[1] ?? '';
     expect(plain).toContain(',high,,是,');
   });
