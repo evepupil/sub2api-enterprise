@@ -3,16 +3,15 @@
 import { Check, ChevronDown, Share2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
+import { buttonClass } from '@/components/console/button';
 import { CONTROL_BUTTON } from '@/components/console/control-button';
 import { useCopy } from '@/components/console/copy-button';
-import { buttonClass } from '@/components/console/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { formatPercent, INVITE_PROGRAM } from '@/lib/console';
 import { SITE } from '@/lib/site';
 
 interface ShareItem {
@@ -26,27 +25,15 @@ interface ShareItem {
  * 分享下拉：复制邀请链接、复制邀请码、生成一段可以直接发给朋友的分享文案。
  * 复制成功后，对应菜单项的文字短暂变成「已复制」，菜单保持打开，方便继续复制别的。
  */
-export function InviteShareMenu() {
+export function InviteShareMenu({ code, link }: { code: string; link: string }) {
   const t = useTranslations('consoleInvite');
   const tc = useTranslations('console');
   const { copiedKey, copy } = useCopy();
 
   const items: readonly ShareItem[] = [
-    { key: 'link', label: t('share.copyLink'), text: INVITE_PROGRAM.link },
-    {
-      key: 'code',
-      label: t('share.copyCode', { code: INVITE_PROGRAM.code }),
-      text: INVITE_PROGRAM.code,
-    },
-    {
-      key: 'text',
-      label: t('share.copyText'),
-      text: t('share.text', {
-        site: SITE.name,
-        bonus: formatPercent(INVITE_PROGRAM.inviteeBonusRate, 0),
-        link: INVITE_PROGRAM.link,
-      }),
-    },
+    { key: 'link', label: t('share.copyLink'), text: link },
+    { key: 'code', label: t('share.copyCode', { code }), text: code },
+    { key: 'text', label: t('share.copyText'), text: t('share.text', { site: SITE.name, link }) },
   ];
 
   return (

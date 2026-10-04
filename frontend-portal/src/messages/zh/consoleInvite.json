@@ -10,34 +10,45 @@
     "copyLink": "复制邀请链接",
     "copyCode": "复制邀请码 {code}",
     "copyText": "生成分享文案",
-    "text": "我在用 {site} 调用 Claude、GPT、Gemini 等模型，用我的链接注册首充额外送 {bonus}：{link}"
+    "text": "我在用 {site} 调用 Claude、GPT、Gemini 等模型，用我的链接注册：{link}"
   },
   "rules": {
-    "inviter": "<b>邀请人：</b>被邀请人注册后 {window} 天内每次充值，你获得充值额 {rate} 的返利。",
-    "invitee": "<b>被邀请人：</b>首次充值额外获得 {bonus} 赠送。",
-    "payout": "<b>到账：</b>返利先冻结 {freeze} 天，到期后自动转入余额。"
+    "invite": "<b>邀请：</b>把邀请链接或邀请码发给朋友，对方用它注册后就和你绑定。",
+    "rebate": "<b>返利：</b>对方每次充值，你获得充值金额 {rate} 的返利。",
+    "payout": "<b>到账：</b>返利可以随时转入余额，用来调用模型。",
+    "frozen": "新产生的返利要过了冻结期才能转入余额。"
   },
   "stats": {
     "total": "累计返利",
-    "released": "已到账",
+    "available": "可转入余额",
     "frozen": "冻结中",
     "invited": "邀请人数",
-    "effective": "其中 {count} 人已充值"
+    "rebated": "其中 {count} 人已产生返利"
+  },
+  "transfer": {
+    "action": "转入余额",
+    "working": "转入中…",
+    "done": "已转入余额 {amount}",
+    "errors": {
+      "empty": "没有可转入的返利",
+      "too_many": "操作太频繁，请稍后再试",
+      "unavailable": "服务暂时不可用，请稍后再试"
+    }
   },
   "invitees": {
     "title": "邀请记录",
     "columns": {
       "user": "用户",
-      "registeredAt": "注册时间",
-      "recharged": "{days} 天内充值",
-      "rebate": "返利",
-      "status": "状态"
+      "joinedAt": "注册时间",
+      "rebate": "带来的返利"
     },
-    "status": {
-      "pending": "未充值",
-      "frozen": "冻结中",
-      "released": "已到账"
-    },
-    "empty": "还没有邀请"
+    "empty": "还没有邀请",
+    "partial": "只显示最近 {count} 位"
+  },
+  "disabled": "邀请返利没有开启",
+  "errors": {
+    "tooMany": "查询太频繁，请稍后再试",
+    "unavailable": "数据暂时取不到，请稍后再试",
+    "retry": "重试"
   }
 }

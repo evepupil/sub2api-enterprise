@@ -396,8 +396,9 @@ pnpm format:check  # prettier
 | 找回密码、谷歌登录、人机验证 | 不连后端，入口不显示；后端开了人机验证时，注册失败提示联系管理员 |
 | 控制台用量页 | 2026-10-03 接通后端，显示登录账号自己的真实用量：后端用量总览接口（技术设计 18.2）、官网转发 `src/app/api/portal/console/usage/`、取数与换算 `src/lib/console/live/` |
 | 控制台模型页 | 2026-10-04 接通后端：分组、模型、实付价、官方价来自后端模型广场（技术设计 18.3），官网转发 `src/app/api/portal/console/models/`、换算 `src/lib/console/live/models-*.ts`；展示名、厂商、协议、上下文仍取官网目录（见上面「30 个模型」一行） |
-| 控制台日志页 | 2026-10-04 接通后端：登录账号计费成功的调用（后端 `/api/v1/usage`，技术设计 18.4），官网转发 `src/app/api/portal/console/logs/`（列表、筛选选项、导出 CSV）、换算 `src/lib/console/live/logs-*.ts`；费用旁的费用明细、模型旁的 Fast 标签都按后端记录算。用量、模型、日志、账单四页以外的控制台页面仍是占位数据（**编的**） |
+| 控制台日志页 | 2026-10-04 接通后端：登录账号计费成功的调用（后端 `/api/v1/usage`，技术设计 18.4），官网转发 `src/app/api/portal/console/logs/`（列表、筛选选项、导出 CSV）、换算 `src/lib/console/live/logs-*.ts`；费用旁的费用明细、模型旁的 Fast 标签都按后端记录算。用量、模型、日志、账单、邀请几页以外的控制台页面仍是占位数据（**编的**） |
 | 控制台账单页 | 2026-10-04 接通后端：余额卡（可用余额、累计充值、累计赠送、累计消耗）与交易记录（只含余额变动，由兑换记录、充值订单、优惠码、退款拼成，每笔之后的余额按现在的余额倒推）来自后端新加的两个接口（技术设计 18.5），兑换码走后端真实兑换；官网转发 `src/app/api/portal/console/billing/`、换算 `src/lib/console/live/billing-*.ts`。充值弹窗还没接支付，档位、赠送与支付方式是占位（**编的**），`src/lib/console/billing.ts` |
+| 控制台邀请页 | 2026-10-04 接 sub2api 原有的邀请返利（后端不改，技术设计 18.7）：邀请码、返利比例、返利统计、被邀请人与转入余额都来自后端，官网转发 `src/app/api/portal/console/invite/`、换算 `src/lib/console/live/invite-*.ts`；后台没开邀请返利时侧栏不显示入口 |
 
 ---
 
@@ -455,7 +456,6 @@ pnpm format:check  # prettier
 | `REQUEST_LOGS`、`filterLogs(logs, filter)`、`logsToCsv(logs)`、`curlFor(log)`、`LogFilter`、`RequestLog` | 请求日志 |
 | `API_KEYS`、`getKey(id)`、`maskKey(secret)`、`searchKeys(keys, q, status)`、`KEY_STATUSES`、`USED_MODEL_IDS` | API 密钥 |
 | `RECHARGE_PRESETS`、`RECHARGE_BONUS_TIERS`、`rechargeBonus(a)`、`RECHARGE_LIMITS`、`PAYMENT_METHODS` | 充值弹窗的占位配置（账单页其余部分已接后端：`@/lib/console/live/billing-*`、`use-billing`） |
-| `INVITE_PROGRAM`、`INVITEES`、`inviteStats(list)` | 邀请返利 |
 | `ORGANIZATION`、`ORG_MEMBERS`、`ORG_INVITATIONS`、`quotaRatio(m)`、`orgSummary(list)` | 组织 |
 | `TICKETS`、`filterTickets(list, status)`、`TICKET_STATUSES`、`TICKET_CATEGORIES`、`TICKET_LIMITS` | 工单 |
 | `CHAT_SAMPLE`、`CHAT_REPLIES`、`CHAT_MODEL_IDS`、`DEFAULT_CHAT_MODEL`、`CHAT_INPUT_MAX` | 对话页 |

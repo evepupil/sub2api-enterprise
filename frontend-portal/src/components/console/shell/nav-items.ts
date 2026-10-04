@@ -30,6 +30,15 @@ export const CONSOLE_NAV: readonly { key: ConsoleNavKey; href: string; icon: Luc
   { key: 'tickets', href: '/console/tickets', icon: LifeBuoy },
 ];
 
+/**
+ * 实际显示的菜单：后台没开邀请返利（或还没读到开关）时不显示「邀请」，和 sub2api 原来的用户菜单一致。
+ */
+export function visibleNav(affiliateEnabled: boolean | null): typeof CONSOLE_NAV {
+  return affiliateEnabled === true
+    ? CONSOLE_NAV
+    : CONSOLE_NAV.filter((item) => item.key !== 'invite');
+}
+
 /** 当前地址是否属于某个菜单项（子页面也算） */
 export function isNavActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);

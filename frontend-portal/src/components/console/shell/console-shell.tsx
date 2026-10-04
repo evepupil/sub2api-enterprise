@@ -6,6 +6,7 @@ import { useState, type ReactNode } from 'react';
 
 import { Brand } from '@/components/layout/brand';
 import { usePathname } from '@/i18n/navigation';
+import { useAffiliateEnabled } from '@/lib/console/live/use-affiliate';
 import { cn } from '@/lib/utils';
 
 import { Sheet } from '../dialog';
@@ -25,6 +26,8 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [announcementOpen, setAnnouncementOpen] = useState(true);
+  // 邀请返利开关只读一次，桌面侧栏和手机抽屉共用
+  const affiliateEnabled = useAffiliateEnabled();
 
   // 换页时关掉手机抽屉（渲染时按外部值调整状态，不在副作用里改）
   const [lastPath, setLastPath] = useState(pathname);
@@ -45,7 +48,11 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
             collapsed ? 'w-16' : 'w-64',
           )}
         >
-          <ConsoleSidebar collapsed={collapsed} onToggleCollapse={() => setCollapsed((c) => !c)} />
+          <ConsoleSidebar
+            collapsed={collapsed}
+            affiliateEnabled={affiliateEnabled}
+            onToggleCollapse={() => setCollapsed((c) => !c)}
+          />
         </aside>
         <div className="flex min-w-0 flex-1 flex-col">
           <div className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-3 lg:hidden">
@@ -80,7 +87,11 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
         title={t('nav.label')}
         titleHidden
       >
-        <ConsoleSidebar collapsed={false} onNavigate={() => setDrawerOpen(false)} />
+        <ConsoleSidebar
+          collapsed={false}
+          affiliateEnabled={affiliateEnabled}
+          onNavigate={() => setDrawerOpen(false)}
+        />
       </Sheet>
     </div>
   );

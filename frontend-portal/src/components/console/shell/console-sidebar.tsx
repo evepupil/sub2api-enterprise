@@ -8,7 +8,7 @@ import { Link, usePathname } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 
 import { buttonClass } from '../button';
-import { CONSOLE_NAV, isNavActive } from './nav-items';
+import { isNavActive, visibleNav } from './nav-items';
 import { NotificationsMenu } from './notifications-menu';
 import { UserMenu } from './user-menu';
 
@@ -19,10 +19,13 @@ import { UserMenu } from './user-menu';
  */
 export function ConsoleSidebar({
   collapsed,
+  affiliateEnabled,
   onToggleCollapse,
   onNavigate,
 }: {
   collapsed: boolean;
+  /** 后台有没有开邀请返利；没开或还没读到时不显示「邀请」 */
+  affiliateEnabled: boolean | null;
   /** 只有桌面端传，手机抽屉里不显示收起按钮 */
   onToggleCollapse?: () => void;
   /** 点了菜单项之后（手机端用来关抽屉） */
@@ -84,7 +87,7 @@ export function ConsoleSidebar({
         className={cn('mt-4 min-h-0 flex-1 overflow-y-auto', collapsed ? 'px-2' : 'px-3')}
       >
         <ul className="space-y-0.5">
-          {CONSOLE_NAV.map((item) => {
+          {visibleNav(affiliateEnabled).map((item) => {
             const active = isNavActive(pathname, item.href);
             const label = t(`nav.${item.key}`);
             return (

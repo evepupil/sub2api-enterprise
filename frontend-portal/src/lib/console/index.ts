@@ -2,7 +2,6 @@ export * from './account';
 export * from './billing';
 export * from './chat';
 export * from './format';
-export * from './invite';
 export * from './keys';
 export * from './logs';
 export * from './org';

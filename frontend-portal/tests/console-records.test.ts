@@ -7,8 +7,6 @@ import {
   DEFAULT_RANGE,
   filterLogs,
   filterTickets,
-  INVITEES,
-  inviteStats,
   logsToCsv,
   maskKey,
   ORG_MEMBERS,
@@ -109,17 +107,7 @@ describe('充值弹窗', () => {
   });
 });
 
-describe('邀请、组织、工单', () => {
-  it('邀请统计', () => {
-    expect(inviteStats(INVITEES)).toEqual({
-      invited: 4,
-      effective: 3,
-      totalRebateUsd: 20,
-      releasedUsd: 17,
-      frozenUsd: 3,
-    });
-  });
-
+describe('组织、工单', () => {
   it('组织成员配额', () => {
     const admin = ORG_MEMBERS[0]!;
     expect(quotaRatio(admin)).toBeNull();
