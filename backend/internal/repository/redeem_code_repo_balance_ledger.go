@@ -15,8 +15,10 @@ import (
 // 一个用户的余额变动记录不多（充值、兑换、调整，通常几十到几百条），流水整份在库里拼好再筛选分页；
 // 只有「每一笔之后的余额」要加回这笔之后的调用扣费，这一项只对当前页的几行按用户与时间查使用记录。
 
-// balanceLedgerCTE 把兑换记录（含在线充值、管理员调整、邀请返利转入）、优惠码使用记录、余额订单退款
+// balanceLedgerCTE 把兑换记录（含在线充值、管理员调整）、邀请返利转入、优惠码使用记录、余额订单退款
 // 拼成一份流水，$1 是用户 ID。兑换记录能对上某个充值订单的兑换码时算在线充值，来源取订单的支付方式。
+// 邀请返利转入记在邀请返利流水（action = 'transfer'）里，编号照管理端余额记录写成 AFF-序号；
+// 兑换记录里的 affiliate_balance 类只有旧数据才有，照样算进来（管理端也是两处合并显示）。
 const balanceLedgerCTE = `WITH ledger AS (
 	SELECT 'rc_' || rc.id AS id,
 		CASE
@@ -40,6 +42,11 @@ const balanceLedgerCTE = `WITH ledger AS (
 	LEFT JOIN payment_orders po ON po.recharge_code = rc.code AND po.user_id = rc.used_by
 	WHERE rc.used_by = $1 AND rc.status = 'used' AND rc.used_at IS NOT NULL
 		AND rc.type IN ('balance', 'admin_balance', 'affiliate_balance')
+	UNION ALL
+	SELECT 'af_' || ual.id, 'affiliate', 'affiliate', ual.amount::double precision, ual.created_at,
+		'AFF-' || ual.id, '', NULL::double precision
+	FROM user_affiliate_ledger ual
+	WHERE ual.user_id = $1 AND ual.action = 'transfer' AND ual.amount > 0
 	UNION ALL
 	SELECT 'pc_' || pcu.id, 'promo', 'promo_code', pcu.bonus_amount::double precision, pcu.used_at,
 		COALESCE(pc.code, ''), '', NULL::double precision

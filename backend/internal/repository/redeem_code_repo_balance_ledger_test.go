@@ -31,10 +31,13 @@ func TestBalanceLedgerWhereNumbersParametersAfterUserID(t *testing.T) {
 }
 
 func TestBalanceLedgerCTECoversEveryBalanceChange(t *testing.T) {
-	// 流水只含余额变动：兑换记录里的余额类（在线充值、兑换码、管理员调整、邀请返利转入）、优惠码赠送、余额订单退款
+	// 流水只含余额变动：兑换记录里的余额类（在线充值、兑换码、管理员调整）、邀请返利转入、优惠码赠送、余额订单退款
 	for _, fragment := range []string{
 		"rc.type IN ('balance', 'admin_balance', 'affiliate_balance')",
 		"LEFT JOIN payment_orders po ON po.recharge_code = rc.code AND po.user_id = rc.used_by",
+		// 邀请返利转入记在邀请返利流水里，不在兑换记录里（管理端余额记录同样从这里读）
+		"FROM user_affiliate_ledger ual",
+		"ual.action = 'transfer'",
 		"FROM promo_code_usages pcu",
 		"po.order_type = 'balance' AND po.refund_at IS NOT NULL AND po.refund_amount > 0",
 	} {

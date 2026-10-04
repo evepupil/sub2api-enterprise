@@ -397,7 +397,7 @@ pnpm format:check  # prettier
 | 控制台用量页 | 2026-10-03 接通后端，显示登录账号自己的真实用量：后端用量总览接口（技术设计 18.2）、官网转发 `src/app/api/portal/console/usage/`、取数与换算 `src/lib/console/live/` |
 | 控制台模型页 | 2026-10-04 接通后端：分组、模型、实付价、官方价来自后端模型广场（技术设计 18.3），官网转发 `src/app/api/portal/console/models/`、换算 `src/lib/console/live/models-*.ts`；展示名、厂商、协议、上下文仍取官网目录（见上面「30 个模型」一行） |
 | 控制台日志页 | 2026-10-04 接通后端：登录账号计费成功的调用（后端 `/api/v1/usage`，技术设计 18.4），官网转发 `src/app/api/portal/console/logs/`（列表、筛选选项、导出 CSV）、换算 `src/lib/console/live/logs-*.ts`；费用旁的费用明细、模型旁的 Fast 标签都按后端记录算。用量、模型、日志、账单、邀请、密钥几页以外的控制台页面仍是占位数据（**编的**） |
-| 控制台账单页 | 2026-10-04 接通后端：余额卡（可用余额、累计充值、累计赠送、累计消耗）与交易记录（只含余额变动，由兑换记录、充值订单、优惠码、退款拼成，每笔之后的余额按现在的余额倒推）来自后端新加的两个接口（技术设计 18.5），兑换码走后端真实兑换；官网转发 `src/app/api/portal/console/billing/`、换算 `src/lib/console/live/billing-*.ts`。充值弹窗还没接支付，档位、赠送与支付方式是占位（**编的**），`src/lib/console/billing.ts` |
+| 控制台账单页 | 2026-10-04 接通后端：余额卡（可用余额、累计充值、累计赠送、累计消耗）与交易记录（只含余额变动，由兑换记录、充值订单、邀请返利转入、优惠码、退款拼成，每笔之后的余额按现在的余额倒推）来自后端新加的两个接口（技术设计 18.5），兑换码走后端真实兑换；官网转发 `src/app/api/portal/console/billing/`、换算 `src/lib/console/live/billing-*.ts`。充值弹窗还没接支付，档位、赠送与支付方式是占位（**编的**），`src/lib/console/billing.ts` |
 | 控制台邀请页 | 2026-10-04 接 sub2api 原有的邀请返利（后端不改，技术设计 18.7）：邀请码、返利比例、返利统计、被邀请人与转入余额都来自后端，官网转发 `src/app/api/portal/console/invite/`、换算 `src/lib/console/live/invite-*.ts`；后台没开邀请返利时侧栏不显示入口 |
 | 控制台密钥页 | 2026-10-04 接通后端：密钥列表（完整密钥、分组与专属倍率、近 30 天与今日用量）和创建、编辑、暂停、删除都走后端现有的密钥接口（技术设计 18.6），创建与编辑照 sub2api 的密钥表单；官网转发 `src/app/api/portal/console/keys/`、取数与规则 `src/lib/console/live/keys-*.ts`。接入示例里 curl 用的模型名是示意（**编的**） |
 
