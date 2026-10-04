@@ -33,14 +33,12 @@ import { cn } from '@/lib/utils';
 import { KeysCreateDialog } from './keys-create-dialog';
 import { KeysEditDialog } from './keys-edit-dialog';
 import { KeysTable } from './keys-table';
-import { KeysUsageDialog } from './keys-usage-dialog';
 
-/** 当前打开的弹窗：同一时刻只有一个；编辑、接入、删除带着那一行 */
+/** 当前打开的弹窗：同一时刻只有一个；编辑、删除带着那一行 */
 type KeysDialog =
   | { kind: 'none' }
   | { kind: 'create' }
   | { kind: 'edit'; key: LiveKey }
-  | { kind: 'usage'; key: LiveKey }
   | { kind: 'delete'; key: LiveKey };
 
 /** 搜索框停下这么久才去查 */
@@ -245,7 +243,6 @@ export function KeysPage() {
               }
               handlers={(row) => ({
                 onToggleReveal: () => toggleReveal(row.id),
-                onConnect: () => setDialog({ kind: 'usage', key: row }),
                 onEdit: () => setDialog({ kind: 'edit', key: row }),
                 onToggleStatus: () => toggleStatus(row),
                 onDelete: () => setDialog({ kind: 'delete', key: row }),
@@ -297,7 +294,6 @@ export function KeysPage() {
           onChanged={refreshList}
         />
       ) : null}
-      {dialog.kind === 'usage' ? <KeysUsageDialog row={dialog.key} onClose={closeDialog} /> : null}
       <ConfirmDialog
         id="delete-key"
         open={dialog.kind === 'delete'}

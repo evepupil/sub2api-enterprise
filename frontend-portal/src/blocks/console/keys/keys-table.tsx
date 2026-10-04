@@ -8,7 +8,7 @@ import type { LiveKey } from '@/lib/console/live/keys-types';
 
 import { KeysRow, type KeysRowHandlers } from './keys-row';
 
-/** 密钥表：整张表最小 1100 宽，小屏横向滚动，操作列固定在右侧 */
+/** 密钥表：整张表最小 1020 宽，小屏横向滚动，操作列固定在右侧 */
 export function KeysTable({
   rows,
   revealed,
@@ -30,7 +30,7 @@ export function KeysTable({
   const tc = useTranslations('console');
   return (
     <TableShell id="keys" footer={footer}>
-      <Table minWidth={1100}>
+      <Table minWidth={1020}>
         <thead>
           <tr>
             <Th>{t('table.name')}</Th>

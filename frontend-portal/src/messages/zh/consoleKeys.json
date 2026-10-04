@@ -4,7 +4,6 @@
   },
   "actions": {
     "create": "创建密钥",
-    "connect": "接入",
     "edit": "编辑",
     "pause": "暂停",
     "resume": "启用",
@@ -74,14 +73,6 @@
   },
   "edit": {
     "title": "编辑密钥"
-  },
-  "usage": {
-    "title": "接入 {name}",
-    "clientLabel": "接入方式",
-    "claude": "Claude Code",
-    "codex": "Codex CLI",
-    "curl": "curl",
-    "copy": "复制代码"
   },
   "delete": {
     "title": "删除密钥「{name}」？",

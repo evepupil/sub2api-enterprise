@@ -6,7 +6,6 @@ import {
   roundCents,
 } from '@/blocks/console/billing/billing-rules';
 import { chatReducer, createChatState, STREAM_STEP } from '@/blocks/console/chat/chat-reducer';
-import { buildSnippet } from '@/blocks/console/keys/keys-snippets';
 import { clearFilters, DEFAULT_QUERY, paginationKey } from '@/blocks/console/models/models-state';
 import {
   buildInvitation,
@@ -32,16 +31,6 @@ import {
   withStatus,
 } from '@/blocks/console/tickets/tickets-logic';
 import { CHAT_REPLIES, CHAT_SAMPLE, ORG_MEMBERS, TICKETS } from '@/lib/console';
-import { SITE } from '@/lib/site';
-
-describe('密钥页接入示例', () => {
-  it('地址取站点配置，密钥填这一行的完整密钥', () => {
-    const snippet = buildSnippet('codex', 'sk-test');
-    expect(snippet).toContain(`base_url = "${SITE.apiBase}/v1"`);
-    expect(snippet).toContain('export CODU_API_KEY=sk-test');
-    expect(buildSnippet('claude', 'sk-test')).toContain('ANTHROPIC_AUTH_TOKEN=sk-test');
-  });
-});
 
 describe('组织页规则', () => {
   it('配额提醒档位与成员搜索', () => {

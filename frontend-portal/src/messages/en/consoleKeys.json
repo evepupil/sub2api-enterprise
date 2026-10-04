@@ -4,7 +4,6 @@
   },
   "actions": {
     "create": "Create key",
-    "connect": "Connect",
     "edit": "Edit",
     "pause": "Pause",
     "resume": "Resume",
@@ -74,14 +73,6 @@
   },
   "edit": {
     "title": "Edit key"
-  },
-  "usage": {
-    "title": "Connect {name}",
-    "clientLabel": "Client",
-    "claude": "Claude Code",
-    "codex": "Codex CLI",
-    "curl": "curl",
-    "copy": "Copy code"
   },
   "delete": {
     "title": "Delete “{name}”?",

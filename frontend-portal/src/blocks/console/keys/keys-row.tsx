@@ -1,9 +1,8 @@
 'use client';
 
-import { Pause, Pencil, Play, Terminal, Trash2 } from 'lucide-react';
+import { Pause, Pencil, Play, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
-import { Button } from '@/components/console/button';
 import { Td, Tr } from '@/components/console/data-table';
 import { Badge, type BadgeTone } from '@/components/ui/badge';
 import type { KeyStatus, LiveKey } from '@/lib/console/live/keys-types';
@@ -28,7 +27,6 @@ const STATUS_TONE: Record<KeyStatus, BadgeTone> = {
 
 export interface KeysRowHandlers {
   onToggleReveal: () => void;
-  onConnect: () => void;
   onEdit: () => void;
   onToggleStatus: () => void;
   onDelete: () => void;
@@ -43,7 +41,6 @@ export function KeysRow({
   revealed,
   busy,
   onToggleReveal,
-  onConnect,
   onEdit,
   onToggleStatus,
   onDelete,
@@ -84,10 +81,6 @@ export function KeysRow({
       </Td>
       <Td sticky="right">
         <div className="flex items-center justify-end gap-1">
-          <Button variant="secondary" size="sm" data-key-usage={row.id} onClick={onConnect}>
-            <Terminal aria-hidden />
-            {t('actions.connect')}
-          </Button>
           <KeysIconButton icon={Pencil} label={t('actions.edit')} data-key-edit onClick={onEdit} />
           <KeysIconButton
             icon={active ? Pause : Play}
