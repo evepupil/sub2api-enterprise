@@ -99,6 +99,8 @@ type paymentFulfillmentAffiliateRepoStub struct {
 	inviteeSummary *AffiliateSummary
 	inviterSummary *AffiliateSummary
 	accrueCalls    []paymentFulfillmentAffiliateAccrueCall
+	// 返利自动到账：发完返利后把谁的返利转进了余额
+	transferCalls []int64
 }
 
 func (r *paymentFulfillmentAffiliateRepoStub) EnsureUserAffiliate(_ context.Context, userID int64) (*AffiliateSummary, error) {
@@ -146,8 +148,9 @@ func (r *paymentFulfillmentAffiliateRepoStub) ThawFrozenQuota(context.Context, i
 	panic("unexpected ThawFrozenQuota call")
 }
 
-func (r *paymentFulfillmentAffiliateRepoStub) TransferQuotaToBalance(context.Context, int64) (float64, float64, error) {
-	panic("unexpected TransferQuotaToBalance call")
+func (r *paymentFulfillmentAffiliateRepoStub) TransferQuotaToBalance(_ context.Context, userID int64) (float64, float64, error) {
+	r.transferCalls = append(r.transferCalls, userID)
+	return 0, 0, ErrAffiliateQuotaEmpty
 }
 
 func (r *paymentFulfillmentAffiliateRepoStub) ListInvitees(context.Context, int64, int) ([]AffiliateInvitee, error) {
@@ -1191,6 +1194,8 @@ func TestExecuteSubscriptionFulfillmentAppliesAffiliateRebate(t *testing.T) {
 	require.NotNil(t, affiliateRepo.accrueCalls[0].sourceOrderID)
 	require.Equal(t, order.ID, *affiliateRepo.accrueCalls[0].sourceOrderID)
 	require.Equal(t, 1, subRepo.createCalls)
+	// 返利自动到账：返利在充值事务里落库，事务提交后才转进邀请人余额，而且只转一次
+	require.Equal(t, []int64{inviterID}, affiliateRepo.transferCalls)
 
 	applied, err := client.PaymentAuditLog.Query().
 		Where(paymentauditlog.OrderIDEQ(strconv.FormatInt(order.ID, 10)), paymentauditlog.ActionEQ("AFFILIATE_REBATE_APPLIED")).
@@ -1284,6 +1289,7 @@ func TestExecuteSubscriptionFulfillmentDoesNotDuplicateWorkAfterLegacySuccessAud
 	require.NoError(t, err)
 	require.Equal(t, OrderStatusCompleted, reloaded.Status)
 	require.Empty(t, affiliateRepo.accrueCalls)
+	require.Empty(t, affiliateRepo.transferCalls)
 	require.Zero(t, subRepo.createCalls)
 }
 

@@ -15,8 +15,8 @@ import { InviteInviteesTable } from './invite-invitees-table';
 import { InviteLinkPanel } from './invite-link-panel';
 
 /**
- * 邀请返利页（接 sub2api 原有的邀请返利）：邀请链接与规则、四项统计与转入余额，下面是邀请记录。
- * 后台没开邀请返利时侧栏不显示入口；直接打开这页时显示没开启。转入余额成功后重新取一次数据。
+ * 邀请返利页（接 sub2api 的邀请返利，返利由后端自动进余额）：邀请链接与规则、三项统计，下面是邀请记录。
+ * 后台没开邀请返利时侧栏不显示入口；直接打开这页时显示没开启。取不到时可以重试。
  */
 export function InvitePage() {
   const t = useTranslations('consoleInvite');
@@ -48,7 +48,7 @@ export function InvitePage() {
         <EmptyState id="invite-disabled" icon={Gift} title={t('disabled')} />
       ) : (
         <>
-          <InviteLinkPanel detail={state.detail} refreshing={live.loading} onTransferred={reload} />
+          <InviteLinkPanel detail={state.detail} />
           <InviteInviteesTable detail={state.detail} />
         </>
       )}

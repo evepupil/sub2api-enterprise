@@ -396,6 +396,15 @@ func ProvideAccountExpiryService(accountRepo AccountRepository) *AccountExpirySe
 	return svc
 }
 
+// ProvideAffiliateRebateSettlementService 创建并启动邀请返利自动到账的兜底（企业版，每分钟一轮）。
+// 返利仓库没实现兜底查询时不启动。
+func ProvideAffiliateRebateSettlementService(repo AffiliateRepository, affiliateService *AffiliateService) *AffiliateRebateSettlementService {
+	lister, _ := repo.(AffiliatePendingRebateLister)
+	svc := NewAffiliateRebateSettlementService(lister, affiliateService, time.Minute)
+	svc.Start()
+	return svc
+}
+
 // ProvideOpenAICodexVersionSyncService creates and starts OpenAICodexVersionSyncService.
 // 出站 Codex 身份的版本号靠它跟随官方发布，无需为了跟版本而发新版本；面板可关闭。
 func ProvideOpenAICodexVersionSyncService(
@@ -923,6 +932,7 @@ var ProviderSet = wire.NewSet(
 	ProvideTokenRefreshService,
 	wire.Bind(new(GrokOAuthReconciler), new(*TokenRefreshService)),
 	ProvideAccountExpiryService,
+	ProvideAffiliateRebateSettlementService,
 	ProvideOpenAICodexVersionSyncService,
 	ProvideProxyExpiryService,
 	ProvideSubscriptionExpiryService,

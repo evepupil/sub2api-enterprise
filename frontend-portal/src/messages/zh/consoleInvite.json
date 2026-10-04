@@ -14,26 +14,17 @@
   },
   "rules": {
     "invite": "<b>邀请：</b>把邀请链接或邀请码发给朋友，对方用它注册后就和你绑定。",
-    "rebate": "<b>返利：</b>对方每次充值，你获得充值金额 {rate} 的返利。",
-    "payout": "<b>到账：</b>返利可以随时转入余额，用来调用模型。",
-    "frozen": "新产生的返利要过了冻结期才能转入余额。"
+    "rebate": "<b>返利：</b>朋友每次充值到账，你获得到账金额 {rate} 的返利。",
+    "duration": "只算朋友注册后 {days} 天内的充值。",
+    "cap": "每位朋友最多为你带来 {amount} 返利。",
+    "payout": "<b>到账：</b>返利立刻进你的余额。",
+    "payoutFrozen": "<b>到账：</b>返利冻结 {unit, select, days {{count} 天} other {{count} 小时}}，到期后自动进你的余额。"
   },
   "stats": {
     "total": "累计返利",
-    "available": "可转入余额",
-    "frozen": "冻结中",
+    "pending": "待到账",
     "invited": "邀请人数",
     "rebated": "其中 {count} 人已产生返利"
-  },
-  "transfer": {
-    "action": "转入余额",
-    "working": "转入中…",
-    "done": "已转入余额 {amount}",
-    "errors": {
-      "empty": "没有可转入的返利",
-      "too_many": "操作太频繁，请稍后再试",
-      "unavailable": "服务暂时不可用，请稍后再试"
-    }
   },
   "invitees": {
     "title": "邀请记录",

@@ -2,22 +2,25 @@ import { describe, expect, it } from 'vitest';
 
 import { visibleNav } from '@/components/console/shell/nav-items';
 import type { AffiliateDetail } from '@/lib/console/live/invite-types';
-import { inviteesTruncated, inviteLink, rebatedInviteeCount } from '@/lib/console/live/invite-view';
 import {
-  toAffiliateDetail,
-  toAffiliateTransfer,
-  transferErrorFor,
-} from '@/lib/server/sub2api/affiliate';
-import { backendError } from '@/lib/server/sub2api/envelope';
+  freezePeriod,
+  inviteesTruncated,
+  inviteLink,
+  rebatedInviteeCount,
+} from '@/lib/console/live/invite-view';
+import { toAffiliateDetail } from '@/lib/server/sub2api/affiliate';
 
 const RAW_DETAIL = {
   user_id: 2,
   aff_code: 'U47FHLDJ5VTG',
   aff_count: 3,
-  aff_quota: 1.5,
+  aff_quota: 0.25,
   aff_frozen_quota: 0.5,
   aff_history_quota: 2,
   effective_rebate_rate_percent: 12.5,
+  rebate_freeze_hours: 72,
+  rebate_duration_days: 30,
+  rebate_per_invitee_cap: 50,
   invitees: [
     {
       user_id: 41,
@@ -32,14 +35,13 @@ const RAW_DETAIL = {
 };
 
 describe('邀请页：后端结果的转换', () => {
-  it('详情换成页面用的形状，认不出的被邀请人整行丢掉', () => {
+  it('详情换成页面用的形状：规则带后台设置，可转的和冻结中的都算待到账，认不出的被邀请人整行丢掉', () => {
     expect(toAffiliateDetail(RAW_DETAIL)).toEqual({
       code: 'U47FHLDJ5VTG',
-      ratePercent: 12.5,
+      rules: { ratePercent: 12.5, freezeHours: 72, durationDays: 30, perInviteeCapUsd: 50 },
       invited: 3,
-      availableUsd: 1.5,
-      frozenUsd: 0.5,
       totalUsd: 2,
+      pendingUsd: 0.75,
       invitees: [
         {
           id: '41',
@@ -53,26 +55,32 @@ describe('邀请页：后端结果的转换', () => {
     });
   });
 
-  it('缺邀请码或任何一个金额、人数都当取不到', () => {
+  it('旧版后端没带规则设置、或设置不合法时按不冻结、永久有效、不设上限', () => {
+    const legacy: Record<string, unknown> = { ...RAW_DETAIL };
+    delete legacy.rebate_freeze_hours;
+    delete legacy.rebate_duration_days;
+    delete legacy.rebate_per_invitee_cap;
+    expect(toAffiliateDetail(legacy)?.rules).toEqual({
+      ratePercent: 12.5,
+      freezeHours: 0,
+      durationDays: 0,
+      perInviteeCapUsd: 0,
+    });
+    expect(toAffiliateDetail({ ...RAW_DETAIL, rebate_freeze_hours: -5 })?.rules.freezeHours).toBe(
+      0,
+    );
+  });
+
+  it('缺邀请码或任何一个金额、人数、比例都当取不到', () => {
     expect(toAffiliateDetail({ ...RAW_DETAIL, aff_code: '' })).toBeNull();
     expect(toAffiliateDetail({ ...RAW_DETAIL, aff_quota: null })).toBeNull();
+    expect(toAffiliateDetail({ ...RAW_DETAIL, effective_rebate_rate_percent: 'x' })).toBeNull();
     expect(toAffiliateDetail({ ...RAW_DETAIL, invitees: undefined })?.invitees).toEqual([]);
     expect(toAffiliateDetail('x')).toBeNull();
   });
-
-  it('转入结果与错误归类', () => {
-    expect(toAffiliateTransfer({ transferred_quota: 1.5, balance: 135.7 })).toEqual({
-      transferredUsd: 1.5,
-      balanceUsd: 135.7,
-    });
-    expect(toAffiliateTransfer({ transferred_quota: 1.5 })).toBeNull();
-    expect(transferErrorFor(backendError(400, 'AFFILIATE_QUOTA_EMPTY'))).toBe('empty');
-    expect(transferErrorFor(backendError(429, ''))).toBe('too_many');
-    expect(transferErrorFor(backendError(503, 'SERVICE_UNAVAILABLE'))).toBe('unavailable');
-  });
 });
 
-describe('邀请页：链接与统计', () => {
+describe('邀请页：链接、统计与规则写法', () => {
   const detail = toAffiliateDetail(RAW_DETAIL) as AffiliateDetail;
 
   it('邀请链接指向本站注册页，英文界面带 /en，邀请码做网址转义', () => {
@@ -88,6 +96,12 @@ describe('邀请页：链接与统计', () => {
     expect(rebatedInviteeCount(detail)).toBe(1);
     expect(inviteesTruncated(detail)).toBe(true);
     expect(inviteesTruncated({ ...detail, invited: 2 })).toBe(false);
+  });
+
+  it('冻结期整天数写天，否则写小时', () => {
+    expect(freezePeriod(72)).toEqual({ unit: 'days', count: 3 });
+    expect(freezePeriod(24)).toEqual({ unit: 'days', count: 1 });
+    expect(freezePeriod(36)).toEqual({ unit: 'hours', count: 36 });
   });
 
   it('后台没开邀请返利或还没读到开关时，侧栏不显示「邀请」', () => {

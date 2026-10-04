@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	dbent "github.com/Wei-Shaw/sub2api/ent"
 	infraerrors "github.com/Wei-Shaw/sub2api/internal/pkg/errors"
 	"github.com/Wei-Shaw/sub2api/internal/pkg/logger"
 )
@@ -92,6 +93,10 @@ type AffiliateDetail struct {
 	// 用于在用户的 /affiliate 页面直观展示「分享后能拿到多少」。
 	EffectiveRebateRatePercent float64            `json:"effective_rebate_rate_percent"`
 	Invitees                   []AffiliateInvitee `json:"invitees"`
+	// 企业版：返利规则里的后台设置，官网邀请页照实写规则（0 表示不冻结 / 永久有效 / 不设上限）
+	RebateFreezeHours   int     `json:"rebate_freeze_hours"`
+	RebateDurationDays  int     `json:"rebate_duration_days"`
+	RebatePerInviteeCap float64 `json:"rebate_per_invitee_cap"`
 }
 
 type AffiliateRepository interface {
@@ -253,7 +258,7 @@ func (s *AffiliateService) GetAffiliateDetail(ctx context.Context, userID int64)
 	if err != nil {
 		return nil, err
 	}
-	return &AffiliateDetail{
+	detail := &AffiliateDetail{
 		UserID:                     summary.UserID,
 		AffCode:                    summary.AffCode,
 		InviterID:                  summary.InviterID,
@@ -263,7 +268,13 @@ func (s *AffiliateService) GetAffiliateDetail(ctx context.Context, userID int64)
 		AffHistoryQuota:            summary.AffHistoryQuota,
 		EffectiveRebateRatePercent: s.resolveRebateRatePercent(ctx, summary),
 		Invitees:                   invitees,
-	}, nil
+	}
+	if s.settingService != nil {
+		detail.RebateFreezeHours = s.settingService.GetAffiliateRebateFreezeHours(ctx)
+		detail.RebateDurationDays = s.settingService.GetAffiliateRebateDurationDays(ctx)
+		detail.RebatePerInviteeCap = s.settingService.GetAffiliateRebatePerInviteeCap(ctx)
+	}
+	return detail, nil
 }
 
 func (s *AffiliateService) BindInviterByCode(ctx context.Context, userID int64, rawCode string) error {
@@ -382,6 +393,11 @@ func (s *AffiliateService) AccrueInviteRebateForOrder(ctx context.Context, invit
 	}
 	if !applied {
 		return 0, nil
+	}
+	// 企业版：返利自动到账。不在调用方的事务里时返利已经落库，马上转进邀请人余额；
+	// 在事务里（在线充值）由调用方提交后再转，免得事务回滚了余额却已经动过（见 affiliate_auto_settle.go）
+	if dbent.TxFromContext(ctx) == nil {
+		s.settleBestEffort(ctx, *inviteeSummary.InviterID)
 	}
 	return rebate, nil
 }

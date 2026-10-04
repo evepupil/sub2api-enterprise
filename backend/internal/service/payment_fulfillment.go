@@ -733,6 +733,8 @@ func (s *PaymentService) applyAffiliateRebateForOrder(ctx context.Context, o *db
 		})
 		return fmt.Errorf("commit affiliate rebate tx: %w", err)
 	}
+	// 企业版：返利自动到账。返利已提交，接着转进邀请人余额（失败由每分钟的兜底再转）
+	s.affiliateService.SettleInviterOf(ctx, o.UserID)
 	return nil
 }
 

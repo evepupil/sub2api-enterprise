@@ -14,26 +14,17 @@
   },
   "rules": {
     "invite": "<b>Invite:</b> send your link or code to a friend. Once they sign up with it, they're linked to you.",
-    "rebate": "<b>Rebate:</b> every time they top up, you earn {rate} of the amount.",
-    "payout": "<b>Payout:</b> move rebates to your balance at any time and spend them on API calls.",
-    "frozen": "New rebates can be moved once their holding period ends."
+    "rebate": "<b>Rebate:</b> every time they top up, you earn {rate} of the amount credited.",
+    "duration": "Only top-ups within {days, plural, one {# day} other {# days}} of their sign-up count.",
+    "cap": "Each friend can earn you up to {amount}.",
+    "payout": "<b>Payout:</b> rebates go straight to your balance.",
+    "payoutFrozen": "<b>Payout:</b> rebates are held for {unit, select, days {{count, plural, one {# day} other {# days}}} other {{count, plural, one {# hour} other {# hours}}}}, then go to your balance automatically."
   },
   "stats": {
     "total": "Total rebates",
-    "available": "Ready to move",
-    "frozen": "On hold",
+    "pending": "Pending",
     "invited": "Invited",
     "rebated": "{count, plural, one {# of them has} other {# of them have}} earned you rebates"
-  },
-  "transfer": {
-    "action": "Move to balance",
-    "working": "Moving…",
-    "done": "{amount} moved to your balance",
-    "errors": {
-      "empty": "No rebates to move",
-      "too_many": "Too many attempts. Try again shortly",
-      "unavailable": "Service unavailable. Try again later"
-    }
   },
   "invitees": {
     "title": "Referral history",
