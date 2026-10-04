@@ -1,17 +1,17 @@
-import { daysBetween } from '@/lib/console/time';
-import {
-  USAGE_MAX_RANGE_DAYS,
-  type UsageOverview,
-  type UsageOverviewBucket,
-  type UsageOverviewPoint,
+import type {
+  UsageOverview,
+  UsageOverviewBucket,
+  UsageOverviewPoint,
 } from '@/lib/console/live/usage-types';
+
+import { CONSOLE_TIMEZONE, parseDateRange } from './date-range';
 
 /**
  * 控制台用量页的后端接口：查询参数的校验、拼后端地址、把后端结果换成浏览器用的形状。纯函数，单测锁住。
  * 后端接口见技术设计 18.2；日期一律按北京时间划分，和控制台显示一致。
  */
 
-export const USAGE_TIMEZONE = 'Asia/Shanghai';
+export const USAGE_TIMEZONE = CONSOLE_TIMEZONE;
 
 export interface UsageQuery {
   from: string;
@@ -20,21 +20,10 @@ export interface UsageQuery {
   detail: boolean;
 }
 
-const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
-
-function isDateKey(value: string | null): value is string {
-  if (value === null || !DATE_PATTERN.test(value)) return false;
-  const time = Date.parse(`${value}T00:00:00Z`);
-  return !Number.isNaN(time) && new Date(time).toISOString().slice(0, 10) === value;
-}
-
 /** 浏览器传来的 ?from=&to=&detail=1；日期不合法、起止颠倒或超过最长范围时返回 null */
 export function parseUsageQuery(params: URLSearchParams): UsageQuery | null {
-  const from = params.get('from');
-  const to = params.get('to');
-  if (!isDateKey(from) || !isDateKey(to) || from > to) return null;
-  if (daysBetween(from, to) + 1 > USAGE_MAX_RANGE_DAYS) return null;
-  return { from, to, detail: params.get('detail') === '1' };
+  const range = parseDateRange(params);
+  return range ? { ...range, detail: params.get('detail') === '1' } : null;
 }
 
 /** 后端地址：一天按小时，多天按天；要明细时带上三个拆分维度 */

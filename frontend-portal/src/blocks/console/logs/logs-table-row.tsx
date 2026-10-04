@@ -1,116 +1,60 @@
 'use client';
 
-import { ArrowDown, ArrowUp, Database, type LucideIcon } from 'lucide-react';
-import { useLocale, useTranslations } from 'next-intl';
-
 import { ProviderLogo } from '@/components/catalog/provider-logo';
 import { Td, Tr } from '@/components/console/data-table';
-import { Badge } from '@/components/ui/badge';
-import type { AppLocale } from '@/i18n/routing';
-import { getEdition, getModel } from '@/lib/catalog';
-import {
-  formatCompact,
-  formatDateTime,
-  formatDuration,
-  formatUsd,
-  type RequestLog,
-} from '@/lib/console';
+import { formatDateTime, formatUsd } from '@/lib/console';
+import type { LogRow } from '@/lib/console/live/logs-types';
+import { catalogEntry, inferProvider } from '@/lib/console/live/models-view';
 
+import { BillingCell, DurationCell, KeyCell, TokensCell } from './logs-cells';
 import { LogsRowMenu } from './logs-row-menu';
 import type { OpenLogDetail } from './logs-types';
 
-/** Token 一格里的一小段：图标 + 数字。图标只是装饰，含义靠悬停提示和读屏文字 */
-function TokenPart({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: LucideIcon;
-  label: string;
-  value: number;
-}) {
-  return (
-    <span title={label} className="inline-flex items-center gap-1">
-      <Icon aria-hidden className="size-3.5 text-subtle-foreground" />
-      <span className="sr-only">{label}</span>
-      {formatCompact(value)}
-    </span>
-  );
-}
-
 /**
- * 请求表的一行。时间拆成日期和时分秒两行；模型调用名是打开详情的入口；
- * 失败请求在状态格里直接写错误名；最后一格固定在右侧，横向滚动时也能点。
+ * 日志表的一行（一次计费成功的调用）。时间拆成日期和时分秒两行、固定在左侧；
+ * 模型名是打开详情的入口；最后一格（更多操作）固定在右侧，横向滚动时也能点。
  */
-export function LogsTableRow({
-  log,
-  onOpenDetail,
-}: {
-  log: RequestLog;
-  onOpenDetail: OpenLogDetail;
-}) {
-  const t = useTranslations('consoleLogs');
-  const locale = useLocale() as AppLocale;
-
-  const [date = '', time = ''] = formatDateTime(log.ts).split(' ');
+export function LogsTableRow({ log, onOpenDetail }: { log: LogRow; onOpenDetail: OpenLogDetail }) {
+  const [date = '', time = ''] = formatDateTime(Date.parse(log.createdAt)).split(' ');
+  const provider = catalogEntry(log.model)?.provider ?? inferProvider(log.model);
 
   return (
     <Tr data-log-row={log.id}>
-      <Td className="whitespace-nowrap tabular-nums">
+      <Td sticky="left" className="whitespace-nowrap tabular-nums max-sm:static">
         <div className="text-foreground">{date}</div>
         <div className="text-xs text-subtle-foreground">{time}</div>
       </Td>
       <Td>
+        <KeyCell row={log} />
+      </Td>
+      <Td>
         <div className="flex items-center gap-2 whitespace-nowrap">
-          <ProviderLogo provider={getModel(log.modelId).provider} size={16} />
+          {provider ? (
+            <ProviderLogo provider={provider} size={16} />
+          ) : (
+            <span aria-hidden className="size-4 shrink-0 rounded-full bg-muted" />
+          )}
           <button
             type="button"
             data-log-open={log.id}
             onClick={(event) => onOpenDetail(log, event.currentTarget)}
             className="font-mono text-sm underline decoration-dotted underline-offset-4 transition-colors hover:decoration-solid"
           >
-            {log.modelId}
+            {log.model}
           </button>
         </div>
       </Td>
-      <Td className="whitespace-nowrap tabular-nums">
-        {log.type === 'image' ? (
-          t('table.images', { count: log.images })
-        ) : (
-          <span className="inline-flex items-center gap-3">
-            <TokenPart icon={ArrowDown} label={t('table.input')} value={log.inputTokens} />
-            <TokenPart icon={ArrowUp} label={t('table.output')} value={log.outputTokens} />
-            {log.cacheTokens > 0 ? (
-              <TokenPart icon={Database} label={t('table.cache')} value={log.cacheTokens} />
-            ) : null}
-          </span>
-        )}
+      <Td>
+        <TokensCell row={log} />
       </Td>
-      <Td align="right" className="whitespace-nowrap tabular-nums">
-        {formatUsd(log.costUsd)}
-      </Td>
-      <Td className="whitespace-nowrap tabular-nums">
-        {formatDuration(log.durationMs)}
-        {log.ttftMs !== null ? (
-          <span className="ml-1.5 text-xs text-subtle-foreground">
-            {t('table.ttft', { value: formatDuration(log.ttftMs) })}
-          </span>
-        ) : null}
+      <Td align="right" className="whitespace-nowrap font-medium tabular-nums">
+        {formatUsd(log.actualCost)}
       </Td>
       <Td>
-        <Badge tone="outline">{getEdition(log.group).name[locale]}</Badge>
+        <DurationCell row={log} />
       </Td>
       <Td>
-        {log.status === 'success' ? (
-          <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
-            <span aria-hidden className="size-2 rounded-full bg-success-graphic" />
-            {t('table.success')}
-          </span>
-        ) : (
-          <Badge tone="danger">
-            {log.errorCode ? t(`errors.${log.errorCode}`) : t('filters.error')}
-          </Badge>
-        )}
+        <BillingCell row={log} />
       </Td>
       <Td sticky="right" align="center">
         <LogsRowMenu log={log} onOpenDetail={onOpenDetail} />

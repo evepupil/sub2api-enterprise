@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { ProviderLogo } from '@/components/catalog/provider-logo';
 import { buttonClass } from '@/components/console/button';
 import { Td, Tr } from '@/components/console/data-table';
+import { GroupWithRate } from '@/components/console/group-rate';
 import { Badge } from '@/components/ui/badge';
 import { Link } from '@/i18n/navigation';
 import type { AppLocale } from '@/i18n/routing';
@@ -13,7 +14,6 @@ import { PROTOCOL_LABELS, formatContext, getProvider } from '@/lib/catalog';
 import type { LiveCurrency, ModelRowView } from '@/lib/console/live/models-view';
 import { cn } from '@/lib/utils';
 
-import { ChannelCell } from './models-channel';
 import { ModelDiscount, ModelPrice } from './models-price';
 
 /**
@@ -75,7 +75,11 @@ export function ModelRow({
       </Td>
 
       <Td>
-        <ChannelCell channel={row.channel} />
+        <GroupWithRate
+          name={row.channel.name}
+          rate={row.channel.rate}
+          className="text-foreground"
+        />
       </Td>
 
       <Td align="right" className="whitespace-nowrap">

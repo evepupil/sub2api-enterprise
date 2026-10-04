@@ -395,7 +395,8 @@ pnpm format:check  # prettier
 | 注册 | 2026-10-03 接通后端，规则与现有 sub2api 注册页一致：`src/app/api/portal/auth/{settings,register,send-verify-code,validate-invitation-code,validate-promo-code}` 转发、`src/lib/server/sub2api/public-settings.ts` 读后端公开开关、`src/lib/auth/` 注册规则（规格见 `design/登录注册.md` A2） |
 | 找回密码、谷歌登录、人机验证 | 不连后端，入口不显示；后端开了人机验证时，注册失败提示联系管理员 |
 | 控制台用量页 | 2026-10-03 接通后端，显示登录账号自己的真实用量：后端用量总览接口（技术设计 18.2）、官网转发 `src/app/api/portal/console/usage/`、取数与换算 `src/lib/console/live/` |
-| 控制台模型页 | 2026-10-04 接通后端：分组、模型、实付价、官方价来自后端模型广场（技术设计 18.3），官网转发 `src/app/api/portal/console/models/`、换算 `src/lib/console/live/models-*.ts`；展示名、厂商、协议、上下文仍取官网目录（见上面「30 个模型」一行）。用量页、模型页以外的控制台页面仍是占位数据（**编的**） |
+| 控制台模型页 | 2026-10-04 接通后端：分组、模型、实付价、官方价来自后端模型广场（技术设计 18.3），官网转发 `src/app/api/portal/console/models/`、换算 `src/lib/console/live/models-*.ts`；展示名、厂商、协议、上下文仍取官网目录（见上面「30 个模型」一行） |
+| 控制台日志页 | 2026-10-04 接通后端：登录账号计费成功的调用（后端 `/api/v1/usage`，技术设计 18.4），官网转发 `src/app/api/portal/console/logs/`（列表、筛选选项、导出 CSV）、换算 `src/lib/console/live/logs-*.ts`。用量、模型、日志三页以外的控制台页面仍是占位数据（**编的**） |
 
 ---
 
@@ -433,6 +434,7 @@ pnpm format:check  # prettier
 | `CopyButton` / `useCopy` | `copy-button.tsx` | 复制图标按钮（成功后变对勾 1.5 秒），`data-copy={name}`；菜单项里复制用 `useCopy()` |
 | `StackedBarChart` | `charts/stacked-bar-chart.tsx` | 堆叠柱状图 `{ id, labels: { axis, full }[], series: { id, label, color, values }[], formatValue, formatAxis?, ariaLabel, totalLabel, emptyLabel, height? }`；颜色用 `seriesColor(i)`，「其他」用 `OTHER_COLOR`；`data-chart={id}`、`data-buckets` |
 | `ActivityHeatmap` | `charts/activity-heatmap.tsx` | 活跃热力图 `{ data: Heatmap, monthLabel, cellTitle, ariaLabel, lessLabel, moreLabel, weekdayLabels }` |
+| `GroupWithRate` / `RateBadge` | `group-rate.tsx` | 分组名 + 倍率徽标 `{ name, rate, className? }`（只要徽标用 `RateBadge`）；徽标 `data-group-rate`，颜色按倍率分档：低于 ×0.2 绿、低于 ×0.5 蓝、低于 ×1 橙、×1 灰、高于 ×1 红（`rateTone`）。模型页、日志页共用 |
 | `Skeleton` | `skeleton.tsx` | 加载占位块 `{ className?, style? }`：浅灰圆角、轻轻呼吸（减少动效时不动），`data-skeleton`；尺寸和真实内容一样，加载完不跳动 |
 | 外壳件 | `shell/*` | 页面不用直接引用；`Avatar` 可在设置页复用 |
 
@@ -465,7 +467,7 @@ pnpm format:check  # prettier
 
 ### 10.4 控制台实现守则（在第 7 章之外）
 
-- 页面区块全部 `'use client'`，状态用本地 `useState`（对话页的模型参数除外，见页面规格）；除了已接后端的用量页、模型页（经 `src/lib/console/live/`），不发任何网络请求，不用 `Math.random()`、`Date.now()`、`new Date()` 生成显示用的数据（新建密钥、邀请码这类一次性随机串可以用 `crypto.getRandomValues`，只在点击事件里调用）。
+- 页面区块全部 `'use client'`，状态用本地 `useState`（对话页的模型参数除外，见页面规格）；除了已接后端的用量页、模型页、日志页（经 `src/lib/console/live/`），不发任何网络请求，不用 `Math.random()`、`Date.now()`、`new Date()` 生成显示用的数据（新建密钥、邀请码这类一次性随机串可以用 `crypto.getRandomValues`，只在点击事件里调用）。
 - 时间一律用 `formatDateTime` 一类函数（北京时间），金额一律 `formatUsd`（写作 US$，不要自己拼「$」），Token 一律 `formatCompact`。模型单价沿用官网价格表的写法（`formatMoney`，`$` / `¥`）。
 - 新增、编辑、删除只改本页的本地列表；刷新按钮转 600ms 圈后恢复；表单提交先校验（所有出错字段同时标红，焦点落第一个），通过后加载 800–1200ms 再给结果。
 - 每个列表都要有空状态（筛选无结果时给「清除筛选」）；长文本截断；手机 375 宽页面不横向溢出（宽表格在 `TableShell` 里横向滚动，筛选栏折成一到两列）。

@@ -1,23 +1,16 @@
 'use client';
 
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 
 import { ProviderLogo } from '@/components/catalog/provider-logo';
 import { CopyButton } from '@/components/console/copy-button';
 import { Sheet } from '@/components/console/dialog';
-import { Badge } from '@/components/ui/badge';
-import type { AppLocale } from '@/i18n/routing';
-import { getEdition, getModel } from '@/lib/catalog';
-import {
-  curlFor,
-  formatDateTime,
-  formatDuration,
-  formatInteger,
-  formatUsd,
-  getKey,
-  type RequestLog,
-} from '@/lib/console';
+import { GroupWithRate } from '@/components/console/group-rate';
+import { formatDateTime, formatDuration, formatInteger, formatUsd } from '@/lib/console';
+import type { LogRow } from '@/lib/console/live/logs-types';
+import { curlExample, tierOf } from '@/lib/console/live/logs-view';
+import { catalogEntry, inferProvider } from '@/lib/console/live/models-view';
 import { cn } from '@/lib/utils';
 
 /** 没有值时的占位（例如非流式请求没有首字耗时） */
@@ -41,85 +34,107 @@ function DetailRow({
   );
 }
 
-function LogDetailBody({ log }: { log: RequestLog }) {
+function LogDetailBody({ log }: { log: LogRow }) {
   const t = useTranslations('consoleLogs');
-  const locale = useLocale() as AppLocale;
-
-  const model = getModel(log.modelId);
-  const curl = curlFor(log);
-  const succeeded = log.status === 'success';
-  const errorName = log.errorCode ? t(`errors.${log.errorCode}`) : null;
+  const provider = catalogEntry(log.model)?.provider ?? inferProvider(log.model);
+  const tier = tierOf(log.serviceTier);
+  const curl = curlExample(log);
+  const number = (value: number) => <span className="tabular-nums">{formatInteger(value)}</span>;
 
   return (
     <div className="space-y-6 px-5 py-4">
       <dl>
         <DetailRow label={t('detail.time')}>
-          <span className="tabular-nums">{formatDateTime(log.ts)}</span>
+          <span className="tabular-nums">{formatDateTime(Date.parse(log.createdAt))}</span>
         </DetailRow>
-        <DetailRow label={t('detail.requestId')}>
-          <div className="flex items-start justify-between gap-2">
-            <span className="font-mono">{log.id}</span>
-            {/* 按钮比一行字高，用负的上下外边距把行高压回去 */}
-            <CopyButton name="log-id" value={log.id} label={t('menu.copyId')} className="-my-1.5" />
-          </div>
+        {log.requestId ? (
+          <DetailRow label={t('detail.requestId')}>
+            <div className="flex items-start justify-between gap-2">
+              <span className="font-mono">{log.requestId}</span>
+              {/* 按钮比一行字高，用负的上下外边距把行高压回去 */}
+              <CopyButton
+                name="log-id"
+                value={log.requestId}
+                label={t('menu.copyId')}
+                className="-my-1.5"
+              />
+            </div>
+          </DetailRow>
+        ) : null}
+        <DetailRow label={t('detail.key')}>{log.key.name}</DetailRow>
+        <DetailRow label={t('detail.group')}>
+          <GroupWithRate name={log.group?.name ?? t('table.noGroup')} rate={log.rate} />
         </DetailRow>
-        <DetailRow label={t('detail.key')}>{getKey(log.keyId).name}</DetailRow>
-        <DetailRow label={t('detail.group')}>{getEdition(log.group).name[locale]}</DetailRow>
         <DetailRow label={t('detail.model')}>
           <span className="inline-flex items-center gap-2">
-            <ProviderLogo provider={model.provider} size={16} />
-            <span className="font-mono">{log.modelId}</span>
+            {provider ? <ProviderLogo provider={provider} size={16} /> : null}
+            <span className="font-mono">{log.model}</span>
           </span>
         </DetailRow>
-        <DetailRow label={t('detail.type')}>
-          {log.type === 'image' ? t('filters.image') : t('filters.text')}
+        {log.reasoningEffort ? (
+          <DetailRow label={t('detail.reasoning')}>{log.reasoningEffort}</DetailRow>
+        ) : null}
+        <DetailRow label={t('detail.tier')}>
+          {tier ? t(`table.tier.${tier}`) : log.serviceTier}
         </DetailRow>
+        {log.endpoint ? (
+          <DetailRow label={t('detail.endpoint')} mono>
+            {log.endpoint}
+          </DetailRow>
+        ) : null}
         <DetailRow label={t('detail.stream')}>
           {log.stream ? t('detail.yes') : t('detail.no')}
         </DetailRow>
-        <DetailRow label={t('detail.status')}>
-          <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-1">
-            {succeeded ? (
-              <span className="inline-flex items-center gap-1.5">
-                <span aria-hidden className="size-2 rounded-full bg-success-graphic" />
-                {t('filters.success')}
-              </span>
-            ) : (
-              <Badge tone="danger">{t('filters.error')}</Badge>
-            )}
-            <span className="tabular-nums text-muted-foreground">{log.httpStatus}</span>
-            {errorName ? <span className="text-muted-foreground">{errorName}</span> : null}
-          </span>
-        </DetailRow>
-        <DetailRow label={t('detail.finish')}>{t(`finish.${log.finishReason}`)}</DetailRow>
-        <DetailRow label={t('detail.inputTokens')}>
-          <span className="tabular-nums">{formatInteger(log.inputTokens)}</span>
-        </DetailRow>
-        <DetailRow label={t('detail.cacheTokens')}>
-          <span className="tabular-nums">{formatInteger(log.cacheTokens)}</span>
-        </DetailRow>
-        <DetailRow label={t('detail.outputTokens')}>
-          <span className="tabular-nums">{formatInteger(log.outputTokens)}</span>
-        </DetailRow>
-        {log.type === 'image' ? (
+        <DetailRow label={t('detail.inputTokens')}>{number(log.tokens.input)}</DetailRow>
+        <DetailRow label={t('detail.outputTokens')}>{number(log.tokens.output)}</DetailRow>
+        <DetailRow label={t('detail.cacheRead')}>{number(log.tokens.cacheRead)}</DetailRow>
+        <DetailRow label={t('detail.cacheWrite')}>{number(log.tokens.cacheWrite)}</DetailRow>
+        {log.images.count > 0 ? (
           <DetailRow label={t('detail.images')}>
-            <span className="tabular-nums">{t('table.images', { count: log.images })}</span>
+            {log.images.size
+              ? t('table.extra.imagesWithSize', { count: log.images.count, size: log.images.size })
+              : t('table.extra.images', { count: log.images.count })}
           </DetailRow>
         ) : null}
-        <DetailRow label={t('detail.cost')}>
-          <span className="tabular-nums">{formatUsd(log.costUsd)}</span>
+        <DetailRow label={t('detail.officialCost')}>
+          <div className="tabular-nums">
+            <div>{formatUsd(log.costs.total)}</div>
+            <div className="text-xs text-subtle-foreground">
+              {t('detail.officialBreakdown', {
+                input: formatUsd(log.costs.input),
+                output: formatUsd(log.costs.output),
+                cacheRead: formatUsd(log.costs.cacheRead),
+                cacheWrite: formatUsd(log.costs.cacheWrite),
+              })}
+            </div>
+          </div>
         </DetailRow>
+        <DetailRow label={t('detail.actualCost')}>
+          <span className="font-medium tabular-nums">{formatUsd(log.actualCost)}</span>
+        </DetailRow>
+        {log.longContext ? (
+          <DetailRow label={t('detail.longContext')}>{t('detail.yes')}</DetailRow>
+        ) : null}
         <DetailRow label={t('detail.duration')}>
-          <span className="tabular-nums">{formatDuration(log.durationMs)}</span>
-        </DetailRow>
-        <DetailRow label={t('detail.ttft')}>
           <span className="tabular-nums">
-            {log.ttftMs === null ? NONE : formatDuration(log.ttftMs)}
+            {log.durationMs === null ? NONE : formatDuration(log.durationMs)}
           </span>
         </DetailRow>
-        <DetailRow label={t('detail.client')} mono>
-          {log.client}
+        <DetailRow label={t('detail.firstToken')}>
+          <span className="tabular-nums">
+            {log.firstTokenMs === null ? NONE : formatDuration(log.firstTokenMs)}
+          </span>
         </DetailRow>
+        {log.userAgent ? (
+          <DetailRow label={t('detail.client')} mono>
+            {log.userAgent}
+          </DetailRow>
+        ) : null}
+        {log.ip ? (
+          <DetailRow label={t('detail.ip')} mono>
+            {log.ip}
+          </DetailRow>
+        ) : null}
       </dl>
 
       <section>
@@ -142,10 +157,10 @@ function LogDetailBody({ log }: { log: RequestLog }) {
 }
 
 /**
- * 请求详情抽屉：标题是请求 ID，正文是这条请求的全部字段和一条可以直接复制的 curl 示例。
+ * 调用详情抽屉：标题是请求 ID（没有时写模型名），正文是这条记录的全部字段和一条可复制的示意请求。
  * log 为空表示抽屉关闭；点遮罩、按 Esc、点关闭按钮都会通知上层清空。
  */
-export function LogsDetailSheet({ log, onClose }: { log: RequestLog | null; onClose: () => void }) {
+export function LogsDetailSheet({ log, onClose }: { log: LogRow | null; onClose: () => void }) {
   return (
     <Sheet
       id="log-detail"
@@ -153,7 +168,11 @@ export function LogsDetailSheet({ log, onClose }: { log: RequestLog | null; onCl
       onOpenChange={(open) => {
         if (!open) onClose();
       }}
-      title={log ? <span className="break-all font-mono text-sm">{log.id}</span> : null}
+      title={
+        log ? (
+          <span className="break-all font-mono text-sm">{log.requestId || log.model}</span>
+        ) : null
+      }
     >
       {log ? <LogDetailBody log={log} /> : null}
     </Sheet>

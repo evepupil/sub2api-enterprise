@@ -3,86 +3,102 @@
 import { Download } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
+import { Button } from '@/components/console/button';
 import { CONTROL_BUTTON } from '@/components/console/control-button';
 import { DateRangePicker } from '@/components/console/date-range-picker';
-import { FilterField, SearchInput } from '@/components/console/filter-field';
+import { FilterField } from '@/components/console/filter-field';
 import { Panel } from '@/components/console/panel';
 import { Select, type SelectOption } from '@/components/console/select';
-import { Button } from '@/components/console/button';
-import { getModel } from '@/lib/catalog';
-import {
-  API_KEYS,
-  logsToCsv,
-  TODAY,
-  USED_MODEL_IDS,
-  type LogFilter,
-  type RequestLog,
-} from '@/lib/console';
+import type { DateRange } from '@/lib/console';
+import type { LogOptions, LogStream, LogType } from '@/lib/console/live/logs-types';
 
-import { downloadCsv } from './logs-export';
+import type { LogSelection } from './logs-types';
+
+/** 下拉里「全部」用的值（真实的密钥 ID、模型名不会是它） */
+const ALL = 'all';
 
 /**
- * 日志筛选栏：第一行是六个条件（时间、密钥、模型、状态、类型、流式），
- * 第二行是请求 ID 搜索、清除筛选和导出。任何条件变化都由上层重新算结果并回到第 1 页。
- * rows 是当前筛选结果（全部，不只当前页），导出 CSV 用它。
+ * 日志筛选栏：时间、密钥、模型、类型、流式五个条件，右下是清除筛选和导出 CSV。
+ * 密钥、模型的选项来自后端（账号的密钥、这段时间用过的模型）；任何条件变化都由上层重新取数并回到第 1 页。
  */
 export function LogsFilters({
-  filter,
+  selection,
+  range,
+  today,
+  since,
+  options,
   onChange,
-  rows,
   dirty,
   onClear,
+  exporting,
+  exportFailed,
+  canExport,
+  onExport,
 }: {
-  filter: LogFilter;
-  onChange: (filter: LogFilter) => void;
-  rows: readonly RequestLog[];
+  selection: LogSelection;
+  /** 当前生效的时间范围（selection.range 为空时是默认的最近 30 天） */
+  range: DateRange;
+  today: string | undefined;
+  since: string | undefined;
+  options: LogOptions | null;
+  onChange: (change: Partial<LogSelection>) => void;
   /** 筛选条件是否已经偏离默认值，决定要不要显示「清除筛选」 */
   dirty: boolean;
   onClear: () => void;
+  exporting: boolean;
+  exportFailed: boolean;
+  canExport: boolean;
+  onExport: () => void;
 }) {
   const t = useTranslations('consoleLogs');
   const all = t('filters.all');
 
+  // 选中的密钥或模型不在选项里（比如换了时间范围）也照样显示出来，不让下拉变空
+  const keys = options?.keys ?? [];
   const keyOptions: SelectOption<string>[] = [
-    { value: 'all', label: all },
-    ...API_KEYS.map((key) => ({ value: key.id, label: key.name })),
+    { value: ALL, label: all },
+    ...keys.map((key) => ({ value: String(key.id), label: key.name })),
+    ...(selection.keyId !== null && !keys.some((key) => key.id === selection.keyId)
+      ? [{ value: String(selection.keyId), label: `#${selection.keyId}` }]
+      : []),
   ];
+  const models = options?.models ?? [];
   const modelOptions: SelectOption<string>[] = [
-    { value: 'all', label: all },
-    ...USED_MODEL_IDS.map((id) => ({ value: id, label: getModel(id).name })),
+    { value: ALL, label: all },
+    ...models.map((model) => ({ value: model, label: model })),
+    ...(selection.model !== null && !models.includes(selection.model)
+      ? [{ value: selection.model, label: selection.model }]
+      : []),
   ];
-  const statusOptions: SelectOption<LogFilter['status']>[] = [
-    { value: 'all', label: all },
-    { value: 'success', label: t('filters.success') },
-    { value: 'error', label: t('filters.error') },
-  ];
-  const typeOptions: SelectOption<LogFilter['type']>[] = [
+  const typeOptions: SelectOption<LogType>[] = [
     { value: 'all', label: all },
     { value: 'text', label: t('filters.text') },
     { value: 'image', label: t('filters.image') },
   ];
-  const streamOptions: SelectOption<LogFilter['stream']>[] = [
+  const streamOptions: SelectOption<LogStream>[] = [
     { value: 'all', label: all },
     { value: 'stream', label: t('filters.streamOn') },
-    { value: 'non-stream', label: t('filters.streamOff') },
+    { value: 'nonStream', label: t('filters.streamOff') },
   ];
 
   return (
     <Panel id="log-filters">
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <FilterField label={t('filters.time')}>
           <DateRangePicker
             align="start"
             className="w-full"
-            value={filter.range}
-            onChange={(range) => onChange({ ...filter, range })}
+            value={range}
+            today={today}
+            since={since}
+            onChange={(next) => onChange({ range: next })}
           />
         </FilterField>
         <FilterField label={t('filters.key')}>
           <Select
             name="log-key"
-            value={filter.keyId}
-            onChange={(keyId) => onChange({ ...filter, keyId })}
+            value={selection.keyId === null ? ALL : String(selection.keyId)}
+            onChange={(value) => onChange({ keyId: value === ALL ? null : Number(value) })}
             options={keyOptions}
             ariaLabel={t('filters.key')}
           />
@@ -90,26 +106,17 @@ export function LogsFilters({
         <FilterField label={t('filters.model')}>
           <Select
             name="log-model"
-            value={filter.modelId}
-            onChange={(modelId) => onChange({ ...filter, modelId })}
+            value={selection.model ?? ALL}
+            onChange={(value) => onChange({ model: value === ALL ? null : value })}
             options={modelOptions}
             ariaLabel={t('filters.model')}
-          />
-        </FilterField>
-        <FilterField label={t('filters.status')}>
-          <Select
-            name="log-status"
-            value={filter.status}
-            onChange={(status) => onChange({ ...filter, status })}
-            options={statusOptions}
-            ariaLabel={t('filters.status')}
           />
         </FilterField>
         <FilterField label={t('filters.type')}>
           <Select
             name="log-type"
-            value={filter.type}
-            onChange={(type) => onChange({ ...filter, type })}
+            value={selection.type}
+            onChange={(type) => onChange({ type })}
             options={typeOptions}
             ariaLabel={t('filters.type')}
           />
@@ -117,25 +124,20 @@ export function LogsFilters({
         <FilterField label={t('filters.stream')}>
           <Select
             name="log-stream"
-            value={filter.stream}
-            onChange={(stream) => onChange({ ...filter, stream })}
+            value={selection.stream}
+            onChange={(stream) => onChange({ stream })}
             options={streamOptions}
             ariaLabel={t('filters.stream')}
           />
         </FilterField>
       </div>
 
-      {/* 按钮和搜索框都是 h-10，底部对齐 */}
-      <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end">
-        <FilterField label={t('filters.requestId')} htmlFor="log-search" className="min-w-0 flex-1">
-          <SearchInput
-            id="log-search"
-            data-log-search
-            placeholder={t('filters.search')}
-            value={filter.query}
-            onChange={(event) => onChange({ ...filter, query: event.target.value })}
-          />
-        </FilterField>
+      <div className="mt-3 flex flex-wrap items-center justify-end gap-3">
+        {exportFailed ? (
+          <p role="alert" className="mr-auto text-sm text-danger">
+            {t('error.export')}
+          </p>
+        ) : null}
         {dirty ? (
           <Button variant="ghost" className={CONTROL_BUTTON} data-clear-filters onClick={onClear}>
             {t('filters.clear')}
@@ -145,8 +147,9 @@ export function LogsFilters({
           variant="secondary"
           className={CONTROL_BUTTON}
           data-export
-          disabled={rows.length === 0}
-          onClick={() => downloadCsv(logsToCsv(rows), `logs-${TODAY}.csv`)}
+          loading={exporting}
+          disabled={!canExport || exporting}
+          onClick={onExport}
         >
           <Download aria-hidden />
           {t('export')}

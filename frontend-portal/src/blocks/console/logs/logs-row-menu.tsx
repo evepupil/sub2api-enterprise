@@ -11,24 +11,19 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { curlFor, type RequestLog } from '@/lib/console';
+import type { LogRow } from '@/lib/console/live/logs-types';
+import { curlExample } from '@/lib/console/live/logs-view';
 
 import type { OpenLogDetail } from './logs-types';
 
 const ICON = 'size-4 text-subtle-foreground';
 
 /**
- * 每行最右边的「更多操作」菜单：复制请求 ID、复制为 curl、查看详情。
+ * 每行最右边的「更多操作」菜单：复制请求 ID（后端记了才有）、复制为 curl（示意请求）、查看详情。
  * 复制成功后菜单保持打开，对应菜单项的文字短暂变成「已复制」（1.5 秒后恢复），让用户看到结果。
  * 菜单用非模态：从菜单里打开详情抽屉时，不会和抽屉的遮罩抢页面的点击控制。
  */
-export function LogsRowMenu({
-  log,
-  onOpenDetail,
-}: {
-  log: RequestLog;
-  onOpenDetail: OpenLogDetail;
-}) {
+export function LogsRowMenu({ log, onOpenDetail }: { log: LogRow; onOpenDetail: OpenLogDetail }) {
   const t = useTranslations('consoleLogs');
   const { copiedKey, copy } = useCopy();
   const copiedId = copiedKey === 'id';
@@ -50,25 +45,27 @@ export function LogsRowMenu({
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem
-          data-log-action="copy-id"
-          onSelect={(event) => {
-            event.preventDefault();
-            copy(log.id, 'id');
-          }}
-        >
-          {copiedId ? (
-            <Check aria-hidden className="size-4 text-success" />
-          ) : (
-            <Copy aria-hidden className={ICON} />
-          )}
-          {copiedId ? t('menu.copied') : t('menu.copyId')}
-        </DropdownMenuItem>
+        {log.requestId ? (
+          <DropdownMenuItem
+            data-log-action="copy-id"
+            onSelect={(event) => {
+              event.preventDefault();
+              copy(log.requestId, 'id');
+            }}
+          >
+            {copiedId ? (
+              <Check aria-hidden className="size-4 text-success" />
+            ) : (
+              <Copy aria-hidden className={ICON} />
+            )}
+            {copiedId ? t('menu.copied') : t('menu.copyId')}
+          </DropdownMenuItem>
+        ) : null}
         <DropdownMenuItem
           data-log-action="copy-curl"
           onSelect={(event) => {
             event.preventDefault();
-            copy(curlFor(log), 'curl');
+            copy(curlExample(log), 'curl');
           }}
         >
           {copiedCurl ? (

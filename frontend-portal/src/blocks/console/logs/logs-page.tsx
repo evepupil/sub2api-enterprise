@@ -1,54 +1,114 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { TriangleAlert } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
+import { Button } from '@/components/console/button';
 import { ConsolePage } from '@/components/console/console-page';
-import { usePagination } from '@/components/console/pagination';
+import { EmptyState } from '@/components/console/empty-state';
 import { RefreshButton } from '@/components/console/refresh-button';
+import { Skeleton } from '@/components/console/skeleton';
+import { presetRange, type DateRange, type RangePreset } from '@/lib/console';
+import { DEFAULT_PAGE_SIZE } from '@/lib/console/pagination';
 import {
-  DEFAULT_RANGE,
-  filterLogs,
-  REQUEST_LOGS,
-  type LogFilter,
-  type RequestLog,
-} from '@/lib/console';
+  downloadLogsCsv,
+  fetchLogOptions,
+  fetchLogs,
+  unavailable,
+  useLoadable,
+} from '@/lib/console/live/logs-client';
+import type { LogFilters, LogOptions, LogRow, LogsPageData } from '@/lib/console/live/logs-types';
+import { useLiveClock } from '@/lib/console/live/use-live-clock';
+import { usageSince } from '@/lib/console/live/usage-view';
+import { useSession } from '@/lib/session/session-provider';
+import { cn } from '@/lib/utils';
 
 import { LogsDetailSheet } from './logs-detail-sheet';
 import { LogsFilters } from './logs-filters';
 import { LogsTable } from './logs-table';
-import type { OpenLogDetail } from './logs-types';
+import {
+  DEFAULT_SELECTION,
+  isDefaultSelection,
+  type LogSelection,
+  type OpenLogDetail,
+} from './logs-types';
 
-/** 默认筛选：最近 30 天、其余条件都不限 */
-const DEFAULT_FILTER: LogFilter = {
-  range: DEFAULT_RANGE,
-  keyId: 'all',
-  modelId: 'all',
-  status: 'all',
-  type: 'all',
-  stream: 'all',
-  query: '',
-};
-
-/** 筛选条件的指纹：用来判断「是否偏离默认值」，也是分页回到第 1 页的信号 */
-const DEFAULT_FILTER_KEY = JSON.stringify(DEFAULT_FILTER);
+const DEFAULT_PRESET: RangePreset = 'last30d';
 
 /**
- * 请求日志页：筛选栏决定看哪些请求，表格分页展示，点模型名或「查看详情」从右侧抽屉看单条请求。
- * 筛选、分页、抽屉三块状态都在这里，子组件只负责画和上报操作。
+ * 日志页（接后端）：登录账号自己的计费成功的调用，从新到旧。筛选栏决定看哪些调用，
+ * 表格由后端分页；点模型名或「查看详情」从右侧抽屉看单条调用。换条件时先留着旧数据（变浅），
+ * 新数据到了再换；取不到时整页显示出错与重试。
  */
 export function LogsPage() {
   const t = useTranslations('consoleLogs');
-  const [filter, setFilter] = useState<LogFilter>(DEFAULT_FILTER);
-  const [detail, setDetail] = useState<RequestLog | null>(null);
+  const locale = useLocale();
+  const clock = useLiveClock();
+  const { user } = useSession();
+
+  const [selection, setSelection] = useState<LogSelection>(DEFAULT_SELECTION);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [reloadKey, setReloadKey] = useState(0);
+  const [detail, setDetail] = useState<LogRow | null>(null);
+  const [exporting, setExporting] = useState(false);
+  const [exportFailed, setExportFailed] = useState(false);
   const opener = useRef<HTMLElement | null>(null);
 
-  const rows = useMemo(() => filterLogs(REQUEST_LOGS, filter), [filter]);
-  const filterKey = JSON.stringify(filter);
-  const dirty = filterKey !== DEFAULT_FILTER_KEY;
-  const pager = usePagination(rows, filterKey);
+  const today = clock?.today ?? null;
+  const since = today === null ? null : usageSince(user?.createdAt ?? null, today);
+  // 预设范围跟着「今天」走（跨天自动更新），自定义范围原样保留
+  const range = useMemo<DateRange | null>(() => {
+    if (today === null || since === null) return null;
+    if (selection.range === null) return presetRange(DEFAULT_PRESET, today, since);
+    return selection.range.preset
+      ? presetRange(selection.range.preset, today, since)
+      : selection.range;
+  }, [selection.range, today, since]);
 
-  const clearFilters = () => setFilter(DEFAULT_FILTER);
+  const filters: LogFilters | null = range
+    ? {
+        from: range.from,
+        to: range.to,
+        keyId: selection.keyId,
+        model: selection.model,
+        type: selection.type,
+        stream: selection.stream,
+      }
+    : null;
+  const query = filters ? { ...filters, page, pageSize } : null;
+
+  const logs = useLoadable<LogsPageData>(
+    query ? `${JSON.stringify(query)}|${reloadKey}` : null,
+    (signal) => (query ? fetchLogs(query, signal) : unavailable()),
+  );
+  const options = useLoadable<LogOptions>(
+    range ? `${range.from}|${range.to}|${reloadKey}` : null,
+    (signal) => (range ? fetchLogOptions(range.from, range.to, signal) : unavailable()),
+  );
+
+  // 筛选条件一变就回到第 1 页
+  const changeSelection = (change: Partial<LogSelection>) => {
+    setSelection((current) => ({ ...current, ...change }));
+    setPage(1);
+    setExportFailed(false);
+  };
+  const clearFilters = () => {
+    setSelection(DEFAULT_SELECTION);
+    setPage(1);
+    setExportFailed(false);
+  };
+  const reload = () => setReloadKey((key) => key + 1);
+
+  const exportCsv = async () => {
+    if (!filters) return;
+    setExporting(true);
+    setExportFailed(false);
+    const ok = await downloadLogsCsv(filters, locale);
+    setExporting(false);
+    setExportFailed(!ok);
+  };
 
   const openDetail: OpenLogDetail = (log, button) => {
     opener.current = button;
@@ -63,16 +123,68 @@ export function LogsPage() {
     opener.current = null;
   }, [detail]);
 
-  return (
-    <ConsolePage id="logs" title={t('meta.title')} actions={<RefreshButton />}>
-      <LogsFilters
-        filter={filter}
-        onChange={setFilter}
-        rows={rows}
-        dirty={dirty}
-        onClear={clearFilters}
+  const data = logs.data;
+  const stale = data !== null && logs.loading;
+
+  let body: React.ReactNode;
+  if (logs.error) {
+    body = (
+      <EmptyState
+        id="logs-error"
+        icon={TriangleAlert}
+        title={logs.error === 'too_many' ? t('error.tooMany') : t('error.unavailable')}
+        action={
+          <Button variant="secondary" onClick={reload} data-logs-retry>
+            {t('error.retry')}
+          </Button>
+        }
       />
-      <LogsTable pager={pager} onOpenDetail={openDetail} onClear={clearFilters} />
+    );
+  } else if (data === null) {
+    body = (
+      <div data-logs-loading className="space-y-2">
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-96 w-full" />
+      </div>
+    );
+  } else {
+    body = (
+      <div
+        data-logs-content
+        aria-busy={logs.loading ? 'true' : undefined}
+        className={cn('transition-opacity', stale && 'opacity-60')}
+      >
+        <LogsTable
+          data={data}
+          onPageChange={setPage}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setPage(1);
+          }}
+          onOpenDetail={openDetail}
+          onClear={clearFilters}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <ConsolePage id="logs" title={t('meta.title')} actions={<RefreshButton onRefresh={reload} />}>
+      <LogsFilters
+        selection={selection}
+        range={range ?? presetRange(DEFAULT_PRESET)}
+        today={today ?? undefined}
+        since={since ?? undefined}
+        options={options.data}
+        onChange={changeSelection}
+        dirty={!isDefaultSelection(selection)}
+        onClear={clearFilters}
+        exporting={exporting}
+        exportFailed={exportFailed}
+        canExport={filters !== null && (data?.total ?? 0) > 0}
+        onExport={() => void exportCsv()}
+      />
+      {body}
       <LogsDetailSheet log={detail} onClose={() => setDetail(null)} />
     </ConsolePage>
   );
