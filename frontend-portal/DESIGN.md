@@ -437,7 +437,7 @@ pnpm format:check  # prettier
 | `Switch` | `switch.tsx` | `{ name, checked, onCheckedChange, ariaLabel?, id?, disabled? }`；`data-switch={name}` |
 | `CopyButton` / `useCopy` | `copy-button.tsx` | 复制图标按钮（成功后变对勾 1.5 秒），`data-copy={name}`；菜单项里复制用 `useCopy()` |
 | `StackedBarChart` | `charts/stacked-bar-chart.tsx` | 堆叠柱状图 `{ id, labels: { axis, full }[], series: { id, label, color, values }[], formatValue, formatAxis?, ariaLabel, totalLabel, emptyLabel, height? }`；颜色用 `seriesColor(i)`，「其他」用 `OTHER_COLOR`；`data-chart={id}`、`data-buckets` |
-| `ActivityHeatmap` | `charts/activity-heatmap.tsx` | 活跃热力图 `{ data: Heatmap, monthLabel, cellTitle, ariaLabel, lessLabel, moreLabel, weekdayLabels }` |
+| `ActivityHeatmap` | `charts/activity-heatmap.tsx` | 活跃热力图 `{ data: Heatmap, monthLabel, cellTitle, ariaLabel, lessLabel, moreLabel, weekdayLabels }`；正方形格子随容器宽度伸缩（10–18px），月份、星期标签和格子在同一个网格里对齐，太窄时横向滚动 |
 | `GroupWithRate` / `RateBadge` | `group-rate.tsx` | 分组名 + 倍率徽标 `{ name, rate, className? }`（只要徽标用 `RateBadge`）；徽标 `data-group-rate`，颜色按倍率分档：低于 ×0.2 绿、低于 ×0.5 蓝、低于 ×1 橙、×1 灰、高于 ×1 红（`rateTone`）。模型页、日志页共用 |
 | `Skeleton` | `skeleton.tsx` | 加载占位块 `{ className?, style? }`：浅灰圆角、轻轻呼吸（减少动效时不动），`data-skeleton`；尺寸和真实内容一样，加载完不跳动 |
 | `InfoPopover` | `info-popover.tsx` | 「i」图标 + 悬浮说明卡片 `{ name, label, align?, className?, children }`：鼠标移上去显示、移开收起，点一下固定（再点、点别处、Esc 收起），触屏点开；卡片在图标下方（默认右对齐图标），靠边自动挪回屏幕内；卡片里只放说明，不放可点的东西。图标 `data-info-popover={name}`，卡片 `data-info-popover-panel`。日志页费用明细在用 |

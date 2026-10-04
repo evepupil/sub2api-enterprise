@@ -22,8 +22,8 @@ const NONE = '—';
 
 /**
  * 活动面板：最近一年的每日用量热力图（固定看一年，不跟时间范围走）+ 四个小格子统计所选时间范围内的活跃情况。
- * 一年的热力图约 810px 宽，只有超宽屏（2xl）才和小格子左右并排，其余宽度上下排，热力图不被截断。
- * heat、stats 为 null 时还在加载，对应位置显示占位块。
+ * 热力图的格子随宽度伸缩、铺满所在一栏；超宽屏（2xl）和右边 360px 宽的小格子左右并排、上下居中，
+ * 其余宽度上下排（小格子一排四个）。heat、stats 为 null 时还在加载，对应位置显示占位块。
  */
 export function UsageActivity({
   heat,
@@ -37,7 +37,7 @@ export function UsageActivity({
 
   return (
     <Panel id="activity" title={t('activity.title')}>
-      <div className="grid grid-cols-1 gap-6 2xl:grid-cols-[minmax(0,1fr)_320px] 2xl:items-start">
+      <div className="grid grid-cols-1 gap-6 2xl:grid-cols-[minmax(0,1fr)_360px] 2xl:items-center">
         <div className="min-w-0">
           {heat ? (
             <ActivityHeatmap
@@ -73,6 +73,9 @@ export function UsageActivity({
 function ActivityStatCards({ stats, locale }: { stats: ActivityStats; locale: AppLocale }) {
   const t = useTranslations('consoleUsage');
   const top = stats.mostActive;
+  const topSub = top
+    ? t('activity.topDaySub', { tokens: formatCompact(top.tokens), cost: formatUsd(top.costUsd) })
+    : null;
   return (
     <>
       <StatCard
@@ -98,13 +101,14 @@ function ActivityStatCards({ stats, locale }: { stats: ActivityStats; locale: Ap
         id="top-day"
         label={t('activity.topDay')}
         value={top ? formatDayLabel(top.day, locale) : NONE}
+        // 和热力图并排（2xl）时说明固定一行（放不下时省略，悬停看全文），不把这一排撑得比旁边高；
+        // 其余宽度照常最多折两行，手机上金额不被截掉
         sub={
-          top
-            ? t('activity.topDaySub', {
-                tokens: formatCompact(top.tokens),
-                cost: formatUsd(top.costUsd),
-              })
-            : undefined
+          topSub ? (
+            <span className="block 2xl:truncate" title={topSub}>
+              {topSub}
+            </span>
+          ) : undefined
         }
       />
     </>
