@@ -4,7 +4,6 @@ export * from './chat';
 export * from './format';
 export * from './keys';
 export * from './logs';
-export * from './org';
 export * from './pagination';
 export * from './tickets';
 export * from './time';

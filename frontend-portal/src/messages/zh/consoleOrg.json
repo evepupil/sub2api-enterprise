@@ -2,93 +2,202 @@
   "meta": {
     "title": "组织"
   },
-  "actions": {
-    "invite": "邀请成员",
-    "adjustQuota": "调整配额",
-    "disable": "停用",
-    "enable": "启用",
-    "remove": "移除",
-    "revoke": "作废",
-    "generate": "生成邀请码",
-    "done": "完成",
-    "copyOrgId": "复制组织 ID",
-    "copyCode": "复制邀请码",
-    "copyLink": "复制邀请链接"
+  "owner": "组织管理员",
+  "suspended": "组织已被平台停用，成员的调用暂时无法进行，请联系平台管理员。",
+  "loadError": {
+    "title": "组织暂时加载不出来",
+    "tooMany": "查询太频繁，请稍后再试",
+    "retry": "重试"
   },
-  "info": {
-    "orgId": "组织 ID",
-    "createdOn": "创建于 {date}",
-    "yourRole": "你的角色"
-  },
-  "stats": {
-    "members": "成员",
-    "membersSub": "启用 / 全部",
-    "monthUsed": "本月消费",
-    "quotaTotal": "成员配额合计",
-    "quotaTotalSub": "每月，不含不限额成员",
-    "groups": "可用分组",
-    "groupsValue": "{count} 个",
-    "groupsSeparator": "、"
-  },
-  "roles": {
-    "admin": "管理员",
-    "member": "成员"
+  "invite": {
+    "validityLabel": "邀请码有效期",
+    "validity": {
+      "1": "1 天内有效",
+      "7": "7 天内有效",
+      "30": "30 天内有效",
+      "0": "长期有效"
+    },
+    "create": "创建邀请码"
   },
   "members": {
     "title": "成员",
-    "searchPlaceholder": "搜索姓名或邮箱",
+    "searchPlaceholder": "搜索邮箱或用户名",
+    "statusLabel": "按状态筛选",
+    "allStatuses": "全部状态",
+    "grant": "周期发放",
+    "split": "平分上限",
+    "selectedCount": "（{count}）",
+    "selectPage": "选择这一页的成员",
+    "select": "选择 {name}",
+    "empty": "还没有成员",
     "noResults": "没有符合条件的成员",
-    "unlimited": "不限",
-    "exhausted": "已用完",
     "columns": {
-      "member": "成员",
-      "role": "角色",
-      "quota": "本月配额",
-      "keys": "密钥",
+      "name": "名称",
+      "email": "邮箱",
       "status": "状态",
-      "joined": "加入时间"
+      "quota": "额度",
+      "used": "已消费",
+      "remaining": "剩余额度"
     },
     "status": {
       "active": "启用",
       "disabled": "已停用"
+    },
+    "unlimited": "不限额",
+    "everyDays": "每 {days} 天",
+    "pending": "待生效",
+    "resetAt": "{date} 重置",
+    "frozen": "冻结 {amount}",
+    "actions": {
+      "rename": "改名",
+      "quota": "设置配额",
+      "disable": "停用",
+      "enable": "启用"
     }
+  },
+  "defaultQuota": {
+    "on": "新成员默认配额：每期 {amount} · {days} 天",
+    "off": "新成员默认配额：未开启",
+    "enable": "开启",
+    "edit": "修改",
+    "title": "新成员默认配额",
+    "hint": "开启后新成员加入时自动获得，周期从加入时刻算起",
+    "syncUnconfigured": "同时发给现有没配周期配额的成员",
+    "syncConfigured": "同时覆盖现有已配周期配额的成员（立即换新一期）",
+    "disable": "关闭默认配额",
+    "disableTitle": "关闭新成员默认配额？",
+    "disableDescription": "之后加入的成员不再自动获得默认配额，已加入成员的配额保留。"
   },
   "quota": {
-    "title": "调整 {name} 的每月配额",
-    "modeLabel": "每月配额",
-    "unlimited": "不限",
-    "custom": "自定义",
-    "amount": "每月金额"
+    "title": "设置配额",
+    "mode": "额度方式",
+    "modes": {
+      "unlimited": "不限额",
+      "fixed": "固定累计上限",
+      "periodic": "周期配额"
+    },
+    "amount": "金额（US$）",
+    "fixedHint": "填 0 表示不让这个成员消费",
+    "switchClears": "保存后会清掉这个成员现有的周期配额",
+    "perPeriod": "每期金额（US$）",
+    "periodDays": "周期（天）",
+    "immediate": "立即生效（当场开新的一期）",
+    "startAt": "生效时间",
+    "startAtHint": "北京时间。到点前按原来的额度，到点自动开始第一期"
   },
-  "remove": {
-    "title": "移除成员「{name}」？",
-    "description": "移除后对方的密钥会立即停用。"
+  "rename": {
+    "title": "改名",
+    "label": "名称"
+  },
+  "split": {
+    "title": "平分上限",
+    "total": "分配总额（US$）",
+    "hint": "按人数平分，成为各自的固定累计上限"
+  },
+  "grant": {
+    "title": "周期发放"
+  },
+  "disableMember": {
+    "title": "停用成员「{name}」？",
+    "description": "停用后这个人的调用会立即被拒绝，可以随时再启用。"
+  },
+  "requests": {
+    "title": "配额申请",
+    "settings": "申请设置",
+    "statusLabel": "按状态筛选",
+    "status": {
+      "all": "全部",
+      "pending": "待处理",
+      "granted": "已发放",
+      "rejected": "已驳回",
+      "withdrawn": "已撤回"
+    },
+    "off": "组织没有开配额申请",
+    "empty": "暂无申请",
+    "approve": "通过",
+    "reject": "驳回",
+    "rejectTitle": "驳回申请",
+    "note": "备注（可选）",
+    "approveTitle": "通过这条申请？",
+    "approveDescription": "{name} 的额度会增加 {amount}。"
+  },
+  "policy": {
+    "title": "申请设置",
+    "mode": "申请方式",
+    "modes": {
+      "off": "关闭",
+      "approve": "先审批再加",
+      "auto": "申请了就加"
+    },
+    "min": "单次最低（US$）",
+    "max": "单次最高（US$）"
   },
   "invitations": {
-    "title": "邀请码",
+    "title": "组织邀请码",
     "empty": "还没有邀请码",
-    "columns": {
-      "code": "邀请码",
-      "created": "创建时间",
-      "expires": "有效期至",
-      "status": "状态",
-      "usedBy": "使用者"
-    },
+    "created": "创建于 {date}",
+    "expires": "有效期至 {date}",
+    "forever": "长期有效",
     "status": {
-      "active": "有效",
+      "unused": "有效",
       "used": "已使用",
+      "disabled": "已停用",
       "expired": "已过期"
-    }
+    },
+    "copyCode": "复制邀请码",
+    "copyLink": "复制邀请链接",
+    "disable": "停用",
+    "disableTitle": "停用这个邀请码？",
+    "disableDescription": "停用后不能再用它注册加入组织。"
   },
-  "invite": {
-    "title": "邀请成员",
-    "expiry": "有效期",
-    "days7": "7 天",
-    "days30": "30 天",
-    "code": "邀请码",
-    "link": "邀请链接"
+  "myQuota": {
+    "title": "组织配额剩余",
+    "unlimited": "不限额",
+    "resetAt": "{date} 重置",
+    "apply": "申请额度",
+    "pending": "申请处理中",
+    "dialogTitle": "申请额度",
+    "amount": "金额（US$）",
+    "range": "单次可申请 {min} – {max}",
+    "reason": "理由（可选）",
+    "submit": "提交",
+    "recent": "最近的申请",
+    "recentFailed": "申请记录暂时加载不出来",
+    "withdraw": "撤回"
   },
   "errors": {
-    "quotaRange": "请输入 {min} 到 {max} 之间的金额"
+    "nameRequired": "请输入名称",
+    "nameTooLong": "名称最多 50 个字",
+    "amount": "请输入 0 到 1000000 之间的金额",
+    "requestAmount": "请输入大于 0 的金额",
+    "period": "周期天数要在 1 到 3650 之间",
+    "start": "请选择生效时间",
+    "range": "单次最低要大于 0，最高不能低于最低",
+    "noteTooLong": "最多 500 个字",
+    "action": {
+      "owner_required": "只有组织管理员能做这个操作",
+      "not_in_org": "你已经不在这个组织里了",
+      "org_disabled": "组织已被平台停用",
+      "member_not_found": "这个成员已经不在组织里了，刷新看看",
+      "owner_immutable": "组织管理员不能这样设置",
+      "name_invalid": "名称要在 1 到 50 个字之间",
+      "amount_invalid": "金额不对，检查一下再试",
+      "period_invalid": "周期天数要在 1 到 3650 之间",
+      "start_invalid": "生效时间不对",
+      "no_targets": "请先勾选成员",
+      "request_disabled": "组织没有开配额申请",
+      "request_amount": "申请金额不在允许的范围内",
+      "request_pending_exists": "已经有一条申请在等处理",
+      "request_ineligible": "你现在不能申请额度",
+      "request_handled": "这条申请已经处理过了",
+      "request_not_found": "这条申请已经不在了，刷新看看",
+      "text_too_long": "内容太长了，最多 500 个字",
+      "range_invalid": "单次最低要大于 0，最高不能低于最低",
+      "invalid": "填写的内容有误，检查一下再试",
+      "forbidden": "没有权限做这个操作",
+      "too_many": "操作太频繁，请稍后再试",
+      "unavailable": "没有成功，请稍后再试"
+    },
+    "approveIneligible": "这个成员现在不能加额度（不限额或已停用），申请已自动作废"
   }
 }

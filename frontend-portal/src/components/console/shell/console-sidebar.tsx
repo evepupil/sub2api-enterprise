@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 
 import { Brand } from '@/components/layout/brand';
 import { Link, usePathname } from '@/i18n/navigation';
+import { useSession } from '@/lib/session/session-provider';
 import { cn } from '@/lib/utils';
 
 import { buttonClass } from '../button';
@@ -33,6 +34,7 @@ export function ConsoleSidebar({
 }) {
   const t = useTranslations('console');
   const pathname = usePathname();
+  const { user } = useSession();
   const chatActive = isNavActive(pathname, '/console/chat');
 
   return (
@@ -87,7 +89,7 @@ export function ConsoleSidebar({
         className={cn('mt-4 min-h-0 flex-1 overflow-y-auto', collapsed ? 'px-2' : 'px-3')}
       >
         <ul className="space-y-0.5">
-          {visibleNav(affiliateEnabled).map((item) => {
+          {visibleNav(affiliateEnabled, user?.organization?.isOwner === true).map((item) => {
             const active = isNavActive(pathname, item.href);
             const label = t(`nav.${item.key}`);
             return (

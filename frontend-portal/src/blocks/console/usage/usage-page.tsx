@@ -32,6 +32,7 @@ import { cn } from '@/lib/utils';
 
 import { UsageActivity } from './usage-activity';
 import { UsageBreakdown } from './usage-breakdown';
+import { UsageOrgQuota } from './usage-org-quota';
 import { UsageStats } from './usage-stats';
 
 const DEFAULT_PRESET: RangePreset = 'last30d';
@@ -39,7 +40,8 @@ const DEFAULT_PRESET: RangePreset = 'last30d';
 /**
  * 用量页（接后端）：时间范围和明细指标是页面里仅有的两个选择。
  * 所选范围的数据一次取齐（数字卡、活跃统计、三张明细图），最近一年的每日合计另取一次给热力图；
- * 刷新按钮两份都重取。换范围时先留着旧数据（变浅），新数据到了再换；取不到时整页显示出错与重试。
+ * 组织的普通成员在最上面多一张「组织配额」卡片（剩余额度、申请额度）。
+ * 刷新按钮全部重取。换范围时先留着旧数据（变浅），新数据到了再换；取不到时整页显示出错与重试。
  */
 export function UsagePage() {
   const t = useTranslations('consoleUsage');
@@ -93,6 +95,7 @@ export function UsagePage() {
   const error = detail.error ?? activity.error;
   const stale = overview !== null && (detail.loading || activity.loading);
   const reload = () => setReloadKey((key) => key + 1);
+  const orgMember = user?.organization ? !user.organization.isOwner : false;
 
   return (
     <ConsolePage
@@ -111,6 +114,7 @@ export function UsagePage() {
         </>
       }
     >
+      {orgMember ? <UsageOrgQuota reloadKey={reloadKey} /> : null}
       {error ? (
         <EmptyState
           id="usage-error"

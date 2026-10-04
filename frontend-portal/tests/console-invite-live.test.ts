@@ -105,7 +105,7 @@ describe('邀请页：链接、统计与规则写法', () => {
   });
 
   it('后台没开邀请返利或还没读到开关时，侧栏不显示「邀请」', () => {
-    const keys = (enabled: boolean | null) => visibleNav(enabled).map((item) => item.key);
+    const keys = (enabled: boolean | null) => visibleNav(enabled, true).map((item) => item.key);
     expect(keys(true)).toContain('invite');
     expect(keys(false)).not.toContain('invite');
     expect(keys(null)).not.toContain('invite');

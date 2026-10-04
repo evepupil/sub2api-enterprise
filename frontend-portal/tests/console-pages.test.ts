@@ -8,16 +8,6 @@ import {
 import { chatReducer, createChatState, STREAM_STEP } from '@/blocks/console/chat/chat-reducer';
 import { clearFilters, DEFAULT_QUERY, paginationKey } from '@/blocks/console/models/models-state';
 import {
-  buildInvitation,
-  generateInviteCode,
-  inviteLink,
-} from '@/blocks/console/organization/organization-invite';
-import {
-  filterMembers,
-  memberInitial,
-  quotaLevel,
-} from '@/blocks/console/organization/organization-model';
-import {
   isValidTwoFactorCode,
   sanitizeTwoFactorCode,
   validatePasswordForm,
@@ -30,31 +20,7 @@ import {
   validateTicketDraft,
   withStatus,
 } from '@/blocks/console/tickets/tickets-logic';
-import { CHAT_REPLIES, CHAT_SAMPLE, ORG_MEMBERS, TICKETS } from '@/lib/console';
-
-describe('组织页规则', () => {
-  it('配额提醒档位与成员搜索', () => {
-    expect(quotaLevel(0.5)).toBe('ok');
-    expect(quotaLevel(0.8)).toBe('warning');
-    expect(quotaLevel(1)).toBe('full');
-    expect(filterMembers(ORG_MEMBERS, '陈').map((m) => m.id)).toEqual(['m-2']);
-    expect(filterMembers(ORG_MEMBERS, 'ZHAO').map((m) => m.id)).toEqual(['m-4']);
-    expect(filterMembers(ORG_MEMBERS, '')).toHaveLength(5);
-    expect(memberInitial('siyuan')).toBe('S');
-  });
-
-  it('邀请码格式与有效期', () => {
-    const code = generateInviteCode();
-    expect(code).toMatch(/^ORG-[A-Z0-9]{4}-[A-Z0-9]{4}$/);
-    expect(inviteLink('ORG-AB12-CD34')).toBe('https://codu.example/register?org=ORG-AB12-CD34');
-    expect(buildInvitation(code, '7d')).toMatchObject({
-      createdAt: '2026-10-03',
-      expiresAt: '2026-10-10',
-      status: 'active',
-      usedBy: null,
-    });
-  });
-});
+import { CHAT_REPLIES, CHAT_SAMPLE, TICKETS } from '@/lib/console';
 
 describe('账单页充值弹窗的金额规则', () => {
   it('自定义金额取到分并落在限额内，整数金额不带小数', () => {

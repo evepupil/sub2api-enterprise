@@ -1,155 +1,157 @@
 'use client';
 
-import { Gauge, Pause, Play, Trash2, type LucideIcon } from 'lucide-react';
-import { useLocale, useTranslations } from 'next-intl';
-import type { ButtonHTMLAttributes } from 'react';
+import { Ban, CircleCheck, Pencil, Wallet } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import { Td, Tr } from '@/components/console/data-table';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/console/button';
-import type { AppLocale } from '@/i18n/routing';
-import { formatUsd, quotaRatio, type OrgMember } from '@/lib/console';
+import { formatUsd } from '@/lib/console';
+import type { OrgMember } from '@/lib/console/live/org-types';
 import { cn } from '@/lib/utils';
 
-import { isAdmin, memberInitial, quotaLevel, type QuotaLevel } from './organization-model';
+import { isExhausted, memberLabel } from './organization-model';
+import { minuteOf, OrgIconButton } from './organization-shared';
 
-const ICON_BUTTON_TONES = {
-  default: 'text-subtle-foreground hover:bg-muted hover:text-foreground',
-  danger: 'text-subtle-foreground hover:bg-danger-soft hover:text-danger',
-} as const;
+const NONE = <span className="text-subtle-foreground">—</span>;
 
-/** 操作列的图标按钮：固定 size-8，名称同时写进 aria-label 和 title */
-function MemberIconButton({
-  icon: Icon,
-  label,
-  tone = 'default',
-  ...rest
-}: ButtonHTMLAttributes<HTMLButtonElement> & {
-  icon: LucideIcon;
-  label: string;
-  tone?: keyof typeof ICON_BUTTON_TONES;
-}) {
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      title={label}
-      className={cn(
-        'inline-flex size-8 shrink-0 items-center justify-center rounded-md transition-colors disabled:pointer-events-none disabled:opacity-40',
-        ICON_BUTTON_TONES[tone],
-      )}
-      {...rest}
-    >
-      <Icon aria-hidden className="size-4" />
-    </button>
-  );
-}
-
-const QUOTA_FILL: Record<QuotaLevel, string> = {
-  ok: 'bg-primary',
-  warning: 'bg-warning-graphic',
-  full: 'bg-danger-graphic',
-};
-
-/** 本月配额列：不限额只写「不限」；有上限显示「已用 / 上限」和进度条，用满标「已用完」 */
-function MemberQuotaCell({ member }: { member: OrgMember }) {
-  const t = useTranslations('consoleOrg');
-  const ratio = quotaRatio(member);
-  if (ratio === null || member.quotaUsd === null) {
-    return <span className="text-muted-foreground">{t('members.unlimited')}</span>;
-  }
-  const level = quotaLevel(ratio);
-  return (
-    <div className="w-40">
-      <div className="flex items-center gap-2 whitespace-nowrap">
-        <span className="text-xs tabular-nums text-foreground">
-          {formatUsd(member.usedUsd)} / {formatUsd(member.quotaUsd)}
-        </span>
-        {level === 'full' ? <Badge tone="danger">{t('members.exhausted')}</Badge> : null}
-      </div>
-      {/* 数字已经写在上面，进度条只是辅助，读屏软件不用再读一遍 */}
-      <div aria-hidden className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
-        <div
-          className={cn('h-full rounded-full', QUOTA_FILL[level])}
-          style={{ width: `${Math.round(ratio * 1000) / 10}%` }}
-        />
-      </div>
-    </div>
-  );
+export interface OrgMemberRowHandlers {
+  onToggleSelect: () => void;
+  onRename: () => void;
+  onQuota: () => void;
+  onToggleStatus: () => void;
 }
 
 /**
- * 成员表的一行。管理员本人那行只能调整配额，停用和移除按钮禁用。
+ * 成员表的一行：勾选框（组织管理员本人没有）、名称、邮箱与用户名、状态、额度（固定累计上限或周期配额）、
+ * 已消费、剩余额度（周期配额写下次重置时间，有冻结金额也写出来）、操作（改名、设置配额、停用 / 启用）。
+ * 组织管理员本人只能改名。
  */
-export function OrganizationMemberRow({
+export function OrgMemberRow({
   member,
-  onAdjustQuota,
-  onToggle,
-  onRemove,
-}: {
-  member: OrgMember;
-  onAdjustQuota: () => void;
-  onToggle: () => void;
-  onRemove: () => void;
-}) {
+  selected,
+  busy,
+  onToggleSelect,
+  onRename,
+  onQuota,
+  onToggleStatus,
+}: OrgMemberRowHandlers & { member: OrgMember; selected: boolean; busy: boolean }) {
   const t = useTranslations('consoleOrg');
-  const locale = useLocale() as AppLocale;
-  const name = member.name[locale];
-  const admin = isAdmin(member);
   const active = member.status === 'active';
 
+  let quota: React.ReactNode;
+  if (member.isOwner) quota = NONE;
+  else if (member.quota) {
+    quota = (
+      <div className="whitespace-nowrap tabular-nums">
+        <div className="text-foreground">{formatUsd(member.quota.amount)}</div>
+        <div className="text-xs text-subtle-foreground">
+          {t('members.everyDays', { days: member.quota.periodDays })}
+          {member.quota.mode === 'periodic_pending' ? ` · ${t('members.pending')}` : ''}
+        </div>
+      </div>
+    );
+  } else if (member.spendingLimit === null) {
+    quota = <span className="text-muted-foreground">{t('members.unlimited')}</span>;
+  } else {
+    quota = <span className="tabular-nums text-foreground">{formatUsd(member.spendingLimit)}</span>;
+  }
+
   return (
-    <Tr data-member-row={member.id}>
+    <Tr data-org-member={member.userId}>
+      <Td className="w-10">
+        {member.isOwner ? null : (
+          <input
+            type="checkbox"
+            data-org-select={member.userId}
+            className="size-4 accent-[var(--foreground)]"
+            checked={selected}
+            onChange={onToggleSelect}
+            aria-label={t('members.select', { name: memberLabel(member) })}
+          />
+        )}
+      </Td>
       <Td>
-        <div className="flex items-center gap-3">
-          <span
-            aria-hidden
-            className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground"
-          >
-            {memberInitial(name)}
-          </span>
-          <div className="min-w-0">
-            <div className="max-w-48 truncate font-medium text-foreground" title={name}>
-              {name}
-            </div>
-            <div className="max-w-48 truncate text-xs text-subtle-foreground" title={member.email}>
-              {member.email}
-            </div>
-          </div>
+        <div className="max-w-40 truncate font-medium text-foreground" title={member.displayName}>
+          {member.displayName || '—'}
         </div>
       </Td>
       <Td>
-        <Badge tone={admin ? 'dark' : 'outline'}>{t(`roles.${member.role}`)}</Badge>
+        <div className="max-w-64 truncate text-foreground" title={member.email}>
+          {member.email}
+        </div>
+        {member.username ? (
+          <div className="max-w-64 truncate text-xs text-subtle-foreground" title={member.username}>
+            {member.username}
+          </div>
+        ) : null}
       </Td>
       <Td>
-        <MemberQuotaCell member={member} />
+        {member.isOwner ? (
+          <Badge tone="info">{t('owner')}</Badge>
+        ) : (
+          <Badge tone={active ? 'success' : 'warning'} data-org-member-status={member.status}>
+            {t(`members.status.${member.status}`)}
+          </Badge>
+        )}
       </Td>
-      <Td className="tabular-nums">{member.keys}</Td>
-      <Td>
-        <Badge tone={active ? 'success' : 'neutral'}>{t(`members.status.${member.status}`)}</Badge>
+      <Td>{quota}</Td>
+      <Td className="whitespace-nowrap tabular-nums">
+        {member.isOwner ? NONE : formatUsd(member.spendingUsed)}
       </Td>
-      <Td className="whitespace-nowrap tabular-nums text-muted-foreground">{member.joinedAt}</Td>
+      <Td className="whitespace-nowrap tabular-nums">
+        {member.isOwner ? (
+          NONE
+        ) : (
+          <>
+            <div
+              className={cn(
+                isExhausted(member) ? 'font-medium text-warning' : 'text-foreground',
+                member.spendingRemaining === null && 'text-muted-foreground',
+              )}
+            >
+              {member.spendingRemaining === null
+                ? t('members.unlimited')
+                : formatUsd(member.spendingRemaining)}
+            </div>
+            {member.quota?.mode === 'periodic_active' && member.quota.windowEnd ? (
+              <div className="text-xs text-subtle-foreground">
+                {t('members.resetAt', { date: minuteOf(member.quota.windowEnd) })}
+              </div>
+            ) : null}
+            {member.spendingFrozen > 0 ? (
+              <div className="text-xs text-subtle-foreground">
+                {t('members.frozen', { amount: formatUsd(member.spendingFrozen) })}
+              </div>
+            ) : null}
+          </>
+        )}
+      </Td>
       <Td sticky="right">
         <div className="flex items-center justify-end gap-1">
-          <Button variant="secondary" size="sm" data-member-quota onClick={onAdjustQuota}>
-            <Gauge aria-hidden />
-            {t('actions.adjustQuota')}
-          </Button>
-          <MemberIconButton
-            icon={active ? Pause : Play}
-            label={active ? t('actions.disable') : t('actions.enable')}
-            data-member-toggle
-            disabled={admin}
-            onClick={onToggle}
+          <OrgIconButton
+            icon={Pencil}
+            label={t('members.actions.rename')}
+            data-org-rename
+            onClick={onRename}
           />
-          <MemberIconButton
-            icon={Trash2}
-            tone="danger"
-            label={t('actions.remove')}
-            data-member-remove
-            disabled={admin}
-            onClick={onRemove}
-          />
+          {member.isOwner ? null : (
+            <>
+              <OrgIconButton
+                icon={Wallet}
+                label={t('members.actions.quota')}
+                data-org-quota
+                onClick={onQuota}
+              />
+              <OrgIconButton
+                icon={active ? Ban : CircleCheck}
+                label={active ? t('members.actions.disable') : t('members.actions.enable')}
+                tone={active ? 'danger' : 'success'}
+                data-org-toggle
+                disabled={busy}
+                onClick={onToggleStatus}
+              />
+            </>
+          )}
         </div>
       </Td>
     </Tr>

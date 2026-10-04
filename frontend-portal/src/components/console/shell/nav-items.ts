@@ -31,12 +31,18 @@ export const CONSOLE_NAV: readonly { key: ConsoleNavKey; href: string; icon: Luc
 ];
 
 /**
- * 实际显示的菜单：后台没开邀请返利（或还没读到开关）时不显示「邀请」，和 sub2api 原来的用户菜单一致。
+ * 实际显示的菜单，和 sub2api 原来的用户菜单一致：后台没开邀请返利（或还没读到开关）时不显示「邀请」；
+ * 「组织」只给组织管理员，个人用户、普通成员（以及还没读到当前用户时）都不显示。
  */
-export function visibleNav(affiliateEnabled: boolean | null): typeof CONSOLE_NAV {
-  return affiliateEnabled === true
-    ? CONSOLE_NAV
-    : CONSOLE_NAV.filter((item) => item.key !== 'invite');
+export function visibleNav(
+  affiliateEnabled: boolean | null,
+  orgOwner: boolean,
+): typeof CONSOLE_NAV {
+  return CONSOLE_NAV.filter(
+    (item) =>
+      (item.key !== 'invite' || affiliateEnabled === true) &&
+      (item.key !== 'organization' || orgOwner),
+  );
 }
 
 /** 当前地址是否属于某个菜单项（子页面也算） */

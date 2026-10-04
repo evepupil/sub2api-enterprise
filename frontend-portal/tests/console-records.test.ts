@@ -9,10 +9,7 @@ import {
   filterTickets,
   logsToCsv,
   maskKey,
-  ORG_MEMBERS,
-  orgSummary,
   presetRange,
-  quotaRatio,
   rechargeBonus,
   REQUEST_LOGS,
   searchKeys,
@@ -107,19 +104,7 @@ describe('充值弹窗', () => {
   });
 });
 
-describe('组织、工单', () => {
-  it('组织成员配额', () => {
-    const admin = ORG_MEMBERS[0]!;
-    expect(quotaRatio(admin)).toBeNull();
-    expect(quotaRatio(ORG_MEMBERS[3]!)).toBe(1);
-    expect(orgSummary(ORG_MEMBERS)).toEqual({
-      members: 5,
-      active: 4,
-      monthUsedUsd: 96.57,
-      quotaTotalUsd: 130,
-    });
-  });
-
+describe('工单', () => {
   it('工单按状态筛选并按更新时间倒序', () => {
     expect(filterTickets(TICKETS, 'all').map((t) => t.id)).toEqual(['T-1024', 'T-1019', 'T-1011']);
     expect(filterTickets(TICKETS, 'resolved').map((t) => t.id)).toEqual(['T-1019']);

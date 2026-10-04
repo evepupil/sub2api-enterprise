@@ -2,93 +2,202 @@
   "meta": {
     "title": "Organization"
   },
-  "actions": {
-    "invite": "Invite member",
-    "adjustQuota": "Adjust quota",
-    "disable": "Disable",
-    "enable": "Enable",
-    "remove": "Remove",
-    "revoke": "Revoke",
-    "generate": "Generate invitation code",
-    "done": "Done",
-    "copyOrgId": "Copy organization ID",
-    "copyCode": "Copy invitation code",
-    "copyLink": "Copy invitation link"
+  "owner": "Organization admin",
+  "suspended": "The platform has suspended this organization. Members can't make calls for now. Contact the platform administrator.",
+  "loadError": {
+    "title": "The organization couldn't be loaded",
+    "tooMany": "Too many requests. Try again shortly.",
+    "retry": "Retry"
   },
-  "info": {
-    "orgId": "Organization ID",
-    "createdOn": "Created {date}",
-    "yourRole": "Your role"
-  },
-  "stats": {
-    "members": "Members",
-    "membersSub": "Active / total",
-    "monthUsed": "Spend this month",
-    "quotaTotal": "Total member quota",
-    "quotaTotalSub": "Per month, excluding unlimited members",
-    "groups": "Available groups",
-    "groupsValue": "{count}",
-    "groupsSeparator": ", "
-  },
-  "roles": {
-    "admin": "Admin",
-    "member": "Member"
+  "invite": {
+    "validityLabel": "Invite code validity",
+    "validity": {
+      "1": "Valid for 1 day",
+      "7": "Valid for 7 days",
+      "30": "Valid for 30 days",
+      "0": "No expiry"
+    },
+    "create": "Create invite code"
   },
   "members": {
     "title": "Members",
-    "searchPlaceholder": "Search by name or email",
-    "noResults": "No members match your search",
-    "unlimited": "Unlimited",
-    "exhausted": "Used up",
+    "searchPlaceholder": "Search by email or username",
+    "statusLabel": "Filter by status",
+    "allStatuses": "All statuses",
+    "grant": "Grant periodic quota",
+    "split": "Split a total",
+    "selectedCount": " ({count})",
+    "selectPage": "Select members on this page",
+    "select": "Select {name}",
+    "empty": "No members yet",
+    "noResults": "No matching members",
     "columns": {
-      "member": "Member",
-      "role": "Role",
-      "quota": "Monthly quota",
-      "keys": "Keys",
+      "name": "Name",
+      "email": "Email",
       "status": "Status",
-      "joined": "Joined"
+      "quota": "Quota",
+      "used": "Spent",
+      "remaining": "Remaining"
     },
     "status": {
       "active": "Active",
       "disabled": "Disabled"
+    },
+    "unlimited": "Unlimited",
+    "everyDays": "Every {days} days",
+    "pending": "Not started yet",
+    "resetAt": "Resets {date}",
+    "frozen": "{amount} held",
+    "actions": {
+      "rename": "Rename",
+      "quota": "Set quota",
+      "disable": "Disable",
+      "enable": "Enable"
     }
+  },
+  "defaultQuota": {
+    "on": "Default quota for new members: {amount} every {days} days",
+    "off": "Default quota for new members: off",
+    "enable": "Turn on",
+    "edit": "Edit",
+    "title": "Default quota for new members",
+    "hint": "New members get it when they join; the period starts when they join.",
+    "syncUnconfigured": "Also give it to current members without a periodic quota",
+    "syncConfigured": "Also replace current members' periodic quotas (starts a new period now)",
+    "disable": "Turn off",
+    "disableTitle": "Turn off the default quota?",
+    "disableDescription": "Members who join later won't get a default quota. Current members keep theirs."
   },
   "quota": {
-    "title": "Adjust monthly quota for {name}",
-    "modeLabel": "Monthly quota",
-    "unlimited": "Unlimited",
-    "custom": "Custom",
-    "amount": "Monthly amount"
+    "title": "Set quota",
+    "mode": "Quota type",
+    "modes": {
+      "unlimited": "Unlimited",
+      "fixed": "Fixed total cap",
+      "periodic": "Periodic quota"
+    },
+    "amount": "Amount (US$)",
+    "fixedHint": "0 means this member can't spend",
+    "switchClears": "Saving removes this member's current periodic quota",
+    "perPeriod": "Amount per period (US$)",
+    "periodDays": "Period (days)",
+    "immediate": "Start now (begins a new period right away)",
+    "startAt": "Starts at",
+    "startAtHint": "Beijing time. The old quota applies until then; the first period starts automatically."
   },
-  "remove": {
-    "title": "Remove member “{name}”?",
-    "description": "Their API keys will be disabled immediately."
+  "rename": {
+    "title": "Rename",
+    "label": "Name"
+  },
+  "split": {
+    "title": "Split a total",
+    "total": "Total to split (US$)",
+    "hint": "Split evenly; each share becomes that member's fixed total cap"
+  },
+  "grant": {
+    "title": "Grant periodic quota"
+  },
+  "disableMember": {
+    "title": "Disable “{name}”?",
+    "description": "Their calls will be rejected right away. You can enable them again any time."
+  },
+  "requests": {
+    "title": "Quota requests",
+    "settings": "Request settings",
+    "statusLabel": "Filter by status",
+    "status": {
+      "all": "All",
+      "pending": "Pending",
+      "granted": "Granted",
+      "rejected": "Rejected",
+      "withdrawn": "Withdrawn"
+    },
+    "off": "Quota requests are off for this organization",
+    "empty": "No requests",
+    "approve": "Approve",
+    "reject": "Reject",
+    "rejectTitle": "Reject request",
+    "note": "Note (optional)",
+    "approveTitle": "Approve this request?",
+    "approveDescription": "{name}'s quota will go up by {amount}."
+  },
+  "policy": {
+    "title": "Request settings",
+    "mode": "How requests work",
+    "modes": {
+      "off": "Off",
+      "approve": "Approve first",
+      "auto": "Grant right away"
+    },
+    "min": "Minimum per request (US$)",
+    "max": "Maximum per request (US$)"
   },
   "invitations": {
-    "title": "Invitation codes",
-    "empty": "No invitation codes yet",
-    "columns": {
-      "code": "Code",
-      "created": "Created",
-      "expires": "Valid until",
-      "status": "Status",
-      "usedBy": "Used by"
-    },
+    "title": "Invite codes",
+    "empty": "No invite codes yet",
+    "created": "Created {date}",
+    "expires": "Valid until {date}",
+    "forever": "No expiry",
     "status": {
-      "active": "Valid",
+      "unused": "Active",
       "used": "Used",
+      "disabled": "Disabled",
       "expired": "Expired"
-    }
+    },
+    "copyCode": "Copy code",
+    "copyLink": "Copy invite link",
+    "disable": "Disable",
+    "disableTitle": "Disable this invite code?",
+    "disableDescription": "It can no longer be used to join the organization."
   },
-  "invite": {
-    "title": "Invite member",
-    "expiry": "Validity",
-    "days7": "7 days",
-    "days30": "30 days",
-    "code": "Invitation code",
-    "link": "Invitation link"
+  "myQuota": {
+    "title": "Organization quota left",
+    "unlimited": "Unlimited",
+    "resetAt": "Resets {date}",
+    "apply": "Request more",
+    "pending": "Request pending",
+    "dialogTitle": "Request more quota",
+    "amount": "Amount (US$)",
+    "range": "Between {min} and {max} per request",
+    "reason": "Reason (optional)",
+    "submit": "Submit",
+    "recent": "Recent requests",
+    "recentFailed": "Requests couldn't be loaded",
+    "withdraw": "Withdraw"
   },
   "errors": {
-    "quotaRange": "Enter an amount between {min} and {max}"
+    "nameRequired": "Enter a name",
+    "nameTooLong": "At most 50 characters",
+    "amount": "Enter an amount from 0 to 1000000",
+    "requestAmount": "Enter an amount above 0",
+    "period": "The period must be 1 to 3650 days",
+    "start": "Pick a start time",
+    "range": "The minimum must be above 0 and the maximum can't be below it",
+    "noteTooLong": "At most 500 characters",
+    "action": {
+      "owner_required": "Only the organization admin can do this",
+      "not_in_org": "You're no longer in this organization",
+      "org_disabled": "The platform has suspended this organization",
+      "member_not_found": "This member is no longer in the organization. Refresh the page.",
+      "owner_immutable": "This can't be set for the organization admin",
+      "name_invalid": "The name must be 1 to 50 characters",
+      "amount_invalid": "That amount isn't valid",
+      "period_invalid": "The period must be 1 to 3650 days",
+      "start_invalid": "That start time isn't valid",
+      "no_targets": "Select members first",
+      "request_disabled": "Quota requests are off for this organization",
+      "request_amount": "The amount is outside the allowed range",
+      "request_pending_exists": "A request is already waiting",
+      "request_ineligible": "You can't request quota right now",
+      "request_handled": "This request has already been handled",
+      "request_not_found": "This request no longer exists. Refresh the page.",
+      "text_too_long": "Too long. At most 500 characters.",
+      "range_invalid": "The minimum must be above 0 and the maximum can't be below it",
+      "invalid": "Something in the form isn't right. Check it and try again.",
+      "forbidden": "You don't have permission to do this",
+      "too_many": "Too many requests. Try again shortly.",
+      "unavailable": "That didn't work. Try again later."
+    },
+    "approveIneligible": "This member can't receive more quota right now (unlimited or disabled), so the request was voided"
   }
 }

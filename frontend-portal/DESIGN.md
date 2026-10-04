@@ -396,16 +396,17 @@ pnpm format:check  # prettier
 | 找回密码、谷歌登录、人机验证 | 不连后端，入口不显示；后端开了人机验证时，注册失败提示联系管理员 |
 | 控制台用量页 | 2026-10-03 接通后端，显示登录账号自己的真实用量：后端用量总览接口（技术设计 18.2）、官网转发 `src/app/api/portal/console/usage/`、取数与换算 `src/lib/console/live/` |
 | 控制台模型页 | 2026-10-04 接通后端：分组、模型、实付价、官方价来自后端模型广场（技术设计 18.3），官网转发 `src/app/api/portal/console/models/`、换算 `src/lib/console/live/models-*.ts`；展示名、厂商、协议、上下文仍取官网目录（见上面「30 个模型」一行） |
-| 控制台日志页 | 2026-10-04 接通后端：登录账号计费成功的调用（后端 `/api/v1/usage`，技术设计 18.4），官网转发 `src/app/api/portal/console/logs/`（列表、筛选选项、导出 CSV）、换算 `src/lib/console/live/logs-*.ts`；费用旁的费用明细、模型旁的 Fast 标签都按后端记录算。用量、模型、日志、账单、邀请、密钥几页以外的控制台页面仍是占位数据（**编的**） |
+| 控制台日志页 | 2026-10-04 接通后端：登录账号计费成功的调用（后端 `/api/v1/usage`，技术设计 18.4），官网转发 `src/app/api/portal/console/logs/`（列表、筛选选项、导出 CSV）、换算 `src/lib/console/live/logs-*.ts`；费用旁的费用明细、模型旁的 Fast 标签都按后端记录算。用量、模型、日志、账单、邀请、密钥、组织几页以外的控制台页面仍是占位数据（**编的**） |
 | 控制台账单页 | 2026-10-04 接通后端：余额卡（可用余额、累计充值、累计赠送、累计消耗）与交易记录（只含余额变动，由兑换记录、充值订单、邀请返利转入、优惠码、退款拼成，每笔之后的余额按现在的余额倒推）来自后端新加的两个接口（技术设计 18.5），兑换码走后端真实兑换；官网转发 `src/app/api/portal/console/billing/`、换算 `src/lib/console/live/billing-*.ts`。充值弹窗还没接支付，档位、赠送与支付方式是占位（**编的**），`src/lib/console/billing.ts` |
 | 控制台邀请页 | 2026-10-04 接 sub2api 的邀请返利（技术设计 18.7），返利由后端自动进余额：邀请码、返利规则（比例、冻结期、有效期、单人上限）、返利统计、被邀请人都来自后端，官网转发 `src/app/api/portal/console/invite/`、换算 `src/lib/console/live/invite-*.ts`；后台没开邀请返利时侧栏不显示入口 |
 | 控制台密钥页 | 2026-10-04 接通后端：密钥列表（完整密钥、分组与专属倍率、近 30 天与今日用量）和创建、编辑、暂停、删除都走后端现有的密钥接口（技术设计 18.6），创建与编辑照 sub2api 的密钥表单；官网转发 `src/app/api/portal/console/keys/`、取数与规则 `src/lib/console/live/keys-*.ts` |
+| 控制台组织页 | 2026-10-04 接通后端，只给组织管理员：成员额度、新成员默认配额、配额申请、组织邀请码都走后端现有的组织接口（技术设计 18.8），官网转发 `src/app/api/portal/console/organization/`、取数与规则 `src/lib/console/live/org-*.ts`；普通成员的组织配额卡片在用量页；组织的占位数据已删 |
 
 ---
 
 ## 10. 控制台（M6）
 
-控制台和官网同一个应用、同一套令牌与基础组件，地址 `/console/<页>`（英文 `/en/console/<页>`，`/console` 自动跳到 `/console/usage`）。信息组织参考 onehop 控制台（用量、模型、日志、API 密钥、账单、邀请、工单，左上角深色「对话」入口），视觉一律按本文件第 2 章的令牌。任务墙不做；侧栏「文档」链到官网 `/docs` 占位页。另加「组织」（成员与配额）和「账户设置」（头像菜单进入）两页。
+控制台和官网同一个应用、同一套令牌与基础组件，地址 `/console/<页>`（英文 `/en/console/<页>`，`/console` 自动跳到 `/console/usage`）。信息组织参考 onehop 控制台（用量、模型、日志、API 密钥、账单、邀请、工单，左上角深色「对话」入口），视觉一律按本文件第 2 章的令牌。任务墙不做；侧栏「文档」链到官网 `/docs` 占位页。另加「组织」（只给组织管理员：成员额度、配额申请、邀请码）和「账户设置」（头像菜单进入）两页。
 
 数据全部占位，集中在 `src/lib/console/`（主控已写好并有单测锁住，**不准改**）。所有操作只改页面内的本地状态，不发请求；刷新、保存、提交一类按钮进入加载态 600–1200ms 再恢复。
 
@@ -457,7 +458,6 @@ pnpm format:check  # prettier
 | `REQUEST_LOGS`、`filterLogs(logs, filter)`、`logsToCsv(logs)`、`curlFor(log)`、`LogFilter`、`RequestLog` | 请求日志 |
 | `API_KEYS`、`getKey(id)`、`maskKey(secret)`、`searchKeys(keys, q, status)`、`KEY_STATUSES`、`USED_MODEL_IDS` | API 密钥 |
 | `RECHARGE_PRESETS`、`RECHARGE_BONUS_TIERS`、`rechargeBonus(a)`、`RECHARGE_LIMITS`、`PAYMENT_METHODS` | 充值弹窗的占位配置（账单页其余部分已接后端：`@/lib/console/live/billing-*`、`use-billing`） |
-| `ORGANIZATION`、`ORG_MEMBERS`、`ORG_INVITATIONS`、`quotaRatio(m)`、`orgSummary(list)` | 组织 |
 | `TICKETS`、`filterTickets(list, status)`、`TICKET_STATUSES`、`TICKET_CATEGORIES`、`TICKET_LIMITS` | 工单 |
 | `CHAT_SAMPLE`、`CHAT_REPLIES`、`CHAT_MODEL_IDS`、`DEFAULT_CHAT_MODEL`、`CHAT_INPUT_MAX` | 对话页 |
 | `CURRENT_USER`、`ANNOUNCEMENTS`、`NOTIFICATIONS` | 当前用户、公告、通知 |
@@ -465,13 +465,13 @@ pnpm format:check  # prettier
 
 模型、厂商、版本与价格照旧从 `@/lib/catalog` 取（`MODELS`、`getModel`、`getProvider`、`getEdition`、`EDITIONS`、`textPrice`、`imagePrice`、`textPriceAt`、`imagePriceAt`、`editionDiscount`、`formatRatio`、`filterModels`、`facetCounts`、`PROTOCOL_LABELS`、`USD_CNY_RATE`、`formatMoney` 等）。版本名用 `getEdition(id).name[locale]`。
 
-用量页的真实数据层在 `@/lib/console/live/`（`useUsageOverview`、`useLiveClock`、`summaryFromOverview`、`breakdownFromPoints`、`dailyTotalsFromBuckets` 等），不经 `@/lib/console` 导出。
+用量页的真实数据层在 `@/lib/console/live/`（`useUsageOverview`、`useLiveClock`、`summaryFromOverview`、`breakdownFromPoints`、`dailyTotalsFromBuckets` 等），不经 `@/lib/console` 导出；其他接了后端的页面同样在这里（如组织页 `org-*`）。
 
-单测算出的关键数字（占位数据，用量页接后端后不再显示这组用量数字）：近 30 天请求 41,198、花费 US$142.97、Token 250.3M、缓存命中 62%；今天请求 492；日志 240 条，其中失败 8 条、生图 24 条、今天 11 条；密钥 5 个；组织成员 5 人。
+单测算出的关键数字（占位数据，用量页接后端后不再显示这组用量数字）：近 30 天请求 41,198、花费 US$142.97、Token 250.3M、缓存命中 62%；今天请求 492；日志 240 条，其中失败 8 条、生图 24 条、今天 11 条；密钥 5 个。
 
 ### 10.4 控制台实现守则（在第 7 章之外）
 
-- 页面区块全部 `'use client'`，状态用本地 `useState`（对话页的模型参数除外，见页面规格）；除了已接后端的用量页、模型页、日志页（经 `src/lib/console/live/`），不发任何网络请求，不用 `Math.random()`、`Date.now()`、`new Date()` 生成显示用的数据（新建密钥、邀请码这类一次性随机串可以用 `crypto.getRandomValues`，只在点击事件里调用）。
+- 页面区块全部 `'use client'`，状态用本地 `useState`（对话页的模型参数除外，见页面规格）；除了已接后端的页面（经 `src/lib/console/live/`），不发任何网络请求，不用 `Math.random()`、`Date.now()`、`new Date()` 生成显示用的数据（新建密钥、邀请码这类一次性随机串可以用 `crypto.getRandomValues`，只在点击事件里调用）。
 - 时间一律用 `formatDateTime` 一类函数（北京时间），金额一律 `formatUsd`（写作 US$，不要自己拼「$」），Token 一律 `formatCompact`。模型单价沿用官网价格表的写法（`formatMoney`，`$` / `¥`）。
 - 新增、编辑、删除只改本页的本地列表；刷新按钮转 600ms 圈后恢复；表单提交先校验（所有出错字段同时标红，焦点落第一个），通过后加载 800–1200ms 再给结果。
 - 每个列表都要有空状态（筛选无结果时给「清除筛选」）；长文本截断；手机 375 宽页面不横向溢出（宽表格在 `TableShell` 里横向滚动，筛选栏折成一到两列）。
