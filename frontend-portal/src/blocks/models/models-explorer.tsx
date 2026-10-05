@@ -1,8 +1,9 @@
 'use client';
 
 /**
- * 模型浏览器：筛选、搜索、排序、类型切换全部存进网址参数，
- * 刷新和分享链接都保留；结果一律走数据层 filterModels / facetCounts。
+ * 模型浏览器：模型与价格来自后台（官网服务器读好后传进来，见 src/lib/catalog/live.ts）。
+ * 筛选、搜索、排序、类型切换全部存进网址参数，刷新和分享链接都保留；结果一律走 filterSiteModels / siteFacetCounts。
+ * 企业通道按合同定价：列出专用通道的模型、价格写「定制」。后台读不到时只显示一句「暂时没有可展示的模型」。
  */
 
 import { useState } from 'react';
@@ -26,18 +27,21 @@ import { SegmentedControl } from '@/components/ui/segmented-control';
 import { ModelsExplorerCard } from './models-explorer-card';
 import {
   CONTEXT_FILTERS,
-  MODELS,
   PROVIDERS,
-  PROTOCOLS,
-  PROTOCOL_LABELS,
   SORT_KEYS,
   TYPE_FILTERS,
-  facetCounts,
-  filterModels,
+  getProvider,
   type ContextFilter,
   type SortKey,
   type TypeFilter,
 } from '@/lib/catalog';
+import {
+  filterSiteModels,
+  providersOf,
+  siteFacetCounts,
+  type SiteCatalog,
+  type SiteModel,
+} from '@/lib/catalog/live';
 import { useEdition } from '@/lib/use-catalog-state';
 import { useUrlList, useUrlState, useUrlText } from '@/lib/use-url-state';
 import { cn } from '@/lib/utils';
@@ -66,17 +70,21 @@ const SORT_LABEL_KEYS: Record<SortKey, 'latest' | 'price-asc' | 'price-desc' | '
   context: 'context',
 };
 
-export function ModelsExplorer() {
+const NO_MODELS: readonly SiteModel[] = [];
+
+export function ModelsExplorer({ catalog }: { catalog: SiteCatalog }) {
   const t = useTranslations('models');
   const locale = useLocale();
 
   const [edition] = useEdition();
+  // 企业通道没有公开单价，借专用通道的模型列表
+  const available = edition === 'enterprise' ? (catalog.pro ?? catalog.personal) : catalog[edition];
+  const models = available ?? NO_MODELS;
   const [type, setType] = useUrlState('type', TYPE_FILTERS, 'all');
   const [providers, setProviders] = useUrlList(
     'provider',
     PROVIDERS.map((p) => p.id),
   );
-  const [protocols, setProtocols] = useUrlList('protocol', PROTOCOLS);
   const [context, setContext] = useUrlState('context', CONTEXT_FILTERS, 'all');
   const [sort, setSort] = useUrlState('sort', SORT_KEYS, 'latest');
   const [query, setQuery] = useUrlText('q');
@@ -93,16 +101,15 @@ export function ModelsExplorer() {
     setSearch(query);
   }
 
-  const counts = facetCounts(MODELS, type);
-  const list = filterModels(MODELS, { type, providers, protocols, context, query, sort }, edition);
+  const counts = siteFacetCounts(models, type);
+  const list = filterSiteModels(models, { type, providers, context, query, sort });
+  const providerOptions = providersOf(models);
 
-  const hasFilters =
-    providers.length > 0 || protocols.length > 0 || context !== 'all' || query.trim() !== '';
+  const hasFilters = providers.length > 0 || context !== 'all' || query.trim() !== '';
 
-  /** 清除筛选：清空厂商、协议、搜索，上下文回 all；类型、排序、版本不动 */
+  /** 清除筛选：清空厂商、搜索，上下文回 all；类型、排序、通道不动 */
   const clearFilters = () => {
     setProviders([]);
-    setProtocols([]);
     setContext('all');
     setQuery('');
   };
@@ -116,10 +123,6 @@ export function ModelsExplorer() {
   /** 多选切换：再点一次取消 */
   const toggleProvider = (id: (typeof providers)[number]) => {
     setProviders(providers.includes(id) ? providers.filter((p) => p !== id) : [...providers, id]);
-  };
-
-  const toggleProtocol = (id: (typeof protocols)[number]) => {
-    setProtocols(protocols.includes(id) ? protocols.filter((p) => p !== id) : [...protocols, id]);
   };
 
   const contextOptions = [
@@ -165,13 +168,13 @@ export function ModelsExplorer() {
           {t('filters.providers')}
         </p>
         <div className="space-y-0.5">
-          {PROVIDERS.map((provider) => {
-            const checked = providers.includes(provider.id);
-            const count = counts.providers[provider.id];
+          {providerOptions.map((id) => {
+            const checked = providers.includes(id);
+            const count = counts.providers[id] ?? 0;
             return (
               <label
-                key={provider.id}
-                data-provider={provider.id}
+                key={id}
+                data-provider={id}
                 className={cn(
                   'flex cursor-pointer items-center gap-3 rounded-md px-2 py-1.5 text-sm text-foreground hover:bg-muted',
                   count === 0 && 'opacity-50',
@@ -181,38 +184,10 @@ export function ModelsExplorer() {
                   type="checkbox"
                   className="size-4 accent-[var(--foreground)]"
                   checked={checked}
-                  onChange={() => toggleProvider(provider.id)}
+                  onChange={() => toggleProvider(id)}
                 />
-                <ProviderLogo provider={provider.id} size={16} />
-                <span className="flex-1 truncate">{provider.name}</span>
-                <span className="text-xs tabular-nums text-subtle-foreground">{count}</span>
-              </label>
-            );
-          })}
-        </div>
-      </div>
-
-      <div>
-        <p className="mb-3 text-xs font-medium uppercase tracking-wide text-subtle-foreground">
-          {t('filters.protocols')}
-        </p>
-        <div className="space-y-0.5">
-          {PROTOCOLS.map((protocol) => {
-            const checked = protocols.includes(protocol);
-            const count = counts.protocols[protocol];
-            return (
-              <label
-                key={protocol}
-                data-protocol={protocol}
-                className="flex cursor-pointer items-center gap-3 rounded-md px-2 py-1.5 text-sm text-foreground hover:bg-muted"
-              >
-                <input
-                  type="checkbox"
-                  className="size-4 accent-[var(--foreground)]"
-                  checked={checked}
-                  onChange={() => toggleProtocol(protocol)}
-                />
-                <span className="flex-1 truncate">{PROTOCOL_LABELS[protocol]}</span>
+                <ProviderLogo provider={id} size={16} />
+                <span className="flex-1 truncate">{getProvider(id).name}</span>
                 <span className="text-xs tabular-nums text-subtle-foreground">{count}</span>
               </label>
             );
@@ -236,6 +211,21 @@ export function ModelsExplorer() {
       ) : null}
     </>
   );
+
+  if (available === null) {
+    return (
+      <section id="explorer" className="pb-20 md:pb-28">
+        <Container>
+          <div
+            data-models-unavailable
+            className="rounded-2xl border border-dashed border-border-strong px-6 py-20 text-center text-base text-muted-foreground"
+          >
+            {t('empty.unavailable')}
+          </div>
+        </Container>
+      </section>
+    );
+  }
 
   return (
     <section id="explorer" className="pb-20 md:pb-28">

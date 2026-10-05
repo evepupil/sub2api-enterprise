@@ -3,6 +3,7 @@
   "titleLine1": "Text, Image and Code Models",
   "titleLine2": "Through a Single API",
   "subtitle": "Claude, GPT, Gemini, DeepSeek and {count} leading models behind one endpoint, billed by usage,<br></br> on the Shared, Dedicated or Enterprise channel.",
+  "subtitleNoCount": "Claude, GPT, Gemini, DeepSeek and other leading models behind one endpoint, billed by usage,<br></br> on the Shared, Dedicated or Enterprise channel.",
   "primaryCta": "Get started",
   "secondaryCta": "View pricing",
   "preview": {

@@ -5,4 +5,3 @@ export * from './models';
 export * from './pricing';
 export * from './providers';
 export * from './types';
-export * from './uptime';

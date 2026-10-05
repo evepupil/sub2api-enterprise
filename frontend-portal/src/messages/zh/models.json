@@ -1,18 +1,18 @@
 {
   "meta": {
     "title": "模型",
-    "description": "30 个主流文本与生图模型，按共享、专用、企业通道查看价格、上下文与可用率。"
+    "description": "主流文本与生图模型，按共享、专用、企业通道查看价格、上下文与可用率。"
   },
   "hero": {
     "title": "所有模型，一个 API 调用",
-    "subtitle": "用一个密钥、一个地址、一张账单，调用 OpenAI、Anthropic、Gemini 协议下的 {count} 个模型。"
+    "subtitle": "用一个密钥、一个地址、一张账单，调用 OpenAI、Anthropic、Gemini 协议下的 {count} 个模型。",
+    "subtitleNoCount": "用一个密钥、一个地址、一张账单，调用 OpenAI、Anthropic、Gemini 协议下的主流模型。"
   },
   "filters": {
     "toggle": "筛选",
     "context": "上下文长度",
     "contextAll": "全部",
     "providers": "厂商",
-    "protocols": "支持协议",
     "clear": "清除筛选"
   },
   "toolbar": {
@@ -33,7 +33,8 @@
     "image": "生图"
   },
   "empty": {
-    "title": "没有符合条件的模型"
+    "title": "没有符合条件的模型",
+    "unavailable": "暂时没有可展示的模型"
   },
   "card": {
     "new": "新",
@@ -43,8 +44,12 @@
     "perImage": "每张",
     "estimate": "约每张",
     "context": "上下文",
-    "uptime": "近 24 小时可用率",
-    "uptimeLabel": "近 24 小时可用率 {percent}%",
-    "pricing": "查看价格"
+    "pricing": "查看价格",
+    "perRequest": "每次",
+    "latency": "对话延迟",
+    "ping": "端点 PING",
+    "availability": "可用性 · 近 7 天",
+    "probes": "近 {count} 次记录",
+    "probesLabel": "近 {count} 次探测，{up} 次正常"
   }
 }

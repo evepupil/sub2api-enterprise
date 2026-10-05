@@ -52,7 +52,6 @@ export interface Model {
   contextTokens: number | null;
   /** 上线日期 YYYY-MM-DD，用于「最新」排序和「新」标记 */
   released: string;
-  description: Localized;
   /** 文本模型官方价 */
   official: TokenPrice | null;
   longContext: LongContextTier | null;

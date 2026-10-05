@@ -1,5 +1,5 @@
 import { ProviderLogo } from '@/components/catalog/provider-logo';
-import { MODELS, type ProviderId } from '@/lib/catalog';
+import type { ProviderId } from '@/lib/catalog';
 import { useTranslations } from 'next-intl';
 
 /** 右侧展示区叠放的厂商，顺序即规格指定 */
@@ -38,7 +38,7 @@ export function AuthShowcase() {
           ))}
         </div>
         <h2 className="mt-8 text-xl font-semibold tracking-tight text-foreground">
-          {t('showcase.title', { count: MODELS.length })}
+          {t('showcase.title')}
         </h2>
         <p className="mt-4 text-base text-muted-foreground">{t('showcase.subtitle')}</p>
       </div>

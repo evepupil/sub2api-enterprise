@@ -92,6 +92,7 @@ function toModel(raw: RawRecord): ChannelModel | null {
     platform: typeof raw.platform === 'string' ? raw.platform : '',
     billing,
     base,
+    cacheRead: billing === 'token' ? num(pricing.cache_read_price) : null,
     tiers: billing === 'token' ? toTiers(pricing.intervals, base) : [],
     perRequest: billing === 'token' ? null : perRequest,
     perRequestTiered: billing !== 'token' && requestTiers.length > 1,

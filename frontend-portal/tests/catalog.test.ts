@@ -1,21 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  DEFAULT_FILTER,
-  editionDiscount,
-  facetCounts,
-  filterModels,
   formatAmount,
   formatContext,
   formatDiscount,
   formatMoney,
-  groupByProvider,
   imagePrice,
   isNewModel,
   MODELS,
-  priceSortKey,
   textPrice,
-  uptimeFor,
   type Model,
 } from '@/lib/catalog';
 
@@ -107,20 +100,14 @@ describe('通道价格 = 官方价 × 分组倍率', () => {
     expect(imagePrice(model('gpt-6-sol'), 'personal')).toBeNull();
     expect(textPrice(model('gpt-image-2'), 'personal')).toBeNull();
   });
-
-  it('定制通道排序按官方价', () => {
-    expect(priceSortKey(model('claude-sonnet-5-5'), 'enterprise')).toBe(2);
-    expect(priceSortKey(model('claude-sonnet-5-5'), 'pro')).toBe(0.6);
-  });
 });
 
 describe('折扣标', () => {
-  it('共享通道 1.5折、专用通道 3折，企业通道定制不显示', () => {
-    expect(formatDiscount(editionDiscount('personal'), 'zh')).toBe('1.5折');
-    expect(formatDiscount(editionDiscount('pro'), 'zh')).toBe('3折');
-    expect(formatDiscount(editionDiscount('personal'), 'en')).toBe('85% off');
-    expect(formatDiscount(editionDiscount('pro'), 'en')).toBe('70% off');
-    expect(editionDiscount('enterprise')).toBeNull();
+  it('实付是官方价的 15%、30% 时写 1.5折、3折，没有折扣不显示', () => {
+    expect(formatDiscount(0.15, 'zh')).toBe('1.5折');
+    expect(formatDiscount(0.3, 'zh')).toBe('3折');
+    expect(formatDiscount(0.15, 'en')).toBe('85% off');
+    expect(formatDiscount(0.3, 'en')).toBe('70% off');
     expect(formatDiscount(null, 'zh')).toBeNull();
   });
 });
@@ -134,10 +121,10 @@ describe('格式化', () => {
     expect(formatAmount(102.04)).toBe('102');
   });
 
-  it('人民币按 7.1 换算', () => {
+  it('人民币按 1 美元 = 1 元换算（和充值到账的比例一致）', () => {
     expect(formatMoney(0.6, 'usd')).toBe('$0.6');
-    expect(formatMoney(0.6, 'cny')).toBe('¥4.26');
-    expect(formatMoney(3, 'cny')).toBe('¥21.3');
+    expect(formatMoney(0.6, 'cny')).toBe('¥0.6');
+    expect(formatMoney(3, 'cny')).toBe('¥3');
   });
 
   it('上下文长度', () => {
@@ -145,105 +132,5 @@ describe('格式化', () => {
     expect(formatContext(1_000_000)).toBe('1M');
     expect(formatContext(200_000)).toBe('200K');
     expect(formatContext(256_000)).toBe('256K');
-  });
-});
-
-describe('筛选与排序', () => {
-  it('筛选栏数量', () => {
-    const all = facetCounts(MODELS, 'all');
-    expect(all.types).toEqual({ all: 30, text: 23, image: 7 });
-    expect(all.providers).toEqual({
-      openai: 10,
-      anthropic: 6,
-      google: 8,
-      deepseek: 2,
-      moonshot: 1,
-      zhipu: 1,
-      minimax: 1,
-      qwen: 1,
-    });
-    expect(all.protocols).toEqual({
-      'openai-chat': 23,
-      'openai-responses': 7,
-      'anthropic-messages': 12,
-      gemini: 8,
-      'openai-images': 7,
-    });
-    expect(facetCounts(MODELS, 'image').providers.google).toBe(4);
-  });
-
-  it('组合筛选', () => {
-    const f = DEFAULT_FILTER;
-    const count = (patch: Partial<typeof f>) =>
-      filterModels(MODELS, { ...f, ...patch }, 'personal').length;
-    expect(count({ type: 'text', providers: ['anthropic'] })).toBe(6);
-    expect(count({ context: '1m' })).toBe(21);
-    expect(count({ context: '200k' })).toBe(23);
-    expect(count({ protocols: ['anthropic-messages'] })).toBe(12);
-    expect(count({ query: 'gemini' })).toBe(8);
-    expect(count({ query: 'nano' })).toBe(4);
-    expect(count({ query: '不存在的模型' })).toBe(0);
-  });
-
-  it('默认按最新排序', () => {
-    expect(
-      filterModels(MODELS, DEFAULT_FILTER, 'personal')
-        .slice(0, 5)
-        .map((m) => m.id),
-    ).toEqual(['claude-sonnet-5-5', 'gpt-6-luna', 'gpt-6-astra', 'gpt-6-sol', 'claude-fable-5-1']);
-  });
-
-  it('价格从低到高：最便宜 GPT-6 Luna，最贵 GPT-6 Astra（与 Claude Fable 5.1 同价按名字排）', () => {
-    const ids = filterModels(
-      MODELS,
-      { ...DEFAULT_FILTER, type: 'text', sort: 'price-asc' },
-      'personal',
-    ).map((m) => m.id);
-    expect(ids.slice(0, 3)).toEqual(['gpt-6-luna', 'gpt-5.6-luna', 'gemini-3.1-flash-lite']);
-    expect(ids.slice(-2)).toEqual(['claude-fable-5-1', 'gpt-6-astra']);
-  });
-
-  it('价格排序时文本在前、生图在后', () => {
-    const list = filterModels(MODELS, { ...DEFAULT_FILTER, sort: 'price-desc' }, 'personal');
-    expect(list.slice(0, 23).every((m) => m.type === 'text')).toBe(true);
-    expect(list.slice(23).every((m) => m.type === 'image')).toBe(true);
-  });
-
-  it('按上下文排序，1.05M 的模型在最前', () => {
-    expect(
-      filterModels(MODELS, { ...DEFAULT_FILTER, sort: 'context' }, 'personal')
-        .slice(0, 3)
-        .map((m) => m.id),
-    ).toEqual(['gpt-5.6-luna', 'gpt-5.6-sol', 'gpt-5.6-terra']);
-  });
-
-  it('价目表按厂商分段', () => {
-    const text = groupByProvider(MODELS.filter((m) => m.type === 'text'));
-    expect(text.map((g) => g.provider)).toEqual([
-      'openai',
-      'anthropic',
-      'google',
-      'deepseek',
-      'moonshot',
-      'zhipu',
-      'minimax',
-      'qwen',
-    ]);
-    const image = groupByProvider(MODELS.filter((m) => m.type === 'image'));
-    expect(image.map((g) => [g.provider, g.models.length])).toEqual([
-      ['openai', 3],
-      ['google', 4],
-    ]);
-  });
-});
-
-describe('可用率（固定种子）', () => {
-  it('同一输入结果固定，24 个小时格', () => {
-    const a = uptimeFor('claude-sonnet-5-5', 'personal');
-    expect(a).toEqual(uptimeFor('claude-sonnet-5-5', 'personal'));
-    expect(a.slots).toHaveLength(24);
-    expect(a.percent).toBe(99.93);
-    expect(uptimeFor('gpt-6-astra', 'personal').percent).toBe(99.62);
-    expect(uptimeFor('gemini-3.1-flash-image', 'enterprise').percent).toBe(100);
   });
 });

@@ -38,6 +38,7 @@
   "units": {
     "perMTokens": "/ 1M tokens",
     "perImage": "/ image",
+    "perRequest": "/ request",
     "from": "from",
     "approx": "≈"
   },

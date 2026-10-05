@@ -4,7 +4,7 @@ import { editionRatio } from './groups';
 import type { EditionId, Localized, Model } from './types';
 
 /** 人民币展示用的固定汇率（占位）。钱包按美元结算，人民币只做参考换算。 */
-export const USD_CNY_RATE = 7.1;
+export const USD_CNY_RATE = 1;
 
 /** 按 Token 计费的生图模型，估算一张 1024×1024 图消耗的输出 Token 数 */
 export const IMAGE_TOKENS_PER_IMAGE = 1290;
@@ -87,12 +87,6 @@ export function imagePrice(model: Model, edition: EditionId): ImagePriceView | n
   return ratio === null ? null : imagePriceAt(model, ratio);
 }
 
-/** 版本相对官方价的折扣（即分组倍率）；不低于官方价或按合同定制时返回 null，不显示折扣标 */
-export function editionDiscount(edition: EditionId): number | null {
-  const ratio = editionRatio(edition);
-  return ratio !== null && ratio < 1 ? ratio : null;
-}
-
 /** 折扣标：中文「3折」「1.5折」，英文「70% off」 */
 export function formatDiscount(discount: number | null, locale: AppLocale): string | null {
   if (discount === null) return null;
@@ -133,17 +127,4 @@ export function localize(value: Localized, locale: AppLocale): string {
 export function isNewModel(model: Model): boolean {
   const days = (Date.parse(CATALOG_AS_OF) - Date.parse(model.released)) / 86_400_000;
   return days >= 0 && days <= NEW_MODEL_DAYS;
-}
-
-/**
- * 价格排序用的键：文本取输入单价，生图取每张价（按 Token 计费的取估算每张价）。
- * 倍率按合同定制的版本没有单价，按官方价排。
- */
-export function priceSortKey(model: Model, edition: EditionId): number {
-  const k = editionRatio(edition) ?? 1;
-  const text = textPriceAt(model, k);
-  if (text) return text.input;
-  const image = imagePriceAt(model, k);
-  if (!image) return Number.POSITIVE_INFINITY;
-  return image.kind === 'per-image' ? image.from : image.estimatedPerImage;
 }

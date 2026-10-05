@@ -6,7 +6,6 @@ import { GridBeams } from '@/components/effects/grid-beams';
 import { buttonClass } from '@/components/ui/button-styles';
 import { Container } from '@/components/ui/container';
 import { Link } from '@/i18n/navigation';
-import { MODELS } from '@/lib/catalog';
 
 /**
  * 载入动画：四组元素（胶囊、标题、副标题、按钮）依次淡入上移，间隔 80ms。
@@ -15,7 +14,7 @@ import { MODELS } from '@/lib/catalog';
  */
 const delay = (index: number): CSSProperties => ({ animationDelay: `${index * 80}ms` });
 
-export function HomeHero() {
+export function HomeHero({ count }: { count: number | null }) {
   const t = useTranslations('homeHero');
 
   return (
@@ -43,10 +42,9 @@ export function HomeHero() {
         </div>
         <div className="animate-fade-up" style={delay(2)}>
           <p className="mx-auto mt-6 max-w-3xl text-balance text-lg text-muted-foreground md:text-xl">
-            {t.rich('subtitle', {
-              count: MODELS.length,
-              br: () => <br className="hidden md:block" />,
-            })}
+            {count === null
+              ? t.rich('subtitleNoCount', { br: () => <br className="hidden md:block" /> })
+              : t.rich('subtitle', { count, br: () => <br className="hidden md:block" /> })}
           </p>
         </div>
         <div className="animate-fade-up" style={delay(3)}>

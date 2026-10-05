@@ -34,6 +34,8 @@ export interface ChannelModel {
   billing: BillingMode;
   /** 按 Token 计费的基础单价 */
   base: TokenRates;
+  /** 缓存读取单价（每 Token，不乘倍率）；后端没给或不按 Token 计费时为 null。官网价格页用 */
+  cacheRead?: number | null;
   /** 长上下文分档，首档从 0 开始；没有分档时为空 */
   tiers: PriceTier[];
   /** 按次 / 按张的单价；有分档（如分辨率）时是最低一档 */

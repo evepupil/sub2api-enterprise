@@ -1,18 +1,18 @@
 {
   "meta": {
     "title": "Models",
-    "description": "30 leading text and image models with prices, context and availability for the Shared, Dedicated and Enterprise channels."
+    "description": "Leading text and image models. Compare prices, context and availability on the Shared, Dedicated and Enterprise channels."
   },
   "hero": {
     "title": "Every model, one API",
-    "subtitle": "One key, one base URL and one bill for {count} models across the OpenAI, Anthropic and Gemini protocols."
+    "subtitle": "One key, one base URL and one bill for {count} models across the OpenAI, Anthropic and Gemini protocols.",
+    "subtitleNoCount": "One key, one base URL and one bill for leading models across the OpenAI, Anthropic and Gemini protocols."
   },
   "filters": {
     "toggle": "Filters",
     "context": "Context length",
     "contextAll": "All",
     "providers": "Providers",
-    "protocols": "Protocols",
     "clear": "Clear filters"
   },
   "toolbar": {
@@ -33,7 +33,8 @@
     "image": "Image"
   },
   "empty": {
-    "title": "No models match these filters"
+    "title": "No models match these filters",
+    "unavailable": "No models to show right now"
   },
   "card": {
     "new": "New",
@@ -43,8 +44,12 @@
     "perImage": "Per image",
     "estimate": "Est. per image",
     "context": "context",
-    "uptime": "24h availability",
-    "uptimeLabel": "24h availability {percent}%",
-    "pricing": "View pricing"
+    "pricing": "View pricing",
+    "perRequest": "Per request",
+    "latency": "Chat latency",
+    "ping": "Endpoint ping",
+    "availability": "Availability · 7 days",
+    "probes": "Last {count} checks",
+    "probesLabel": "{up} of the last {count} checks passed"
   }
 }

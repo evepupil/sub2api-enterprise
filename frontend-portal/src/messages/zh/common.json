@@ -38,6 +38,7 @@
   "units": {
     "perMTokens": "/ 百万 Token",
     "perImage": "/ 张",
+    "perRequest": "/ 次",
     "from": "起",
     "approx": "≈"
   },

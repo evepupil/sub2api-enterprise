@@ -3,6 +3,7 @@
   "titleLine1": "文本、图像与代码模型",
   "titleLine2": "一个 API 全部调用",
   "subtitle": "Claude、GPT、Gemini、DeepSeek 等 {count} 个主流模型统一接入、按量计费，<br></br>共享、专用、企业三种通道按需选择。",
+  "subtitleNoCount": "Claude、GPT、Gemini、DeepSeek 等主流模型统一接入、按量计费，<br></br>共享、专用、企业三种通道按需选择。",
   "primaryCta": "免费注册",
   "secondaryCta": "查看价格",
   "preview": {

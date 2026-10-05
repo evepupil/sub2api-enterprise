@@ -1,91 +1,108 @@
 'use client';
 
+import { Fragment } from 'react';
+
 import { useLocale, useTranslations } from 'next-intl';
 
 import { DiscountBadge } from '@/components/catalog/discount-badge';
-import { ProviderLogo } from '@/components/catalog/provider-logo';
 import { Badge } from '@/components/ui/badge';
-import {
-  editionDiscount,
-  formatMoney,
-  getProvider,
-  groupByProvider,
-  imagePrice,
-  isNewModel,
-  localize,
-  MODELS,
-  type Model,
-} from '@/lib/catalog';
-import { useCurrency, useEdition } from '@/lib/use-catalog-state';
+import { formatMoney, IMAGE_TOKENS_PER_IMAGE } from '@/lib/catalog';
+import { groupSiteModels, type SiteModel } from '@/lib/catalog/live';
+import { useCurrency } from '@/lib/use-catalog-state';
 
-/** 模型格：名称、折扣标、「新」标、调用名和一行描述（让 Nano Banana 等别名可见）。 */
-function ImageModelCell({ model }: { model: Model }) {
+import { PriceProviderRow } from './pricing-provider-row';
+
+const round6 = (value: number) => Math.round(value * 1e6) / 1e6;
+
+/** 模型格：名称、折扣标、「新」标、调用名。 */
+function ImageModelCell({ model }: { model: SiteModel }) {
   const t = useTranslations('pricing');
   const locale = useLocale();
-  const [edition] = useEdition();
-  const discount = editionDiscount(edition);
-
   return (
     <td className="px-5 py-4 align-top">
       <div className="flex flex-wrap items-center gap-2">
         <span className="font-medium text-foreground">{model.name}</span>
-        <DiscountBadge discount={discount} locale={locale} />
-        {isNewModel(model) ? <Badge tone="info">{t('tables.new')}</Badge> : null}
+        <DiscountBadge discount={model.discount} locale={locale} />
+        {model.isNew ? <Badge tone="info">{t('tables.new')}</Badge> : null}
       </div>
-      <p className="mt-1 font-mono text-xs text-subtle-foreground">{model.id}</p>
-      <p className="mt-1 line-clamp-1 max-w-md text-xs text-muted-foreground">
-        {localize(model.description, locale)}
-      </p>
+      {/* 官网目录里没有的模型名字就是调用名，不重复写 */}
+      {model.name === model.id ? null : (
+        <p className="mt-1 font-mono text-xs text-subtle-foreground">{model.id}</p>
+      )}
     </td>
   );
 }
 
-/** 价格格：按张逐档列出，按 Token 显示每百万 Token 单价加每张估算。 */
-function ImagePriceCell({ model }: { model: Model }) {
+/** 价格格：按张写每张价（分辨率有多档时写「起」）；按 Token 写每百万输出 Token 单价加每张估算。 */
+function ImagePriceCell({ model }: { model: SiteModel }) {
   const c = useTranslations('common');
-  const [edition] = useEdition();
   const [currency] = useCurrency();
-  const price = imagePrice(model, edition);
+  const { price } = model;
+  const cell = 'px-5 py-4 text-right align-top tabular-nums text-foreground';
 
-  if (!price) {
+  if (price.kind === 'request') {
     return (
-      <td data-cell="price" className="px-5 py-4 text-right align-top tabular-nums text-foreground">
-        —
+      <td data-cell="price" className={cell}>
+        <div className="flex items-baseline justify-end gap-2">
+          <span>{formatMoney(price.price, currency)}</span>
+          <span className="text-subtle-foreground">
+            {price.unit === 'image' ? c('units.perImage') : c('units.perRequest')}
+            {price.from ? ` ${c('units.from')}` : ''}
+          </span>
+        </div>
       </td>
     );
   }
-
-  if (price.kind === 'per-image') {
+  if (price.kind === 'token' && price.output !== null) {
     return (
-      <td data-cell="price" className="px-5 py-4 text-right align-top tabular-nums text-foreground">
-        {price.resolutions.map((resolution) => (
-          <div key={resolution.label} className="flex justify-end gap-2">
-            <span className="text-subtle-foreground">{resolution.label}</span>
-            <span>{formatMoney(resolution.price, currency)}</span>
-            <span className="text-subtle-foreground">{c('units.perImage')}</span>
-          </div>
-        ))}
+      <td data-cell="price" className={cell}>
+        <div className="flex items-baseline justify-end gap-2">
+          <span>{formatMoney(price.output, currency)}</span>
+          <span className="text-subtle-foreground">{c('units.perMTokens')}</span>
+        </div>
+        <div className="mt-1 text-xs text-muted-foreground">
+          {c('units.approx')}{' '}
+          {formatMoney(round6((price.output * IMAGE_TOKENS_PER_IMAGE) / 1_000_000), currency)}{' '}
+          {c('units.perImage')}
+        </div>
       </td>
     );
+  }
+  return (
+    <td data-cell="price" className={cell}>
+      —
+    </td>
+  );
+}
+
+/** 模型行：计费方式与价格都按所选通道的实付价（来自后台）。 */
+function ImageModelRow({ model }: { model: SiteModel }) {
+  const t = useTranslations('pricing');
+  const { price } = model;
+  let billing = '—';
+  if (price.kind === 'request') {
+    billing = price.unit === 'image' ? t('tables.perImageBilling') : t('tables.perRequestBilling');
+  } else if (price.kind === 'token') {
+    billing = t('tables.perTokenBilling');
   }
 
   return (
-    <td data-cell="price" className="px-5 py-4 text-right align-top tabular-nums text-foreground">
-      <div className="flex items-baseline justify-end gap-2">
-        <span>{formatMoney(price.perMTokens, currency)}</span>
-        <span className="text-subtle-foreground">{c('units.perMTokens')}</span>
-      </div>
-      <div className="mt-1 text-xs text-muted-foreground">
-        ≈ {formatMoney(price.estimatedPerImage, currency)} {c('units.perImage')}
-      </div>
-    </td>
+    <tr
+      id={`model-${model.id}`}
+      data-price-row={model.id}
+      className="scroll-mt-28 border-t border-border transition-colors hover:bg-muted/40 target:bg-info-soft"
+    >
+      <ImageModelCell model={model} />
+      <td className="px-5 py-4 align-top text-muted-foreground">{billing}</td>
+      <ImagePriceCell model={model} />
+    </tr>
   );
 }
 
 /** 生图模型价目表：按厂商分段，三列分别是模型、计费方式、价格。 */
-export function ImagePriceTable() {
+export function ImagePriceTable({ models }: { models: readonly SiteModel[] }) {
   const t = useTranslations('pricing');
-  const imageGroups = groupByProvider(MODELS.filter((model) => model.type === 'image'));
+  const sections = groupSiteModels(models);
 
   return (
     <div id="image-models" className="scroll-mt-28">
@@ -121,69 +138,18 @@ export function ImagePriceTable() {
               </tr>
             </thead>
             <tbody>
-              {imageGroups.map((group) => (
-                <ImageProviderSection
-                  key={group.provider}
-                  provider={group.provider}
-                  models={group.models}
-                />
+              {sections.map((section) => (
+                <Fragment key={section.provider ?? 'other'}>
+                  <PriceProviderRow provider={section.provider} colSpan={3} />
+                  {section.models.map((model) => (
+                    <ImageModelRow key={model.id} model={model} />
+                  ))}
+                </Fragment>
               ))}
             </tbody>
           </table>
         </div>
       </div>
     </div>
-  );
-}
-
-/** 一个厂商的分段：一行厂商标题 + 若干模型行。 */
-function ImageProviderSection({
-  provider,
-  models,
-}: {
-  provider: Model['provider'];
-  models: readonly Model[];
-}) {
-  const providerInfo = getProvider(provider);
-
-  return (
-    <>
-      <tr data-provider-row={provider}>
-        <td colSpan={3} className="border-t border-border bg-muted/50 px-5 py-2.5">
-          <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            <ProviderLogo provider={provider} size={16} />
-            {providerInfo.name}
-          </div>
-        </td>
-      </tr>
-      {models.map((model) => (
-        <ImageModelRow key={model.id} model={model} />
-      ))}
-    </>
-  );
-}
-
-/** 模型行：计费方式与价格格都从数据层生图价取值。 */
-function ImageModelRow({ model }: { model: Model }) {
-  const t = useTranslations('pricing');
-  const [edition] = useEdition();
-  const price = imagePrice(model, edition);
-
-  return (
-    <tr
-      id={`model-${model.id}`}
-      data-price-row={model.id}
-      className="scroll-mt-28 border-t border-border transition-colors hover:bg-muted/40 target:bg-info-soft"
-    >
-      <ImageModelCell model={model} />
-      <td className="px-5 py-4 align-top text-muted-foreground">
-        {price?.kind === 'per-image'
-          ? t('tables.perImageBilling')
-          : price?.kind === 'per-token'
-            ? t('tables.perTokenBilling')
-            : '—'}
-      </td>
-      <ImagePriceCell model={model} />
-    </tr>
   );
 }
