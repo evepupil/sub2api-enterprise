@@ -9,8 +9,11 @@ import { initPage, type LocaleParams } from '@/i18n/page';
 import { siteModelCount } from '@/lib/catalog/live';
 import { getSiteCatalog } from '@/lib/server/site-catalog';
 
-/** 首屏的模型数和模型瀑布流来自后台，页面每 60 秒重新生成一次（和数据缓存同步） */
-export const revalidate = 60;
+/**
+ * 模型数据来自后台：每次打开都用官网服务器缓存（60 秒）里的数据现做页面，不在构建时预先生成——
+ * 构建时通常连不上后台，预先生成会让部署后的第一位访客看到空页面。
+ */
+export const dynamic = 'force-dynamic';
 
 export default async function HomePage({ params }: LocaleParams) {
   await initPage(params);
