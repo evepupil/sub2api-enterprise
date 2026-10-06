@@ -45,8 +45,8 @@ export const EDITIONS: readonly Edition[] = [
     id: 'pro',
     name: { zh: '专用通道', en: 'Dedicated' },
     summary: {
-      zh: '优选资源与优先调度，适合团队和生产环境。',
-      en: 'Premium capacity with priority scheduling, built for teams and production.',
+      zh: '独立自营号池，高可用、低延迟、不降智，适合团队和生产环境。',
+      en: 'Our own dedicated pool: high availability, low latency, full-strength models.',
     },
     ratio: 0.3,
     rpm: 600,
