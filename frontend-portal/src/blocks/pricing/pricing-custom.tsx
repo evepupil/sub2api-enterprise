@@ -6,13 +6,13 @@ import { Container } from '@/components/ui/container';
 import { Link } from '@/i18n/navigation';
 import { SITE } from '@/lib/site';
 
-/** 按合同定价的通道（企业通道）没有公开单价：价目表的位置换成一张联系客服卡（发邮件给客服）。 */
+/** 企业通道按合同定价、没有公开单价：价目表下面固定放一张联系客服卡（发邮件给客服）。 */
 export function PricingCustom() {
   const t = useTranslations('pricing');
   const common = useTranslations('common');
 
   return (
-    <section id="price-list" className="pb-16 md:pb-20">
+    <section id="price-custom" className="pb-16 md:pb-20">
       <Container>
         <div
           data-price-custom

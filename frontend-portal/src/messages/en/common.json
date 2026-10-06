@@ -26,9 +26,6 @@
     "light": "Light",
     "dark": "Dark"
   },
-  "edition": {
-    "label": "Channel"
-  },
   "actions": {
     "getStarted": "Get started",
     "viewPricing": "View pricing",
@@ -40,6 +37,7 @@
     "perImage": "/ image",
     "perRequest": "/ request",
     "from": "from",
+    "fromPrice": "from {price}",
     "approx": "≈"
   },
   "footer": {
@@ -61,8 +59,5 @@
       "privacy": "Privacy Policy",
       "refund": "Refund Policy"
     }
-  },
-  "editionSummary": {
-    "rpm": "Requests per minute"
   }
 }

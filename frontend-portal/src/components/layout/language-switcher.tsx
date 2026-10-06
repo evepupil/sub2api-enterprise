@@ -19,7 +19,7 @@ import { cn } from '@/lib/utils';
 const SHORT_LABEL: Record<AppLocale, string> = { zh: '中文', en: 'EN' };
 
 /**
- * 语言切换下拉。切换时留在当前页，并保留网址里的查询参数（如 ?edition=pro）。
+ * 语言切换下拉。切换时留在当前页，并保留网址里的查询参数（如 ?currency=cny）。
  * full 为真时触发按钮显示完整语言名，用在手机菜单里。
  */
 export function LanguageSwitcher({

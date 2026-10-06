@@ -6,7 +6,7 @@ import { pickAllowed, readList, readParam, writeList, writeParam } from './url-s
 
 /**
  * 把一个界面状态放进网址查询参数，同页所有区块共用：
- * 一个区块改了 ?edition=pro，其他读同一参数的区块立刻跟着变，刷新和分享链接也保留。
+ * 一个区块改了 ?currency=cny，其他读同一参数的区块立刻跟着变，刷新和分享链接也保留。
  * 服务端与首次水合按默认值渲染，水合完成后再读真实网址，所以不需要 Suspense。
  */
 const EVENT = 'url-state-change';

@@ -2,8 +2,9 @@
 
 /**
  * 模型浏览器：模型与价格来自后台（官网服务器读好后传进来，见 src/lib/catalog/live.ts）。
- * 筛选、搜索、排序、类型切换全部存进网址参数，刷新和分享链接都保留；结果一律走 filterSiteModels / siteFacetCounts。
- * 企业通道按合同定价：列出专用通道的模型、价格写「定制」。后台读不到时只显示一句「暂时没有可展示的模型」。
+ * 一张卡是某个分组里的一个模型，同一个模型在几个分组里就有几张，挨着放、便宜的在前；数量按不重复的模型算。
+ * 筛选、搜索（也搜分组名）、排序、类型切换全部存进网址参数，刷新和分享链接都保留；
+ * 结果一律走 filterSiteModels / siteFacetCounts。后台读不到时只显示一句「暂时没有可展示的模型」。
  */
 
 import { useState } from 'react';
@@ -36,13 +37,13 @@ import {
   type TypeFilter,
 } from '@/lib/catalog';
 import {
+  distinctModelCount,
   filterSiteModels,
   providersOf,
   siteFacetCounts,
   type SiteCatalog,
   type SiteModel,
 } from '@/lib/catalog/live';
-import { useEdition } from '@/lib/use-catalog-state';
 import { useUrlList, useUrlState, useUrlText } from '@/lib/use-url-state';
 import { cn } from '@/lib/utils';
 
@@ -76,10 +77,7 @@ export function ModelsExplorer({ catalog }: { catalog: SiteCatalog }) {
   const t = useTranslations('models');
   const locale = useLocale();
 
-  const [edition] = useEdition();
-  // 企业通道没有公开单价，借专用通道的模型列表
-  const available = edition === 'enterprise' ? (catalog.pro ?? catalog.personal) : catalog[edition];
-  const models = available ?? NO_MODELS;
+  const models = catalog ?? NO_MODELS;
   const [type, setType] = useUrlState('type', TYPE_FILTERS, 'all');
   const [providers, setProviders] = useUrlList(
     'provider',
@@ -107,7 +105,7 @@ export function ModelsExplorer({ catalog }: { catalog: SiteCatalog }) {
 
   const hasFilters = providers.length > 0 || context !== 'all' || query.trim() !== '';
 
-  /** 清除筛选：清空厂商、搜索，上下文回 all；类型、排序、通道不动 */
+  /** 清除筛选：清空厂商、搜索，上下文回 all；类型、排序不动 */
   const clearFilters = () => {
     setProviders([]);
     setContext('all');
@@ -212,7 +210,7 @@ export function ModelsExplorer({ catalog }: { catalog: SiteCatalog }) {
     </>
   );
 
-  if (available === null) {
+  if (models.length === 0) {
     return (
       <section id="explorer" className="pb-20 md:pb-28">
         <Container>
@@ -252,7 +250,7 @@ export function ModelsExplorer({ catalog }: { catalog: SiteCatalog }) {
                 </button>
                 <p className="text-sm text-muted-foreground">
                   <span data-result-count className="font-semibold tabular-nums text-foreground">
-                    {list.length}
+                    {distinctModelCount(list)}
                   </span>{' '}
                   {t('toolbar.models')}
                 </p>
@@ -341,12 +339,7 @@ export function ModelsExplorer({ catalog }: { catalog: SiteCatalog }) {
             ) : (
               <div data-model-grid className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {list.map((model) => (
-                  <ModelsExplorerCard
-                    key={model.id}
-                    model={model}
-                    edition={edition}
-                    locale={locale}
-                  />
+                  <ModelsExplorerCard key={model.key} model={model} locale={locale} />
                 ))}
               </div>
             )}

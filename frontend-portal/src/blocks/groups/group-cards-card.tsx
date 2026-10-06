@@ -84,12 +84,9 @@ export function GroupCardsCard({ edition, previous }: { edition: Edition; previo
             {common('actions.contactSupport')}
           </a>
         ) : (
-          // 查看定价：价格页默认就是共享通道，其余通道带上 ?edition=
+          // 查看定价：价格页按分组列价格，直接过去
           <Link
-            href={{
-              pathname: '/pricing',
-              query: edition.id === 'personal' ? {} : { edition: edition.id },
-            }}
+            href="/pricing"
             data-group-cta={edition.id}
             className={buttonClass({
               variant: edition.featured ? 'inverse' : 'primary',

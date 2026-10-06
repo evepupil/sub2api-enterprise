@@ -10,7 +10,7 @@
 
 ## 0. 定位与参照
 
-一个面向个人开发者和企业的 AI 模型 API 服务站官网：一个 API 调用 Claude、GPT、Gemini 等文本模型和 GPT Image、Nano Banana 等生图模型，按量付费，分共享通道、专用通道、企业通道三种通道（可用率承诺、资源质量和价格不同；一个通道就是后端的一个分组，代码里沿用 edition 这个名字）。第一轮只做官网：首页、模型、价格、通道、登录、注册，文档入口占位，控制台不做，后端不接；之后加了控制台（第 10 章），登录、注册和部分控制台页面已接后端（第 9 章）。
+一个面向个人开发者和企业的 AI 模型 API 服务站官网：一个 API 调用 Claude、GPT、Gemini 等文本模型和 GPT Image、Nano Banana 等生图模型，按量付费，分共享通道、专用通道、企业通道三种通道（资源质量和价格不同；通道只是对外的说法，用户实际选后端分组，分组名里写明属于哪个通道，代码里沿用 edition 这个名字）。第一轮只做官网：首页、模型、价格、通道、登录、注册，文档入口占位，控制台不做，后端不接；之后加了控制台（第 10 章），登录、注册和部分控制台页面已接后端（第 9 章）。
 
 用户来这里干这几件事：
 
@@ -37,8 +37,8 @@
 | 页面 | 路由 | 用户来干什么 | 首屏核心动作 | 参照页 | 区块下限 | 分路 |
 |---|---|---|---|---|---|---|
 | 首页 | `/` | 了解服务、注册 | 「免费注册」「查看价格」 | 模板首页 | 7 + 顶栏页脚 | L1 L2 L3 |
-| 模型 | `/catalog` | 选模型、看价格和可用率 | 通道切换、搜索、筛选 | onehop 模型页 | 2（筛选器内含 5 个区域） | L4 |
-| 价格 | `/pricing` | 查单价 | 通道切换、币种切换 | onehop 价格页 | 4 | L5 |
+| 模型 | `/catalog` | 选模型、看各分组的价格和可用率 | 搜索、筛选 | onehop 模型页 | 2（筛选器内含 5 个区域） | L4 |
+| 价格 | `/pricing` | 查各分组的单价 | 币种切换 | onehop 价格页 | 4 | L5 |
 | 通道 | `/channels` | 看三种通道的权益差别 | 看三张通道卡、对比特权、查看定价 | 模板价格页 | 5 | L6 |
 | 登录 | `/login` | 登录（个人与组织成员同一入口） | 填邮箱和密码 | 模板登录页 | 2 | L7 |
 | 注册 | `/register` | 个人注册或创建组织 | 个人/创建组织切换、填表 | 模板注册页 | 2 | L7 |
@@ -256,8 +256,6 @@
 | `src/components/catalog/provider-logo.tsx`（无指令） | `ProviderLogo` | `{ provider: ProviderId; size?: number; className?: string }`，默认 20。`<img src={logo} alt={name} width={size} height={size} loading="lazy" decoding="async" className={cn('shrink-0 select-none', mono && 'dark:invert', className)} />`，数据取 `getProvider` |
 | `src/components/catalog/provider-logo-cloud.tsx`（`'use client'`） | `ProviderLogoCloud` | `{ className?: string }`。两组：A `openai anthropic google deepseek`，B `moonshot zhipu minimax qwen`，每 3000ms 换一组（减少动态效果时停在 A）。外层 `grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-4`，`data-logo-cloud`，`data-logo-set="0"`/`"1"`。每格 `flex h-14 items-center justify-center`，里面 `AnimatePresence mode="wait" initial={false}`（首组直接显示，不等水合）按厂商 id 换 `motion.div`：`initial={{ opacity: 0, y: 12, filter: 'blur(8px)' }}`、`animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}`、`exit={{ opacity: 0, y: -12, filter: 'blur(8px)' }}`、`transition={{ duration: 0.45, delay: 格序号 × 0.08, ease: [0.22,1,0.36,1] }}`；内容 `flex items-center gap-3`：`ProviderLogo size={32}` + `<span className="text-xl font-semibold tracking-tight text-foreground/85 md:text-2xl">{厂商名}</span>` |
 | `src/components/catalog/discount-badge.tsx`（无指令） | `DiscountBadge` | `{ discount: number \| null; locale: AppLocale; className? }`：`formatDiscount` 为空时返回 `null`；否则 `<Badge tone="success" data-discount className={className}>{文字}</Badge>` |
-| `src/components/catalog/edition-switcher.tsx`（`'use client'`） | `EditionSwitcher` | `{ className?: string; size?: 'sm' \| 'md' }`。读写 `useEdition()`，渲染 `SegmentedControl name="edition"`，选项来自 `EDITIONS`，标签 `edition.name[locale]`，`ariaLabel` 取 `common.edition.label` |
-| `src/components/catalog/edition-summary.tsx`（`'use client'`） | `EditionSummary` | `{ className?: string }`。读 `useEdition()`，外层 `flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm`，`data-edition-summary`。每项 `<span className="inline-flex items-center gap-1.5"><span className="text-subtle-foreground">{标签}</span><span data-summary={key} className="font-medium tabular-nums text-foreground">{值}</span></span>`。目前只有一项：`rpm` 值 `rpm.toLocaleString('en-US')`。通道名已在切换器上，倍率与可用率承诺不在官网展示。标签取 `common.editionSummary.<key>` |
 | `src/components/layout/brand.tsx`（无指令） | `Brand` | `{ className?: string }`：`<Link href="/" className="flex items-center gap-2 text-sm font-medium text-foreground">`，前面一个 `aria-hidden` 的 `block h-5 w-6 rounded-md bg-primary` 色块（模板同款黑色圆角块），后面 `SITE.name` |
 | `src/components/layout/theme-toggle.tsx`（`'use client'`） | `ThemeToggle` | `{ className?: string }`：`<button type="button" data-theme-toggle aria-label={common.theme.toggle} className={buttonClass({ variant: 'ghost', size: 'sm', className: 'size-9 px-0 text-muted-foreground hover:text-foreground' })}>`，里面 `Sun className="size-4 dark:hidden"` 和 `Moon className="hidden size-4 dark:block"`，点击 `setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')` |
 | `src/components/layout/language-switcher.tsx`（`'use client'`） | `LanguageSwitcher` | `{ className?: string; full?: boolean }`。触发按钮 `data-lang-trigger`，`aria-label={common.language.label}`，类名 `buttonClass({ variant: 'ghost', size: 'sm', className: 'h-9 gap-1.5 px-3 text-muted-foreground hover:text-foreground' })`，内容 `Languages` 图标 + 文字（full 时显示 `简体中文`/`English`，否则 `中文`/`EN`）+ `ChevronDown size-3.5`。菜单是 `DropdownMenuRadioGroup value={locale}`，两项 `zh`「简体中文」、`en`「English」，每项 `data-lang={code}`。切换走 `useSwitchLocale()`（`src/i18n/use-switch-locale.ts`，控制台头像菜单共用）：`router.replace(\`${pathname}${window.location.search}\`, { locale: next, scroll: false })`（`useRouter`、`usePathname` 来自 `@/i18n/navigation`），保留 `?edition=` 等参数 |
@@ -267,7 +265,7 @@
 
 ### 4.4 页内与跨区块状态（主控已写好，直接用）
 
-- `src/lib/use-catalog-state.ts`（`'use client'`）：`useEdition(): [EditionId, (e: EditionId) => void]`（网址 `?edition=`，默认 `personal`）；`useCurrency(): [Currency, (c: Currency) => void]`（网址 `?currency=`，默认 `usd`）。
+- `src/lib/use-catalog-state.ts`（`'use client'`）：`useCurrency(): [Currency, (c: Currency) => void]`（网址 `?currency=`，默认 `usd`）。2026-10-06 起官网按后台分组展示，没有通道参数。
 - `src/lib/use-url-state.ts`（`'use client'`）：`useUrlState(key, allowed, fallback)`、`useUrlList(key, allowed)`、`useUrlText(key)`，模型页的筛选条件用它们存进网址。
 - 这几个钩子服务端和首次水合时返回默认值，水合后才读真实网址，**不需要 Suspense**，也不会有水合告警。
 
@@ -386,7 +384,7 @@ pnpm format:check  # prettier
 | 品牌名 Codu、标志色块 | 品牌名是用户定的（2026-10-03 由占位的 Nexus API 改名），改名只改 `src/lib/site.ts`；标志色块还是**编的** |
 | 模型清单 | 2026-10-05 起首页、模型页、价格页的模型清单与价格改读后台模型广场（技术设计 18.9）；官网目录 `src/lib/catalog/models.ts` 只补后台没有的展示名、厂商、上下文、上线日期，目录里没有的模型显示原名；上线日期是**编的**；协议只剩控制台模型页在用；模型介绍 2026-10-05 删除 |
 | 官方价 | 官网页面的折扣标用后台模型广场给的官方价；官网目录里的官方价（由 onehop.ai 2026-10-03 公开价目反推）只剩控制台占位页（对话、用量）在用 |
-| 三种通道的分组倍率（共享通道 ×0.15、专用通道 ×0.3、企业通道定制） | 用户 2026-10-03 给定，`src/lib/catalog/editions.ts`；2026-10-05 起官网页面按后台分组的倍率算价，这里的倍率只剩控制台占位页在用；官网的共享通道、专用通道按名字对应后台分组（环境变量 `PORTAL_CHANNEL_GROUPS` 可改） |
+| 三种通道的分组倍率（共享通道 ×0.15、专用通道 ×0.3、企业通道定制） | 用户 2026-10-03 给定，`src/lib/catalog/editions.ts`；2026-10-05 起官网页面按后台分组的倍率算价，这里的倍率只剩控制台占位页在用；2026-10-06 起官网按后台分组展示，不做通道对应 |
 | RPM、并发、组织成员上限、客服响应时限、通道卡特权清单、特权对比各项 | **编的**，`editions.ts`、`groups.ts`；可用率目标、可用率赔付、对公转账 2026-10-06 按用户要求从官网全部去掉，发票说法改成「可以开发票，但不是增值税发票」 |
 | 模型卡的可用率 | 2026-10-05 接后台「对外服务状态」（渠道监测）：对话延迟、端点 PING、近 7 天可用性、近 60 次探测；后台给模型建监测项（名称 = 模型名、分组标签 = 后台分组名）才有，没建的不显示 |
 | 人民币换算、按 Token 计费生图的每张估算 | 人民币按 1 美元 = 1 元（2026-10-05 用户定，和充值到账一致）；每张按 1290 Token 估算是**编的**，`pricing.ts` |
@@ -465,7 +463,7 @@ pnpm format:check  # prettier
 | `CURRENT_USER`、`ANNOUNCEMENTS`、`NOTIFICATIONS` | 当前用户、公告、通知 |
 | `paginate`、`pageButtons`、`PAGE_SIZES` | 分页（组件已封装） |
 
-模型、厂商、版本与价格照旧从 `@/lib/catalog` 取（`MODELS`、`getModel`、`getProvider`、`getEdition`、`EDITIONS`、`textPrice`、`imagePrice`、`textPriceAt`、`imagePriceAt`、`editionDiscount`、`formatRatio`、`filterModels`、`facetCounts`、`PROTOCOL_LABELS`、`USD_CNY_RATE`、`formatMoney` 等）。版本名用 `getEdition(id).name[locale]`。
+模型、厂商、版本与价格照旧从 `@/lib/catalog` 取（`MODELS`、`getModel`、`getProvider`、`getEdition`、`EDITIONS`、`textPrice`、`imagePrice`、`textPriceAt`、`imagePriceAt`、`formatRatio`、`PROTOCOL_LABELS`、`USD_CNY_RATE`、`formatMoney` 等）。版本名用 `getEdition(id).name[locale]`。
 
 用量页的真实数据层在 `@/lib/console/live/`（`useUsageOverview`、`useLiveClock`、`summaryFromOverview`、`breakdownFromPoints`、`dailyTotalsFromBuckets` 等），不经 `@/lib/console` 导出；其他接了后端的页面同样在这里（如组织页 `org-*`）。
 
@@ -508,13 +506,14 @@ pnpm format:check  # prettier
 | `editionRatio(edition)`、`ratioLabel(r)`、`ratioText(r)`、`formatRatio(r, locale)`、`GROUP_HIGHLIGHTS`、`PRIVILEGE_ROWS` | 分组倍率（×0.15 / 定制，价格换算与控制台用）、通道卡独有特权、特权对比（11 行，不含倍率） |
 | `textPrice(model, edition)`、`textPriceAt(model, k)` | 文本单价（美元 / 百万 Token）：input、output、cacheRead、longContext；= 官方价 × 分组倍率，定制通道返回 null；`k = 1` 即官方价 |
 | `imagePrice(model, edition)`、`imagePriceAt(model, k)` | 生图价：按张（resolutions、from）或按 Token（perMTokens、estimatedPerImage）；规则同上 |
-| `editionDiscount(edition)`、`formatDiscount(d, locale)` | 通道折扣与折扣标文字（「1.5折」/「85% off」，定制或不打折时 null） |
+| `formatDiscount(d, locale)` | 折扣标文字（「1.5折」/「85% off」，不打折时 null） |
 | `formatMoney(usd, currency)`、`formatAmount(n)`、`convert(usd, currency)`、`USD_CNY_RATE` | 金额（`$0.6` / `¥4.26`） |
 | `formatContext(tokens)`、`localize(value, locale)` | 上下文、中英文字段 |
 | `isNewModel(model)`、`CATALOG_AS_OF`、`IMAGE_TOKENS_PER_IMAGE` | 「新」标记（30 天内上线的 7 个） |
-| `filterModels(models, filter, edition)`、`facetCounts(models, type)`、`groupByProvider(models)`、`DEFAULT_FILTER`、`TYPE_FILTERS`、`CONTEXT_FILTERS`、`SORT_KEYS`、`PROTOCOLS`、`PROTOCOL_LABELS` | 模型页筛选排序、价目表分段 |
-| `uptimeFor(modelId, edition)`、`UPTIME_SLOTS` | 近 24 小时可用率（percent）与 24 个状态格（up/degraded/down） |
+| `TYPE_FILTERS`、`CONTEXT_FILTERS`、`SORT_KEYS`、`PROTOCOLS`、`PROTOCOL_LABELS` | 模型页筛选的取值；官网的筛选排序、价目表分段在 `@/lib/catalog/live`（见下） |
 
-其他：`SITE`、`NAV_ITEMS`、`FOOTER_COLUMNS`（`@/lib/site`）；`useEdition`、`useCurrency`（`@/lib/use-catalog-state`）；`useUrlState`、`useUrlList`、`useUrlText`（`@/lib/use-url-state`）；`initPage`、`LocaleParams`（`@/i18n/page`）。
+官网的后台数据在 `@/lib/catalog/live`（2026-10-06 起按分组）：`SiteCatalog`（每个分组里的每个模型一条）、`SiteModel`、`buildSiteCatalog`、`filterSiteModels`、`siteFacetCounts`、`providersOf`、`groupSiteModels`、`cheapestPerModel`、`distinctModelCount`、`siteModelCount`、`priceRowId`，用法见 `design/模型.md`、`design/价格.md`、`design/首页.md`。
+
+其他：`SITE`、`NAV_ITEMS`、`FOOTER_COLUMNS`（`@/lib/site`）；`useCurrency`（`@/lib/use-catalog-state`）；`useUrlState`、`useUrlList`、`useUrlText`（`@/lib/use-url-state`）；`initPage`、`LocaleParams`（`@/i18n/page`）。
 
 单测算出的几个关键数字（交互检查会用）：全部 30 / 文本 23 / 生图 7；厂商 OpenAI 10、Anthropic 6、Google 8；只看 Anthropic 文本 6 个；上下文 ≥1M 共 21 个；搜「nano」4 个、搜「gemini」8 个；默认排序第一个 Claude Sonnet 5.5；文本按价格从低到高第一个 GPT-6 Luna；Claude Sonnet 5.5 输入单价 共享通道 $0.3、专用通道 $0.6、企业通道定制（无单价），人民币共享通道 ¥2.13；折扣标 共享通道 1.5折、专用通道 3折、企业通道不显示。

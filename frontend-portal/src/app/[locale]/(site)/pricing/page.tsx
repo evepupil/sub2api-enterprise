@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 
+import { PricingCustom } from '@/blocks/pricing/pricing-custom';
 import { PricingFaq } from '@/blocks/pricing/pricing-faq';
 import { PricingHero } from '@/blocks/pricing/pricing-hero';
 import { PricingNotes } from '@/blocks/pricing/pricing-notes';
@@ -27,6 +28,7 @@ export default async function PricingPage({ params }: LocaleParams) {
     <>
       <PricingHero />
       <PricingTables catalog={catalog} />
+      <PricingCustom />
       <PricingNotes />
       <PricingFaq />
     </>

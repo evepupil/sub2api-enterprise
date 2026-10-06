@@ -1,8 +1,8 @@
 'use client';
 
 /**
- * 模型卡：价格、折扣标、可用率都随当前通道（?edition=）变化，数据来自后台（见 src/lib/catalog/live.ts）；
- * 企业通道按合同定价，价格显示「定制」、不显示可用率。复制调用名成功后短暂换成对勾，1.5 秒恢复。
+ * 模型卡：某个分组里的一个模型（数据来自后台，见 src/lib/catalog/live.ts）。价格、折扣标、可用率都是这个分组的，
+ * 分组名写在价格上面。复制调用名成功后短暂换成对勾，1.5 秒恢复。
  */
 
 import { useEffect, useRef, useState } from 'react';
@@ -15,36 +15,19 @@ import { ProviderLogo } from '@/components/catalog/provider-logo';
 import { Badge } from '@/components/ui/badge';
 import { Link } from '@/i18n/navigation';
 import type { AppLocale } from '@/i18n/routing';
-import {
-  formatContext,
-  formatMoney,
-  formatRatio,
-  getProvider,
-  type EditionId,
-} from '@/lib/catalog';
-import type { SiteModel } from '@/lib/catalog/live';
+import { formatContext, formatMoney, getProvider } from '@/lib/catalog';
+import { priceRowId, type SiteModel } from '@/lib/catalog/live';
 
 import { ModelsHealth } from './models-health';
 
-function CardPrice({
-  model,
-  custom,
-  locale,
-}: {
-  model: SiteModel;
-  custom: boolean;
-  locale: AppLocale;
-}) {
+function CardPrice({ model }: { model: SiteModel }) {
   const t = useTranslations('models');
   const tc = useTranslations('common');
   const { price } = model;
 
   let label: string;
   let value: React.ReactNode;
-  if (custom) {
-    label = model.type === 'text' ? t('card.inputOutput') : t('card.perImage');
-    value = formatRatio(null, locale);
-  } else if (price.kind === 'token') {
+  if (price.kind === 'token') {
     label = t('card.inputOutput');
     const input = price.input === null ? '—' : formatMoney(price.input, 'usd');
     const output = price.output === null ? '—' : formatMoney(price.output, 'usd');
@@ -66,7 +49,7 @@ function CardPrice({
 
   return (
     <>
-      <p className="text-xs text-subtle-foreground">{label}</p>
+      <p className="mt-1 text-xs text-subtle-foreground">{label}</p>
       <p data-card-price className="mt-0.5 text-sm font-medium tabular-nums text-foreground">
         {value}
       </p>
@@ -74,17 +57,8 @@ function CardPrice({
   );
 }
 
-export function ModelsExplorerCard({
-  model,
-  edition,
-  locale,
-}: {
-  model: SiteModel;
-  edition: EditionId;
-  locale: AppLocale;
-}) {
+export function ModelsExplorerCard({ model, locale }: { model: SiteModel; locale: AppLocale }) {
   const t = useTranslations('models');
-  const custom = edition === 'enterprise';
 
   const [copied, setCopied] = useState(false);
   const timerRef = useRef<number | null>(null);
@@ -111,6 +85,7 @@ export function ModelsExplorerCard({
   return (
     <article
       data-model-card={model.id}
+      data-group={model.group.name}
       className="group flex h-full flex-col rounded-2xl border border-border bg-card p-5 shadow-card transition-transform duration-200 hover:-translate-y-0.5"
     >
       <div className="flex min-h-5 items-center gap-2">
@@ -150,15 +125,22 @@ export function ModelsExplorerCard({
         </button>
       </div>
 
-      {!custom && model.health ? <ModelsHealth health={model.health} /> : null}
+      {model.health ? <ModelsHealth health={model.health} /> : null}
 
       <div className="mt-auto pt-4">
         <div className="flex items-end justify-between gap-3 border-t border-border pt-4">
           <div className="min-w-0">
-            <CardPrice model={model} custom={custom} locale={locale} />
+            <p
+              data-card-group
+              className="truncate text-xs font-medium text-foreground"
+              title={model.group.name}
+            >
+              {model.group.name}
+            </p>
+            <CardPrice model={model} />
           </div>
           <div className="flex shrink-0 flex-col items-end gap-1.5">
-            <DiscountBadge discount={custom ? null : model.discount} locale={locale} />
+            <DiscountBadge discount={model.discount} locale={locale} />
             {model.contextTokens !== null ? (
               <span className="text-xs tabular-nums text-muted-foreground">
                 {formatContext(model.contextTokens)} {t('card.context')}
@@ -168,12 +150,7 @@ export function ModelsExplorerCard({
         </div>
 
         <Link
-          href={{
-            pathname: '/pricing',
-            query: edition === 'personal' ? {} : { edition },
-            // 企业通道的价格页没有价目表，不带行锚点
-            ...(custom ? {} : { hash: `model-${model.id}` }),
-          }}
+          href={{ pathname: '/pricing', hash: priceRowId(model) }}
           data-card-pricing
           className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-foreground hover:underline"
         >

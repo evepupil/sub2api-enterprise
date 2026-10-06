@@ -1,11 +1,11 @@
 {
   "meta": {
     "title": "Pricing",
-    "description": "Pay-as-you-go model prices: input, output, cache and image prices for all three channels on one page."
+    "description": "Pay-as-you-go model prices: input, output, cache and image prices for every group on one page."
   },
   "hero": {
     "title": "One transparent price list",
-    "subtitle": "Pay as you go with no subscriptions or monthly fees. What you see is exactly what the selected channel is billed.",
+    "subtitle": "Pay as you go with no subscriptions or monthly fees. What you see is exactly what each group is billed.",
     "currency": "Currency",
     "usd": "USD $",
     "cny": "CNY ¥"
@@ -19,6 +19,7 @@
     "textTitle": "Text models",
     "perMTokens": "Per 1M tokens",
     "model": "Model",
+    "group": "Group",
     "input": "Input",
     "output": "Output",
     "cache": "Cache read",
@@ -42,13 +43,13 @@
     "longContext": "When the input of a single request exceeds the context threshold of a model, the whole request is billed at the long-context price.",
     "edit": "Image-to-image and inpainting also count the tokens of the input image, usually a small share of the total.",
     "currency": "CNY prices use $1 = ¥{rate}, the same rate as top-ups; wallets are always charged in USD.",
-    "editions": "Prices on this page are what the selected channel is billed; the Enterprise channel is priced by contract. See how the channels differ on the <link>channels page</link>."
+    "editions": "Prices on this page are what each group is billed; the Enterprise channel is priced by contract. See how the channels differ on the <link>channels page</link>."
   },
   "faq": {
     "title": "FAQ",
     "items": {
       "q1": "Is the price on this page what I actually pay?",
-      "a1": "Yes. The displayed price is what the selected channel is billed, and every charge is itemized in the console.",
+      "a1": "Yes. The displayed price is what each group is billed, and every charge is itemized in the console.",
       "q2": "Why do prices differ across channels?",
       "a2": "Channels come with different capacity quality: Shared runs on capacity shared by many users, Dedicated on premium capacity with priority scheduling, and Enterprise is set up for a single company.",
       "q3": "Are there subscription fees or minimum spend?",

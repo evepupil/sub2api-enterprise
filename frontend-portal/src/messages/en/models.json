@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Models",
-    "description": "Leading text and image models. Compare prices, context and availability on the Shared, Dedicated and Enterprise channels."
+    "description": "Leading text and image models. Compare prices, context and availability across groups."
   },
   "hero": {
     "title": "Every model, one API",
@@ -17,7 +17,7 @@
   },
   "toolbar": {
     "models": "models",
-    "search": "Search by name, model ID or provider"
+    "search": "Search models, providers or groups"
   },
   "sort": {
     "label": "Sort",

@@ -3,27 +3,21 @@
 import { useTranslations } from 'next-intl';
 
 import { Container } from '@/components/ui/container';
-import type { SiteCatalog } from '@/lib/catalog/live';
-import { useEdition } from '@/lib/use-catalog-state';
+import { distinctModelCount, type SiteCatalog } from '@/lib/catalog/live';
 
-import { PricingCustom } from './pricing-custom';
 import { CurrencyNote } from './pricing-tables-note';
 import { ImagePriceTable } from './pricing-tables-image';
 import { TextPriceTable } from './pricing-tables-text';
 
 /**
- * 价格页价目表：文本与生图两张大表，价格是所选通道的实付价（来自后台，官网服务器读好后传进来）。
- * 通道、币种从网址参数读取，变化时所有金额整体重算。企业通道没有公开单价，换成联系客服卡；
+ * 价格页价目表：文本与生图两张大表，每个模型在各分组的实付价各占一行（来自后台，官网服务器读好后传进来）。
+ * 币种从网址参数读取，变化时所有金额整体重算；跳转标签上的数量按不重复的模型算。
  * 后台读不到时只写一句「暂时没有可展示的价格」。
  */
 export function PricingTables({ catalog }: { catalog: SiteCatalog }) {
   const t = useTranslations('pricing');
-  const [edition] = useEdition();
 
-  if (edition === 'enterprise') return <PricingCustom />;
-
-  const models = catalog[edition];
-  if (models === null || models.length === 0) {
+  if (catalog === null || catalog.length === 0) {
     return (
       <section id="price-list" className="pb-16 md:pb-20">
         <Container>
@@ -38,11 +32,21 @@ export function PricingTables({ catalog }: { catalog: SiteCatalog }) {
     );
   }
 
-  const textModels = models.filter((model) => model.type === 'text');
-  const imageModels = models.filter((model) => model.type === 'image');
+  const textModels = catalog.filter((model) => model.type === 'text');
+  const imageModels = catalog.filter((model) => model.type === 'image');
   const nav = [
-    { id: 'text', href: '#text-models', label: t('tables.text'), count: textModels.length },
-    { id: 'image', href: '#image-models', label: t('tables.image'), count: imageModels.length },
+    {
+      id: 'text',
+      href: '#text-models',
+      label: t('tables.text'),
+      count: distinctModelCount(textModels),
+    },
+    {
+      id: 'image',
+      href: '#image-models',
+      label: t('tables.image'),
+      count: distinctModelCount(imageModels),
+    },
   ].filter((item) => item.count > 0);
 
   return (

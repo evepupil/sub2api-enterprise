@@ -2,27 +2,25 @@
 
 import { Fragment } from 'react';
 
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 
-import { DiscountBadge } from '@/components/catalog/discount-badge';
 import { Badge } from '@/components/ui/badge';
 import { formatMoney, IMAGE_TOKENS_PER_IMAGE } from '@/lib/catalog';
-import { groupSiteModels, type SiteModel } from '@/lib/catalog/live';
+import { groupSiteModels, priceRowId, type SiteModel } from '@/lib/catalog/live';
 import { useCurrency } from '@/lib/use-catalog-state';
 
+import { PriceGroupCell } from './pricing-group-cell';
 import { PriceProviderRow } from './pricing-provider-row';
 
 const round6 = (value: number) => Math.round(value * 1e6) / 1e6;
 
-/** 模型格：名称、折扣标、「新」标、调用名。 */
-function ImageModelCell({ model }: { model: SiteModel }) {
+/** 模型格：名称、「新」标、调用名。同一个模型在几个分组里就合并几行。 */
+function ImageModelCell({ model, span }: { model: SiteModel; span: number }) {
   const t = useTranslations('pricing');
-  const locale = useLocale();
   return (
-    <td className="px-5 py-4 align-top">
+    <td rowSpan={span} className="px-5 py-4 align-top">
       <div className="flex flex-wrap items-center gap-2">
         <span className="font-medium text-foreground">{model.name}</span>
-        <DiscountBadge discount={model.discount} locale={locale} />
         {model.isNew ? <Badge tone="info">{t('tables.new')}</Badge> : null}
       </div>
       {/* 官网目录里没有的模型名字就是调用名，不重复写 */}
@@ -75,8 +73,8 @@ function ImagePriceCell({ model }: { model: SiteModel }) {
   );
 }
 
-/** 模型行：计费方式与价格都按所选通道的实付价（来自后台）。 */
-function ImageModelRow({ model }: { model: SiteModel }) {
+/** 一个分组一行：计费方式与价格都按这个分组的实付价（来自后台）。span 大于 0 是这个模型的第一行，带上合并的模型格。 */
+function ImageModelRow({ model, span }: { model: SiteModel; span: number }) {
   const t = useTranslations('pricing');
   const { price } = model;
   let billing = '—';
@@ -88,21 +86,30 @@ function ImageModelRow({ model }: { model: SiteModel }) {
 
   return (
     <tr
-      id={`model-${model.id}`}
+      id={priceRowId(model)}
       data-price-row={model.id}
+      data-group={model.group.name}
       className="scroll-mt-28 border-t border-border transition-colors hover:bg-muted/40 target:bg-info-soft"
     >
-      <ImageModelCell model={model} />
+      {span > 0 ? <ImageModelCell model={model} span={span} /> : null}
+      <PriceGroupCell model={model} />
       <td className="px-5 py-4 align-top text-muted-foreground">{billing}</td>
       <ImagePriceCell model={model} />
     </tr>
   );
 }
 
-/** 生图模型价目表：按厂商分段，三列分别是模型、计费方式、价格。 */
+/** 生图模型价目表：按厂商分段，四列分别是模型、分组、计费方式、价格；同一个模型的几个分组挨着、便宜的在前。 */
 export function ImagePriceTable({ models }: { models: readonly SiteModel[] }) {
   const t = useTranslations('pricing');
   const sections = groupSiteModels(models);
+
+  const columns = [
+    { label: t('tables.model'), align: 'left' },
+    { label: t('tables.group'), align: 'left' },
+    { label: t('tables.billing'), align: 'left' },
+    { label: t('tables.price'), align: 'right' },
+  ] as const;
 
   return (
     <div id="image-models" className="scroll-mt-28">
@@ -114,36 +121,37 @@ export function ImagePriceTable({ models }: { models: readonly SiteModel[] }) {
       </div>
       <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-card shadow-card">
         <div className="overflow-x-auto">
-          <table data-price-table="image" className="w-full min-w-[680px] border-collapse text-sm">
+          <table data-price-table="image" className="w-full min-w-[760px] border-collapse text-sm">
             <thead className="bg-surface">
               <tr>
-                <th
-                  scope="col"
-                  className="px-5 py-3 text-left text-xs font-medium text-subtle-foreground"
-                >
-                  {t('tables.model')}
-                </th>
-                <th
-                  scope="col"
-                  className="px-5 py-3 text-left text-xs font-medium text-subtle-foreground"
-                >
-                  {t('tables.billing')}
-                </th>
-                <th
-                  scope="col"
-                  className="px-5 py-3 text-right text-xs font-medium text-subtle-foreground"
-                >
-                  {t('tables.price')}
-                </th>
+                {columns.map((column) => (
+                  <th
+                    key={column.label}
+                    scope="col"
+                    className={
+                      column.align === 'left'
+                        ? 'px-5 py-3 text-left text-xs font-medium text-subtle-foreground'
+                        : 'px-5 py-3 text-right text-xs font-medium text-subtle-foreground'
+                    }
+                  >
+                    {column.label}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {sections.map((section) => (
                 <Fragment key={section.provider ?? 'other'}>
-                  <PriceProviderRow provider={section.provider} colSpan={3} />
-                  {section.models.map((model) => (
-                    <ImageModelRow key={model.id} model={model} />
-                  ))}
+                  <PriceProviderRow provider={section.provider} colSpan={columns.length} />
+                  {section.entries.map((entry) =>
+                    entry.rows.map((model, index) => (
+                      <ImageModelRow
+                        key={model.key}
+                        model={model}
+                        span={index === 0 ? entry.rows.length : 0}
+                      />
+                    )),
+                  )}
                 </Fragment>
               ))}
             </tbody>

@@ -8,11 +8,11 @@ import { formatContext, formatMoney, getProvider } from '@/lib/catalog';
 import type { SiteModel } from '@/lib/catalog/live';
 
 /**
- * 模型瀑布流里的单张模型卡（服务端组件），数据来自后台的共享通道、一律美元：
+ * 模型瀑布流里的单张模型卡（服务端组件），数据来自后台、一律美元，价格取这个模型最便宜的分组：
  * 厂商与名称，下一行厂商 · 上下文（生图写「生图」）；建了监测项的模型写最近一次的对话延迟与端点 PING；
- * 底部文本显示输入单价，按张、按次显示单价（多档写「起」）。
+ * 底部文本显示输入单价，按张、按次显示单价。分辨率多档或别的分组更贵（from）时价格后面写「起」。
  */
-export function ModelMarqueeCard({ model }: { model: SiteModel }) {
+export function ModelMarqueeCard({ model, from }: { model: SiteModel; from: boolean }) {
   const t = useTranslations('homeMore');
   const tc = useTranslations('common');
   const tm = useTranslations('models');
@@ -28,12 +28,17 @@ export function ModelMarqueeCard({ model }: { model: SiteModel }) {
   const meta = [providerName, detail].filter(Boolean).join(' · ');
 
   const { price } = model;
+  const fromPrice = from || (price.kind === 'request' && price.from);
   let priceText = '';
   if (price.kind === 'token' && price.input !== null) {
-    priceText = `${t('catalog.input')} ${formatMoney(price.input, 'usd')} ${tc('units.perMTokens')}`;
+    const amount = `${formatMoney(price.input, 'usd')} ${tc('units.perMTokens')}`;
+    priceText = fromPrice
+      ? t('catalog.inputFrom', { price: amount })
+      : `${t('catalog.input')} ${amount}`;
   } else if (price.kind === 'request') {
     const unit = price.unit === 'image' ? tc('units.perImage') : tc('units.perRequest');
-    priceText = `${formatMoney(price.price, 'usd')} ${unit}${price.from ? ` ${tc('units.from')}` : ''}`;
+    const amount = `${formatMoney(price.price, 'usd')} ${unit}`;
+    priceText = fromPrice ? tc('units.fromPrice', { price: amount }) : amount;
   }
 
   const health = model.health;

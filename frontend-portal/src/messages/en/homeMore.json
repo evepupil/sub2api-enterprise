@@ -26,7 +26,7 @@
     },
     "ratios": {
       "title": "Public pricing",
-      "desc": "Every model's price on each channel is published on the pricing page."
+      "desc": "Every model's price in each group is published on the pricing page."
     },
     "invoices": {
       "title": "Invoices",
@@ -39,6 +39,7 @@
     "image": "Image",
     "new": "New",
     "input": "Input",
+    "inputFrom": "Input from {price}",
     "more": "Browse all models"
   },
   "cta": {

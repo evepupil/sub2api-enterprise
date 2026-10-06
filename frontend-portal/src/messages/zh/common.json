@@ -26,9 +26,6 @@
     "light": "浅色",
     "dark": "深色"
   },
-  "edition": {
-    "label": "通道"
-  },
   "actions": {
     "getStarted": "免费注册",
     "viewPricing": "查看价格",
@@ -40,6 +37,7 @@
     "perImage": "/ 张",
     "perRequest": "/ 次",
     "from": "起",
+    "fromPrice": "{price} 起",
     "approx": "≈"
   },
   "footer": {
@@ -61,8 +59,5 @@
       "privacy": "隐私政策",
       "refund": "退款政策"
     }
-  },
-  "editionSummary": {
-    "rpm": "单密钥每分钟请求"
   }
 }

@@ -25,7 +25,7 @@ export default async function HomePage({ params }: LocaleParams) {
       <ProviderLogos />
       <FeaturesBento />
       <FeatureGrid />
-      <ModelMarquee models={catalog.personal} />
+      <ModelMarquee catalog={catalog} />
       <HomeCta />
     </>
   );

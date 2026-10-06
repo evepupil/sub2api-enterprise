@@ -7,7 +7,7 @@ import { Marquee } from '@/components/effects/marquee';
 import { SectionHeading } from '@/components/ui/section-heading';
 import { buttonClass } from '@/components/ui/button-styles';
 import { Container } from '@/components/ui/container';
-import { filterSiteModels, type SiteModel } from '@/lib/catalog/live';
+import { cheapestPerModel, type CheapestModel, type SiteCatalog } from '@/lib/catalog/live';
 import { cn } from '@/lib/utils';
 
 /** 三列的滚动方向与一圈时长（照规格：up 42s / down 50s / up 46s） */
@@ -18,8 +18,8 @@ const COLUMNS: readonly { direction: 'up' | 'down'; duration: number }[] = [
 ];
 
 /**
- * 首页「N 个模型，持续上新」：共享通道的模型（来自后台，页面读好后传进来）三列竖向滚动。
- * 后台读不到或没有模型时整块不显示。
+ * 首页「N 个模型，持续上新」：后台各分组的模型（页面读好后传进来）三列竖向滚动，一个模型一张卡，
+ * 价格取最便宜的分组。后台读不到或没有模型时整块不显示。
  */
 /** 一列至少这么多张卡，滚动时才不会露出空档 */
 const MIN_COLUMN_CARDS = 4;
@@ -28,7 +28,7 @@ const MIN_COLUMN_CARDS = 4;
  * 第 c 列的卡片：模型够多时按 i % 3 轮流分到三列；太少时每列都放全部模型（错开起点），
  * 还不够就重复几遍，保证一列至少 4 张。
  */
-function marqueeColumn(models: readonly SiteModel[], c: number): SiteModel[] {
+function marqueeColumn(models: readonly CheapestModel[], c: number): CheapestModel[] {
   if (models.length >= MIN_COLUMN_CARDS * COLUMNS.length) {
     return models.filter((_, i) => i % COLUMNS.length === c);
   }
@@ -38,17 +38,11 @@ function marqueeColumn(models: readonly SiteModel[], c: number): SiteModel[] {
   return Array.from({ length: times }, () => rotated).flat();
 }
 
-export function ModelMarquee({ models: source }: { models: readonly SiteModel[] | null }) {
+export function ModelMarquee({ catalog }: { catalog: SiteCatalog }) {
   const t = useTranslations('homeMore');
-  if (source === null || source.length === 0) return null;
-  // 最新在前的完整列表，再按 i % 3 轮流分到三列
-  const models = filterSiteModels(source, {
-    type: 'all',
-    providers: [],
-    context: 'all',
-    query: '',
-    sort: 'latest',
-  });
+  if (catalog === null || catalog.length === 0) return null;
+  // 每个模型一张、最新在前，再按 i % 3 轮流分到三列
+  const models = cheapestPerModel(catalog);
   const columns = COLUMNS.map((_, c) => marqueeColumn(models, c));
 
   return (
@@ -73,8 +67,12 @@ export function ModelMarquee({ models: source }: { models: readonly SiteModel[] 
                   groupClassName="w-full"
                 >
                   {/* 竖向滚动：条目间距用 Marquee 默认的 16px，两份内容首尾相接实现无缝循环 */}
-                  {column.map((model, index) => (
-                    <ModelMarqueeCard key={`${model.id}-${index}`} model={model} />
+                  {column.map((item, index) => (
+                    <ModelMarqueeCard
+                      key={`${item.model.id}-${index}`}
+                      model={item.model}
+                      from={item.from}
+                    />
                   ))}
                 </Marquee>
               </div>
