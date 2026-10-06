@@ -51,7 +51,7 @@
       "q1": "Is the price on this page what I actually pay?",
       "a1": "Yes. The displayed price is what each group is billed, and every charge is itemized in the console.",
       "q2": "Why do prices differ across channels?",
-      "a2": "Channels come with different capacity quality: Shared runs on capacity shared by many users, Dedicated on premium capacity with priority scheduling, and Enterprise is set up for a single company.",
+      "a2": "Channels come with different capacity quality: Shared runs on capacity shared by many users, Dedicated on our own pool with high availability, low latency and full-strength models, and Enterprise is set up for a single company.",
       "q3": "Are there subscription fees or minimum spend?",
       "a3": "No. Usage is deducted from your balance as it happens; there is no monthly fee.",
       "q4": "Am I charged for failed image requests?",

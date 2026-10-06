@@ -27,8 +27,8 @@ const DESC_COLOR: Record<'plain' | 'featured', string> = {
 };
 
 /**
- * 单张通道卡：通道名、说明、特权清单、底部整宽按钮，三张卡等高、按钮靠底对齐（不写可用率承诺）。
- * 通道页只比权益，不展示倍率。previous 是上一档通道，清单第一条写「包含上一档全部特权」（模板同款写法）。
+ * 单张通道卡：通道名、说明、权益清单、底部整宽按钮，三张卡等高、按钮靠底对齐（不写可用率承诺和并发、限额数字）。
+ * 通道页只比权益，不展示倍率。previous 是上一档通道，清单第一条写「包含上一档全部权益」（模板同款写法）。
  */
 export function GroupCardsCard({ edition, previous }: { edition: Edition; previous?: Edition }) {
   const t = useTranslations('groups');
@@ -36,13 +36,9 @@ export function GroupCardsCard({ edition, previous }: { edition: Edition; previo
   const locale = useLocale();
   const variant: 'plain' | 'featured' = edition.featured ? 'featured' : 'plain';
 
-  // 清单：上一档全部特权 → 限额 → 工单 → 本通道独有的几条
+  // 清单：上一档全部权益 → 本通道多出来的几条（不写并发、限额这类数字）
   const items: ReactNode[] = [
     ...(previous ? [t('cards.includes', { edition: localize(previous.name, locale) })] : []),
-    edition.ratio === null
-      ? t('cards.customLimits')
-      : t('cards.rpm', { value: edition.rpm.toLocaleString('en-US') }),
-    t('cards.support', { hours: edition.supportHours }),
     ...GROUP_HIGHLIGHTS[edition.id].map((item) => localize(item, locale)),
   ];
 

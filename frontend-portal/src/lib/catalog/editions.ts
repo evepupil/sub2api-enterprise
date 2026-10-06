@@ -1,9 +1,9 @@
 import type { EditionId, Localized } from './types';
 
 /**
- * 三种通道（占位数据）：共享通道、专用通道、企业通道。一个通道就是后端的一个分组：
- * API 密钥绑定哪个分组，就按哪个通道的限额和倍率计费，实际扣费 = 官方价 × 分组倍率。
- * 代码里沿用 edition（版本）这个名字和 personal / pro / enterprise 这组 id，页面上统一叫「通道」。
+ * 三种通道：共享通道、专用通道、企业通道。通道是官网上的说法，用户实际在控制台选后端分组，
+ * 分组名里写明属于哪个通道；官网的模型页、价格页直接按分组列价，这里只给通道页与首页通道面板用。
+ * 各通道的权益见 groups.ts。代码里沿用 edition（版本）这个名字和 personal / pro / enterprise 这组 id。
  */
 export interface Edition {
   id: EditionId;
@@ -12,12 +12,6 @@ export interface Edition {
   summary: Localized;
   /** 分组倍率（相对官方价）：0.15 即官方价的 15%；null 表示按合同定制。官网页面只用它算价格，不单独展示 */
   ratio: number | null;
-  /** 单个密钥每分钟请求数上限 */
-  rpm: number;
-  /** 单个账号并发上限 */
-  concurrency: number;
-  /** 工单首次响应时限，小时 */
-  supportHours: number;
   /** 通道页用深色重点卡（每页一张） */
   featured: boolean;
   /** 通道卡按钮：查看定价 / 联系客服 */
@@ -35,9 +29,6 @@ export const EDITIONS: readonly Edition[] = [
       en: 'Shared capacity, pay as you go, built for individual developers and everyday calls.',
     },
     ratio: 0.15,
-    rpm: 60,
-    concurrency: 10,
-    supportHours: 48,
     featured: false,
     cta: 'pricing',
   },
@@ -45,13 +36,10 @@ export const EDITIONS: readonly Edition[] = [
     id: 'pro',
     name: { zh: '专用通道', en: 'Dedicated' },
     summary: {
-      zh: '独立自营号池，高可用、低延迟、不降智。',
-      en: 'Our own dedicated pool: high availability, low latency, full-strength models.',
+      zh: '独立自营号池，适合团队和生产环境。',
+      en: 'Our own dedicated pool, built for teams and production.',
     },
     ratio: 0.3,
-    rpm: 600,
-    concurrency: 50,
-    supportHours: 12,
     featured: true,
     cta: 'pricing',
   },
@@ -63,9 +51,6 @@ export const EDITIONS: readonly Edition[] = [
       en: 'Set up for a single enterprise, built for scale and compliance.',
     },
     ratio: null,
-    rpm: 3000,
-    concurrency: 300,
-    supportHours: 1,
     featured: false,
     cta: 'contact',
   },

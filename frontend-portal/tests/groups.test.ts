@@ -24,10 +24,23 @@ describe('通道（一个通道就是一个分组）', () => {
     expect(EDITIONS.map((e) => e.cta)).toEqual(['pricing', 'pricing', 'contact']);
   });
 
-  it('每张通道卡都有独有特权', () => {
+  it('每张通道卡都有比上一档多出来的权益，清单里没有并发、限额这类数字', () => {
     for (const e of EDITIONS) {
       expect(GROUP_HIGHLIGHTS[e.id].length, e.id).toBeGreaterThan(0);
+      for (const item of GROUP_HIGHLIGHTS[e.id]) {
+        expect(item.zh, e.id).not.toMatch(/并发|每分钟|限额/);
+      }
     }
+    const zh = (id: 'personal' | 'pro' | 'enterprise') => GROUP_HIGHLIGHTS[id].map((i) => i.zh);
+    expect(zh('personal')).toEqual([
+      '全部文本模型',
+      '全部生图模型',
+      '7 天内可退款',
+      '客服 24 小时在线',
+      '基础安全防护',
+    ]);
+    expect(zh('pro')).toContain('ChatGPT 专业通道');
+    expect(zh('enterprise')).toContain('可开发票');
   });
 });
 
@@ -42,16 +55,26 @@ describe('倍率写法（价格换算与控制台用）', () => {
   });
 });
 
-describe('特权对比', () => {
-  it('8 行，只比权益不比倍率，不写可用率承诺，额度从数据推出', () => {
-    expect(PRIVILEGE_ROWS).toHaveLength(8);
+describe('权益对比', () => {
+  it('11 行，只比权益：不比倍率，不写可用率承诺，也不写并发、限额这类数字', () => {
+    expect(PRIVILEGE_ROWS).toHaveLength(11);
     const ids = PRIVILEGE_ROWS.map((r) => r.id);
-    for (const hidden of ['ratio', 'channel', 'sla', 'credits', 'invoice']) {
+    for (const hidden of ['ratio', 'channel', 'sla', 'credits', 'rpm', 'concurrency', 'members']) {
       expect(ids).not.toContain(hidden);
     }
     const row = (id: string) => PRIVILEGE_ROWS.find((r) => r.id === id)?.values;
-    expect(row('rpm')?.enterprise).toEqual({ zh: '3,000', en: '3,000' });
-    expect(row('priority')).toEqual({ personal: false, pro: true, enterprise: true });
-    expect(row('support')?.enterprise).toEqual({ zh: '1 小时', en: '1 hour' });
+    expect(row('chatgpt-pro')).toEqual({ personal: false, pro: true, enterprise: true });
+    expect(row('invoice')).toEqual({ personal: false, pro: false, enterprise: true });
+    expect(row('security')?.enterprise).toEqual({ zh: '可定制', en: 'Custom' });
+  });
+
+  it('上一档有的权益下一档都有', () => {
+    const order = ['personal', 'pro', 'enterprise'] as const;
+    for (const row of PRIVILEGE_ROWS) {
+      order.forEach((id, index) => {
+        const next = order[index + 1];
+        if (next && row.values[id] !== false) expect(row.values[next], row.id).not.toBe(false);
+      });
+    }
   });
 });

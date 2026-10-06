@@ -1,18 +1,15 @@
 {
   "meta": {
     "title": "Channels",
-    "description": "Limits and support compared across the Shared, Dedicated and Enterprise channels."
+    "description": "Benefits and support compared across the Shared, Dedicated and Enterprise channels."
   },
   "hero": {
     "title": "Channels",
-    "subtitle": "Every API key is bound to a channel. Channels differ in limits and support."
+    "subtitle": "Every API key is bound to a channel. Channels differ in capacity and support."
   },
   "cards": {
     "popular": "Most popular",
     "includes": "Everything in {edition}, plus",
-    "rpm": "{value} requests per minute per key",
-    "customLimits": "Concurrency and limits by contract",
-    "support": "Support response within {hours} h",
     "use": "View pricing"
   },
   "compare": {
@@ -24,7 +21,7 @@
     "title": "FAQ",
     "items": {
       "q1": "How do the three channels differ?",
-      "a1": "Shared runs on capacity shared by many users, for individual development and everyday calls. Dedicated uses premium capacity with priority scheduling, for teams and production. Enterprise is set up for a single company.",
+      "a1": "Shared runs on capacity shared by many users, for individual development and everyday calls. Dedicated runs on our own pool with high availability, low latency and full-strength models, for teams and production. Enterprise is set up for a single company, with custom security protection, enterprise management features and a dedicated account manager.",
       "q2": "Can one account use multiple channels?",
       "a2": "Yes. Each API key is bound to one channel, and one account can create multiple keys for different purposes.",
       "q3": "Will prices change over time?",
