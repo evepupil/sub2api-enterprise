@@ -20,7 +20,7 @@ const KNOB: Record<'on' | 'off', string> = {
   off: 'translate-x-0.5',
 };
 
-/** 面板里的一行：通道名 + 可用率目标 + 一句话定位 + 可点的假开关。 */
+/** 面板里的一行：通道名 + 一句话定位 + 可点的假开关。 */
 function GroupRow(props: { edition: EditionId; on: boolean; onToggle: () => void }) {
   const locale = useLocale();
   const group = getEdition(props.edition);
@@ -28,7 +28,6 @@ function GroupRow(props: { edition: EditionId; on: boolean; onToggle: () => void
   return (
     <div className="flex items-center gap-3 border-b border-border px-4 py-3 last:border-b-0">
       <Badge tone="outline">{localize(group.name, locale)}</Badge>
-      <span className="font-mono text-xs text-foreground">{`${group.slaTarget.toFixed(1)}%`}</span>
       <span className="min-w-0 flex-1 truncate text-xs text-muted-foreground">
         {localize(group.summary, locale)}
       </span>

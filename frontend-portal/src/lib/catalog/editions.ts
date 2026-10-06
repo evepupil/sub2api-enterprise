@@ -2,7 +2,7 @@ import type { EditionId, Localized } from './types';
 
 /**
  * 三种通道（占位数据）：共享通道、专用通道、企业通道。一个通道就是后端的一个分组：
- * API 密钥绑定哪个分组，就按哪个通道的可用率目标、限额和倍率计费，实际扣费 = 官方价 × 分组倍率。
+ * API 密钥绑定哪个分组，就按哪个通道的限额和倍率计费，实际扣费 = 官方价 × 分组倍率。
  * 代码里沿用 edition（版本）这个名字和 personal / pro / enterprise 这组 id，页面上统一叫「通道」。
  */
 export interface Edition {
@@ -12,8 +12,6 @@ export interface Edition {
   summary: Localized;
   /** 分组倍率（相对官方价）：0.15 即官方价的 15%；null 表示按合同定制。官网页面只用它算价格，不单独展示 */
   ratio: number | null;
-  /** 可用率目标，百分数 */
-  slaTarget: number;
   /** 单个密钥每分钟请求数上限 */
   rpm: number;
   /** 单个账号并发上限 */
@@ -22,7 +20,7 @@ export interface Edition {
   supportHours: number;
   /** 通道页用深色重点卡（每页一张） */
   featured: boolean;
-  /** 通道卡按钮：查看定价 / 联系销售 */
+  /** 通道卡按钮：查看定价 / 联系客服 */
   cta: 'pricing' | 'contact';
 }
 
@@ -37,7 +35,6 @@ export const EDITIONS: readonly Edition[] = [
       en: 'Shared capacity, pay as you go, built for individual developers and everyday calls.',
     },
     ratio: 0.15,
-    slaTarget: 99.0,
     rpm: 60,
     concurrency: 10,
     supportHours: 48,
@@ -52,7 +49,6 @@ export const EDITIONS: readonly Edition[] = [
       en: 'Premium capacity with priority scheduling, built for teams and production.',
     },
     ratio: 0.3,
-    slaTarget: 99.5,
     rpm: 600,
     concurrency: 50,
     supportHours: 12,
@@ -63,11 +59,10 @@ export const EDITIONS: readonly Edition[] = [
     id: 'enterprise',
     name: { zh: '企业通道', en: 'Enterprise' },
     summary: {
-      zh: '为企业单独开设，可用率按合同约定，适合规模化和合规要求高的企业。',
-      en: 'Set up for a single enterprise with contractual availability, built for scale and compliance.',
+      zh: '为企业单独开设，适合规模化和合规要求高的企业。',
+      en: 'Set up for a single enterprise, built for scale and compliance.',
     },
     ratio: null,
-    slaTarget: 99.9,
     rpm: 3000,
     concurrency: 300,
     supportHours: 1,

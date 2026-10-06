@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { CheckList } from '@/components/ui/check-list';
 import { buttonClass } from '@/components/ui/button-styles';
 import { GROUP_HIGHLIGHTS, localize, type Edition } from '@/lib/catalog';
+import { SITE } from '@/lib/site';
 import { cn } from '@/lib/utils';
 import { Link } from '@/i18n/navigation';
 
@@ -20,23 +21,13 @@ const NAME_COLOR: Record<'plain' | 'featured', string> = {
   featured: 'text-white',
 };
 
-const FIGURE_COLOR: Record<'plain' | 'featured', string> = {
-  plain: 'text-foreground',
-  featured: 'text-white',
-};
-
 const DESC_COLOR: Record<'plain' | 'featured', string> = {
   plain: 'text-muted-foreground',
   featured: 'text-navy-muted',
 };
 
-const SUFFIX_COLOR: Record<'plain' | 'featured', string> = {
-  plain: 'text-muted-foreground',
-  featured: 'text-navy-muted',
-};
-
 /**
- * 单张通道卡：可用率目标（大号数字）、说明、特权清单、底部整宽按钮，三张卡等高、按钮靠底对齐。
+ * 单张通道卡：通道名、说明、特权清单、底部整宽按钮，三张卡等高、按钮靠底对齐（不写可用率承诺）。
  * 通道页只比权益，不展示倍率。previous 是上一档通道，清单第一条写「包含上一档全部特权」（模板同款写法）。
  */
 export function GroupCardsCard({ edition, previous }: { edition: Edition; previous?: Edition }) {
@@ -74,18 +65,6 @@ export function GroupCardsCard({ edition, previous }: { edition: Edition; previo
         </h3>
         {edition.featured ? <Badge tone="inverse">{t('cards.popular')}</Badge> : null}
       </div>
-      <div className="relative mt-6 flex items-baseline gap-2">
-        <span
-          data-group-sla={edition.id}
-          className={cn(
-            'text-4xl font-semibold tracking-tight tabular-nums md:text-5xl',
-            FIGURE_COLOR[variant],
-          )}
-        >
-          {`${edition.slaTarget.toFixed(1)}%`}
-        </span>
-        <span className={cn('text-sm', SUFFIX_COLOR[variant])}>{t('cards.slaLabel')}</span>
-      </div>
       <p className={cn('relative mt-4 min-h-10 text-sm', DESC_COLOR[variant])}>
         {localize(edition.summary, locale)}
       </p>
@@ -96,13 +75,13 @@ export function GroupCardsCard({ edition, previous }: { edition: Edition; previo
       />
       <div className="relative mt-auto pt-8">
         {edition.cta === 'contact' ? (
-          // 联系销售为占位链接
+          // 企业通道：发邮件给客服
           <a
-            href="#"
+            href={`mailto:${SITE.supportEmail}`}
             data-group-cta={edition.id}
             className={buttonClass({ variant: 'secondary', block: true })}
           >
-            {common('actions.contactSales')}
+            {common('actions.contactSupport')}
           </a>
         ) : (
           // 查看定价：价格页默认就是共享通道，其余通道带上 ?edition=

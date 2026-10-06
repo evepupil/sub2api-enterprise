@@ -17,7 +17,7 @@
 1. 在首页弄清楚这是什么服务、能调哪些模型、怎么收费，然后注册。
 2. 在模型页按厂商、上下文筛选模型，切换通道看每个模型的价格和可用率（对话延迟、端点 PING、近 7 天可用性、近 60 次探测）。
 3. 在价格页按通道、按币种查每个模型的输入、输出、缓存和生图单价。
-4. 在通道页看三种通道的权益差别（可用率目标、限额、客服响应时限与特权，不展示倍率），点「查看定价」去价格页看单价。
+4. 在通道页看三种通道的权益差别（限额、客服响应时限与特权，不展示倍率、不写可用率承诺），点「查看定价」去价格页看单价。
 5. 登录（个人与组织成员同一入口），注册个人账号或创建组织。
 
 目标观感：**像素级复刻 Aceternity「AI SaaS Template」（Every AI）的观感，内容全部换成我们的。** 白底近黑字、Geist 字体、超大加粗标题、黑色胶囊按钮、带光线流动的网格背景、滚动后浮起的胶囊顶栏、深色重点卡、页脚超大水印字；暗色主题整体反转。
@@ -257,7 +257,7 @@
 | `src/components/catalog/provider-logo-cloud.tsx`（`'use client'`） | `ProviderLogoCloud` | `{ className?: string }`。两组：A `openai anthropic google deepseek`，B `moonshot zhipu minimax qwen`，每 3000ms 换一组（减少动态效果时停在 A）。外层 `grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-4`，`data-logo-cloud`，`data-logo-set="0"`/`"1"`。每格 `flex h-14 items-center justify-center`，里面 `AnimatePresence mode="wait" initial={false}`（首组直接显示，不等水合）按厂商 id 换 `motion.div`：`initial={{ opacity: 0, y: 12, filter: 'blur(8px)' }}`、`animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}`、`exit={{ opacity: 0, y: -12, filter: 'blur(8px)' }}`、`transition={{ duration: 0.45, delay: 格序号 × 0.08, ease: [0.22,1,0.36,1] }}`；内容 `flex items-center gap-3`：`ProviderLogo size={32}` + `<span className="text-xl font-semibold tracking-tight text-foreground/85 md:text-2xl">{厂商名}</span>` |
 | `src/components/catalog/discount-badge.tsx`（无指令） | `DiscountBadge` | `{ discount: number \| null; locale: AppLocale; className? }`：`formatDiscount` 为空时返回 `null`；否则 `<Badge tone="success" data-discount className={className}>{文字}</Badge>` |
 | `src/components/catalog/edition-switcher.tsx`（`'use client'`） | `EditionSwitcher` | `{ className?: string; size?: 'sm' \| 'md' }`。读写 `useEdition()`，渲染 `SegmentedControl name="edition"`，选项来自 `EDITIONS`，标签 `edition.name[locale]`，`ariaLabel` 取 `common.edition.label` |
-| `src/components/catalog/edition-summary.tsx`（`'use client'`） | `EditionSummary` | `{ className?: string }`。读 `useEdition()`，一行两项，外层 `flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm`，`data-edition-summary`。每项 `<span className="inline-flex items-center gap-1.5"><span className="text-subtle-foreground">{标签}</span><span data-summary={key} className="font-medium tabular-nums text-foreground">{值}</span></span>`。两项：`sla` 值 `${slaTarget.toFixed(1)}%`；`rpm` 值 `rpm.toLocaleString('en-US')`。通道名已在切换器上，倍率不在官网展示。标签取 `common.editionSummary.<key>` |
+| `src/components/catalog/edition-summary.tsx`（`'use client'`） | `EditionSummary` | `{ className?: string }`。读 `useEdition()`，外层 `flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm`，`data-edition-summary`。每项 `<span className="inline-flex items-center gap-1.5"><span className="text-subtle-foreground">{标签}</span><span data-summary={key} className="font-medium tabular-nums text-foreground">{值}</span></span>`。目前只有一项：`rpm` 值 `rpm.toLocaleString('en-US')`。通道名已在切换器上，倍率与可用率承诺不在官网展示。标签取 `common.editionSummary.<key>` |
 | `src/components/layout/brand.tsx`（无指令） | `Brand` | `{ className?: string }`：`<Link href="/" className="flex items-center gap-2 text-sm font-medium text-foreground">`，前面一个 `aria-hidden` 的 `block h-5 w-6 rounded-md bg-primary` 色块（模板同款黑色圆角块），后面 `SITE.name` |
 | `src/components/layout/theme-toggle.tsx`（`'use client'`） | `ThemeToggle` | `{ className?: string }`：`<button type="button" data-theme-toggle aria-label={common.theme.toggle} className={buttonClass({ variant: 'ghost', size: 'sm', className: 'size-9 px-0 text-muted-foreground hover:text-foreground' })}>`，里面 `Sun className="size-4 dark:hidden"` 和 `Moon className="hidden size-4 dark:block"`，点击 `setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')` |
 | `src/components/layout/language-switcher.tsx`（`'use client'`） | `LanguageSwitcher` | `{ className?: string; full?: boolean }`。触发按钮 `data-lang-trigger`，`aria-label={common.language.label}`，类名 `buttonClass({ variant: 'ghost', size: 'sm', className: 'h-9 gap-1.5 px-3 text-muted-foreground hover:text-foreground' })`，内容 `Languages` 图标 + 文字（full 时显示 `简体中文`/`English`，否则 `中文`/`EN`）+ `ChevronDown size-3.5`。菜单是 `DropdownMenuRadioGroup value={locale}`，两项 `zh`「简体中文」、`en`「English」，每项 `data-lang={code}`。切换走 `useSwitchLocale()`（`src/i18n/use-switch-locale.ts`，控制台头像菜单共用）：`router.replace(\`${pathname}${window.location.search}\`, { locale: next, scroll: false })`（`useRouter`、`usePathname` 来自 `@/i18n/navigation`），保留 `?edition=` 等参数 |
@@ -325,7 +325,7 @@
 - 禁止：「示意」「数据非实测」「演示数据」「建设中」「敬请期待」「即将上线」「V1 暂不支持」「后续开放」这类开发说明；「一切运行正常」这类空洞状态句；虚构客户评价、客户名称和客户标志；任何读取、检测、审查调用内容的说法；使用场景介绍；代码调用示例；「最」「第一」「100%」这类绝对化用语（数据里的可用率数字除外）。
 - 数字写具体：「30 个模型」「99.9%」，数字一律从数据层算，不写死在文案里（文案用 `{count}` 占位）。
 - 单位：中文「美元 / 百万 Token」「/ 张」，英文「/ 1M tokens」「/ image」。中文与英文、数字之间留一个半角空格（「30 个模型」「GPT-6 Astra 已上线」）。
-- 按钮文字写动作：「免费注册」「查看价格」「联系销售」，链接文字写去向。
+- 按钮文字写动作：「免费注册」「查看价格」「联系客服」，链接文字写去向。
 
 ---
 
@@ -387,7 +387,7 @@ pnpm format:check  # prettier
 | 模型清单 | 2026-10-05 起首页、模型页、价格页的模型清单与价格改读后台模型广场（技术设计 18.9）；官网目录 `src/lib/catalog/models.ts` 只补后台没有的展示名、厂商、上下文、上线日期，目录里没有的模型显示原名；上线日期是**编的**；协议只剩控制台模型页在用；模型介绍 2026-10-05 删除 |
 | 官方价 | 官网页面的折扣标用后台模型广场给的官方价；官网目录里的官方价（由 onehop.ai 2026-10-03 公开价目反推）只剩控制台占位页（对话、用量）在用 |
 | 三种通道的分组倍率（共享通道 ×0.15、专用通道 ×0.3、企业通道定制） | 用户 2026-10-03 给定，`src/lib/catalog/editions.ts`；2026-10-05 起官网页面按后台分组的倍率算价，这里的倍率只剩控制台占位页在用；官网的共享通道、专用通道按名字对应后台分组（环境变量 `PORTAL_CHANNEL_GROUPS` 可改） |
-| 可用率目标、RPM、并发、组织成员上限、客服响应时限、通道卡特权清单、特权对比各项 | **编的**，`editions.ts`、`groups.ts` |
+| RPM、并发、组织成员上限、客服响应时限、通道卡特权清单、特权对比各项 | **编的**，`editions.ts`、`groups.ts`；可用率目标、可用率赔付、对公转账 2026-10-06 按用户要求从官网全部去掉，发票说法改成「可以开发票，但不是增值税发票」 |
 | 模型卡的可用率 | 2026-10-05 接后台「对外服务状态」（渠道监测）：对话延迟、端点 PING、近 7 天可用性、近 60 次探测；后台给模型建监测项（名称 = 模型名、分组标签 = 后台分组名）才有，没建的不显示 |
 | 人民币换算、按 Token 计费生图的每张估算 | 人民币按 1 美元 = 1 元（2026-10-05 用户定，和充值到账一致）；每张按 1290 Token 估算是**编的**，`pricing.ts` |
 | 首页控制台预览 | 控制台用量页的截图，数字是控制台的占位数据（**编的**），`public/home/console-*.webp` |
@@ -504,7 +504,7 @@ pnpm format:check  # prettier
 |---|---|
 | `MODELS: readonly Model[]` | 30 个模型（23 文本、7 生图），字段见 `types.ts` |
 | `PROVIDERS`、`getProvider(id)` | 8 个厂商：名称、标志路径、是否单色 |
-| `EDITIONS`、`EDITION_IDS`、`getEdition(id)`、`isEditionId(v)` | 三种通道（即三个分组，名称为共享通道 / 专用通道 / 企业通道）：名称、一句话、分组倍率（企业通道 null 即定制）、可用率目标、RPM、并发、工单时限、是否重点卡、按钮类型（查看定价 / 联系销售） |
+| `EDITIONS`、`EDITION_IDS`、`getEdition(id)`、`isEditionId(v)` | 三种通道（即三个分组，名称为共享通道 / 专用通道 / 企业通道）：名称、一句话、分组倍率（企业通道 null 即定制）、RPM、并发、客服响应时限、是否重点卡、按钮类型（查看定价 / 联系客服） |
 | `editionRatio(edition)`、`ratioLabel(r)`、`ratioText(r)`、`formatRatio(r, locale)`、`GROUP_HIGHLIGHTS`、`PRIVILEGE_ROWS` | 分组倍率（×0.15 / 定制，价格换算与控制台用）、通道卡独有特权、特权对比（11 行，不含倍率） |
 | `textPrice(model, edition)`、`textPriceAt(model, k)` | 文本单价（美元 / 百万 Token）：input、output、cacheRead、longContext；= 官方价 × 分组倍率，定制通道返回 null；`k = 1` 即官方价 |
 | `imagePrice(model, edition)`、`imagePriceAt(model, k)` | 生图价：按张（resolutions、from）或按 Token（perMTokens、estimatedPerImage）；规则同上 |

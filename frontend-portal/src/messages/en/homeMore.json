@@ -14,7 +14,7 @@
     },
     "editions": {
       "title": "Three channels",
-      "desc": "Shared, Dedicated and Enterprise channels, each with its own availability target."
+      "desc": "Shared, Dedicated and Enterprise channels with different capacity and pricing."
     },
     "failover": {
       "title": "Automatic failover",
@@ -29,13 +29,13 @@
       "desc": "Every model's price on each channel is published on the pricing page."
     },
     "invoices": {
-      "title": "Invoicing",
-      "desc": "The Dedicated and Enterprise channels support bank transfer and invoicing."
+      "title": "Invoices",
+      "desc": "We can issue invoices, though not VAT invoices."
     }
   },
   "catalog": {
     "title": "{count} models and counting",
-    "subtitle": "New models are added as soon as they launch, with prices and availability published alongside.",
+    "subtitle": "New models are added as soon as they launch, with prices published alongside.",
     "image": "Image",
     "new": "New",
     "input": "Input",

@@ -50,20 +50,20 @@
       "q1": "Is the price on this page what I actually pay?",
       "a1": "Yes. The displayed price is what the selected channel is billed, and every charge is itemized in the console.",
       "q2": "Why do prices differ across channels?",
-      "a2": "Channels come with different capacity quality and availability targets: Shared runs on capacity shared by many users, Dedicated on premium capacity with priority scheduling, and Enterprise is set up for a single company with an availability agreement.",
+      "a2": "Channels come with different capacity quality: Shared runs on capacity shared by many users, Dedicated on premium capacity with priority scheduling, and Enterprise is set up for a single company.",
       "q3": "Are there subscription fees or minimum spend?",
       "a3": "No. Usage is deducted from your balance as it happens; there is no monthly fee.",
       "q4": "Am I charged for failed image requests?",
       "a4": "Requests that fail upstream are not billed. Successful generations are billed per image or per token.",
       "q5": "Can I get invoices?",
-      "a5": "The Dedicated and Enterprise channels support bank transfer and VAT invoices.",
+      "a5": "Yes, we can issue invoices, though not VAT invoices. Payment by bank transfer isn't supported.",
       "q6": "How are CNY prices calculated?",
       "a6": "They use $1 = ¥1, the same rate as top-ups. Billing is in USD."
     }
   },
   "custom": {
     "title": "Enterprise channel pricing is set by contract",
-    "desc": "Capacity set up for you and an availability agreement, quoted on your usage.",
+    "desc": "Capacity set up for your company, quoted on your usage.",
     "compare": "Compare channels"
   }
 }

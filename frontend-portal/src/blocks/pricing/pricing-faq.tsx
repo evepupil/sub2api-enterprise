@@ -3,8 +3,9 @@ import { useTranslations } from 'next-intl';
 import { FaqList } from '@/components/ui/faq-list';
 import { buttonClass } from '@/components/ui/button-styles';
 import { Container } from '@/components/ui/container';
+import { SITE } from '@/lib/site';
 
-/** 常见问题：左栏标题加联系销售，右栏手风琴（同时只展开一条，展开逻辑在共享组件里）。 */
+/** 常见问题：左栏标题加联系客服，右栏手风琴（同时只展开一条，展开逻辑在共享组件里）。 */
 export function PricingFaq() {
   const t = useTranslations('pricing');
   const c = useTranslations('common');
@@ -26,8 +27,12 @@ export function PricingFaq() {
             {t('faq.title')}
           </h2>
           <div className="mt-6">
-            <a href="#" className={buttonClass({ variant: 'secondary' })}>
-              {c('actions.contactSales')}
+            <a
+              href={`mailto:${SITE.supportEmail}`}
+              data-faq-contact
+              className={buttonClass({ variant: 'secondary' })}
+            >
+              {c('actions.contactSupport')}
             </a>
           </div>
         </div>

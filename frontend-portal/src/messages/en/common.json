@@ -33,7 +33,7 @@
     "getStarted": "Get started",
     "viewPricing": "View pricing",
     "viewModels": "View models",
-    "contactSales": "Contact sales"
+    "contactSupport": "Contact support"
   },
   "units": {
     "perMTokens": "/ 1M tokens",
@@ -63,7 +63,6 @@
     }
   },
   "editionSummary": {
-    "sla": "Availability",
     "rpm": "Requests per minute"
   }
 }

@@ -13,7 +13,7 @@ import { TextPriceTable } from './pricing-tables-text';
 
 /**
  * 价格页价目表：文本与生图两张大表，价格是所选通道的实付价（来自后台，官网服务器读好后传进来）。
- * 通道、币种从网址参数读取，变化时所有金额整体重算。企业通道没有公开单价，换成联系销售卡；
+ * 通道、币种从网址参数读取，变化时所有金额整体重算。企业通道没有公开单价，换成联系客服卡；
  * 后台读不到时只写一句「暂时没有可展示的价格」。
  */
 export function PricingTables({ catalog }: { catalog: SiteCatalog }) {

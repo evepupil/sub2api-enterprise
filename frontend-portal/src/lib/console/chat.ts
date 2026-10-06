@@ -33,8 +33,8 @@ export const CHAT_SAMPLE: readonly ChatMessage[] = [
     id: 'c-2',
     role: 'assistant',
     content: {
-      zh: '每个 API 密钥都绑定一个分组，分共享、专用和企业三种。实际扣费等于模型的官方价乘以分组倍率，比如共享分组倍率 0.15，就是官方价的 15%。倍率越高的分组，资源越好，可用率承诺也越高。',
-      en: 'Every API key is bound to a group: Shared, Dedicated or Enterprise. The billed price is the official price times the group ratio, so Shared at 0.15 costs 15% of the official price. Groups with higher ratios get better capacity and availability targets.',
+      zh: '每个 API 密钥都绑定一个分组，分共享、专用和企业三种。实际扣费等于模型的官方价乘以分组倍率，比如共享分组倍率 0.15，就是官方价的 15%。倍率越高的分组，资源越好。',
+      en: 'Every API key is bound to a group: Shared, Dedicated or Enterprise. The billed price is the official price times the group ratio, so Shared at 0.15 costs 15% of the official price. Groups with higher ratios get better capacity.',
     },
     model: 'claude-sonnet-5-5',
   },

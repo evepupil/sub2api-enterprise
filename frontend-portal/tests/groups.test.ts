@@ -19,7 +19,7 @@ describe('通道（一个通道就是一个分组）', () => {
     expect(editionRatio('enterprise')).toBeNull();
   });
 
-  it('专用通道是唯一的重点卡，共享与专用查看定价，只有企业通道走联系销售', () => {
+  it('专用通道是唯一的重点卡，共享与专用查看定价，只有企业通道走联系客服', () => {
     expect(EDITIONS.filter((e) => e.featured).map((e) => e.id)).toEqual(['pro']);
     expect(EDITIONS.map((e) => e.cta)).toEqual(['pricing', 'pricing', 'contact']);
   });
@@ -43,13 +43,13 @@ describe('倍率写法（价格换算与控制台用）', () => {
 });
 
 describe('特权对比', () => {
-  it('11 行，只比权益不比倍率，可用率与额度从数据推出', () => {
-    expect(PRIVILEGE_ROWS).toHaveLength(11);
+  it('8 行，只比权益不比倍率，不写可用率承诺，额度从数据推出', () => {
+    expect(PRIVILEGE_ROWS).toHaveLength(8);
     const ids = PRIVILEGE_ROWS.map((r) => r.id);
-    expect(ids).not.toContain('ratio');
-    expect(ids).not.toContain('channel');
+    for (const hidden of ['ratio', 'channel', 'sla', 'credits', 'invoice']) {
+      expect(ids).not.toContain(hidden);
+    }
     const row = (id: string) => PRIVILEGE_ROWS.find((r) => r.id === id)?.values;
-    expect(row('sla')?.enterprise).toEqual({ zh: '99.9%', en: '99.9%' });
     expect(row('rpm')?.enterprise).toEqual({ zh: '3,000', en: '3,000' });
     expect(row('priority')).toEqual({ personal: false, pro: true, enterprise: true });
     expect(row('support')?.enterprise).toEqual({ zh: '1 小时', en: '1 hour' });

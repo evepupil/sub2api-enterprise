@@ -4,8 +4,9 @@ import { useTranslations } from 'next-intl';
 import { buttonClass } from '@/components/ui/button-styles';
 import { Container } from '@/components/ui/container';
 import { Link } from '@/i18n/navigation';
+import { SITE } from '@/lib/site';
 
-/** 按合同定价的通道（企业通道）没有公开单价：价目表的位置换成一张联系销售卡。 */
+/** 按合同定价的通道（企业通道）没有公开单价：价目表的位置换成一张联系客服卡（发邮件给客服）。 */
 export function PricingCustom() {
   const t = useTranslations('pricing');
   const common = useTranslations('common');
@@ -25,9 +26,8 @@ export function PricingCustom() {
             {t('custom.desc')}
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            {/* 联系销售为占位链接 */}
-            <a href="#" data-price-contact className={buttonClass()}>
-              {common('actions.contactSales')}
+            <a href={`mailto:${SITE.supportEmail}`} data-price-contact className={buttonClass()}>
+              {common('actions.contactSupport')}
             </a>
             <Link href="/channels" className={buttonClass({ variant: 'secondary' })}>
               {t('custom.compare')}

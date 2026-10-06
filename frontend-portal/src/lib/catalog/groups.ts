@@ -35,12 +35,8 @@ export const GROUP_HIGHLIGHTS: Record<EditionId, readonly Localized[]> = {
     text('全部文本与生图模型', 'Every text and image model'),
     text('故障自动切换', 'Automatic failover'),
   ],
-  pro: [
-    text('高峰期优先调度', 'Priority scheduling at peak hours'),
-    text('对公转账与发票', 'Bank transfer and invoices'),
-  ],
+  pro: [text('高峰期优先调度', 'Priority scheduling at peak hours')],
   enterprise: [
-    text('可用率赔付', 'SLA credits'),
     text('专属客户经理', 'Dedicated account manager'),
     text('可选私有化部署', 'Optional private deployment'),
   ],
@@ -58,19 +54,13 @@ export interface PrivilegeRow {
 const yes = true;
 const no = false;
 const thousands = (n: number): Localized => text(n.toLocaleString('en-US'));
-const sla = (id: EditionId): Localized => text(`${getEdition(id).slaTarget.toFixed(1)}%`);
 const hours = (id: EditionId): Localized => {
   const h = getEdition(id).supportHours;
   return text(`${h} 小时`, `${h} ${h === 1 ? 'hour' : 'hours'}`);
 };
 
-/** 三种通道的特权对比（通道页对比表），只比权益不比倍率；可用率与额度直接从数据推出，不另写一份 */
+/** 三种通道的特权对比（通道页对比表），只比权益不比倍率、不写可用率承诺；额度直接从数据推出，不另写一份 */
 export const PRIVILEGE_ROWS: readonly PrivilegeRow[] = [
-  {
-    id: 'sla',
-    label: text('可用率目标', 'Availability target'),
-    values: { personal: sla('personal'), pro: sla('pro'), enterprise: sla('enterprise') },
-  },
   {
     id: 'rpm',
     label: text('单密钥每分钟请求数', 'Requests per minute per key'),
@@ -110,23 +100,13 @@ export const PRIVILEGE_ROWS: readonly PrivilegeRow[] = [
     values: { personal: yes, pro: yes, enterprise: yes },
   },
   {
-    id: 'invoice',
-    label: text('对公转账与发票', 'Bank transfer and invoices'),
-    values: { personal: no, pro: yes, enterprise: yes },
-  },
-  {
-    id: 'credits',
-    label: text('可用率赔付', 'SLA credits'),
-    values: { personal: no, pro: no, enterprise: yes },
-  },
-  {
     id: 'manager',
     label: text('专属客户经理', 'Dedicated account manager'),
     values: { personal: no, pro: no, enterprise: yes },
   },
   {
     id: 'support',
-    label: text('工单响应', 'Support response'),
+    label: text('客服响应', 'Support response'),
     values: { personal: hours('personal'), pro: hours('pro'), enterprise: hours('enterprise') },
   },
 ];

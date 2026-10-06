@@ -33,7 +33,7 @@
     "getStarted": "免费注册",
     "viewPricing": "查看价格",
     "viewModels": "查看模型",
-    "contactSales": "联系销售"
+    "contactSupport": "联系客服"
   },
   "units": {
     "perMTokens": "/ 百万 Token",
@@ -63,7 +63,6 @@
     }
   },
   "editionSummary": {
-    "sla": "可用率目标",
     "rpm": "单密钥每分钟请求"
   }
 }
