@@ -7,8 +7,8 @@ export const SITE = {
   wordmark: 'Codu',
   /** 版权年份固定写死，避免构建与浏览器时间不一致 */
   copyrightYear: 2026,
-  /** 接口地址（占位），控制台的接入示例与「复制为 curl」用 */
-  apiBase: 'https://api.codu.example',
+  /** 模型调用的接口地址，和官网同一个域名（2026-10-08 用户定）；控制台日志「复制为 curl」用 */
+  apiBase: 'https://codu.xyz',
   /** 客服邮箱（Cloudflare 邮件转发到运营者邮箱）；控制台「联系我们」与页脚用 */
   supportEmail: 'support@codu.xyz',
   /** QQ 交流群号 */
