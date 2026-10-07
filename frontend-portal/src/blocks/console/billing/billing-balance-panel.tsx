@@ -64,7 +64,8 @@ export function BillingBalancePanel({
   summary: BalanceSummary | null;
   error: 'too_many' | 'unavailable' | null;
   onRetry: () => void;
-  onRecharge: () => void;
+  /** 不传时不显示「充值」按钮（首发在线支付没接，用兑换码） */
+  onRecharge?: () => void;
 }) {
   const t = useTranslations('consoleBilling');
   const low = summary !== null && isLowBalance(summary);
@@ -122,10 +123,12 @@ export function BillingBalancePanel({
             </p>
           ) : null}
         </div>
-        <Button size="lg" data-recharge onClick={onRecharge}>
-          <Plus aria-hidden />
-          {t('balance.recharge')}
-        </Button>
+        {onRecharge ? (
+          <Button size="lg" data-recharge onClick={onRecharge}>
+            <Plus aria-hidden />
+            {t('balance.recharge')}
+          </Button>
+        ) : null}
       </div>
 
       <div className="mt-6 grid gap-4 border-t border-border pt-5 sm:grid-cols-3 sm:gap-0 sm:divide-x sm:divide-border">
