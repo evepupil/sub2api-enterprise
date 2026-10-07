@@ -44,7 +44,7 @@
 | 注册 | `/register` | 个人注册或创建组织 | 个人/创建组织切换、填表 | 模板注册页 | 2 | L7 |
 | 找回密码 | `/forgot-password` | 忘了密码，收重置链接 | 填邮箱 | sub2api 找回密码页 | 1 | L7 |
 | 重置密码 | `/reset-password` | 用邮件里的链接设新密码 | 填两遍新密码 | sub2api 重置密码页 | 1 | L7 |
-| 文档 | `/docs` | 占位 | 无 | 无 | 1 | L7 |
+| 文档 | `/docs` | 占位（首发关着：`SITE_FEATURES.docs` 为 false 时入口都不显示、页面 404） | 无 | 无 | 1 | L7 |
 | 404 | 任意不存在地址 | 回到站内 | 「返回首页」 | 无 | 1 | L7 |
 
 英文版地址前加 `/en`（`/en/catalog`），由框架处理，区块不用管。模型页用 `/catalog` 而不是 `/models`：官网和后端以后合并在同一个域名下，后端已有 `GET /models` 接口。
@@ -273,10 +273,10 @@
 
 - 外层 `<header data-site-header className="sticky top-0 z-50 w-full px-4 pt-3 md:px-6">`。
 - 桌面（`lg` 及以上）一行 `<nav className="mx-auto hidden h-14 max-w-7xl items-center justify-between rounded-full px-6 transition-[background-color,box-shadow,transform] duration-300 lg:flex">`；滚动超过 80px（`useScroll` + `useMotionValueEvent`）加 `translate-y-1.5 bg-background/80 shadow-nav backdrop-blur-md`，否则 `bg-transparent`。
-  - 左：`Brand`，后面 `<ul className="ml-10 flex items-center gap-1">` 四个菜单（`NAV_ITEMS`，文字 `common.nav.<key>`）。每个 `<Link data-nav={key} aria-current={当前页 ? 'page' : undefined} className="relative rounded-md px-4 py-2 text-sm transition-colors">`；当前页 `bg-muted text-foreground`，其余 `text-muted-foreground hover:text-foreground`；悬停时非当前页项下面垫一个 `motion.span layoutId="nav-hover" className="absolute inset-0 -z-10 rounded-md bg-muted"`。当前页判断：`pathname === href || pathname.startsWith(href + '/')`。
+  - 左：`Brand`，后面 `<ul className="ml-10 flex items-center gap-1">` 菜单（`NAV_ITEMS`，文字 `common.nav.<key>`；模型、价格、通道、文档，文档跟着 `SITE_FEATURES.docs`，首发不显示）。每个 `<Link data-nav={key} aria-current={当前页 ? 'page' : undefined} className="relative rounded-md px-4 py-2 text-sm transition-colors">`；当前页 `bg-muted text-foreground`，其余 `text-muted-foreground hover:text-foreground`；悬停时非当前页项下面垫一个 `motion.span layoutId="nav-hover" className="absolute inset-0 -z-10 rounded-md bg-muted"`。当前页判断：`pathname === href || pathname.startsWith(href + '/')`。
   - 右：`<div className="flex items-center gap-1">` 依次 `LanguageSwitcher`、`ThemeToggle`、`<Link data-nav-login href="/login" className={buttonClass({ variant: 'ghost' })}>登录</Link>`、`<Link data-nav-register href="/register" className={buttonClass()}>注册</Link>`（文字 `common.nav.login` / `register`）。
 - 手机（`lg` 以下）：`<div className="mx-auto flex h-14 items-center justify-between rounded-full px-4 transition-[background-color,box-shadow] duration-300 lg:hidden">`，滚动后同样加 `bg-background/80 shadow-nav backdrop-blur-md`。左 `Brand`，右 `ThemeToggle` + 汉堡按钮（`data-mobile-menu-trigger`、`aria-expanded`、`aria-controls="mobile-menu"`、`aria-label` 取 `common.nav.openMenu`/`closeMenu`，图标 `Menu`/`X`）。
-  - 展开面板 `AnimatePresence` + `motion.div id="mobile-menu" data-mobile-menu`，`initial={{ opacity: 0, y: -8 }}`、`animate={{ opacity: 1, y: 0 }}`、`exit={{ opacity: 0, y: -8 }}`、0.2s；类名 `absolute inset-x-4 top-[calc(100%+8px)] rounded-2xl border border-border bg-card p-4 shadow-card`。内容：四个菜单 `block rounded-md px-3 py-3 text-base text-foreground hover:bg-muted`（当前页加 `bg-muted`）→ `my-3 border-t border-border` → `LanguageSwitcher full` → `mt-3 grid gap-2`：登录（`buttonClass({ variant: 'secondary', block: true })`）、注册（`buttonClass({ block: true })`）。
+  - 展开面板 `AnimatePresence` + `motion.div id="mobile-menu" data-mobile-menu`，`initial={{ opacity: 0, y: -8 }}`、`animate={{ opacity: 1, y: 0 }}`、`exit={{ opacity: 0, y: -8 }}`、0.2s；类名 `absolute inset-x-4 top-[calc(100%+8px)] rounded-2xl border border-border bg-card p-4 shadow-card`。内容：菜单（同 `NAV_ITEMS`） `block rounded-md px-3 py-3 text-base text-foreground hover:bg-muted`（当前页加 `bg-muted`）→ `my-3 border-t border-border` → `LanguageSwitcher full` → `mt-3 grid gap-2`：登录（`buttonClass({ variant: 'secondary', block: true })`）、注册（`buttonClass({ block: true })`）。
   - 点菜单项、按 Esc、路由变化都收起；打开时 `body` 不加滚动锁。
 - 顶栏只有这一个，(site) 布局和 404 页渲染它。
 
@@ -407,7 +407,7 @@ pnpm format:check  # prettier
 
 ## 10. 控制台（M6）
 
-控制台和官网同一个应用、同一套令牌与基础组件，地址 `/console/<页>`（英文 `/en/console/<页>`，`/console` 自动跳到 `/console/usage`）。信息组织参考 onehop 控制台（用量、模型、日志、API 密钥、账单、邀请、工单，左上角深色「对话」入口），视觉一律按本文件第 2 章的令牌。任务墙不做；侧栏「文档」链到官网 `/docs` 占位页。另加「组织」（只给组织管理员：成员额度、配额申请、邀请码）和「账户设置」（头像菜单进入）两页。
+控制台和官网同一个应用、同一套令牌与基础组件，地址 `/console/<页>`（英文 `/en/console/<页>`，`/console` 自动跳到 `/console/usage`）。信息组织参考 onehop 控制台（用量、模型、日志、API 密钥、账单、邀请、工单，左上角深色「对话」入口），视觉一律按本文件第 2 章的令牌。任务墙不做；侧栏「文档」链到官网 `/docs` 占位页（跟着 `SITE_FEATURES.docs`，首发不显示）。另加「组织」（只给组织管理员：成员额度、配额申请、邀请码）和「账户设置」（头像菜单进入）两页。
 
 数据全部占位，集中在 `src/lib/console/`（主控已写好并有单测锁住，**不准改**）。所有操作只改页面内的本地状态，不发请求；刷新、保存、提交一类按钮进入加载态 600–1200ms 再恢复。
 

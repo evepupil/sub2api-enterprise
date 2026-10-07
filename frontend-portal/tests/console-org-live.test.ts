@@ -49,6 +49,7 @@ import {
   toPolicy,
   toQuotaRequest,
 } from '@/lib/server/sub2api/organization';
+import { SITE_FEATURES } from '@/lib/site';
 
 const MEMBER: OrgMember = {
   userId: 5,
@@ -227,6 +228,11 @@ describe('组织页表单', () => {
     expect(keys(true)).toContain('organization');
     expect(keys(false)).not.toContain('organization');
     expect(keys(false)).toContain('invite');
+  });
+
+  it('官网文档入口没开时，侧栏也不显示「文档」', () => {
+    const keys = visibleNav(true, true).map((item) => item.key);
+    expect(keys.includes('docs')).toBe(SITE_FEATURES.docs);
   });
 });
 

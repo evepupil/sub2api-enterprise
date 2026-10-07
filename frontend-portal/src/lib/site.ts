@@ -15,15 +15,28 @@ export const SITE = {
   qqGroup: '1095058028',
 } as const;
 
+/**
+ * 官网里还没做好的入口，首发先不显示（2026-10-07 用户定），做好后改成 true。
+ * - docs：文档页还是占位。关着时顶栏、页脚、控制台侧栏都没有「文档」，直接打开 /docs 是 404。
+ */
+export const SITE_FEATURES: Readonly<{ docs: boolean }> = {
+  docs: false,
+};
+
 export type NavKey = 'models' | 'pricing' | 'groups' | 'docs';
 
+/** 入口开关没开的链接不显示 */
+const shown = (key: string): boolean => key !== 'docs' || SITE_FEATURES.docs;
+
 /** 顶栏菜单，顺序即显示顺序；文字取 common.nav.<key>（groups 这个键对应「通道」页） */
-export const NAV_ITEMS: readonly { key: NavKey; href: string }[] = [
-  { key: 'models', href: '/catalog' },
-  { key: 'pricing', href: '/pricing' },
-  { key: 'groups', href: '/channels' },
-  { key: 'docs', href: '/docs' },
-];
+export const NAV_ITEMS: readonly { key: NavKey; href: string }[] = (
+  [
+    { key: 'models', href: '/catalog' },
+    { key: 'pricing', href: '/pricing' },
+    { key: 'groups', href: '/channels' },
+    { key: 'docs', href: '/docs' },
+  ] as const
+).filter((item) => shown(item.key));
 
 export type FooterLinkKey =
   | 'models'
@@ -44,12 +57,14 @@ export const FOOTER_COLUMNS: readonly {
 }[] = [
   {
     key: 'product',
-    links: [
-      { key: 'models', href: '/catalog' },
-      { key: 'pricing', href: '/pricing' },
-      { key: 'groups', href: '/channels' },
-      { key: 'docs', href: '/docs' },
-    ],
+    links: (
+      [
+        { key: 'models', href: '/catalog' },
+        { key: 'pricing', href: '/pricing' },
+        { key: 'groups', href: '/channels' },
+        { key: 'docs', href: '/docs' },
+      ] as const
+    ).filter((link) => shown(link.key)),
   },
   {
     key: 'company',
