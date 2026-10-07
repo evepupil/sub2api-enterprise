@@ -48,5 +48,11 @@
     "tailwindcss": "4.3.3",
     "typescript": "5.9.3",
     "vitest": "4.1.11"
+  },
+  "pnpm": {
+    "overrides": {
+      "sharp": "^0.35.5",
+      "source-map-js": "^1.2.2"
+    }
   }
 }
