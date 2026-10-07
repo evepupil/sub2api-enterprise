@@ -5,17 +5,13 @@
   },
   "hero": {
     "title": "One transparent price list",
-    "subtitle": "Pay as you go with no subscriptions or monthly fees. What you see is exactly what each group is billed.",
-    "currency": "Currency",
-    "usd": "USD $",
-    "cny": "CNY ¥"
+    "subtitle": "Pay as you go with no subscriptions or monthly fees. What you see is exactly what each group is billed."
   },
   "tables": {
     "jump": "Jump to",
     "text": "Text models",
     "image": "Image models",
     "unitUsd": "Prices in USD",
-    "unitCny": "Prices in CNY at $1 = ¥{rate}; wallets are charged in USD",
     "textTitle": "Text models",
     "perMTokens": "Per 1M tokens",
     "model": "Model",
@@ -42,7 +38,7 @@
     "estimate": "Per-image prices marked with ≈ are estimated at 1024×1024 (about {tokens} output tokens); actual cost varies with size and quality.",
     "longContext": "When the input of a single request exceeds the context threshold of a model, the whole request is billed at the long-context price.",
     "edit": "Image-to-image and inpainting also count the tokens of the input image, usually a small share of the total.",
-    "currency": "CNY prices use $1 = ¥{rate}, the same rate as top-ups; wallets are always charged in USD.",
+    "currency": "All prices are in US dollars. Every ¥1 you top up credits US$1, and usage is charged in US dollars.",
     "editions": "Prices on this page are what each group is billed; the Enterprise channel is priced by contract. See how the channels differ on the <link>channels page</link>."
   },
   "faq": {
@@ -58,8 +54,8 @@
       "a4": "Requests that fail upstream are not billed. Successful generations are billed per image or per token.",
       "q5": "Can I get invoices?",
       "a5": "Yes, for the Dedicated and Enterprise channels, though not VAT invoices. Payment by bank transfer isn't supported.",
-      "q6": "How are CNY prices calculated?",
-      "a6": "They use $1 = ¥1, the same rate as top-ups. Billing is in USD."
+      "q6": "How do RMB top-ups convert to balance?",
+      "a6": "Every ¥1 you top up credits US$1, and usage is then charged in US dollars."
     }
   },
   "custom": {

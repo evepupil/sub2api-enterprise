@@ -129,9 +129,3 @@ export function toConsoleChannels(raw: unknown): ConsoleChannel[] | null {
     .filter(notNull)
     .filter((channel) => channel.models.length > 0);
 }
-
-/** 充值比例（付 1 元到账多少美元）：取支付配置里的 balance_recharge_multiplier，读不到按 1 */
-export function rechargeMultiplierFrom(raw: unknown): number {
-  const value = isRecord(raw) ? num(raw.balance_recharge_multiplier) : null;
-  return value !== null && value > 0 ? value : 1;
-}

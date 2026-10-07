@@ -31,13 +31,13 @@ export function ModelMarqueeCard({ model, from }: { model: SiteModel; from: bool
   const fromPrice = from || (price.kind === 'request' && price.from);
   let priceText = '';
   if (price.kind === 'token' && price.input !== null) {
-    const amount = `${formatMoney(price.input, 'usd')} ${tc('units.perMTokens')}`;
+    const amount = `${formatMoney(price.input)} ${tc('units.perMTokens')}`;
     priceText = fromPrice
       ? t('catalog.inputFrom', { price: amount })
       : `${t('catalog.input')} ${amount}`;
   } else if (price.kind === 'request') {
     const unit = price.unit === 'image' ? tc('units.perImage') : tc('units.perRequest');
-    const amount = `${formatMoney(price.price, 'usd')} ${unit}`;
+    const amount = `${formatMoney(price.price)} ${unit}`;
     priceText = fromPrice ? tc('units.fromPrice', { price: amount }) : amount;
   }
 

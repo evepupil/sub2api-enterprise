@@ -29,19 +29,10 @@ export async function fetchConsoleModels(signal?: AbortSignal): Promise<ModelsFe
     if (response.status === 429) return { kind: 'error', reason: 'too_many' };
     const body: unknown = await response.json().catch(() => null);
     // 官网服务器已经整理成固定形状，这里只确认关键字段在
-    if (
-      response.ok &&
-      isRecord(body) &&
-      body.ok === true &&
-      Array.isArray(body.channels) &&
-      typeof body.rechargeMultiplier === 'number'
-    ) {
+    if (response.ok && isRecord(body) && body.ok === true && Array.isArray(body.channels)) {
       return {
         kind: 'ok',
-        data: {
-          channels: body.channels as ConsoleModelsData['channels'],
-          rechargeMultiplier: body.rechargeMultiplier,
-        },
+        data: { channels: body.channels as ConsoleModelsData['channels'] },
       };
     }
     return { kind: 'error', reason: 'unavailable' };

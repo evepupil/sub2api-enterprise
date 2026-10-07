@@ -67,6 +67,4 @@ export interface ConsoleChannel {
 
 export interface ConsoleModelsData {
   channels: ConsoleChannel[];
-  /** 充值比例：付 1 元到账多少美元。人民币价格 = 美元价 ÷ 它 */
-  rechargeMultiplier: number;
 }

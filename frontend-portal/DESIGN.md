@@ -16,7 +16,7 @@
 
 1. 在首页弄清楚这是什么服务、能调哪些模型、怎么收费，然后注册。
 2. 在模型页按厂商、上下文筛选模型，切换通道看每个模型的价格和可用率（对话延迟、端点 PING、近 7 天可用性、近 60 次探测）。
-3. 在价格页按通道、按币种查每个模型的输入、输出、缓存和生图单价。
+3. 在价格页按分组查每个模型的输入、输出、缓存和生图单价（只写美元）。
 4. 在通道页看三种通道的权益差别（模型范围、退款、安全防护、客服与企业服务，不展示倍率、不写可用率承诺和并发限额），点「查看定价」去价格页看单价。
 5. 登录（个人与组织成员同一入口），注册个人账号或创建组织。
 
@@ -38,7 +38,7 @@
 |---|---|---|---|---|---|---|
 | 首页 | `/` | 了解服务、注册 | 「免费注册」「查看价格」 | 模板首页 | 7 + 顶栏页脚 | L1 L2 L3 |
 | 模型 | `/catalog` | 选模型、看各分组的价格和可用率 | 搜索、筛选 | onehop 模型页 | 2（筛选器内含 5 个区域） | L4 |
-| 价格 | `/pricing` | 查各分组的单价 | 币种切换 | onehop 价格页 | 4 | L5 |
+| 价格 | `/pricing` | 查各分组的单价 | 无（只写美元） | onehop 价格页 | 4 | L5 |
 | 通道 | `/channels` | 看三种通道的权益差别 | 看三张通道卡、对比特权、查看定价 | 模板价格页 | 5 | L6 |
 | 登录 | `/login` | 登录（个人与组织成员同一入口） | 填邮箱和密码 | 模板登录页 | 2 | L7 |
 | 注册 | `/register` | 个人注册或创建组织 | 个人/创建组织切换、填表 | 模板注册页 | 2 | L7 |
@@ -270,7 +270,6 @@
 
 ### 4.4 页内与跨区块状态（主控已写好，直接用）
 
-- `src/lib/use-catalog-state.ts`（`'use client'`）：`useCurrency(): [Currency, (c: Currency) => void]`（网址 `?currency=`，默认 `usd`）。2026-10-06 起官网按后台分组展示，没有通道参数。
 - `src/lib/use-url-state.ts`（`'use client'`）：`useUrlState(key, allowed, fallback)`、`useUrlList(key, allowed)`、`useUrlText(key)`，模型页的筛选条件用它们存进网址。
 - 这几个钩子服务端和首次水合时返回默认值，水合后才读真实网址，**不需要 Suspense**，也不会有水合告警。
 
@@ -392,7 +391,7 @@ pnpm format:check  # prettier
 | 三种通道的分组倍率（共享通道 ×0.15、专用通道 ×0.3、企业通道定制） | 用户 2026-10-03 给定，`src/lib/catalog/editions.ts`；2026-10-05 起官网页面按后台分组的倍率算价，这里的倍率只剩控制台占位页在用；2026-10-06 起官网按后台分组展示，不做通道对应 |
 | 通道卡权益清单、权益对比各项 | 用户 2026-10-07 给定（`groups.ts`）：共享通道：全部文本模型、全部生图模型、7 天内可退款、客服 24 小时在线、基础安全防护；专用通道：包含共享通道全部权益，另有 ChatGPT 专业通道、高可用 / 低延迟 / 不降智、专属客服 24 小时一对一、可开发票；企业通道：包含专用通道全部权益，另有可开发票（专用、企业两张卡都写）、定制安全防护、企业级管理功能、专属客户经理、可选私有化部署。RPM、并发、组织成员上限、客服响应时限这些编的数字同日删掉；可用率目标、可用率赔付、对公转账 2026-10-06 已去掉 |
 | 模型卡的可用率 | 2026-10-05 接后台「对外服务状态」（渠道监测）：对话延迟、端点 PING、近 7 天可用性、近 60 次探测；后台给模型建监测项（名称 = 模型名、分组标签 = 后台分组名）才有，没建的不显示 |
-| 人民币换算、按 Token 计费生图的每张估算 | 人民币按 1 美元 = 1 元（2026-10-05 用户定，和充值到账一致）；每张按 1290 Token 估算是**编的**，`pricing.ts` |
+| 按 Token 计费生图的每张估算 | 每张按 1290 Token 估算是**编的**，`pricing.ts`（价格只写美元，充值 1 元 = 1 美元是用户 2026-10-08 定的真实口径） |
 | 首页控制台预览 | 控制台用量页的截图，数字是拍图时给测试账号补的演示用量（**编的**），`public/home/console-*.webp` |
 | 首页四张黑白示例图 | AI 生成（imagegen，gpt-image），`public/showcase/` |
 | 厂商标志 | lobehub icons（MIT），`public/providers/`；谷歌登录按钮标志 `public/brands/google.svg` |
@@ -512,13 +511,13 @@ pnpm format:check  # prettier
 | `textPrice(model, edition)`、`textPriceAt(model, k)` | 文本单价（美元 / 百万 Token）：input、output、cacheRead、longContext；= 官方价 × 分组倍率，定制通道返回 null；`k = 1` 即官方价 |
 | `imagePrice(model, edition)`、`imagePriceAt(model, k)` | 生图价：按张（resolutions、from）或按 Token（perMTokens、estimatedPerImage）；规则同上 |
 | `formatDiscount(d, locale)` | 折扣标文字（「1.5折」/「85% off」，不打折时 null） |
-| `formatMoney(usd, currency)`、`formatAmount(n)`、`convert(usd, currency)`、`USD_CNY_RATE` | 金额（`$0.6` / `¥4.26`） |
+| `formatMoney(usd)`、`formatAmount(n)` | 美元金额（`$0.6`） |
 | `formatContext(tokens)`、`localize(value, locale)` | 上下文、中英文字段 |
 | `isNewModel(model)`、`CATALOG_AS_OF`、`IMAGE_TOKENS_PER_IMAGE` | 「新」标记（30 天内上线的 7 个） |
 | `TYPE_FILTERS`、`CONTEXT_FILTERS`、`SORT_KEYS`、`PROTOCOLS`、`PROTOCOL_LABELS` | 模型页筛选的取值；官网的筛选排序、价目表分段在 `@/lib/catalog/live`（见下） |
 
 官网的后台数据在 `@/lib/catalog/live`（2026-10-06 起按分组）：`SiteCatalog`（每个分组里的每个模型一条）、`SiteModel`、`buildSiteCatalog`、`filterSiteModels`、`siteFacetCounts`、`providersOf`、`groupSiteModels`、`cheapestPerModel`、`distinctModelCount`、`siteModelCount`、`priceRowId`，用法见 `design/模型.md`、`design/价格.md`、`design/首页.md`。
 
-其他：`SITE`、`NAV_ITEMS`、`FOOTER_COLUMNS`（`@/lib/site`）；`useCurrency`（`@/lib/use-catalog-state`）；`useUrlState`、`useUrlList`、`useUrlText`（`@/lib/use-url-state`）；`initPage`、`LocaleParams`（`@/i18n/page`）。
+其他：`SITE`、`NAV_ITEMS`、`FOOTER_COLUMNS`（`@/lib/site`）；`useUrlState`、`useUrlList`、`useUrlText`（`@/lib/use-url-state`）；`initPage`、`LocaleParams`（`@/i18n/page`）。
 
 单测算出的几个关键数字（交互检查会用）：全部 30 / 文本 23 / 生图 7；厂商 OpenAI 10、Anthropic 6、Google 8；只看 Anthropic 文本 6 个；上下文 ≥1M 共 21 个；搜「nano」4 个、搜「gemini」8 个；默认排序第一个 Claude Sonnet 5.5；文本按价格从低到高第一个 GPT-6 Luna；Claude Sonnet 5.5 输入单价 共享通道 $0.3、专用通道 $0.6、企业通道定制（无单价），人民币共享通道 ¥2.13；折扣标 共享通道 1.5折、专用通道 3折、企业通道不显示。

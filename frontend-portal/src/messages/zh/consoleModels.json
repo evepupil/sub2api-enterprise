@@ -28,12 +28,6 @@
     "priceDesc": "价格从高到低",
     "context": "上下文长度"
   },
-  "currency": {
-    "label": "币种",
-    "usd": "美元",
-    "cny": "人民币",
-    "note": "按 1 美元 = ¥{rate} 折算，钱包按美元扣费"
-  },
   "table": {
     "model": "模型",
     "channel": "分组",

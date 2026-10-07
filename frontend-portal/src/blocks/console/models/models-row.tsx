@@ -12,7 +12,7 @@ import { Link } from '@/i18n/navigation';
 import type { AppLocale } from '@/i18n/routing';
 import { PROTOCOL_LABELS, formatContext, getProvider } from '@/lib/catalog';
 import { CONSOLE_FEATURES } from '@/lib/console/features';
-import type { LiveCurrency, ModelRowView } from '@/lib/console/live/models-view';
+import type { ModelRowView } from '@/lib/console/live/models-view';
 import { cn } from '@/lib/utils';
 
 import { ModelDiscount, ModelPrice } from './models-price';
@@ -26,15 +26,11 @@ import { ModelDiscount, ModelPrice } from './models-price';
  */
 export function ModelRow({
   row,
-  currency,
-  rechargeMultiplier,
   locale,
   favorite,
   onToggleFavorite,
 }: {
   row: ModelRowView;
-  currency: LiveCurrency;
-  rechargeMultiplier: number;
   locale: AppLocale;
   favorite: boolean;
   onToggleFavorite: (id: string) => void;
@@ -84,16 +80,11 @@ export function ModelRow({
       </Td>
 
       <Td align="right" className="whitespace-nowrap">
-        <ModelPrice row={row} currency={currency} rechargeMultiplier={rechargeMultiplier} />
+        <ModelPrice row={row} />
       </Td>
 
       <Td className="whitespace-nowrap">
-        <ModelDiscount
-          row={row}
-          currency={currency}
-          rechargeMultiplier={rechargeMultiplier}
-          locale={locale}
-        />
+        <ModelDiscount row={row} locale={locale} />
       </Td>
 
       <Td>

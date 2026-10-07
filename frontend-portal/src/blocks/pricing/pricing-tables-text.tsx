@@ -5,15 +5,13 @@ import { Fragment } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { Badge } from '@/components/ui/badge';
-import { formatContext, formatMoney, type Currency } from '@/lib/catalog';
+import { formatContext, formatMoney } from '@/lib/catalog';
 import { groupSiteModels, priceRowId, type SiteModel } from '@/lib/catalog/live';
-import { useCurrency } from '@/lib/use-catalog-state';
 
 import { PriceGroupCell } from './pricing-group-cell';
 import { PriceProviderRow } from './pricing-provider-row';
 
-const money = (value: number | null, currency: Currency) =>
-  value === null ? '—' : formatMoney(value, currency);
+const money = (value: number | null) => (value === null ? '—' : formatMoney(value));
 
 /** 模型格：名称、「新」标、调用名。同一个模型在几个分组里就合并几行。 */
 function TextModelCell({ model, span }: { model: SiteModel; span: number }) {
@@ -39,7 +37,6 @@ function TextModelCell({ model, span }: { model: SiteModel; span: number }) {
 function TextModelRow({ model, span }: { model: SiteModel; span: number }) {
   const t = useTranslations('pricing');
   const c = useTranslations('common');
-  const [currency] = useCurrency();
   const { price } = model;
   const tier = price.kind === 'token' ? price.longContext : null;
   const cell = 'whitespace-nowrap px-5 py-4 text-right align-top tabular-nums text-foreground';
@@ -57,24 +54,24 @@ function TextModelRow({ model, span }: { model: SiteModel; span: number }) {
           <p className="mt-1 text-xs text-muted-foreground">
             {t('tables.longContext', {
               threshold: formatContext(tier.threshold),
-              input: money(tier.input, currency),
-              output: money(tier.output, currency),
+              input: money(tier.input),
+              output: money(tier.output),
             })}
           </p>
         ) : null}
       </PriceGroupCell>
       <td data-cell="input" className={cell}>
         {price.kind === 'token'
-          ? money(price.input, currency)
+          ? money(price.input)
           : price.kind === 'request'
-            ? `${formatMoney(price.price, currency)} ${c('units.perRequest')}`
+            ? `${formatMoney(price.price)} ${c('units.perRequest')}`
             : '—'}
       </td>
       <td data-cell="output" className={cell}>
-        {price.kind === 'token' ? money(price.output, currency) : '—'}
+        {price.kind === 'token' ? money(price.output) : '—'}
       </td>
       <td data-cell="cache" className={cell}>
-        {money(model.cacheRead, currency)}
+        {money(model.cacheRead)}
       </td>
       {span > 0 ? (
         <td

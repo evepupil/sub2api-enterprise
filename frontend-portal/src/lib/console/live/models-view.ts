@@ -22,8 +22,6 @@ import type { ChannelModel, ConsoleChannel, TimeWindow, TokenRates } from './mod
  * 目录里没有的模型显示原名，厂商按模型名猜，协议按后端平台推，上下文未知。
  */
 
-export type LiveCurrency = 'usd' | 'cny';
-
 /** 实付价（美元，已乘分组倍率；按 Token 的是每百万 Token） */
 export type LivePrice =
   | {
@@ -282,17 +280,7 @@ export function providersIn(rows: readonly ModelRowView[]): Provider[] {
   return PROVIDERS.filter((provider) => present.has(provider.id));
 }
 
-/** 带币种符号的金额：人民币按充值比例换算（付 1 元到账 rechargeMultiplier 美元） */
-export function formatLiveMoney(
-  usd: number,
-  currency: LiveCurrency,
-  rechargeMultiplier: number,
-): string {
-  if (currency === 'usd') return `$${formatAmount(usd)}`;
-  return `¥${formatAmount(round6(usd / rechargeMultiplier))}`;
-}
-
-/** 1 美元合多少元（币种说明用） */
-export function cnyPerUsd(rechargeMultiplier: number): number {
-  return Math.round((1 / rechargeMultiplier) * 100) / 100;
+/** 美元金额：$4.5（价格只写美元，充值 1 元 = 1 美元） */
+export function formatLiveMoney(usd: number): string {
+  return `$${formatAmount(usd)}`;
 }

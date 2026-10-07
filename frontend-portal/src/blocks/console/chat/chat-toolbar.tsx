@@ -75,8 +75,8 @@ export function ChatToolbar({
           {price ? (
             <span className="text-xs tabular-nums text-subtle-foreground">
               {t('pricing', {
-                input: formatMoney(price.input, 'usd'),
-                output: formatMoney(price.output, 'usd'),
+                input: formatMoney(price.input),
+                output: formatMoney(price.output),
               })}
             </span>
           ) : null}

@@ -7,7 +7,6 @@ import { useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
 import { formatMoney, IMAGE_TOKENS_PER_IMAGE } from '@/lib/catalog';
 import { groupSiteModels, priceRowId, type SiteModel } from '@/lib/catalog/live';
-import { useCurrency } from '@/lib/use-catalog-state';
 
 import { PriceGroupCell } from './pricing-group-cell';
 import { PriceProviderRow } from './pricing-provider-row';
@@ -34,7 +33,6 @@ function ImageModelCell({ model, span }: { model: SiteModel; span: number }) {
 /** 价格格：按张写每张价（分辨率有多档时写「起」）；按 Token 写每百万输出 Token 单价加每张估算。 */
 function ImagePriceCell({ model }: { model: SiteModel }) {
   const c = useTranslations('common');
-  const [currency] = useCurrency();
   const { price } = model;
   const cell = 'px-5 py-4 text-right align-top tabular-nums text-foreground';
 
@@ -42,7 +40,7 @@ function ImagePriceCell({ model }: { model: SiteModel }) {
     return (
       <td data-cell="price" className={cell}>
         <div className="flex items-baseline justify-end gap-2">
-          <span>{formatMoney(price.price, currency)}</span>
+          <span>{formatMoney(price.price)}</span>
           <span className="text-subtle-foreground">
             {price.unit === 'image' ? c('units.perImage') : c('units.perRequest')}
             {price.from ? ` ${c('units.from')}` : ''}
@@ -55,12 +53,12 @@ function ImagePriceCell({ model }: { model: SiteModel }) {
     return (
       <td data-cell="price" className={cell}>
         <div className="flex items-baseline justify-end gap-2">
-          <span>{formatMoney(price.output, currency)}</span>
+          <span>{formatMoney(price.output)}</span>
           <span className="text-subtle-foreground">{c('units.perMTokens')}</span>
         </div>
         <div className="mt-1 text-xs text-muted-foreground">
           {c('units.approx')}{' '}
-          {formatMoney(round6((price.output * IMAGE_TOKENS_PER_IMAGE) / 1_000_000), currency)}{' '}
+          {formatMoney(round6((price.output * IMAGE_TOKENS_PER_IMAGE) / 1_000_000))}{' '}
           {c('units.perImage')}
         </div>
       </td>

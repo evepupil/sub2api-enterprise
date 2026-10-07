@@ -5,7 +5,6 @@ import type { ConsoleChannel } from '@/lib/console/live/models-types';
 import {
   allModelRows,
   catalogEntry,
-  cnyPerUsd,
   filterRows,
   formatLiveMoney,
   inferProtocols,
@@ -14,7 +13,7 @@ import {
   providersIn,
   type ModelsQuery,
 } from '@/lib/console/live/models-view';
-import { rechargeMultiplierFrom, toConsoleChannels } from '@/lib/server/sub2api/model-plaza';
+import { toConsoleChannels } from '@/lib/server/sub2api/model-plaza';
 
 /** 后端模型广场的一段真实形状（单价是美元 / 每 Token） */
 const PLAZA = {
@@ -140,11 +139,8 @@ describe('后端模型广场 → 通道', () => {
     });
   });
 
-  it('看不懂的数据返回 null；充值比例读不到或不是正数时按 1', () => {
+  it('看不懂的数据返回 null', () => {
     expect(toConsoleChannels({ groups: 'x' })).toBeNull();
-    expect(rechargeMultiplierFrom({ balance_recharge_multiplier: 0.14 })).toBe(0.14);
-    expect(rechargeMultiplierFrom({ balance_recharge_multiplier: 0 })).toBe(1);
-    expect(rechargeMultiplierFrom(null)).toBe(1);
   });
 });
 
@@ -282,12 +278,10 @@ describe('所有通道一张表', () => {
   });
 });
 
-describe('币种与收藏', () => {
-  it('人民币按充值比例换算：付 1 元到账 1 美元时数字不变', () => {
-    expect(formatLiveMoney(4.5, 'usd', 1)).toBe('$4.5');
-    expect(formatLiveMoney(4.5, 'cny', 1)).toBe('¥4.5');
-    expect(formatLiveMoney(0.7, 'cny', 0.14)).toBe('¥5');
-    expect(cnyPerUsd(0.14)).toBe(7.14);
+describe('金额与收藏', () => {
+  it('价格只写美元', () => {
+    expect(formatLiveMoney(4.5)).toBe('$4.5');
+    expect(formatLiveMoney(0.0125)).toBe('$0.0125');
   });
 
   it('收藏：格式不对当作没有，点一下加上、再点去掉', () => {

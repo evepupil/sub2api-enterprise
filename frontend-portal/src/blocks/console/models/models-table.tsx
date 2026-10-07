@@ -9,7 +9,7 @@ import { EmptyState } from '@/components/console/empty-state';
 import { Pagination, usePagination } from '@/components/console/pagination';
 import type { AppLocale } from '@/i18n/routing';
 import { CONSOLE_FEATURES } from '@/lib/console/features';
-import type { LiveCurrency, ModelRowView } from '@/lib/console/live/models-view';
+import type { ModelRowView } from '@/lib/console/live/models-view';
 
 import { ModelRow } from './models-row';
 
@@ -20,8 +20,6 @@ import { ModelRow } from './models-row';
 export function ModelsTable({
   rows,
   resetKey,
-  currency,
-  rechargeMultiplier,
   favorites,
   noFavorites,
   onToggleFavorite,
@@ -30,8 +28,6 @@ export function ModelsTable({
   /** 筛选、排序、范围都处理完的全部结果（每行是一个分组里的一个模型），分页在表内做 */
   rows: readonly ModelRowView[];
   resetKey: string;
-  currency: LiveCurrency;
-  rechargeMultiplier: number;
   favorites: readonly string[];
   /** 收藏范围下一个模型都没收藏：空状态换成「还没有收藏的模型」，不给清除筛选 */
   noFavorites: boolean;
@@ -79,8 +75,6 @@ export function ModelsTable({
             <ModelRow
               key={row.key}
               row={row}
-              currency={currency}
-              rechargeMultiplier={rechargeMultiplier}
               locale={locale}
               favorite={favorites.includes(row.id)}
               onToggleFavorite={onToggleFavorite}

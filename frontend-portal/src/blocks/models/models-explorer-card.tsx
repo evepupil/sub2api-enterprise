@@ -29,8 +29,8 @@ function CardPrice({ model }: { model: SiteModel }) {
   let value: React.ReactNode;
   if (price.kind === 'token') {
     label = t('card.inputOutput');
-    const input = price.input === null ? '—' : formatMoney(price.input, 'usd');
-    const output = price.output === null ? '—' : formatMoney(price.output, 'usd');
+    const input = price.input === null ? '—' : formatMoney(price.input);
+    const output = price.output === null ? '—' : formatMoney(price.output);
     value = (
       <>
         {input} / {output}
@@ -42,7 +42,7 @@ function CardPrice({ model }: { model: SiteModel }) {
     );
   } else if (price.kind === 'request') {
     label = price.unit === 'image' ? t('card.perImage') : t('card.perRequest');
-    value = `${formatMoney(price.price, 'usd')}${price.from ? ` ${tc('units.from')}` : ''}`;
+    value = `${formatMoney(price.price)}${price.from ? ` ${tc('units.from')}` : ''}`;
   } else {
     return null;
   }

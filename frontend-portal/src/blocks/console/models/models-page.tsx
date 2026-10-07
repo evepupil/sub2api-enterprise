@@ -11,12 +11,7 @@ import { Skeleton } from '@/components/console/skeleton';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { useConsoleModels } from '@/lib/console/live/models-client';
 import { useFavoriteModels } from '@/lib/console/live/models-favorites';
-import {
-  allModelRows,
-  filterRows,
-  providersIn,
-  type LiveCurrency,
-} from '@/lib/console/live/models-view';
+import { allModelRows, filterRows, providersIn } from '@/lib/console/live/models-view';
 
 import { ModelsFilterBar } from './models-filter-bar';
 import {
@@ -43,7 +38,6 @@ export function ConsoleModelsPage() {
 
   const [scope, setScope] = useState<ModelScope>('all');
   const [query, setQuery] = useState<ModelsQuery>(DEFAULT_QUERY);
-  const [currency, setCurrency] = useState<LiveCurrency>('usd');
 
   const allRows = useMemo(() => allModelRows(data?.channels ?? []), [data]);
   const providers = useMemo(() => providersIn(allRows), [allRows]);
@@ -98,20 +92,12 @@ export function ConsoleModelsPage() {
             ]}
           />
           <ModelsFilterBar query={query} providers={providers} onChange={patchQuery} />
-          <ModelsToolbar
-            sort={query.sort}
-            onSortChange={(sort) => patchQuery({ sort })}
-            currency={currency}
-            onCurrencyChange={setCurrency}
-            rechargeMultiplier={data.rechargeMultiplier}
-          />
+          <ModelsToolbar sort={query.sort} onSortChange={(sort) => patchQuery({ sort })} />
         </div>
 
         <ModelsTable
           rows={rows}
           resetKey={paginationKey(scope, query)}
-          currency={currency}
-          rechargeMultiplier={data.rechargeMultiplier}
           favorites={favorites}
           noFavorites={scope === 'favorites' && favoriteCount === 0}
           onToggleFavorite={toggleFavorite}

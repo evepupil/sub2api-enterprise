@@ -3,13 +3,8 @@ import type { AppLocale } from '@/i18n/routing';
 import { editionRatio } from './groups';
 import type { EditionId, Localized, Model } from './types';
 
-/** 人民币展示用的固定汇率（占位）。钱包按美元结算，人民币只做参考换算。 */
-export const USD_CNY_RATE = 1;
-
 /** 按 Token 计费的生图模型，估算一张 1024×1024 图消耗的输出 Token 数 */
 export const IMAGE_TOKENS_PER_IMAGE = 1290;
-
-export type Currency = 'usd' | 'cny';
 
 /** 演示用的固定「今天」，「新上线」标记都从它算，避免构建与浏览器结果不一致 */
 export const CATALOG_AS_OF = '2026-10-03';
@@ -104,13 +99,9 @@ export function formatAmount(value: number): string {
   return Number(value.toFixed(digits)).toString();
 }
 
-export function convert(usd: number, currency: Currency): number {
-  return currency === 'cny' ? round6(usd * USD_CNY_RATE) : usd;
-}
-
-/** 带币种符号的金额：$0.6 / ¥4.26 */
-export function formatMoney(usd: number, currency: Currency): string {
-  return `${currency === 'cny' ? '¥' : '$'}${formatAmount(convert(usd, currency))}`;
+/** 美元金额：$0.6（官网价格只写美元，充值 1 元 = 1 美元） */
+export function formatMoney(usd: number): string {
+  return `$${formatAmount(usd)}`;
 }
 
 /** 上下文长度：1050000 → 1.05M，200000 → 200K */

@@ -7,18 +7,13 @@ import type { AppLocale } from '@/i18n/routing';
 import { formatContext } from '@/lib/catalog';
 import {
   formatLiveMoney,
-  type LiveCurrency,
   type ModelRowView,
   type PriceWindow,
 } from '@/lib/console/live/models-view';
 import { cn } from '@/lib/utils';
 
-type Money = (usd: number | null) => string;
-
 /** 金额格式化：没有这一项时写「—」 */
-function moneyFormatter(currency: LiveCurrency, rechargeMultiplier: number): Money {
-  return (usd) => (usd === null ? '—' : formatLiveMoney(usd, currency, rechargeMultiplier));
-}
+const money = (usd: number | null): string => (usd === null ? '—' : formatLiveMoney(usd));
 
 /** 时段说明：「高峰 20:00–23:00 ×1.5」「工作日 00:30–08:30 ×0.5」 */
 function WindowLine({ window }: { window: PriceWindow }) {
@@ -38,17 +33,8 @@ function WindowLine({ window }: { window: PriceWindow }) {
  * 有长上下文分档时多一行加价档；按张、按次计费的是单价；下面再列高峰、分时段的加价。
  * 交互检查用 data-model-price 取这一格。
  */
-export function ModelPrice({
-  row,
-  currency,
-  rechargeMultiplier,
-}: {
-  row: ModelRowView;
-  currency: LiveCurrency;
-  rechargeMultiplier: number;
-}) {
+export function ModelPrice({ row }: { row: ModelRowView }) {
   const t = useTranslations('consoleModels');
-  const money = moneyFormatter(currency, rechargeMultiplier);
   const { price } = row;
 
   return (
@@ -94,18 +80,7 @@ export function ModelPrice({
  * 折扣列：折扣标加一行官方价。打折时把官方价划掉，让人一眼看出省了多少；
  * 按张、按次计费的模型和官方价单位不同，不显示。
  */
-export function ModelDiscount({
-  row,
-  currency,
-  rechargeMultiplier,
-  locale,
-}: {
-  row: ModelRowView;
-  currency: LiveCurrency;
-  rechargeMultiplier: number;
-  locale: AppLocale;
-}) {
-  const money = moneyFormatter(currency, rechargeMultiplier);
+export function ModelDiscount({ row, locale }: { row: ModelRowView; locale: AppLocale }) {
   if (!row.official) return <span className="text-subtle-foreground">—</span>;
 
   return (

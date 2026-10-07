@@ -121,10 +121,9 @@ describe('格式化', () => {
     expect(formatAmount(102.04)).toBe('102');
   });
 
-  it('人民币按 1 美元 = 1 元换算（和充值到账的比例一致）', () => {
-    expect(formatMoney(0.6, 'usd')).toBe('$0.6');
-    expect(formatMoney(0.6, 'cny')).toBe('¥0.6');
-    expect(formatMoney(3, 'cny')).toBe('¥3');
+  it('价格只写美元（充值 1 元 = 1 美元，不做人民币换算）', () => {
+    expect(formatMoney(0.6)).toBe('$0.6');
+    expect(formatMoney(3)).toBe('$3');
   });
 
   it('上下文长度', () => {

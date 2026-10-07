@@ -28,12 +28,6 @@
     "priceDesc": "Price: high to low",
     "context": "Context length"
   },
-  "currency": {
-    "label": "Currency",
-    "usd": "USD",
-    "cny": "CNY",
-    "note": "Converted at $1 = ¥{rate}; your wallet is billed in USD"
-  },
   "table": {
     "model": "Model",
     "channel": "Group",

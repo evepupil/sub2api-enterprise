@@ -8,16 +8,12 @@ import type { BackendResult } from '@/lib/server/sub2api/envelope';
 const backend = vi.hoisted(() => ({
   calls: [] as string[],
   plaza: (() => ({ ok: true, data: { groups: [] } })) as () => BackendResult<unknown>,
-  checkout: (() => ({
-    ok: true,
-    data: { balance_recharge_multiplier: 1 },
-  })) as () => BackendResult<unknown>,
 }));
 
 vi.mock('@/lib/server/sub2api/client', () => ({
   callBackend: async (call: BackendCall) => {
     backend.calls.push(call.path);
-    return call.path === '/model-plaza' ? backend.plaza() : backend.checkout();
+    return backend.plaza();
   },
 }));
 
@@ -40,7 +36,6 @@ const GROUP = {
 
 beforeEach(() => {
   backend.calls.length = 0;
-  backend.checkout = () => ({ ok: true, data: { balance_recharge_multiplier: 1 } });
 });
 
 describe('控制台模型接口', () => {
@@ -49,27 +44,20 @@ describe('控制台模型接口', () => {
     expect(backend.calls).toEqual([]);
   });
 
-  it('读模型广场与充值比例，整理成通道列表', async () => {
+  it('只读模型广场（价格只写美元，不再读充值比例），整理成通道列表', async () => {
     backend.plaza = () => ({ ok: true, data: { groups: [GROUP] } });
-    backend.checkout = () => ({ ok: true, data: { balance_recharge_multiplier: 0.14 } });
     const response = await route.GET(get());
     expect(response.status).toBe(200);
     expect(await response.json()).toMatchObject({
       ok: true,
-      rechargeMultiplier: 0.14,
       channels: [{ id: '2', name: '标准通道', rate: 0.15, models: [{ id: 'gpt-5.5' }] }],
     });
-    expect(backend.calls.sort()).toEqual(['/model-plaza', '/payment/checkout-info']);
+    expect(backend.calls).toEqual(['/model-plaza']);
   });
 
-  it('模型广场没打开（404）时当作没有可用模型；充值比例读不到按 1', async () => {
+  it('模型广场没打开（404）时当作没有可用模型', async () => {
     backend.plaza = () => ({ ok: false, error: { status: 404, reason: 'NOT_FOUND', message: '' } });
-    backend.checkout = () => ({ ok: false, error: { status: 500, reason: '', message: '' } });
-    expect(await (await route.GET(get())).json()).toEqual({
-      ok: true,
-      channels: [],
-      rechargeMultiplier: 1,
-    });
+    expect(await (await route.GET(get())).json()).toEqual({ ok: true, channels: [] });
   });
 
   it('后端出错按服务不可用处理', async () => {
