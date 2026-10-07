@@ -17,6 +17,7 @@ import enGroups from './en/groups.json';
 import enHomeHero from './en/homeHero.json';
 import enHomeMore from './en/homeMore.json';
 import enHomeShowcase from './en/homeShowcase.json';
+import enLegal from './en/legal.json';
 import enMisc from './en/misc.json';
 import enModels from './en/models.json';
 import enPricing from './en/pricing.json';
@@ -37,6 +38,7 @@ import zhGroups from './zh/groups.json';
 import zhHomeHero from './zh/homeHero.json';
 import zhHomeMore from './zh/homeMore.json';
 import zhHomeShowcase from './zh/homeShowcase.json';
+import zhLegal from './zh/legal.json';
 import zhMisc from './zh/misc.json';
 import zhModels from './zh/models.json';
 import zhPricing from './zh/pricing.json';
@@ -55,6 +57,7 @@ const zh = {
   groups: zhGroups,
   auth: zhAuth,
   misc: zhMisc,
+  legal: zhLegal,
   console: zhConsole,
   consoleChat: zhConsoleChat,
   consoleUsage: zhConsoleUsage,
@@ -81,6 +84,7 @@ const en: Messages = {
   groups: enGroups,
   auth: enAuth,
   misc: enMisc,
+  legal: enLegal,
   console: enConsole,
   consoleChat: enConsoleChat,
   consoleUsage: enConsoleUsage,

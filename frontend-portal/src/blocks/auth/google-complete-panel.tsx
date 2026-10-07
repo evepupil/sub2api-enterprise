@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { AuthFormAlert } from '@/blocks/auth/auth-form-alert';
+import { AuthLegalNote } from '@/blocks/auth/auth-legal-note';
 import { AuthPanelFrame } from '@/blocks/auth/auth-panel-frame';
 import { Button } from '@/components/ui/button';
 import { buttonClass } from '@/components/ui/button-styles';
@@ -298,20 +299,7 @@ export function GoogleCompletePanel() {
             </Button>
           </form>
 
-          <p className="mt-8 text-center text-xs leading-5 text-subtle-foreground">
-            {t.rich('register.terms', {
-              terms: (chunks) => (
-                <a href="#" className="underline underline-offset-4 hover:text-foreground">
-                  {chunks}
-                </a>
-              ),
-              privacy: (chunks) => (
-                <a href="#" className="underline underline-offset-4 hover:text-foreground">
-                  {chunks}
-                </a>
-              ),
-            })}
-          </p>
+          <AuthLegalNote action="register" />
         </>
       ) : null}
     </AuthPanelFrame>

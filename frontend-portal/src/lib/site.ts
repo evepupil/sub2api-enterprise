@@ -39,18 +39,9 @@ export const NAV_ITEMS: readonly { key: NavKey; href: string }[] = (
 ).filter((item) => shown(item.key));
 
 export type FooterLinkKey =
-  | 'models'
-  | 'pricing'
-  | 'groups'
-  | 'docs'
-  | 'about'
-  | 'contact'
-  | 'status'
-  | 'terms'
-  | 'privacy'
-  | 'refund';
+  'models' | 'pricing' | 'groups' | 'docs' | 'contact' | 'terms' | 'privacy' | 'refund';
 
-/** 页脚三列链接；文字取 common.footer.links.<key>，'#' 为占位 */
+/** 页脚三列链接；文字取 common.footer.links.<key>。「退款政策」跳到服务条款的退款一节 */
 export const FOOTER_COLUMNS: readonly {
   key: 'product' | 'company' | 'legal';
   links: readonly { key: FooterLinkKey; href: string }[];
@@ -68,18 +59,14 @@ export const FOOTER_COLUMNS: readonly {
   },
   {
     key: 'company',
-    links: [
-      { key: 'about', href: '#' },
-      { key: 'contact', href: `mailto:${SITE.supportEmail}` },
-      { key: 'status', href: '#' },
-    ],
+    links: [{ key: 'contact', href: `mailto:${SITE.supportEmail}` }],
   },
   {
     key: 'legal',
     links: [
-      { key: 'terms', href: '#' },
-      { key: 'privacy', href: '#' },
-      { key: 'refund', href: '#' },
+      { key: 'terms', href: '/terms' },
+      { key: 'privacy', href: '/privacy' },
+      { key: 'refund', href: '/terms#refund' },
     ],
   },
 ];

@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 
 import { AuthFormAlert } from '@/blocks/auth/auth-form-alert';
 import { AuthGoogleButton } from '@/blocks/auth/auth-google-button';
+import { AuthLegalNote } from '@/blocks/auth/auth-legal-note';
 import { AuthPanelFrame } from '@/blocks/auth/auth-panel-frame';
 import { AuthPasswordInput } from '@/blocks/auth/auth-password-input';
 import { LoginTwoFactor } from '@/blocks/auth/login-two-factor';
@@ -218,20 +219,7 @@ export function LoginPanel() {
             />
           ) : null}
 
-          <p className="mt-8 text-center text-xs leading-5 text-subtle-foreground">
-            {t.rich('login.terms', {
-              terms: (chunks) => (
-                <a href="#" className="underline underline-offset-4 hover:text-foreground">
-                  {chunks}
-                </a>
-              ),
-              privacy: (chunks) => (
-                <a href="#" className="underline underline-offset-4 hover:text-foreground">
-                  {chunks}
-                </a>
-              ),
-            })}
-          </p>
+          <AuthLegalNote action="login" />
         </>
       )}
     </AuthPanelFrame>

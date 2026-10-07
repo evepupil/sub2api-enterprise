@@ -45,6 +45,8 @@
 | 找回密码 | `/forgot-password` | 忘了密码，收重置链接 | 填邮箱 | sub2api 找回密码页 | 1 | L7 |
 | 重置密码 | `/reset-password` | 用邮件里的链接设新密码 | 填两遍新密码 | sub2api 重置密码页 | 1 | L7 |
 | 文档 | `/docs` | 占位（首发关着：`SITE_FEATURES.docs` 为 false 时入口都不显示、页面 404） | 无 | 无 | 1 | L7 |
+| 服务条款 | `/terms` | 看服务条款（含退款一节） | 无 | 无 | 1 | L7 |
+| 隐私政策 | `/privacy` | 看隐私政策 | 无 | 无 | 1 | L7 |
 | 404 | 任意不存在地址 | 回到站内 | 「返回首页」 | 无 | 1 | L7 |
 
 英文版地址前加 `/en`（`/en/catalog`），由框架处理，区块不用管。模型页用 `/catalog` 而不是 `/models`：官网和后端以后合并在同一个域名下，后端已有 `GET /models` 接口。
@@ -174,6 +176,8 @@
 | `/pricing` | `src/app/[locale]/(site)/pricing/page.tsx` | `pricing.meta.title` | PricingHero、PricingTables、PricingNotes、PricingFaq |
 | `/channels` | `src/app/[locale]/(site)/channels/page.tsx` | `groups.meta.title` | GroupsHero、GroupCards、PrivilegeTable、GroupsFaq、GroupsLogos |
 | `/docs` | `src/app/[locale]/(site)/docs/page.tsx` | `misc.meta.docsTitle` | DocsPlaceholder |
+| `/terms` | `src/app/[locale]/(site)/terms/page.tsx` | `legal.meta.termsTitle` | LegalDocument（服务条款） |
+| `/privacy` | `src/app/[locale]/(site)/privacy/page.tsx` | `legal.meta.privacyTitle` | LegalDocument（隐私政策） |
 | `/login` | `src/app/[locale]/(auth)/login/page.tsx` | `auth.meta.loginTitle` | 两栏：LoginPanel、AuthShowcase |
 | `/register` | `src/app/[locale]/(auth)/register/page.tsx` | `auth.meta.registerTitle` | 两栏：RegisterPanel、AuthShowcase |
 | 404 | `src/app/[locale]/not-found.tsx` | `misc.meta.notFoundTitle` | SiteHeader、NotFoundView、SiteFooter |
@@ -230,6 +234,7 @@
 | A2 | 注册表单 | `RegisterPanel` | `src/blocks/auth/register-panel.tsx` | `register` | background | L7 |
 | A3 | 右侧展示 | `AuthShowcase` | `src/blocks/auth/auth-showcase.tsx` | `auth-showcase` | surface | L7 |
 | X1 | 文档占位 | `DocsPlaceholder` | `src/blocks/misc/docs-placeholder.tsx` | `docs` | background + 网格光线 | L7 |
+| X3 | 条款页 | `LegalDocument` | `src/blocks/legal/legal-document.tsx` | `terms-hero` / `privacy-hero`，每节以节名作锚点 | background（页首网格光线） | L7 |
 | X2 | 404 | `NotFoundView` | `src/blocks/misc/not-found-view.tsx` | `not-found` | background + 网格光线 | L7 |
 
 ### 4.3 共享组件签名（地基路照写，各区块直接 import，不准自己再造）
@@ -292,7 +297,7 @@
     </div>
     <div className="grid grid-cols-2 gap-x-16 gap-y-10 sm:grid-cols-3">
       FOOTER_COLUMNS 每列一个 <nav aria-label={common.footer.columns.<key>}><ul className="space-y-4">
-        每个链接 <li> 内：href 以 / 开头用 Link，'#' 用 <a>，类名 text-sm text-muted-foreground transition-colors hover:text-foreground，文字 common.footer.links.<key>
+        每个链接 <li> 内：href 以 / 开头用 Link，其余（客服邮箱 mailto）用 <a>，类名 text-sm text-muted-foreground transition-colors hover:text-foreground，文字 common.footer.links.<key>
     </div>
   </Container>
   <p aria-hidden className="pointer-events-none select-none bg-gradient-to-b from-neutral-50 to-neutral-200 bg-clip-text pb-6 text-center text-[32vw] font-bold leading-[0.8] tracking-tighter text-transparent dark:from-neutral-950 dark:to-neutral-800 xl:text-[400px]">{SITE.wordmark}</p>
@@ -373,7 +378,7 @@ pnpm format:check  # prettier
 | L4 模型页 | `src/blocks/models/**`、`src/messages/{zh,en}/models.json` |
 | L5 价格页 | `src/blocks/pricing/**`、`src/messages/{zh,en}/pricing.json` |
 | L6 通道页 | `src/blocks/groups/**`、`src/messages/{zh,en}/groups.json` |
-| L7 登录注册与其他 | `src/blocks/auth/**`、`src/blocks/misc/**`、`src/messages/{zh,en}/auth.json`、`src/messages/{zh,en}/misc.json` |
+| L7 登录注册与其他 | `src/blocks/auth/**`、`src/blocks/misc/**`、`src/blocks/legal/**`、`src/lib/legal/**`、`src/messages/{zh,en}/auth.json`、`src/messages/{zh,en}/misc.json`、`src/messages/{zh,en}/legal.json` |
 
 ---
 

@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 
 import { AuthFormAlert } from '@/blocks/auth/auth-form-alert';
 import { AuthGoogleButton } from '@/blocks/auth/auth-google-button';
+import { AuthLegalNote } from '@/blocks/auth/auth-legal-note';
 import { AuthPanelFrame } from '@/blocks/auth/auth-panel-frame';
 import { Button } from '@/components/ui/button';
 import { SegmentedControl } from '@/components/ui/segmented-control';
@@ -324,22 +325,7 @@ export function RegisterPanel() {
             />
           ) : null}
 
-          {closed ? null : (
-            <p className="mt-8 text-center text-xs leading-5 text-subtle-foreground">
-              {t.rich('register.terms', {
-                terms: (chunks) => (
-                  <a href="#" className="underline underline-offset-4 hover:text-foreground">
-                    {chunks}
-                  </a>
-                ),
-                privacy: (chunks) => (
-                  <a href="#" className="underline underline-offset-4 hover:text-foreground">
-                    {chunks}
-                  </a>
-                ),
-              })}
-            </p>
-          )}
+          {closed ? null : <AuthLegalNote action="register" />}
         </>
       )}
     </AuthPanelFrame>
