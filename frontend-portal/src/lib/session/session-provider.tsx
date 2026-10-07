@@ -24,6 +24,8 @@ export interface SessionState {
   user: SessionUser | null;
   /** 退出登录：通知后端作废凭证、清掉 cookie，然后整页回到登录页 */
   signOut: () => Promise<void>;
+  /** 本页改了用户资料（如账户设置里改用户名）后，把新值合进当前用户，头像菜单等处立刻跟着变 */
+  updateUser: (patch: Partial<Pick<SessionUser, 'username'>>) => void;
 }
 
 const SessionContext = createContext<SessionState | null>(null);
@@ -66,9 +68,13 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     goToLoginAfterSignOut();
   }, []);
 
+  const updateUser = useCallback((patch: Partial<Pick<SessionUser, 'username'>>) => {
+    setUser((current) => (current ? { ...current, ...patch } : current));
+  }, []);
+
   const value = useMemo<SessionState>(
-    () => ({ status, user, signOut: handleSignOut }),
-    [status, user, handleSignOut],
+    () => ({ status, user, signOut: handleSignOut, updateUser }),
+    [status, user, handleSignOut, updateUser],
   );
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }

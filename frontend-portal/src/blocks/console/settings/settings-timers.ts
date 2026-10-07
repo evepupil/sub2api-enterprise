@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 /**
- * 延时执行，用来模拟请求耗时。返回一个「过多久之后做什么」的函数，
+ * 延时执行（如密码改好后过一会儿跳登录页）。返回一个「过多久之后做什么」的函数，
  * 所有还没到点的定时器在组件卸载时一起清掉，页面离开后不会再去改状态。
  */
 export function useSchedule() {

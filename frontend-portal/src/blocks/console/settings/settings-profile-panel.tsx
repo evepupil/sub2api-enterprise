@@ -1,44 +1,45 @@
 'use client';
 
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { useState, type FormEvent } from 'react';
 
 import { Panel } from '@/components/console/panel';
 import { Avatar } from '@/components/console/shell/user-menu';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/console/button';
 import { Field } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import type { AppLocale } from '@/i18n/routing';
-import { CURRENT_USER } from '@/lib/console';
+import { saveUsername } from '@/lib/console/live/account-client';
+import type { AccountErrorReason } from '@/lib/console/live/account-types';
+import { useSession } from '@/lib/session/session-provider';
 
-import { PROFILE_NAME_MAX, RESULT_FLASH_MS, SAVE_PROFILE_MS } from './settings-config';
+import { PROFILE_NAME_MAX, RESULT_FLASH_MS } from './settings-config';
 import { SettingsFlash } from './settings-flash';
-import { useFlash, useSchedule } from './settings-timers';
+import { useFlash } from './settings-timers';
 import { validateProfileName, type ProfileNameError } from './settings-validation';
 
 const NAME_FIELD_ID = 'profile-name';
 
 /**
- * 个人资料：头像、可改的名称、只读的邮箱（已验证）。
- * 名称没有改动时「保存」不可点；保存先转 0.8 秒圈，成功后按钮旁边显示 2 秒「已保存」。
+ * 个人资料：头像、可改的名称（后台的用户名）、只读的登录邮箱，都取当前登录的账号。
+ * 名称没有改动时「保存」不可点；保存成功后头像菜单里的名字跟着变，按钮旁边显示 2 秒「已保存」。
  */
 export function SettingsProfilePanel() {
   const t = useTranslations('consoleSettings');
   const tc = useTranslations('console');
-  const locale = useLocale() as AppLocale;
-  const schedule = useSchedule();
+  const { user, updateUser } = useSession();
   const saved = useFlash(RESULT_FLASH_MS);
 
-  // 已保存的名称用来判断「有没有改动」；输入框里的名称是正在编辑的草稿
-  const [savedName, setSavedName] = useState(() => CURRENT_USER.name[locale]);
-  const [name, setName] = useState(() => CURRENT_USER.name[locale]);
+  // 没动过输入框时 draft 为 null，显示账号当前的用户名；登录信息还没读到时为空
+  const [draft, setDraft] = useState<string | null>(null);
   const [error, setError] = useState<ProfileNameError | null>(null);
+  const [failure, setFailure] = useState<AccountErrorReason | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const dirty = name.trim() !== savedName;
+  const current = user?.username ?? '';
+  const name = draft ?? current;
+  const dirty = user !== null && name.trim() !== current;
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (saving || !dirty) return;
     const found = validateProfileName(name);
@@ -47,14 +48,17 @@ export function SettingsProfilePanel() {
       document.getElementById(NAME_FIELD_ID)?.focus();
       return;
     }
-    const next = name.trim();
     setSaving(true);
-    schedule(() => {
-      setSavedName(next);
-      setName(next);
-      setSaving(false);
-      saved.show();
-    }, SAVE_PROFILE_MS);
+    setFailure(null);
+    const result = await saveUsername(name.trim());
+    setSaving(false);
+    if (!result.ok) {
+      setFailure(result.reason);
+      return;
+    }
+    updateUser({ username: result.data });
+    setDraft(null);
+    saved.show();
   };
 
   return (
@@ -73,33 +77,31 @@ export function SettingsProfilePanel() {
                 name="name"
                 autoComplete="name"
                 value={name}
-                readOnly={saving}
+                readOnly={saving || user === null}
                 onChange={(event) => {
-                  setName(event.target.value);
+                  setDraft(event.target.value);
                   setError(null);
+                  setFailure(null);
                 }}
                 aria-invalid={error ? true : undefined}
                 aria-describedby={error ? `${NAME_FIELD_ID}-error` : undefined}
               />
             </Field>
             <Field label={t('profile.email')} htmlFor="profile-email">
-              <div className="flex items-center gap-2">
-                <Input
-                  id="profile-email"
-                  type="email"
-                  value={CURRENT_USER.email}
-                  readOnly
-                  disabled
-                  className="min-w-0 flex-1"
-                />
-                <Badge tone="success" className="self-center">
-                  {t('profile.verified')}
-                </Badge>
-              </div>
+              <Input id="profile-email" type="email" value={user?.email ?? ''} readOnly disabled />
             </Field>
           </div>
         </div>
         <div className="mt-5 flex items-center justify-end">
+          {failure ? (
+            <p
+              role="alert"
+              data-profile-error={failure}
+              className="mr-auto pr-3 text-sm text-danger"
+            >
+              {t(`errors.${failure}`)}
+            </p>
+          ) : null}
           {/* 刚保存完又开始改动时，「已保存」立刻消失，避免和新的未保存改动矛盾 */}
           <SettingsFlash visible={saved.visible && !dirty}>{t('profile.saved')}</SettingsFlash>
           <Button type="submit" data-profile-save disabled={!dirty} loading={saving}>

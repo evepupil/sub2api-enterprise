@@ -1,21 +1,6 @@
-import type { EditionId, Localized } from '@/lib/catalog';
+import type { Localized } from '@/lib/catalog';
 
 import { dayStart, HOUR_MS } from './time';
-
-/** 当前登录用户（占位） */
-export const CURRENT_USER: {
-  name: Localized;
-  email: string;
-  /** 头像里显示的字 */
-  initials: Localized;
-  /** 新建密钥时默认选中的分组 */
-  defaultGroup: EditionId;
-} = {
-  name: { zh: '林舟', en: 'Lin Zhou' },
-  email: 'linzhou@example.com',
-  initials: { zh: '林', en: 'LZ' },
-  defaultGroup: 'pro',
-};
 
 /** 顶部公告条（占位），轮流显示 */
 export interface Announcement {
