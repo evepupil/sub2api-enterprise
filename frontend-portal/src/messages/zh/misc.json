@@ -9,5 +9,11 @@
   "notFound": {
     "title": "页面不存在",
     "home": "返回首页"
+  },
+  "error": {
+    "title": "页面出错了",
+    "retry": "重试",
+    "home": "返回首页",
+    "code": "错误编号：{code}"
   }
 }

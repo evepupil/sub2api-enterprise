@@ -9,5 +9,11 @@
   "notFound": {
     "title": "Page not found",
     "home": "Back to home"
+  },
+  "error": {
+    "title": "Something went wrong",
+    "retry": "Try again",
+    "home": "Back to home",
+    "code": "Error code: {code}"
   }
 }

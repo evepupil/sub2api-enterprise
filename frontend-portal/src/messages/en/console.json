@@ -78,5 +78,10 @@
   "filters": {
     "all": "All",
     "noResults": "No matching records"
+  },
+  "error": {
+    "title": "This page ran into a problem",
+    "retry": "Try again",
+    "code": "Error code: {code}. Send it to support if it keeps happening."
   }
 }

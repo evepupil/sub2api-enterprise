@@ -48,6 +48,7 @@
 | 服务条款 | `/terms` | 看服务条款（含退款一节） | 无 | 无 | 1 | L7 |
 | 隐私政策 | `/privacy` | 看隐私政策 | 无 | 无 | 1 | L7 |
 | 404 | 任意不存在地址 | 回到站内 | 「返回首页」 | 无 | 1 | L7 |
+| 出错页 | 页面渲染出错时 | 重试或回到站内 | 「重试」「返回首页」 | 无 | 1 | L7 |
 
 英文版地址前加 `/en`（`/en/catalog`），由框架处理，区块不用管。模型页用 `/catalog` 而不是 `/models`：官网和后端以后合并在同一个域名下，后端已有 `GET /models` 接口。
 
@@ -181,6 +182,7 @@
 | `/login` | `src/app/[locale]/(auth)/login/page.tsx` | `auth.meta.loginTitle` | 两栏：LoginPanel、AuthShowcase |
 | `/register` | `src/app/[locale]/(auth)/register/page.tsx` | `auth.meta.registerTitle` | 两栏：RegisterPanel、AuthShowcase |
 | 404 | `src/app/[locale]/not-found.tsx` | `misc.meta.notFoundTitle` | SiteHeader、NotFoundView、SiteFooter |
+| 出错 | `src/app/[locale]/(site)/error.tsx`（官网，顶栏页脚保留）、`[locale]/error.tsx`（登录注册与布局本身，整屏居中）、`[locale]/console/error.tsx`（控制台，外壳保留）、`src/app/global-error.tsx`（最外层兜底，自带页面框架、中英双语） | 沿用所在页 | ErrorView / ConsoleErrorView |
 
 - `(site)` 组的布局 `src/app/[locale]/(site)/layout.tsx` 渲染 `SiteHeader` → `<main id="main">` → `SiteFooter`；`(auth)` 组的布局只有 `<main id="main" className="min-h-dvh">`，没有顶栏页脚（和模板登录页一致）。
 - 每个页面开头 `const locale = await initPage(params)`（`@/i18n/page`），有标题的页面写 `generateMetadata`。
@@ -236,6 +238,7 @@
 | X1 | 文档占位 | `DocsPlaceholder` | `src/blocks/misc/docs-placeholder.tsx` | `docs` | background + 网格光线 | L7 |
 | X3 | 条款页 | `LegalDocument` | `src/blocks/legal/legal-document.tsx` | `terms-hero` / `privacy-hero`，每节以节名作锚点 | background（页首网格光线） | L7 |
 | X2 | 404 | `NotFoundView` | `src/blocks/misc/not-found-view.tsx` | `not-found` | background + 网格光线 | L7 |
+| X4 | 出错页 | `ErrorView`（`'use client'`，`{ digest?, onRetry, className? }`） | `src/blocks/misc/error-view.tsx` | `error`（`data-error-view`，重试 `data-error-retry`） | background + 网格光线 | L7 |
 
 ### 4.3 共享组件签名（地基路照写，各区块直接 import，不准自己再造）
 
