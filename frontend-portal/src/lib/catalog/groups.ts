@@ -29,7 +29,10 @@ export function formatRatio(ratio: number | null, locale: AppLocale): string {
   return ratioText(ratio)[locale];
 }
 
-/** 通道卡的权益清单：每个通道比上一档多出来的几条（卡片上排在「包含上一档全部权益」之后） */
+/**
+ * 通道卡的权益清单：每个通道比上一档多出来的几条（卡片上排在「包含上一档全部权益」之后）。
+ * 「可开发票」专用、企业两张卡都写（2026-10-07 用户要求），共享通道不能开。
+ */
 export const GROUP_HIGHLIGHTS: Record<EditionId, readonly Localized[]> = {
   personal: [
     text('全部文本模型', 'All text models'),
@@ -42,6 +45,7 @@ export const GROUP_HIGHLIGHTS: Record<EditionId, readonly Localized[]> = {
     text('ChatGPT 专业通道', 'ChatGPT Pro channel'),
     text('高可用、低延迟、不降智', 'High availability, low latency, full-strength models'),
     text('专属客服 24 小时一对一', 'Dedicated 24/7 one-on-one support'),
+    text('可开发票', 'Invoices'),
   ],
   enterprise: [
     text('可开发票', 'Invoices'),
@@ -115,7 +119,7 @@ export const PRIVILEGE_ROWS: readonly PrivilegeRow[] = [
   {
     id: 'invoice',
     label: text('开发票', 'Invoices'),
-    values: { personal: no, pro: no, enterprise: yes },
+    values: { personal: no, pro: yes, enterprise: yes },
   },
   {
     id: 'management',

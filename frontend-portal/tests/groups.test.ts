@@ -40,7 +40,10 @@ describe('通道（一个通道就是一个分组）', () => {
       '基础安全防护',
     ]);
     expect(zh('pro')).toContain('ChatGPT 专业通道');
+    // 可开发票专用、企业两张卡都写
+    expect(zh('pro')).toContain('可开发票');
     expect(zh('enterprise')).toContain('可开发票');
+    expect(zh('personal')).not.toContain('可开发票');
   });
 });
 
@@ -64,7 +67,7 @@ describe('权益对比', () => {
     }
     const row = (id: string) => PRIVILEGE_ROWS.find((r) => r.id === id)?.values;
     expect(row('chatgpt-pro')).toEqual({ personal: false, pro: true, enterprise: true });
-    expect(row('invoice')).toEqual({ personal: false, pro: false, enterprise: true });
+    expect(row('invoice')).toEqual({ personal: false, pro: true, enterprise: true });
     expect(row('security')?.enterprise).toEqual({ zh: '可定制', en: 'Custom' });
   });
 

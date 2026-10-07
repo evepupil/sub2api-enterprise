@@ -30,7 +30,7 @@
     },
     "invoices": {
       "title": "Invoices",
-      "desc": "We can issue invoices, though not VAT invoices."
+      "desc": "Invoices for the Dedicated and Enterprise channels (not VAT invoices)."
     }
   },
   "catalog": {

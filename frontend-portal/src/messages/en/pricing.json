@@ -57,7 +57,7 @@
       "q4": "Am I charged for failed image requests?",
       "a4": "Requests that fail upstream are not billed. Successful generations are billed per image or per token.",
       "q5": "Can I get invoices?",
-      "a5": "Yes, we can issue invoices, though not VAT invoices. Payment by bank transfer isn't supported.",
+      "a5": "Yes, for the Dedicated and Enterprise channels, though not VAT invoices. Payment by bank transfer isn't supported.",
       "q6": "How are CNY prices calculated?",
       "a6": "They use $1 = ¥1, the same rate as top-ups. Billing is in USD."
     }
