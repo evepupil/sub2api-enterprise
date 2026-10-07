@@ -2,6 +2,8 @@ import type { NextConfig } from 'next';
 import { PHASE_DEVELOPMENT_SERVER } from 'next/constants';
 import createNextIntlPlugin from 'next-intl/plugin';
 
+import { SECURITY_HEADERS } from './src/lib/server/security-headers';
+
 // 中英文消息由 src/i18n/request.ts 按请求的语言加载
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
@@ -20,11 +22,17 @@ const nextConfig = (phase: string): NextConfig =>
   withNextIntl({
     output: 'standalone',
     reactStrictMode: true,
+    // 不在响应头里暴露框架名
+    poweredByHeader: false,
     // 类型检查由门禁里的 pnpm typecheck 单独执行，构建时不重复跑
     typescript: { ignoreBuildErrors: true },
     allowedDevOrigins: phase === PHASE_DEVELOPMENT_SERVER ? devOrigins : undefined,
     distDir: phase === PHASE_DEVELOPMENT_SERVER ? '.next' : '.next-build',
     // 带 /zh 前缀的地址统一跳回不带前缀的地址，避免同一页面有两个网址
+    // 安全响应头（防点击劫持、禁止猜文件类型、来源策略、强制 HTTPS 等），清单见 security-headers.ts
+    async headers() {
+      return [{ source: '/:path*', headers: [...SECURITY_HEADERS] }];
+    },
     async redirects() {
       return [
         { source: '/zh', destination: '/', permanent: false },
