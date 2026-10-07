@@ -21,7 +21,7 @@
   },
   "sort": {
     "label": "Sort",
-    "latest": "Newest",
+    "default": "Default",
     "price-asc": "Price: low to high",
     "price-desc": "Price: high to low",
     "context": "Longest context"
@@ -37,7 +37,6 @@
     "unavailable": "No models to show right now"
   },
   "card": {
-    "new": "New",
     "image": "Image",
     "copy": "Copy model ID",
     "inputOutput": "Input / Output",

@@ -55,8 +55,6 @@ export interface SiteModel {
   provider: ProviderId | null;
   type: ModelType;
   contextTokens: number | null;
-  released: string | null;
-  isNew: boolean;
   /** 实付价（已乘分组倍率） */
   price: LivePrice;
   /** 缓存读取价（每百万 Token，已乘分组倍率）；没有为 null */
@@ -92,8 +90,6 @@ function siteModels(
       provider: row.provider,
       type: row.type,
       contextTokens: row.contextTokens,
-      released: row.released,
-      isNew: row.isNew,
       price: row.price,
       cacheRead: cacheRead === null ? null : round6(cacheRead * PER_MILLION * channel.rate),
       discount: row.discount,
@@ -182,8 +178,17 @@ function matchesQuery(model: SiteModel, query: string): boolean {
   ].some((value) => value.toLowerCase().includes(text));
 }
 
+/** 每个模型在后台模型广场里第一次出现的位置（「默认」排序用） */
+function firstSeen(models: readonly SiteModel[]): Map<string, number> {
+  const first = new Map<string, number>();
+  models.forEach((model, index) => {
+    if (!first.has(model.id)) first.set(model.id, index);
+  });
+  return first;
+}
+
 /**
- * 模型页的筛选与排序：最新按上线日期（目录里没有的排后），价格排序时文本在前、生图在后；
+ * 模型页的筛选与排序：默认按后台模型广场的顺序，价格排序时文本在前、生图在后；
  * 关键词也搜分组名（搜「共享」就只剩名字里带共享的分组）。同一个模型的几条挨着、便宜的在前。
  */
 export function filterSiteModels(
@@ -200,19 +205,12 @@ export function filterSiteModels(
       matchesQuery(model, query.query),
   );
   switch (query.sort) {
-    case 'latest':
+    case 'default': {
+      const first = firstSeen(models);
       return result.sort(
-        (a, b) =>
-          (a.released === b.released
-            ? 0
-            : a.released === null
-              ? 1
-              : b.released === null
-                ? -1
-                : b.released.localeCompare(a.released)) ||
-          byName(a, b) ||
-          byOffer(a, b),
+        (a, b) => (first.get(a.id) ?? 0) - (first.get(b.id) ?? 0) || byOffer(a, b),
       );
+    }
     case 'price-asc':
     case 'price-desc':
       return result.sort(
@@ -306,15 +304,15 @@ export interface CheapestModel {
   from: boolean;
 }
 
-const LATEST: SiteModelsQuery = {
+const DEFAULT_ORDER: SiteModelsQuery = {
   type: 'all',
   providers: [],
   context: 'all',
   query: '',
-  sort: 'latest',
+  sort: 'default',
 };
 
-/** 首页瀑布流：每个模型一张卡，取最便宜的分组；顺序同模型页「最新」 */
+/** 首页瀑布流：每个模型一张卡，取最便宜的分组；顺序同模型页「默认」（后台模型广场的顺序） */
 export function cheapestPerModel(models: readonly SiteModel[]): CheapestModel[] {
   const best = new Map<string, SiteModel>();
   const pricier = new Set<string>();
@@ -333,7 +331,7 @@ export function cheapestPerModel(models: readonly SiteModel[]): CheapestModel[] 
     }
     if (byOffer(model, current) < 0) best.set(model.id, model);
   }
-  return filterSiteModels([...best.values()], LATEST).map((model) => ({
+  return filterSiteModels([...best.values()], DEFAULT_ORDER).map((model) => ({
     model,
     from: pricier.has(model.id),
   }));

@@ -50,8 +50,6 @@ export interface Model {
   protocols: readonly Protocol[];
   /** 上下文长度（Token），生图模型没有 */
   contextTokens: number | null;
-  /** 上线日期 YYYY-MM-DD，用于「最新」排序和「新」标记 */
-  released: string;
   /** 文本模型官方价 */
   official: TokenPrice | null;
   longContext: LongContextTier | null;

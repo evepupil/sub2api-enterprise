@@ -6,12 +6,6 @@ import type { EditionId, Localized, Model } from './types';
 /** 按 Token 计费的生图模型，估算一张 1024×1024 图消耗的输出 Token 数 */
 export const IMAGE_TOKENS_PER_IMAGE = 1290;
 
-/** 演示用的固定「今天」，「新上线」标记都从它算，避免构建与浏览器结果不一致 */
-export const CATALOG_AS_OF = '2026-10-03';
-
-/** 上线多少天内算「新」 */
-export const NEW_MODEL_DAYS = 30;
-
 const round6 = (x: number): number => Math.round(x * 1e6) / 1e6;
 
 export interface TextPriceView {
@@ -112,10 +106,4 @@ export function formatContext(tokens: number): string {
 
 export function localize(value: Localized, locale: AppLocale): string {
   return value[locale];
-}
-
-/** 是否在 CATALOG_AS_OF 之前 NEW_MODEL_DAYS 天内上线 */
-export function isNewModel(model: Model): boolean {
-  const days = (Date.parse(CATALOG_AS_OF) - Date.parse(model.released)) / 86_400_000;
-  return days >= 0 && days <= NEW_MODEL_DAYS;
 }

@@ -4,7 +4,6 @@ import { Fragment } from 'react';
 
 import { useTranslations } from 'next-intl';
 
-import { Badge } from '@/components/ui/badge';
 import { formatMoney, IMAGE_TOKENS_PER_IMAGE } from '@/lib/catalog';
 import { groupSiteModels, priceRowId, type SiteModel } from '@/lib/catalog/live';
 
@@ -13,15 +12,11 @@ import { PriceProviderRow } from './pricing-provider-row';
 
 const round6 = (value: number) => Math.round(value * 1e6) / 1e6;
 
-/** 模型格：名称、「新」标、调用名。同一个模型在几个分组里就合并几行。 */
+/** 模型格：名称、调用名。同一个模型在几个分组里就合并几行。 */
 function ImageModelCell({ model, span }: { model: SiteModel; span: number }) {
-  const t = useTranslations('pricing');
   return (
     <td rowSpan={span} className="px-5 py-4 align-top">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="font-medium text-foreground">{model.name}</span>
-        {model.isNew ? <Badge tone="info">{t('tables.new')}</Badge> : null}
-      </div>
+      <span className="font-medium text-foreground">{model.name}</span>
       {/* 官网目录里没有的模型名字就是调用名，不重复写 */}
       {model.name === model.id ? null : (
         <p className="mt-1 font-mono text-xs text-subtle-foreground">{model.id}</p>

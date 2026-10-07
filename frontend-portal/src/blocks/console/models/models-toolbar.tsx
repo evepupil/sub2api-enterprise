@@ -6,7 +6,7 @@ import { SegmentedControl } from '@/components/ui/segmented-control';
 import { SORT_KEYS, type SortKey } from '@/lib/catalog';
 
 const SORT_LABEL = {
-  latest: 'sort.latest',
+  default: 'sort.default',
   'price-asc': 'sort.priceAsc',
   'price-desc': 'sort.priceDesc',
   context: 'sort.context',

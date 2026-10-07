@@ -1,6 +1,5 @@
 import {
   formatAmount,
-  isNewModel,
   MODELS,
   PROVIDERS,
   type ContextFilter,
@@ -59,9 +58,6 @@ export interface ModelRowView {
   type: ModelType;
   protocols: readonly Protocol[];
   contextTokens: number | null;
-  /** 上线日期，目录里没有的模型为 null */
-  released: string | null;
-  isNew: boolean;
   price: LivePrice;
   /** 官方价（每百万 Token，不乘倍率），只有按 Token 计费且后端查得到时才有 */
   official: TokenRates | null;
@@ -198,8 +194,6 @@ function toRow(model: ChannelModel, channel: ConsoleChannel): ModelRowView {
     type,
     protocols: meta?.protocols ?? inferProtocols(model.id, model.platform, type),
     contextTokens: meta?.contextTokens ?? null,
-    released: meta?.released ?? null,
-    isNew: meta ? isNewModel(meta) : false,
     price,
     official,
     discount: discountOf(price, official),
@@ -228,22 +222,18 @@ function compareNullable(a: number | null, b: number | null, direction: 1 | -1):
   return (a - b) * direction;
 }
 
-function comparator(sort: SortKey): (a: ModelRowView, b: ModelRowView) => number {
+function comparator(
+  sort: SortKey,
+  first: ReadonlyMap<string, number>,
+): (a: ModelRowView, b: ModelRowView) => number {
   // 同一个模型的几行挨着放，倍率低的分组在前
-  const byName = (a: ModelRowView, b: ModelRowView) =>
-    a.id.localeCompare(b.id) ||
-    a.channel.rate - b.channel.rate ||
-    a.channel.name.localeCompare(b.channel.name);
+  const byChannel = (a: ModelRowView, b: ModelRowView) =>
+    a.channel.rate - b.channel.rate || a.channel.name.localeCompare(b.channel.name);
+  const byName = (a: ModelRowView, b: ModelRowView) => a.id.localeCompare(b.id) || byChannel(a, b);
   switch (sort) {
-    case 'latest':
-      return (a, b) =>
-        a.released === b.released
-          ? byName(a, b)
-          : a.released === null
-            ? 1
-            : b.released === null
-              ? -1
-              : b.released.localeCompare(a.released);
+    case 'default':
+      // 后台模型广场的顺序：按模型第一次出现的位置
+      return (a, b) => (first.get(a.id) ?? 0) - (first.get(b.id) ?? 0) || byChannel(a, b);
     case 'price-asc':
       return (a, b) => compareNullable(a.sortPrice, b.sortPrice, 1) || byName(a, b);
     case 'price-desc':
@@ -255,6 +245,11 @@ function comparator(sort: SortKey): (a: ModelRowView, b: ModelRowView) => number
 
 /** 按类型、厂商、上下文、协议、关键词（模型名、厂商、分组名）筛选后排序；上下文未知的模型在按上下文筛选时不出现 */
 export function filterRows(rows: readonly ModelRowView[], query: ModelsQuery): ModelRowView[] {
+  // 「默认」排序要用每个模型在后台模型广场里第一次出现的位置
+  const first = new Map<string, number>();
+  rows.forEach((row, index) => {
+    if (!first.has(row.id)) first.set(row.id, index);
+  });
   const text = query.query.trim().toLowerCase();
   const minContext = CONTEXT_MIN[query.context];
   return rows
@@ -271,7 +266,7 @@ export function filterRows(rows: readonly ModelRowView[], query: ModelsQuery): M
           (row.provider !== null &&
             (PROVIDER_NAME.get(row.provider) ?? '').toLowerCase().includes(text))),
     )
-    .sort(comparator(query.sort));
+    .sort(comparator(query.sort, first));
 }
 
 /** 筛选栏的厂商选项：只列这个分组里出现过的厂商，顺序同官网目录 */

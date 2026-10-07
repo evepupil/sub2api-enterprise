@@ -97,7 +97,6 @@ export function ModelsExplorerCard({ model, locale }: { model: SiteModel; locale
             </span>
           </>
         ) : null}
-        {model.isNew ? <Badge tone="info">{t('card.new')}</Badge> : null}
         <span className="flex-1" />
         {model.type === 'image' ? <Badge tone="outline">{t('card.image')}</Badge> : null}
       </div>

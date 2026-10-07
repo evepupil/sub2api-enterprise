@@ -349,7 +349,7 @@ pnpm format:check  # prettier
 
 - 用了 `useState` / `useEffect` / 事件处理 / motion 组件 / `useTranslations` 以外的客户端钩子的文件，第一行是 `'use client'`；纯展示的不加。服务端组件不能给客户端组件传函数参数。
 - 禁止 `any`、`@ts-ignore`、`@ts-expect-error`、`eslint-disable`、未使用的变量和 import。
-- 禁止 `Math.random()`、`Date.now()`、`new Date()`（时间相关一律用数据层的 `CATALOG_AS_OF`）。
+- 禁止 `Math.random()`、`Date.now()`、`new Date()`（时间相关的展示一律由数据给出，不在渲染时取当前时间）。
 - 组件里不写死业务数字（价格、倍率、数量、可用率），全部来自后台数据（`@/lib/catalog/live`）、`@/lib/catalog` 或 `SITE`。
 - 不写十六进制色值（2.1 的三个例外除外），不拼接类名。
 - 手机 375 宽不出现横向滚动条；宽表格放进 `overflow-x-auto` 容器，网格子项里的横向滚动区给子项加 `min-w-0`。
@@ -386,7 +386,7 @@ pnpm format:check  # prettier
 | 项 | 状态 |
 |---|---|
 | 品牌名 Codu、标志色块 | 品牌名是用户定的（2026-10-03 由占位的 Nexus API 改名），改名只改 `src/lib/site.ts`；标志色块还是**编的** |
-| 模型清单 | 2026-10-05 起首页、模型页、价格页的模型清单与价格改读后台模型广场（技术设计 18.9）；官网目录 `src/lib/catalog/models.ts` 只补后台没有的展示名、厂商、上下文、上线日期，目录里没有的模型显示原名；上线日期是**编的**；协议只剩控制台模型页在用；模型介绍 2026-10-05 删除 |
+| 模型清单 | 2026-10-05 起首页、模型页、价格页的模型清单与价格改读后台模型广场（技术设计 18.9）；官网目录 `src/lib/catalog/models.ts` 只补后台没有的展示名、厂商、上下文，目录里没有的模型显示原名（编的上线日期与「新」标记 2026-10-08 去掉）；协议只剩控制台模型页在用；模型介绍 2026-10-05 删除 |
 | 官方价 | 官网页面的折扣标用后台模型广场给的官方价；官网目录里的官方价（由 onehop.ai 2026-10-03 公开价目反推）只剩控制台占位页（对话、用量）在用 |
 | 三种通道的分组倍率（共享通道 ×0.15、专用通道 ×0.3、企业通道定制） | 用户 2026-10-03 给定，`src/lib/catalog/editions.ts`；2026-10-05 起官网页面按后台分组的倍率算价，这里的倍率只剩控制台占位页在用；2026-10-06 起官网按后台分组展示，不做通道对应 |
 | 通道卡权益清单、权益对比各项 | 用户 2026-10-07 给定（`groups.ts`）：共享通道：全部文本模型、全部生图模型、7 天内可退款、客服 24 小时在线、基础安全防护；专用通道：包含共享通道全部权益，另有 ChatGPT 专业通道、高可用 / 低延迟 / 不降智、专属客服 24 小时一对一、可开发票；企业通道：包含专用通道全部权益，另有可开发票（专用、企业两张卡都写）、定制安全防护、企业级管理功能、专属客户经理、可选私有化部署。RPM、并发、组织成员上限、客服响应时限这些编的数字同日删掉；可用率目标、可用率赔付、对公转账 2026-10-06 已去掉 |
@@ -513,7 +513,7 @@ pnpm format:check  # prettier
 | `formatDiscount(d, locale)` | 折扣标文字（「1.5折」/「85% off」，不打折时 null） |
 | `formatMoney(usd)`、`formatAmount(n)` | 美元金额（`$0.6`） |
 | `formatContext(tokens)`、`localize(value, locale)` | 上下文、中英文字段 |
-| `isNewModel(model)`、`CATALOG_AS_OF`、`IMAGE_TOKENS_PER_IMAGE` | 「新」标记（30 天内上线的 7 个） |
+| `IMAGE_TOKENS_PER_IMAGE` | 按 Token 计费生图的每张估算 |
 | `TYPE_FILTERS`、`CONTEXT_FILTERS`、`SORT_KEYS`、`PROTOCOLS`、`PROTOCOL_LABELS` | 模型页筛选的取值；官网的筛选排序、价目表分段在 `@/lib/catalog/live`（见下） |
 
 官网的后台数据在 `@/lib/catalog/live`（2026-10-06 起按分组）：`SiteCatalog`（每个分组里的每个模型一条）、`SiteModel`、`buildSiteCatalog`、`filterSiteModels`、`siteFacetCounts`、`providersOf`、`groupSiteModels`、`cheapestPerModel`、`distinctModelCount`、`siteModelCount`、`priceRowId`，用法见 `design/模型.md`、`design/价格.md`、`design/首页.md`。

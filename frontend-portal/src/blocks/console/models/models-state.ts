@@ -11,7 +11,7 @@ export const DEFAULT_QUERY: ModelsQuery = {
   context: 'all',
   protocol: 'all',
   query: '',
-  sort: 'latest',
+  sort: 'default',
 };
 
 /**

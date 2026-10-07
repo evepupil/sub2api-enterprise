@@ -2,7 +2,6 @@ import { useLocale, useTranslations } from 'next-intl';
 
 import { DiscountBadge } from '@/components/catalog/discount-badge';
 import { ProviderLogo } from '@/components/catalog/provider-logo';
-import { Badge } from '@/components/ui/badge';
 import type { AppLocale } from '@/i18n/routing';
 import { formatContext, formatMoney, getProvider } from '@/lib/catalog';
 import type { SiteModel } from '@/lib/catalog/live';
@@ -56,7 +55,6 @@ export function ModelMarqueeCard({ model, from }: { model: SiteModel; from: bool
           <p className="truncate text-sm font-medium text-foreground">{model.name}</p>
           {meta ? <p className="truncate text-xs text-subtle-foreground">{meta}</p> : null}
         </div>
-        {model.isNew ? <Badge tone="info">{t('catalog.new')}</Badge> : null}
       </div>
       {health && (health.latencyMs !== null || health.pingMs !== null) ? (
         <p className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-xs tabular-nums text-muted-foreground">

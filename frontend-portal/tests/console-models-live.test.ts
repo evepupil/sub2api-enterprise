@@ -208,7 +208,7 @@ describe('筛选与排序', () => {
     context: 'all',
     protocol: 'all',
     query: '',
-    sort: 'latest',
+    sort: 'default',
     ...patch,
   });
 
@@ -227,11 +227,10 @@ describe('筛选与排序', () => {
     );
   });
 
-  it('按价格排序时没有价格的排最后；按最新排序时目录里没有的排最后', () => {
+  it('按价格排序时没有价格的排最后；默认按后台模型广场的顺序', () => {
     const asc = filterRows(rows, query({ sort: 'price-asc' })).map((row) => row.id);
     expect(asc[0]).toBe('gpt-image-2');
-    const latest = filterRows(rows, query({ sort: 'latest' })).map((row) => row.id);
-    expect(latest.at(-1)).toBe('mystery-model-x');
+    expect(filterRows(rows, query()).map((row) => row.id)).toEqual(rows.map((row) => row.id));
   });
 
   it('厂商选项只列出现过的', () => {
@@ -268,7 +267,7 @@ describe('所有通道一张表', () => {
       context: 'all',
       protocol: 'all',
       query: '',
-      sort: 'latest',
+      sort: 'default',
     };
     const sorted = filterRows(rows, query).filter((row) => row.id === 'claude-sonnet-4-5');
     expect(sorted.map((row) => row.channel.rate)).toEqual([0.25, 1]);

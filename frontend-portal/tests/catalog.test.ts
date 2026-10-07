@@ -6,7 +6,6 @@ import {
   formatDiscount,
   formatMoney,
   imagePrice,
-  isNewModel,
   MODELS,
   textPrice,
   type Model,
@@ -35,18 +34,6 @@ describe('模型目录', () => {
         expect(m.image, m.id).not.toBeNull();
       }
     }
-  });
-
-  it('近 30 天上线的 7 个模型带「新」标记', () => {
-    expect(MODELS.filter(isNewModel).map((m) => m.id)).toEqual([
-      'gpt-6-astra',
-      'gpt-6-sol',
-      'gpt-6-luna',
-      'claude-fable-5-1',
-      'claude-sonnet-5-5',
-      'gpt-image-2.5-sunburst',
-      'gpt-image-2.5-flare',
-    ]);
   });
 });
 

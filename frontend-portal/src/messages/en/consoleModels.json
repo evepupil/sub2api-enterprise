@@ -23,7 +23,7 @@
   },
   "sort": {
     "label": "Sort",
-    "latest": "Newest",
+    "default": "Default",
     "priceAsc": "Price: low to high",
     "priceDesc": "Price: high to low",
     "context": "Context length"
@@ -40,7 +40,6 @@
     "perMTokens": "per 1M tokens",
     "longContext": "Over {threshold}: {input} / {output}",
     "perImageFrom": "from {price} / image",
-    "new": "New",
     "try": "Try it",
     "favorite": "Favorite",
     "unfavorite": "Remove favorite",

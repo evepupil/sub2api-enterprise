@@ -128,7 +128,6 @@ describe('价格来自后台、乘各自分组的倍率', () => {
     expect(find('mystery-model', '共享 Claude')).toMatchObject({
       name: 'mystery-model',
       provider: null,
-      released: null,
     });
   });
 
@@ -173,21 +172,20 @@ describe('模型页的筛选与排序', () => {
     providers: [],
     context: 'all',
     query: '',
-    sort: 'latest',
+    sort: 'default',
     ...patch,
   });
   const labels = (models: readonly SiteModel[]) =>
     models.map((model) => `${model.group.name}:${model.id}`);
 
-  it('最新：同一个模型的几条挨着、便宜的分组在前，目录里没有上线日期的排在最后', () => {
-    const list = labels(filterSiteModels(catalog, query()));
-    const first = list.indexOf(`共享 Claude:${SONNET}`);
-    expect(list.slice(first, first + 3)).toEqual([
+  it('默认：按后台模型广场里第一次出现的顺序，同一个模型的几条挨着、便宜的分组在前', () => {
+    expect(labels(filterSiteModels(catalog, query()))).toEqual([
       `共享 Claude:${SONNET}`,
       `专用 Claude:${SONNET}`,
       `default:${SONNET}`,
+      '共享 Claude:mystery-model',
+      '共享 Claude:gpt-image-2',
     ]);
-    expect(list.at(-1)).toBe('共享 Claude:mystery-model');
   });
 
   it('价格从低到高：文本在前、生图在后', () => {
@@ -248,6 +246,7 @@ describe('价目表与首页', () => {
     expect(sonnet?.model.group.name).toBe('共享 Claude');
     expect(sonnet?.from).toBe(true);
     expect(cards.find((card) => card.model.id === 'mystery-model')?.from).toBe(false);
-    expect(cards.at(-1)?.model.id).toBe('mystery-model');
+    // 顺序同模型页「默认」：后台模型广场里第一次出现的顺序
+    expect(cards.map((card) => card.model.id)).toEqual([SONNET, 'mystery-model', 'gpt-image-2']);
   });
 });

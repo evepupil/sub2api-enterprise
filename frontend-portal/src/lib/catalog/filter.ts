@@ -6,11 +6,12 @@ import type { ModelType, Protocol } from './types';
 
 export type TypeFilter = 'all' | ModelType;
 export type ContextFilter = 'all' | '200k' | '1m';
-export type SortKey = 'latest' | 'price-asc' | 'price-desc' | 'context';
+/** default：按后台模型广场的顺序（运营在后台决定先后） */
+export type SortKey = 'default' | 'price-asc' | 'price-desc' | 'context';
 
 export const TYPE_FILTERS: readonly TypeFilter[] = ['all', 'text', 'image'];
 export const CONTEXT_FILTERS: readonly ContextFilter[] = ['all', '200k', '1m'];
-export const SORT_KEYS: readonly SortKey[] = ['latest', 'price-asc', 'price-desc', 'context'];
+export const SORT_KEYS: readonly SortKey[] = ['default', 'price-asc', 'price-desc', 'context'];
 export const PROTOCOLS: readonly Protocol[] = [
   'openai-chat',
   'openai-responses',

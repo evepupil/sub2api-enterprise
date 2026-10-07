@@ -21,7 +21,6 @@
     "cache": "缓存读取",
     "context": "上下文",
     "longContext": "超过 {threshold}：输入 {input} · 输出 {output}",
-    "new": "新",
     "imageTitle": "生图模型",
     "imageUnit": "按张或按百万输出 Token",
     "billing": "计费方式",

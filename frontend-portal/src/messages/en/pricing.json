@@ -21,7 +21,6 @@
     "cache": "Cache read",
     "context": "Context",
     "longContext": "Above {threshold}: input {input} · output {output}",
-    "new": "New",
     "imageTitle": "Image models",
     "imageUnit": "Per image or per 1M output tokens",
     "billing": "Billing",

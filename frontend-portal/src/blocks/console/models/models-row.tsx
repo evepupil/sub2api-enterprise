@@ -62,7 +62,6 @@ export function ModelRow({
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <span className="truncate font-medium text-foreground">{row.name}</span>
-              {row.isNew ? <Badge tone="info">{t('table.new')}</Badge> : null}
             </div>
             {row.name !== row.id ? (
               <p className="font-mono text-xs text-subtle-foreground">{row.id}</p>

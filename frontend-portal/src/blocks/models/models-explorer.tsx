@@ -64,8 +64,8 @@ const FILTER_PANEL = {
 /** 筛选开关按钮：只在小屏出现 */
 const FILTER_TOGGLE = 'lg:hidden';
 
-const SORT_LABEL_KEYS: Record<SortKey, 'latest' | 'price-asc' | 'price-desc' | 'context'> = {
-  latest: 'latest',
+const SORT_LABEL_KEYS: Record<SortKey, 'default' | 'price-asc' | 'price-desc' | 'context'> = {
+  default: 'default',
   'price-asc': 'price-asc',
   'price-desc': 'price-desc',
   context: 'context',
@@ -84,7 +84,7 @@ export function ModelsExplorer({ catalog }: { catalog: SiteCatalog }) {
     PROVIDERS.map((p) => p.id),
   );
   const [context, setContext] = useUrlState('context', CONTEXT_FILTERS, 'all');
-  const [sort, setSort] = useUrlState('sort', SORT_KEYS, 'latest');
+  const [sort, setSort] = useUrlState('sort', SORT_KEYS, 'default');
   const [query, setQuery] = useUrlText('q');
 
   // 手机（lg 以下）筛选面板默认收起
@@ -130,7 +130,7 @@ export function ModelsExplorer({ catalog }: { catalog: SiteCatalog }) {
   ];
 
   const sortLabels: Record<SortKey, string> = {
-    latest: t('sort.latest'),
+    default: t('sort.default'),
     'price-asc': t('sort.price-asc'),
     'price-desc': t('sort.price-desc'),
     context: t('sort.context'),

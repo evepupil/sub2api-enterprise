@@ -23,7 +23,7 @@
   },
   "sort": {
     "label": "排序",
-    "latest": "最新",
+    "default": "默认",
     "priceAsc": "价格从低到高",
     "priceDesc": "价格从高到低",
     "context": "上下文长度"
@@ -40,7 +40,6 @@
     "perMTokens": "每百万 Token",
     "longContext": "超过 {threshold}：{input} / {output}",
     "perImageFrom": "{price} / 张起",
-    "new": "新",
     "try": "试一试",
     "favorite": "收藏",
     "unfavorite": "取消收藏",

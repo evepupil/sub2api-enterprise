@@ -21,7 +21,7 @@
   },
   "sort": {
     "label": "排序",
-    "latest": "最新上线",
+    "default": "默认",
     "price-asc": "价格从低到高",
     "price-desc": "价格从高到低",
     "context": "上下文最长"
@@ -37,7 +37,6 @@
     "unavailable": "暂时没有可展示的模型"
   },
   "card": {
-    "new": "新",
     "image": "生图",
     "copy": "复制调用名",
     "inputOutput": "输入 / 输出",
