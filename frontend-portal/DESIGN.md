@@ -434,7 +434,7 @@ pnpm format:check  # prettier
 | `StatCard` | `stat-card.tsx` | `{ id, label, value, aside?, sub?, size?: 'md' \| 'sm' }`；`data-stat={id}`，数字在 `[data-stat-value]` |
 | `Select` | `select.tsx` | 单选下拉 `{ name, value, onChange, options: { value, label }[], ariaLabel, size?, align?, className? }`；触发按钮 `data-select={name}`，选项 `data-option={value}`；宽度默认撑满父级 |
 | `FilterField` / `SearchInput` | `filter-field.tsx` | 筛选项：上方小标签 + 控件；`SearchInput` 是带放大镜的输入框（`type="search"`） |
-| `DateRangePicker` | `date-range-picker.tsx` | `{ value: DateRange, onChange, today?, since?, align? }`；左侧常用范围立即生效，右侧月历自选后点「应用」；`today` / `since`（「全部」的起点）不传就是占位日期，接了后端的页面传真实的今天和账号创建日；`rangeLabel()` 可复用 |
+| `DateRangePicker` | `date-range-picker.tsx` | `{ value: DateRange, onChange, today: string | null, since: string | null, align? }`；左侧常用范围立即生效，右侧月历自选后点「应用」；`today` 是真实的今天、`since` 是「全部」的起点（账号创建日），页面刚挂载还不知道时传 null，按钮先不可点（2026-10-08 起不再带写死的占位日期）；`rangeLabel()` 可复用 |
 | `TableShell` / `Table` / `Th` / `Td` / `Tr` | `data-table.tsx` | 外框可带 `footer`（放分页）；`Table` 传 `minWidth` 让小屏横向滚动；`Th`/`Td` 支持 `align` 与 `sticky: 'left' \| 'right'`（固定首列或操作列） |
 | `RefreshButton` | `refresh-button.tsx` | 标题行刷新按钮（高 40、小圆角，转 600ms，`data-refresh`），可传 `onRefresh` |
 | `Button` / `buttonClass` | `button.tsx` | 控制台的按钮：官网按钮的同款颜色与尺寸，圆角固定 6px（`rounded-md`）。控制台代码只能从这里取按钮，直接引用 `@/components/ui/button`、`button-styles` 会被代码检查拦下（`eslint.config.mjs`） |

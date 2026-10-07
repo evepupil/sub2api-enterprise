@@ -224,12 +224,12 @@ export function BillingTransactions({
               <ChevronRight aria-hidden />
             </Button>
           </div>
-          {/* 还不知道今天是哪天时（刚打开的一瞬间）先按默认范围显示按钮，避免标题行跳动 */}
+          {/* 还不知道今天是哪天时（刚打开的一瞬间）先按默认范围显示按钮、按钮不可点，避免标题行跳动 */}
           <DateRangePicker
             value={range ?? presetRange('last30d')}
             onChange={(next) => patch({ range: next })}
-            today={today ?? undefined}
-            since={since ?? undefined}
+            today={today}
+            since={since}
             align="end"
           />
         </>

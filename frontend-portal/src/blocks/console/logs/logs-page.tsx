@@ -172,8 +172,8 @@ export function LogsPage() {
       <LogsFilters
         selection={selection}
         range={range ?? presetRange(DEFAULT_PRESET)}
-        today={today ?? undefined}
-        since={since ?? undefined}
+        today={today}
+        since={since}
         options={options.data}
         onChange={changeSelection}
         dirty={!isDefaultSelection(selection)}

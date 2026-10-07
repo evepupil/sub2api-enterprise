@@ -42,8 +42,8 @@ export function LogsFilters({
   selection: LogSelection;
   /** 当前生效的时间范围（selection.range 为空时是默认的最近 30 天） */
   range: DateRange;
-  today: string | undefined;
-  since: string | undefined;
+  today: string | null;
+  since: string | null;
   options: LogOptions | null;
   onChange: (change: Partial<LogSelection>) => void;
   /** 筛选条件是否已经偏离默认值，决定要不要显示「清除筛选」 */

@@ -7,14 +7,12 @@ import { useState } from 'react';
 
 import type { AppLocale } from '@/i18n/routing';
 import {
-  ACCOUNT_SINCE,
   customRange,
   formatDayLabel,
   formatMonthTitle,
   monthMatrix,
   presetRange,
   RANGE_PRESETS,
-  TODAY,
   type DateRange,
   type RangePreset,
 } from '@/lib/console/time';
@@ -41,29 +39,31 @@ interface Draft {
 
 /**
  * 时间范围选择：左侧常用范围（点了立即生效），右侧月历自选起止日（点「应用」生效）。
- * 今天之后的日期不能选。today 与 since（「全部」的起点）默认是占位数据的固定日期，
- * 接了后端的页面传入真实的今天和账号创建日。
+ * 今天之后的日期不能选。today 是真实的今天，since 是「全部」的起点（账号创建日）；
+ * 页面刚挂载、还不知道这两个日期时传 null，按钮先不可点（一瞬间后就能用），不拿写死的日期凑数。
  * 交互检查：触发按钮 data-range-trigger，预设 data-range-preset，日期 data-day，应用 data-range-apply。
  */
 export function DateRangePicker({
   value,
   onChange,
-  today = TODAY,
-  since = ACCOUNT_SINCE,
+  today,
+  since,
   align = 'end',
   className,
 }: {
   value: DateRange;
   onChange: (range: DateRange) => void;
-  today?: string;
-  since?: string;
+  today: string | null;
+  since: string | null;
   align?: 'start' | 'end';
   className?: string;
 }) {
   const t = useTranslations('console');
   const locale = useLocale() as AppLocale;
-  const todayYear = Number(today.slice(0, 4));
-  const todayMonth = Number(today.slice(5, 7));
+  // 还不知道今天时按钮不可点、面板打不开，下面的月历计算用不到这个兜底值
+  const latest = today ?? value.to;
+  const todayYear = Number(latest.slice(0, 4));
+  const todayMonth = Number(latest.slice(5, 7));
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<Draft>({ from: null, to: null });
   const [view, setView] = useState({ year: todayYear, month: todayMonth });
@@ -77,12 +77,13 @@ export function DateRangePicker({
   };
 
   const choosePreset = (preset: RangePreset) => {
+    if (today === null || since === null) return;
     onChange(presetRange(preset, today, since));
     setOpen(false);
   };
 
   const clickDay = (day: string) => {
-    if (day > today) return;
+    if (day > latest) return;
     // 已经选好一段时，再点就重新开始；否则这一下是结束日
     setDraft((current) =>
       current.from === null || current.to !== null
@@ -92,7 +93,7 @@ export function DateRangePicker({
   };
 
   const apply = () => {
-    if (draft.from === null) return;
+    if (draft.from === null || today === null) return;
     onChange(customRange(draft.from, draft.to ?? draft.from, today));
     setOpen(false);
   };
@@ -118,6 +119,7 @@ export function DateRangePicker({
           type="button"
           data-range-trigger
           aria-label={t('range.label')}
+          disabled={today === null || since === null}
           className={buttonClass({
             variant: 'secondary',
             className: cn(CONTROL_BUTTON, 'justify-between gap-2 px-3', className),
@@ -189,7 +191,7 @@ export function DateRangePicker({
               {monthMatrix(view.year, view.month)
                 .flat()
                 .map((cell) => {
-                  const disabled = cell.day > today;
+                  const disabled = cell.day > latest;
                   const isEdge = cell.day === low || cell.day === high;
                   const inside = low !== null && high !== null && cell.day > low && cell.day < high;
                   return (
