@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 import { AuthFormAlert } from '@/blocks/auth/auth-form-alert';
+import { AuthGoogleButton } from '@/blocks/auth/auth-google-button';
 import { AuthPanelFrame } from '@/blocks/auth/auth-panel-frame';
 import { AuthPasswordInput } from '@/blocks/auth/auth-password-input';
 import { LoginTwoFactor } from '@/blocks/auth/login-two-factor';
@@ -11,11 +12,14 @@ import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Link, useRouter } from '@/i18n/navigation';
+import { googleStartUrl } from '@/lib/auth/google-oauth';
+import { isOAuthError } from '@/lib/auth/oauth-errors';
 import { EMAIL_PATTERN } from '@/lib/auth/register-form';
 import { useAuthSettings } from '@/lib/auth/use-auth-settings';
 import { signIn } from '@/lib/session/client';
 import { safeNextPath } from '@/lib/session/guard';
 import type { AuthErrorReason } from '@/lib/session/types';
+import { useUrlText } from '@/lib/use-url-state';
 
 type LoginErrors = Partial<Record<'email' | 'password', string>>;
 
@@ -25,10 +29,12 @@ type Step = { kind: 'credentials' } | { kind: 'two_factor'; emailMasked: string 
  * 登录表单：个人与组织成员都用邮箱和密码登录，界面不区分账号类型。
  * 提交经官网服务器转给后端；成功后进控制台（有回跳地址就回到原来要去的页）。
  * 账号开了两步验证时切到第二步输入验证码。后台开了找回密码时，密码框右上角有「忘记密码？」；
- * 谷歌登录还没接后端，入口先不显示。
+ * 后台开了谷歌登录时下面有「使用 Google 账号登录」（整页跳去官网服务器，由它替浏览器和后台、谷歌打交道），
+ * 谷歌登录失败时服务器带着 ?oauth_error= 跳回这里，表单上方显示原因。
  */
 export function LoginPanel() {
   const t = useTranslations('auth');
+  const locale = useLocale();
   const router = useRouter();
   const { settings } = useAuthSettings();
   const [step, setStep] = useState<Step>({ kind: 'credentials' });
@@ -37,10 +43,18 @@ export function LoginPanel() {
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // 谷歌登录失败跳回来时地址里带 ?oauth_error=：按原因显示提示；用户一动手（输入、提交）就从地址里去掉
+  const [oauthError, setOauthError] = useUrlText('oauth_error');
+  const oauthMessage = isOAuthError(oauthError) ? t(`login.oauthErrors.${oauthError}`) : null;
+  const dismissOauthError = () => {
+    if (oauthError !== '') setOauthError('');
+  };
+
   const setValue = (key: 'email' | 'password', value: string) => {
     // 输入即清掉该字段的错误和整表提示
     setValues((current) => ({ ...current, [key]: value }));
     setFormError(null);
+    dismissOauthError();
     setErrors((current) => {
       if (!(key in current)) return current;
       const next = { ...current };
@@ -96,6 +110,7 @@ export function LoginPanel() {
 
     setSubmitting(true);
     setFormError(null);
+    dismissOauthError();
     const result = await signIn(values.email.trim(), values.password);
     if (result.kind === 'signed_in') {
       enterConsole();
@@ -172,7 +187,7 @@ export function LoginPanel() {
               }
             />
 
-            <AuthFormAlert message={formError} />
+            <AuthFormAlert message={formError ?? oauthMessage} />
 
             <Button type="submit" block loading={submitting} data-login-submit>
               {t('login.submit')}
@@ -189,6 +204,19 @@ export function LoginPanel() {
               {t('login.toRegister')}
             </Link>
           </p>
+
+          {settings.googleOAuthEnabled ? (
+            <AuthGoogleButton
+              label={t('login.google')}
+              dataAttribute="data-google-login"
+              startUrl={() =>
+                googleStartUrl({
+                  locale: locale === 'en' ? 'en' : 'zh',
+                  next: safeNextPath(new URLSearchParams(window.location.search).get('next')),
+                })
+              }
+            />
+          ) : null}
 
           <p className="mt-8 text-center text-xs leading-5 text-subtle-foreground">
             {t.rich('login.terms', {

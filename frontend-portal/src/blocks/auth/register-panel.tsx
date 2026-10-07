@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 import { AuthFormAlert } from '@/blocks/auth/auth-form-alert';
+import { AuthGoogleButton } from '@/blocks/auth/auth-google-button';
 import { AuthPanelFrame } from '@/blocks/auth/auth-panel-frame';
 import { Button } from '@/components/ui/button';
 import { SegmentedControl } from '@/components/ui/segmented-control';
@@ -14,6 +15,7 @@ import {
   referralCodeFromQuery,
   storeReferralCode,
 } from '@/lib/auth/affiliate';
+import { googleStartUrl, storeGoogleDraft } from '@/lib/auth/google-oauth';
 import { checkInvitationCode, checkPromoCode, register } from '@/lib/auth/register-client';
 import {
   EMPTY_REGISTER_VALUES,
@@ -55,9 +57,13 @@ const FIELD_INPUT_ID: Record<RegisterField, string> = {
  * 注册页：规则与现有 sub2api 注册页一致（见 src/lib/auth/register-form.ts）。
  * 打开时读后端开关决定显示哪些输入框；后台开了邮箱验证时多一步验证码；注册成功即为登录状态，进控制台。
  * 网址里的 ?invite= / ?promo= / ?aff= 会自动填好并校验。
+ * 后台开了谷歌登录时下面有「使用 Google 账号注册」：先把已填的注册类型、组织名称、邀请码等存在本页会话里，
+ * 新用户到「完成注册」页时预填；发起时只带返利码和有效的优惠码（优惠码只能在发起时交给后台），
+ * 组织与邀请码在完成注册时才提交，避免这里填过又改主意时后台按旧值建组织。
  */
 export function RegisterPanel() {
   const t = useTranslations('auth');
+  const locale = useLocale();
   const router = useRouter();
   const { loaded, settings } = useAuthSettings();
   const messages = useRegisterMessages(settings);
@@ -293,6 +299,30 @@ export function RegisterPanel() {
               {t('register.toLogin')}
             </Link>
           </p>
+
+          {!closed && settings.googleOAuthEnabled ? (
+            <AuthGoogleButton
+              label={t('register.google')}
+              dataAttribute="data-google-register"
+              startUrl={() => {
+                storeGoogleDraft({
+                  account,
+                  orgName: values.orgName,
+                  memberName: values.memberName,
+                  invite: values.invite,
+                  aff: values.aff,
+                });
+                return googleStartUrl({
+                  locale: locale === 'en' ? 'en' : 'zh',
+                  aff: values.aff,
+                  promo:
+                    settings.promoCodeEnabled && promo.check.status === 'valid'
+                      ? values.promo
+                      : undefined,
+                });
+              }}
+            />
+          ) : null}
 
           {closed ? null : (
             <p className="mt-8 text-center text-xs leading-5 text-subtle-foreground">

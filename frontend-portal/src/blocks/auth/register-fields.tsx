@@ -14,7 +14,8 @@ import type { StatusLine } from './use-register-messages';
 /**
  * 注册表单的输入项（第一步），顺序：组织名称（创建组织时）→ 邮箱 → 密码 → 邀请码 →
  * 你在组织中的名称（创建组织或凭组织邀请码加入时）→ 邀请返利码（后台开了返利时）→ 优惠码（后台开了优惠码时）。
- * 只负责画，校验与提交在 RegisterPanel 里。
+ * 只负责画，校验与提交在 RegisterPanel 里。谷歌登录的完成注册页也用它：邮箱是谷歌邮箱、只读（emailLocked），
+ * 优惠码只能在发起谷歌登录时提交，不显示（showPromo 为 false）。
  */
 export function RegisterFields({
   settings,
@@ -25,6 +26,8 @@ export function RegisterFields({
   showMemberName,
   inviteStatus,
   promoStatus,
+  emailLocked = false,
+  showPromo = true,
 }: {
   settings: AuthSettings;
   values: RegisterValues;
@@ -34,6 +37,8 @@ export function RegisterFields({
   showMemberName: boolean;
   inviteStatus: StatusLine | null;
   promoStatus: StatusLine | null;
+  emailLocked?: boolean;
+  showPromo?: boolean;
 }) {
   const t = useTranslations('auth');
   const describedBy = (field: RegisterField, id: string) =>
@@ -72,6 +77,8 @@ export function RegisterFields({
           autoComplete="email"
           placeholder="name@company.com"
           value={values.email}
+          readOnly={emailLocked}
+          disabled={emailLocked}
           onChange={(event) => setValue('email', event.target.value)}
           aria-invalid={errors.email ? true : undefined}
           aria-describedby={describedBy('email', 'email')}
@@ -131,7 +138,7 @@ export function RegisterFields({
         />
       ) : null}
 
-      {settings.promoCodeEnabled ? (
+      {settings.promoCodeEnabled && showPromo ? (
         <RegisterCodeField
           id="promo"
           label={t('fields.promo')}

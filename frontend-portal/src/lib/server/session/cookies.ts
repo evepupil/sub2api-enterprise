@@ -28,7 +28,8 @@ export interface TokenPair {
 export interface CookieOptions {
   httpOnly: true;
   sameSite: 'lax';
-  path: '/';
+  /** 登录凭证是整站 /；谷歌登录过程中的临时 cookie 只在官网的谷歌登录接口下 */
+  path: string;
   secure: boolean;
   maxAge: number;
 }

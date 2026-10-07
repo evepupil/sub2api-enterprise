@@ -91,6 +91,14 @@ export function jsonResponse(
   return response;
 }
 
+/** 整页跳转（谷歌登录的发起与回调用）：不缓存，顺带写 cookie；url 为完整地址 */
+export function redirectResponse(url: string, writes: CookieWrite[] = []): NextResponse {
+  const response = NextResponse.redirect(url, 302);
+  response.headers.set('cache-control', 'no-store');
+  for (const write of writes) response.cookies.set(write.name, write.value, write.options);
+  return response;
+}
+
 /** 官网接口统一的错误响应 */
 export function authErrorResponse(
   reason: AuthErrorReason,
