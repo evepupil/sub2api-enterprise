@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 
+import { AuthCaptcha } from '@/blocks/auth/auth-captcha';
 import { AuthFormAlert } from '@/blocks/auth/auth-form-alert';
 import { AuthGoogleButton } from '@/blocks/auth/auth-google-button';
 import { AuthLegalNote } from '@/blocks/auth/auth-legal-note';
@@ -17,6 +18,7 @@ import { googleStartUrl } from '@/lib/auth/google-oauth';
 import { isOAuthError } from '@/lib/auth/oauth-errors';
 import { EMAIL_PATTERN } from '@/lib/auth/register-form';
 import { useAuthSettings } from '@/lib/auth/use-auth-settings';
+import { useCaptcha } from '@/lib/auth/use-captcha';
 import { signIn } from '@/lib/session/client';
 import { safeNextPath } from '@/lib/session/guard';
 import type { AuthErrorReason } from '@/lib/session/types';
@@ -32,12 +34,14 @@ type Step = { kind: 'credentials' } | { kind: 'two_factor'; emailMasked: string 
  * 账号开了两步验证时切到第二步输入验证码。后台开了找回密码时，密码框右上角有「忘记密码？」；
  * 后台开了谷歌登录时下面有「使用 Google 账号登录」（整页跳去官网服务器，由它替浏览器和后台、谷歌打交道），
  * 谷歌登录失败时服务器带着 ?oauth_error= 跳回这里，表单上方显示原因。
+ * 后台开了 Cloudflare 人机验证时，登录按钮上方有验证框，通过后才能提交；每次提交后重新验证（结果只能用一次）。
  */
 export function LoginPanel() {
   const t = useTranslations('auth');
   const locale = useLocale();
   const router = useRouter();
-  const { settings } = useAuthSettings();
+  const { loaded, settings } = useAuthSettings();
+  const captcha = useCaptcha(settings.turnstileSiteKey);
   const [step, setStep] = useState<Step>({ kind: 'credentials' });
   const [values, setValues] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState<LoginErrors>({});
@@ -86,6 +90,10 @@ export function LoginPanel() {
       case 'TOO_MANY_REQUESTS':
       case 'BACKEND_UNAVAILABLE':
         return t(`login.errors.${reason}`);
+      case 'CAPTCHA_FAILED':
+        return t('captcha.failed');
+      case 'CAPTCHA_UNAVAILABLE':
+        return t('captcha.unavailable');
       default:
         return t('login.errors.generic');
     }
@@ -112,11 +120,12 @@ export function LoginPanel() {
     setSubmitting(true);
     setFormError(null);
     dismissOauthError();
-    const result = await signIn(values.email.trim(), values.password);
+    const result = await signIn(values.email.trim(), values.password, captcha.token);
     if (result.kind === 'signed_in') {
       enterConsole();
       return;
     }
+    captcha.reset();
     setSubmitting(false);
     if (result.kind === 'requires_2fa') {
       setStep({ kind: 'two_factor', emailMasked: result.emailMasked });
@@ -188,9 +197,17 @@ export function LoginPanel() {
               }
             />
 
+            <AuthCaptcha captcha={captcha} />
+
             <AuthFormAlert message={formError ?? oauthMessage} />
 
-            <Button type="submit" block loading={submitting} data-login-submit>
+            <Button
+              type="submit"
+              block
+              loading={submitting}
+              disabled={!loaded || captcha.missing}
+              data-login-submit
+            >
               {t('login.submit')}
             </Button>
           </form>

@@ -53,7 +53,9 @@ export const AUTH_ERROR_REASONS = [
   'ORGANIZATION_MEMBER_NAME_INVALID',
   'ORGANIZATION_REGISTRATION_CONFLICT',
   'USER_ALREADY_IN_ORGANIZATION',
-  'CAPTCHA_REQUIRED',
+  // 人机验证：没通过或已过期（重新验证即可）；后台的验证配置有问题或用了官网不支持的验证码
+  'CAPTCHA_FAILED',
+  'CAPTCHA_UNAVAILABLE',
   // 谷歌登录：待完成注册的会话不存在、过期或已用过（要重新用谷歌登录）
   'OAUTH_SESSION_EXPIRED',
   // 找回密码

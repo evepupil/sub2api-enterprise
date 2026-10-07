@@ -16,14 +16,16 @@ const isOk = (status: number, data: unknown) =>
   data !== null &&
   (data as { ok?: unknown }).ok === true;
 
-/** 请后端给这个邮箱发重置链接；邮件语言跟着页面语言 */
+/** 请后端给这个邮箱发重置链接；邮件语言跟着页面语言；后台开了人机验证时带上验证结果 */
 export async function requestPasswordReset(
   email: string,
   locale: string,
+  captchaToken = '',
 ): Promise<PasswordResetResult> {
   const { status, data } = await authRequest('/api/portal/auth/forgot-password', {
     email,
     locale,
+    ...(captchaToken === '' ? {} : { captchaToken }),
   });
   return isOk(status, data)
     ? { ok: true }

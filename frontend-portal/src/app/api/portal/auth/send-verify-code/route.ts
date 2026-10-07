@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 
+import { captchaTokenFrom, withCaptcha } from '@/lib/server/session/captcha';
 import { isSameOriginRequest } from '@/lib/server/session/origin';
 import { authReasonFor, browserStatusFor } from '@/lib/server/session/reasons';
 import {
@@ -14,18 +15,21 @@ import { forwardedHeaders } from '@/lib/server/sub2api/forward';
 /** 后端没给倒计时时按 60 秒（后端默认值） */
 const DEFAULT_COUNTDOWN_SECONDS = 60;
 
-/** 注册前发邮箱验证码；返回多少秒后才能重发 */
+/** 注册前发邮箱验证码（后台开了人机验证时要带验证结果）；返回多少秒后才能重发 */
 export async function POST(request: NextRequest) {
   if (!isSameOriginRequest(request.headers)) return authErrorResponse('FORBIDDEN_ORIGIN', 403);
 
   const body = await readJsonBody(request);
   const email = typeof body.email === 'string' ? body.email.trim() : '';
-  if (email === '' || email.length > 254) return authErrorResponse('BAD_REQUEST', 400);
+  const captchaToken = captchaTokenFrom(body);
+  if (email === '' || email.length > 254 || captchaToken === null) {
+    return authErrorResponse('BAD_REQUEST', 400);
+  }
 
   const result = await callBackend<unknown>({
     method: 'POST',
     path: '/auth/send-verify-code',
-    body: { email },
+    body: withCaptcha({ email }, captchaToken),
     forwarded: forwardedHeaders(request.headers),
   });
   if (!result.ok) {

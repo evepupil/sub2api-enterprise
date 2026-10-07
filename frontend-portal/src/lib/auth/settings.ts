@@ -17,10 +17,11 @@ export interface AuthSettings {
   emailSuffixWhitelist: string[];
   /** 开了「按邮箱域名限量注册」时，后缀由后端按额度判断，前端不做预检 */
   emailDomainQuotaEnabled: boolean;
-  /** 后台开了任意一种人机验证（官网暂不支持，注册会被后端拒绝） */
-  captchaEnabled: boolean;
-  /** 后台开了注册前确认用户协议（官网暂不支持） */
-  loginAgreementEnabled: boolean;
+  /**
+   * 后台开了 Cloudflare 人机验证时的站点公钥（登录、注册、找回密码页要先过验证），没开是 ''。
+   * 后台开的是腾讯、阿里的验证码时官网不支持，这里也是 ''，提交时后台会拒绝并提示验证不可用。
+   */
+  turnstileSiteKey: string;
   passwordResetEnabled: boolean;
   googleOAuthEnabled: boolean;
 }
@@ -34,8 +35,7 @@ export const DEFAULT_AUTH_SETTINGS: AuthSettings = {
   affiliateEnabled: false,
   emailSuffixWhitelist: [],
   emailDomainQuotaEnabled: false,
-  captchaEnabled: false,
-  loginAgreementEnabled: false,
+  turnstileSiteKey: '',
   passwordResetEnabled: false,
   googleOAuthEnabled: false,
 };
@@ -55,6 +55,8 @@ export function fromPortalSettings(raw: unknown): AuthSettings {
           (item): item is string => typeof item === 'string',
         );
       }
+    } else if (key === 'turnstileSiteKey') {
+      if (typeof value === 'string') result.turnstileSiteKey = value;
     } else if (typeof value === 'boolean') {
       result[key] = value;
     }
@@ -84,11 +86,10 @@ export function toAuthSettings(raw: unknown): AuthSettings {
     affiliateEnabled: flag('affiliate_enabled', DEFAULT_AUTH_SETTINGS.affiliateEnabled),
     emailSuffixWhitelist: whitelist,
     emailDomainQuotaEnabled: flag('registration_email_domain_quota_enabled', false),
-    captchaEnabled:
-      flag('turnstile_enabled', false) ||
-      flag('tencent_captcha_enabled', false) ||
-      flag('aliyun_captcha_enabled', false),
-    loginAgreementEnabled: flag('login_agreement_enabled', false),
+    turnstileSiteKey:
+      flag('turnstile_enabled', false) && typeof raw.turnstile_site_key === 'string'
+        ? raw.turnstile_site_key.trim()
+        : '',
     passwordResetEnabled: flag('password_reset_enabled', false),
     googleOAuthEnabled: flag('google_oauth_enabled', false),
   };

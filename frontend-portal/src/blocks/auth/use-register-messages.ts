@@ -27,7 +27,6 @@ const REGISTER_REASONS = [
   'ORGANIZATION_REGISTRATION_CONFLICT',
   'USER_ALREADY_IN_ORGANIZATION',
   'ORGANIZATION_DISABLED',
-  'CAPTCHA_REQUIRED',
   'OAUTH_SESSION_EXPIRED',
   'TOO_MANY_REQUESTS',
   'BACKEND_UNAVAILABLE',
@@ -64,8 +63,11 @@ export function useRegisterMessages(settings: AuthSettings) {
     return t(`fields.errors.${error}`);
   };
 
-  const reasonMessage = (reason: AuthErrorReason): string =>
-    isRegisterReason(reason) ? t(`register.errors.${reason}`) : t('register.errors.generic');
+  const reasonMessage = (reason: AuthErrorReason): string => {
+    if (reason === 'CAPTCHA_FAILED') return t('captcha.failed');
+    if (reason === 'CAPTCHA_UNAVAILABLE') return t('captcha.unavailable');
+    return isRegisterReason(reason) ? t(`register.errors.${reason}`) : t('register.errors.generic');
+  };
 
   const blockMessage = (block: SubmitBlock): string => t(`register.blocks.${block}`);
 

@@ -75,8 +75,12 @@ export async function checkPromoCode(code: string): Promise<CodeCheck> {
 export type SendCodeResult =
   { ok: true; countdown: number } | { ok: false; reason: AuthErrorReason };
 
-export async function sendVerifyCode(email: string): Promise<SendCodeResult> {
-  const { status, data } = await authRequest('/api/portal/auth/send-verify-code', { email });
+/** 发邮箱验证码；后台开了人机验证时带上验证结果（没开时为 ''，不带） */
+export async function sendVerifyCode(email: string, captchaToken = ''): Promise<SendCodeResult> {
+  const { status, data } = await authRequest('/api/portal/auth/send-verify-code', {
+    email,
+    ...(captchaToken === '' ? {} : { captchaToken }),
+  });
   if (status === 200 && isRecord(data) && data.ok === true) {
     return { ok: true, countdown: typeof data.countdown === 'number' ? data.countdown : 60 };
   }

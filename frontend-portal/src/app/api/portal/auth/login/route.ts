@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 
+import { captchaTokenFrom, withCaptcha } from '@/lib/server/session/captcha';
 import {
   clearedCookieWrites,
   isSecureRequest,
@@ -22,7 +23,7 @@ import { callBackend } from '@/lib/server/sub2api/client';
 import { forwardedHeaders } from '@/lib/server/sub2api/forward';
 
 /**
- * 登录：邮箱 + 密码转给后端。
+ * 登录：邮箱 + 密码转给后端（后台开了人机验证时连同验证结果）。
  * - 成功：两样凭证写进 cookie，只把当前用户信息返回给浏览器；
  * - 账号开了两步验证：临时凭证写进短期 cookie，告诉浏览器进入输入验证码那一步；
  * - 失败：返回归好类的原因，界面按原因显示中文提示。
@@ -33,14 +34,21 @@ export async function POST(request: NextRequest) {
   const body = await readJsonBody(request);
   const email = typeof body.email === 'string' ? body.email.trim() : '';
   const password = typeof body.password === 'string' ? body.password : '';
-  if (email === '' || password === '' || email.length > 254 || password.length > 512) {
+  const captchaToken = captchaTokenFrom(body);
+  if (
+    email === '' ||
+    password === '' ||
+    email.length > 254 ||
+    password.length > 512 ||
+    captchaToken === null
+  ) {
     return authErrorResponse('BAD_REQUEST', 400);
   }
 
   const result = await callBackend<unknown>({
     method: 'POST',
     path: '/auth/login',
-    body: { email, password },
+    body: withCaptcha({ email, password }, captchaToken),
     forwarded: forwardedHeaders(request.headers),
   });
   if (!result.ok) {

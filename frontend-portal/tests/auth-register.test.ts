@@ -63,7 +63,7 @@ describe('后端公开开关', () => {
       promoCodeEnabled: false,
       affiliateEnabled: true,
       emailSuffixWhitelist: ['@corp.test'],
-      captchaEnabled: true,
+      turnstileSiteKey: '',
     });
   });
 
@@ -271,7 +271,7 @@ describe('注册错误归类', () => {
     expect(reason('INVALID_VERIFY_CODE')).toBe('INVALID_VERIFY_CODE');
     expect(reason('ORGANIZATION_REGISTRATION_CONFLICT')).toBe('ORGANIZATION_REGISTRATION_CONFLICT');
     expect(reason('PROMO_CODE_EXPIRED')).toBe('PROMO_CODE_INVALID');
-    expect(reason('TURNSTILE_VERIFICATION_FAILED')).toBe('CAPTCHA_REQUIRED');
+    expect(reason('TURNSTILE_VERIFICATION_FAILED')).toBe('CAPTCHA_FAILED');
     expect(reason('VERIFY_CODE_TOO_FREQUENT', 429)).toBe('VERIFY_CODE_TOO_FREQUENT');
   });
 });

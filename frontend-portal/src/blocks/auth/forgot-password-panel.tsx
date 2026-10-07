@@ -3,6 +3,7 @@
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 
+import { AuthCaptcha } from '@/blocks/auth/auth-captcha';
 import { AuthFormAlert } from '@/blocks/auth/auth-form-alert';
 import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
@@ -11,6 +12,7 @@ import { Link } from '@/i18n/navigation';
 import { resetEmailError } from '@/lib/auth/password-reset';
 import { requestPasswordReset } from '@/lib/auth/password-reset-client';
 import { useAuthSettings } from '@/lib/auth/use-auth-settings';
+import { useCaptcha } from '@/lib/auth/use-captcha';
 import { useCountdown } from '@/lib/auth/use-countdown';
 import type { AuthErrorReason } from '@/lib/session/types';
 
@@ -23,11 +25,13 @@ const RESEND_SECONDS = 60;
  * 找回密码（照 sub2api 原来的找回密码页）：填邮箱 → 发重置链接，邮件语言跟着页面语言。
  * 发出后不管邮箱有没有注册都显示同一句话（后端也不透露），60 秒后可以重发。
  * 后台没开找回密码时只显示一句「暂时关闭」。
+ * 后台开了人机验证时，发送和重发前都要过验证框（重发的验证框在倒计时结束后出现）。
  */
 export function ForgotPasswordPanel() {
   const t = useTranslations('auth');
   const locale = useLocale();
   const { loaded, settings } = useAuthSettings();
+  const captcha = useCaptcha(settings.turnstileSiteKey);
   const [email, setEmail] = useState('');
   const [fieldError, setFieldError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
@@ -38,10 +42,13 @@ export function ForgotPasswordPanel() {
   const messageFor = (reason: AuthErrorReason): string => {
     switch (reason) {
       case 'PASSWORD_RESET_DISABLED':
-      case 'CAPTCHA_REQUIRED':
       case 'TOO_MANY_REQUESTS':
       case 'BACKEND_UNAVAILABLE':
         return t(`forgot.errors.${reason}`);
+      case 'CAPTCHA_FAILED':
+        return t('captcha.failed');
+      case 'CAPTCHA_UNAVAILABLE':
+        return t('captcha.unavailable');
       default:
         return t('forgot.errors.generic');
     }
@@ -50,7 +57,8 @@ export function ForgotPasswordPanel() {
   const send = async (address: string) => {
     setSubmitting(true);
     setFormError(null);
-    const result = await requestPasswordReset(address, locale);
+    const result = await requestPasswordReset(address, locale, captcha.token);
+    captcha.reset();
     setSubmitting(false);
     if (!result.ok) {
       setFormError(messageFor(result.reason));
@@ -90,12 +98,13 @@ export function ForgotPasswordPanel() {
         <p className="break-words text-sm leading-6 text-muted-foreground">
           {t('forgot.sent', { email: sentTo })}
         </p>
+        {countdown.seconds === 0 && !submitting ? <AuthCaptcha captcha={captcha} /> : null}
         <AuthFormAlert message={formError} />
         <Button
           variant="secondary"
           block
           loading={submitting}
-          disabled={countdown.seconds > 0}
+          disabled={countdown.seconds > 0 || captcha.missing}
           onClick={() => void send(sentTo)}
           data-forgot-resend
         >
@@ -127,8 +136,15 @@ export function ForgotPasswordPanel() {
             className="min-w-0"
           />
         </Field>
+        <AuthCaptcha captcha={captcha} />
         <AuthFormAlert message={formError} />
-        <Button type="submit" block loading={submitting} disabled={!loaded} data-forgot-submit>
+        <Button
+          type="submit"
+          block
+          loading={submitting}
+          disabled={!loaded || captcha.missing}
+          data-forgot-submit
+        >
           {t('forgot.submit')}
         </Button>
       </form>

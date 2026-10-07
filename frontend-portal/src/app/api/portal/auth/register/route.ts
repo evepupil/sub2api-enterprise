@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 
+import { captchaTokenFrom, withCaptcha } from '@/lib/server/session/captcha';
 import {
   clearedCookieWrites,
   isSecureRequest,
@@ -38,7 +39,8 @@ function text(body: Record<string, unknown>, key: string, max: number): string |
 
 /**
  * 注册：个人注册、创建组织、凭组织邀请码加入，都走后端同一个注册接口，由后端按邀请码类型判断。
- * 开了邮箱验证时请求里带 6 位验证码。成功后和登录一样写入凭证 cookie，直接是登录状态。
+ * 开了邮箱验证时请求里带 6 位验证码（这时后台不再查人机验证，发验证码那一步查过了）；
+ * 没开邮箱验证、后台开了人机验证时带验证结果。成功后和登录一样写入凭证 cookie，直接是登录状态。
  */
 export async function POST(request: NextRequest) {
   if (!isSameOriginRequest(request.headers)) return authErrorResponse('FORBIDDEN_ORIGIN', 403);
@@ -66,23 +68,27 @@ export async function POST(request: NextRequest) {
     organizationName,
     organizationMemberName,
   ];
-  if (!email || !password || fields.some((value) => value === null)) {
+  const captchaToken = captchaTokenFrom(body);
+  if (!email || !password || fields.some((value) => value === null) || captchaToken === null) {
     return authErrorResponse('BAD_REQUEST', 400);
   }
 
   const result = await callBackend<unknown>({
     method: 'POST',
     path: '/auth/register',
-    body: {
-      email,
-      password,
-      verify_code: verifyCode,
-      invitation_code: invitationCode,
-      promo_code: promoCode,
-      aff_code: affCode,
-      organization_name: organizationName,
-      organization_member_name: organizationMemberName,
-    },
+    body: withCaptcha(
+      {
+        email,
+        password,
+        verify_code: verifyCode,
+        invitation_code: invitationCode,
+        promo_code: promoCode,
+        aff_code: affCode,
+        organization_name: organizationName,
+        organization_member_name: organizationMemberName,
+      },
+      captchaToken,
+    ),
     forwarded: forwardedHeaders(request.headers),
   });
   if (!result.ok) {

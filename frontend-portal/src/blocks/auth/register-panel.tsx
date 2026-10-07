@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 
+import { AuthCaptcha } from '@/blocks/auth/auth-captcha';
 import { AuthFormAlert } from '@/blocks/auth/auth-form-alert';
 import { AuthGoogleButton } from '@/blocks/auth/auth-google-button';
 import { AuthLegalNote } from '@/blocks/auth/auth-legal-note';
@@ -33,6 +34,7 @@ import {
   type RegisterValues,
 } from '@/lib/auth/register-form';
 import { useAuthSettings } from '@/lib/auth/use-auth-settings';
+import { useCaptcha } from '@/lib/auth/use-captcha';
 import { useCodeCheck } from '@/lib/auth/use-code-check';
 import type { AuthErrorReason } from '@/lib/session/types';
 import { useUrlState } from '@/lib/use-url-state';
@@ -61,6 +63,8 @@ const FIELD_INPUT_ID: Record<RegisterField, string> = {
  * 后台开了谷歌登录时下面有「使用 Google 账号注册」：先把已填的注册类型、组织名称、邀请码等存在本页会话里，
  * 新用户到「完成注册」页时预填；发起时只带返利码和有效的优惠码（优惠码只能在发起时交给后台），
  * 组织与邀请码在完成注册时才提交，避免这里填过又改主意时后台按旧值建组织。
+ * 后台开了 Cloudflare 人机验证时，提交按钮上方有验证框：没开邮箱验证时注册要带验证结果；
+ * 开了邮箱验证时由下一步发验证码带上（这时注册本身不再验证）。
  */
 export function RegisterPanel() {
   const t = useTranslations('auth');
@@ -68,6 +72,7 @@ export function RegisterPanel() {
   const router = useRouter();
   const { loaded, settings } = useAuthSettings();
   const messages = useRegisterMessages(settings);
+  const captcha = useCaptcha(settings.turnstileSiteKey);
   const [account, setAccount] = useUrlState('account', ACCOUNT_VALUES, 'personal');
   const [values, setValues] = useState<RegisterValues>(EMPTY_REGISTER_VALUES);
   const [errors, setErrors] = useState<RegisterErrors>({});
@@ -194,12 +199,16 @@ export function RegisterPanel() {
       return;
     }
 
-    const result = await register(registerPayload(values, ctx));
+    const result = await register({
+      ...registerPayload(values, ctx),
+      captchaToken: captcha.token,
+    });
     if (result.kind === 'signed_in') {
       clearReferralCode();
       router.replace('/console/usage');
       return;
     }
+    captcha.reset();
     setSubmitting(false);
     setFormError(messages.reasonMessage(result.reason));
   };
@@ -220,6 +229,7 @@ export function RegisterPanel() {
             creatingOrganization ? t('register.submitOrganization') : t('register.verify.submit')
           }
           reasonMessage={messages.reasonMessage}
+          captcha={captcha}
           onSubmit={submitRegistration}
           onBack={() => setStep('form')}
         />
@@ -275,13 +285,15 @@ export function RegisterPanel() {
                   promoStatus={messages.promoStatus(promo.check)}
                 />
 
+                <AuthCaptcha captcha={captcha} />
+
                 <AuthFormAlert message={formError} />
 
                 <Button
                   type="submit"
                   block
                   loading={submitting}
-                  disabled={!loaded}
+                  disabled={!loaded || captcha.missing}
                   data-register-submit
                 >
                   {submitLabel}

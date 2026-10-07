@@ -55,8 +55,17 @@ function toLoginResult(status: number, data: unknown): LoginResult {
   return { kind: 'error', reason: reasonFromResponse(status, data) };
 }
 
-export async function signIn(email: string, password: string): Promise<LoginResult> {
-  const { status, data } = await post('/api/portal/auth/login', { email, password });
+/** 登录；后台开了人机验证时带上验证结果（没开时为 ''，不带） */
+export async function signIn(
+  email: string,
+  password: string,
+  captchaToken = '',
+): Promise<LoginResult> {
+  const { status, data } = await post('/api/portal/auth/login', {
+    email,
+    password,
+    ...(captchaToken === '' ? {} : { captchaToken }),
+  });
   return toLoginResult(status, data);
 }
 

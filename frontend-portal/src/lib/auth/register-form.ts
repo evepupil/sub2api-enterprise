@@ -154,6 +154,8 @@ export interface RegisterPayload {
   affCode?: string;
   organizationName?: string;
   organizationMemberName?: string;
+  /** 人机验证结果：后台开了人机验证、又没开邮箱验证时注册要带 */
+  captchaToken?: string;
 }
 
 const optional = (value: string): string | undefined => {
