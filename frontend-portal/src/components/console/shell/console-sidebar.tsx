@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 
 import { Brand } from '@/components/layout/brand';
 import { Link, usePathname } from '@/i18n/navigation';
+import { CONSOLE_FEATURES } from '@/lib/console/features';
 import { useSession } from '@/lib/session/session-provider';
 import { cn } from '@/lib/utils';
 
@@ -15,6 +16,7 @@ import { UserMenu } from './user-menu';
 
 /**
  * 控制台侧边栏：品牌与收起按钮、深色「对话」入口、菜单、底部头像菜单（含语言与主题切换）与通知。
+ * 对话入口与通知铃铛按控制台功能开关显示（src/lib/console/features.ts，首发都关着）。
  * collapsed 为真时只显示图标（悬停有原生提示），桌面端可收起；手机端放进左侧抽屉，不收起。
  * 交互检查：菜单项 data-nav={key}，当前页带 aria-current="page"，收起按钮 data-sidebar-toggle。
  */
@@ -64,25 +66,27 @@ export function ConsoleSidebar({
         ) : null}
       </div>
 
-      <div className={cn('shrink-0', collapsed ? 'px-2' : 'px-3')}>
-        <Link
-          href="/console/chat"
-          data-nav="chat"
-          onClick={onNavigate}
-          aria-current={chatActive ? 'page' : undefined}
-          title={collapsed ? t('nav.chat') : undefined}
-          className={buttonClass({
-            block: true,
-            className: cn('h-10', collapsed ? 'px-0' : 'justify-between px-3'),
-          })}
-        >
-          <span className="flex items-center gap-2">
-            <Sparkles aria-hidden />
-            <span className={collapsed ? 'sr-only' : undefined}>{t('nav.chat')}</span>
-          </span>
-          {collapsed ? null : <ArrowRight aria-hidden />}
-        </Link>
-      </div>
+      {CONSOLE_FEATURES.chat ? (
+        <div className={cn('shrink-0', collapsed ? 'px-2' : 'px-3')}>
+          <Link
+            href="/console/chat"
+            data-nav="chat"
+            onClick={onNavigate}
+            aria-current={chatActive ? 'page' : undefined}
+            title={collapsed ? t('nav.chat') : undefined}
+            className={buttonClass({
+              block: true,
+              className: cn('h-10', collapsed ? 'px-0' : 'justify-between px-3'),
+            })}
+          >
+            <span className="flex items-center gap-2">
+              <Sparkles aria-hidden />
+              <span className={collapsed ? 'sr-only' : undefined}>{t('nav.chat')}</span>
+            </span>
+            {collapsed ? null : <ArrowRight aria-hidden />}
+          </Link>
+        </div>
+      ) : null}
 
       <nav
         aria-label={t('nav.label')}
@@ -124,7 +128,7 @@ export function ConsoleSidebar({
         )}
       >
         <UserMenu placement={collapsed ? 'rail' : 'sidebar'} />
-        <NotificationsMenu />
+        {CONSOLE_FEATURES.notifications ? <NotificationsMenu /> : null}
       </div>
     </div>
   );

@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Link } from '@/i18n/navigation';
 import type { AppLocale } from '@/i18n/routing';
 import { PROTOCOL_LABELS, formatContext, getProvider } from '@/lib/catalog';
+import { CONSOLE_FEATURES } from '@/lib/console/features';
 import type { LiveCurrency, ModelRowView } from '@/lib/console/live/models-view';
 import { cn } from '@/lib/utils';
 
@@ -119,19 +120,21 @@ export function ModelRow({
         {row.contextTokens === null ? '—' : formatContext(row.contextTokens)}
       </Td>
 
-      <Td sticky="right" className="whitespace-nowrap">
-        {row.type === 'text' ? (
-          <Link
-            href={{ pathname: '/console/chat', query: { model: row.id } }}
-            className={buttonClass({ size: 'sm' })}
-            data-try={row.id}
-          >
-            {t('table.try')}
-          </Link>
-        ) : (
-          <span className="text-subtle-foreground">—</span>
-        )}
-      </Td>
+      {CONSOLE_FEATURES.chat ? (
+        <Td sticky="right" className="whitespace-nowrap">
+          {row.type === 'text' ? (
+            <Link
+              href={{ pathname: '/console/chat', query: { model: row.id } }}
+              className={buttonClass({ size: 'sm' })}
+              data-try={row.id}
+            >
+              {t('table.try')}
+            </Link>
+          ) : (
+            <span className="text-subtle-foreground">—</span>
+          )}
+        </Td>
+      ) : null}
     </Tr>
   );
 }

@@ -8,6 +8,7 @@ import { Table, TableShell, Th } from '@/components/console/data-table';
 import { EmptyState } from '@/components/console/empty-state';
 import { Pagination, usePagination } from '@/components/console/pagination';
 import type { AppLocale } from '@/i18n/routing';
+import { CONSOLE_FEATURES } from '@/lib/console/features';
 import type { LiveCurrency, ModelRowView } from '@/lib/console/live/models-view';
 
 import { ModelRow } from './models-row';
@@ -56,7 +57,7 @@ export function ModelsTable({
         />
       }
     >
-      {/* 九列的宽表：单元格左右内边距收到 12px，桌面宽度下尽量放下，放不下时横向滚动 */}
+      {/* 九列的宽表（对话关着时没有最后的操作列「试一试」）：单元格左右内边距收到 12px，桌面宽度下尽量放下，放不下时横向滚动 */}
       <Table minWidth={1200} className="[&_td]:px-3 [&_th]:px-3">
         <thead>
           <tr>
@@ -70,7 +71,7 @@ export function ModelsTable({
             <Th>{t('table.provider')}</Th>
             <Th>{t('table.protocols')}</Th>
             <Th>{t('table.context')}</Th>
-            <Th sticky="right">{tc('table.actions')}</Th>
+            {CONSOLE_FEATURES.chat ? <Th sticky="right">{tc('table.actions')}</Th> : null}
           </tr>
         </thead>
         <tbody>

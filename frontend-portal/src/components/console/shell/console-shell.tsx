@@ -6,6 +6,7 @@ import { useState, type ReactNode } from 'react';
 
 import { Brand } from '@/components/layout/brand';
 import { usePathname } from '@/i18n/navigation';
+import { CONSOLE_FEATURES } from '@/lib/console/features';
 import { useAffiliateEnabled } from '@/lib/console/live/use-affiliate';
 import { cn } from '@/lib/utils';
 
@@ -18,7 +19,7 @@ import { UserMenu } from './user-menu';
 /**
  * 控制台外壳：顶部公告条 + 左侧边栏 + 右侧内容区。整屏固定高度，只有内容区滚动。
  * 桌面端侧边栏可收起成图标栏；大屏以下侧边栏换成左侧抽屉，由顶部一条手机栏的菜单按钮打开，换页自动关闭；
- * 手机栏右侧的头像点开的是同一个账号菜单。
+ * 手机栏右侧的头像点开的是同一个账号菜单。公告条与通知铃铛按控制台功能开关显示（首发都关着）。
  */
 export function ConsoleShell({ children }: { children: ReactNode }) {
   const t = useTranslations('console');
@@ -38,7 +39,9 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
 
   return (
     <div data-console-shell className="flex h-dvh flex-col overflow-hidden bg-background">
-      {announcementOpen ? <AnnouncementBar onClose={() => setAnnouncementOpen(false)} /> : null}
+      {CONSOLE_FEATURES.announcements && announcementOpen ? (
+        <AnnouncementBar onClose={() => setAnnouncementOpen(false)} />
+      ) : null}
       <div className="flex min-h-0 flex-1">
         <aside
           data-sidebar
@@ -67,7 +70,7 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
             </button>
             <Brand />
             <span className="flex-1" />
-            <NotificationsMenu side="bottom" />
+            {CONSOLE_FEATURES.notifications ? <NotificationsMenu side="bottom" /> : null}
             <UserMenu placement="bar" />
           </div>
           <main
