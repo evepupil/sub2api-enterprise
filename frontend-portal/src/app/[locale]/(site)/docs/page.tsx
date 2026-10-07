@@ -8,6 +8,8 @@ import { SITE_FEATURES } from '@/lib/site';
 
 export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
   const locale = await initPage(params);
+  // 关着时标题也按 404 走：页面标题是后送到浏览器的，不拦会把 404 页的标题盖成「文档」
+  if (!SITE_FEATURES.docs) notFound();
   const t = await getTranslations({ locale, namespace: 'misc' });
   return { title: t('meta.docsTitle') };
 }
