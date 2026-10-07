@@ -462,19 +462,17 @@ pnpm format:check  # prettier
 | `liveClockSnapshot()`、`parseLiveClock(s)`、`LiveClock` | 真实的今天与当前小时（北京时间），只给接了后端的页面用（经 `useLiveClock()`） |
 | `dayKey(ts)`、`formatDateTime(ts)`、`formatDateTimeShort(ts)`、`formatDayLabel(day, locale)`、`formatMonthLabel(month, locale)`、`formatMonthTitle(y, m, locale)`、`formatHour(h)` | 时间显示（一律北京时间） |
 | `formatCompact(n)`、`formatInteger(n)`、`formatUsd(usd)`、`formatSignedUsd(usd)`、`formatDuration(ms)`、`formatPercent(r, digits?)`、`maskEmail(e)` | 数字、金额（美元，前缀写 `US$`，如 `US$142.97`；不到 1 美元时去掉多余的 0 但至少留两位小数，如 `US$0.50`、`US$0.0412`；导出常量 `USD_PREFIX`）、耗时、百分比 |
-| `USAGE_RECORDS`、`recordsInRange(r)`、`summarize(records)`、`breakdown(records, r, dimension, metric, max?)`、`rankSeries(buckets, sums, max?)`、`dailyTotals()`、`activityStats(totals, r)`、`heatmap(totals, endDay?)`、`heatmapStart(endDay?)`、`monthlyRunRate(cost, days)`、`keyUsage(keyId)`、`OTHER_SERIES`、`USAGE_METRICS` | 用量与图表数据（占位数据与后端数据共用图表函数） |
-| `REQUEST_LOGS`、`filterLogs(logs, filter)`、`logsToCsv(logs)`、`curlFor(log)`、`LogFilter`、`RequestLog` | 请求日志 |
-| `API_KEYS`、`getKey(id)`、`maskKey(secret)`、`searchKeys(keys, q, status)`、`KEY_STATUSES`、`USED_MODEL_IDS` | API 密钥 |
+| `rankSeries(buckets, sums, max?)`、`activityStats(totals, r)`、`heatmap(totals, endDay?)`、`heatmapStart(endDay?)`、`monthlyRunRate(cost, days)`、`OTHER_SERIES`、`USAGE_METRICS` 与几个类型 | 用量页的图表计算（2026-10-08 起早期的假用量记录已删，数据来自 `@/lib/console/live/usage-view`） |
+| `maskKey(secret)`、`KEY_STATUSES`、`API_KEYS` | 密钥打码与状态；`API_KEYS` 是 5 条占位密钥，只给首发隐藏的对话页用 |
 | `RECHARGE_PRESETS`、`RECHARGE_BONUS_TIERS`、`rechargeBonus(a)`、`RECHARGE_LIMITS`、`PAYMENT_METHODS` | 充值弹窗的占位配置（账单页其余部分已接后端：`@/lib/console/live/billing-*`、`use-billing`） |
 | `CHAT_SAMPLE`、`CHAT_REPLIES`、`CHAT_MODEL_IDS`、`DEFAULT_CHAT_MODEL`、`CHAT_INPUT_MAX` | 对话页 |
 | `CURRENT_USER`、`ANNOUNCEMENTS`、`NOTIFICATIONS` | 当前用户、公告、通知 |
 | `paginate`、`pageButtons`、`PAGE_SIZES` | 分页（组件已封装） |
 
-模型、厂商、版本与价格照旧从 `@/lib/catalog` 取（`MODELS`、`getModel`、`getProvider`、`getEdition`、`EDITIONS`、`textPrice`、`imagePrice`、`textPriceAt`、`imagePriceAt`、`formatRatio`、`PROTOCOL_LABELS`、`USD_CNY_RATE`、`formatMoney` 等）。版本名用 `getEdition(id).name[locale]`。
+模型、厂商、版本与价格照旧从 `@/lib/catalog` 取（`MODELS`、`getModel`、`getProvider`、`getEdition`、`EDITIONS`、`textPrice`、`imagePrice`、`textPriceAt`、`imagePriceAt`、`formatRatio`、`PROTOCOL_LABELS`、`formatMoney` 等）。版本名用 `getEdition(id).name[locale]`。
 
 用量页的真实数据层在 `@/lib/console/live/`（`useUsageOverview`、`useLiveClock`、`summaryFromOverview`、`breakdownFromPoints`、`dailyTotalsFromBuckets` 等），不经 `@/lib/console` 导出；其他接了后端的页面同样在这里（如组织页 `org-*`）。
 
-单测算出的关键数字（占位数据，用量页接后端后不再显示这组用量数字）：近 30 天请求 41,198、花费 US$142.97、Token 250.3M、缓存命中 62%；今天请求 492；日志 240 条，其中失败 8 条、生图 24 条、今天 11 条；密钥 5 个。
 
 ### 10.4 控制台实现守则（在第 7 章之外）
 
