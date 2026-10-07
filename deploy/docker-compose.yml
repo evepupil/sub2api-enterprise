@@ -238,6 +238,30 @@ services:
       start_period: 120s
 
   # ===========================================================================
+  # 客户官网（frontend-portal，官网与客户控制台）
+  # 镜像在 frontend-portal/ 下构建：docker build -t sub2api-enterprise-portal:<版本> .
+  # 对外由反向代理按路径分流：模型调用与后台接口给 sub2api，其余给官网（见 deploy/Caddyfile.portal、deploy/PORTAL.md）。
+  # 官网把用户真实 IP 转给后台，后台的可信代理（SERVER_TRUSTED_PROXIES）要包含本网络的网段。
+  # ===========================================================================
+  portal:
+    image: ${PORTAL_IMAGE:-sub2api-enterprise-portal:latest}
+    container_name: sub2api-portal
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "${PORTAL_BIND_HOST:-127.0.0.1}:${PORTAL_PORT:-3000}:3000"
+    environment:
+      # 官网服务器调后台的内网地址（容器网络里的服务名）；不填时登录与控制台接口返回「服务暂时不可用」
+      - SUB2API_INTERNAL_URL=${PORTAL_BACKEND_URL:-http://sub2api:8080}
+      - TZ=${TZ:-Asia/Shanghai}
+    depends_on:
+      sub2api:
+        condition: service_healthy
+    networks:
+      - sub2api-network
+
+  # ===========================================================================
   # PostgreSQL Database
   # ===========================================================================
   postgres:

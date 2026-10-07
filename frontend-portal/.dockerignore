@@ -1,0 +1,10 @@
+# 镜像里只要源码与锁文件：依赖在镜像里重装，构建产物在镜像里重建，本机配置不带进去
+node_modules
+.next
+.next-build
+.env*
+!.env.example
+coverage
+*.log
+.vscode
+.idea
