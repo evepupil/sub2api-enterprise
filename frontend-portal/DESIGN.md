@@ -185,7 +185,7 @@
 | 出错 | `src/app/[locale]/(site)/error.tsx`（官网，顶栏页脚保留）、`[locale]/error.tsx`（登录注册与布局本身，整屏居中）、`[locale]/console/error.tsx`（控制台，外壳保留）、`src/app/global-error.tsx`（最外层兜底，自带页面框架、中英双语） | 沿用所在页 | ErrorView / ConsoleErrorView |
 
 - `(site)` 组的布局 `src/app/[locale]/(site)/layout.tsx` 渲染 `SiteHeader` → `<main id="main">` → `SiteFooter`；`(auth)` 组的布局只有 `<main id="main" className="min-h-dvh">`，没有顶栏页脚（和模板登录页一致）。
-- 每个页面开头 `const locale = await initPage(params)`（`@/i18n/page`），有标题的页面写 `generateMetadata`。
+- 每个页面开头 `const locale = await initPage(params)`（`@/i18n/page`），有标题的页面写 `generateMetadata`；公开页再加 `alternates: pageAlternates(locale, 路径)`（`@/lib/seo`，规范地址与中英文对应地址）。
 - 每个区块组件**具名导出 + 默认导出双份**，**不接收任何参数**，自带最外层 `<section>`（锚点 `id`、底色、纵向留白）。页内几个区块之间共享的状态（当前通道、币种）一律走网址参数（见 4.4），不靠参数传递。顶栏靠 `usePathname()` 自己判断当前页，也不接收参数。
 
 ### 4.2 区块清单

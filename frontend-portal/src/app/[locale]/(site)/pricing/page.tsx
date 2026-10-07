@@ -7,6 +7,7 @@ import { PricingHero } from '@/blocks/pricing/pricing-hero';
 import { PricingNotes } from '@/blocks/pricing/pricing-notes';
 import { PricingTables } from '@/blocks/pricing/pricing-tables';
 import { initPage, type LocaleParams } from '@/i18n/page';
+import { pageAlternates } from '@/lib/seo';
 import { getSiteCatalog } from '@/lib/server/site-catalog';
 
 /**
@@ -18,7 +19,11 @@ export const dynamic = 'force-dynamic';
 export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
   const locale = await initPage(params);
   const t = await getTranslations({ locale, namespace: 'pricing' });
-  return { title: t('meta.title'), description: t('meta.description') };
+  return {
+    title: t('meta.title'),
+    description: t('meta.description'),
+    alternates: pageAlternates(locale, '/pricing'),
+  };
 }
 
 export default async function PricingPage({ params }: LocaleParams) {

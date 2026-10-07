@@ -13,6 +13,9 @@ import { loadMessages, pickMessages, SITE_NAMESPACES } from '@/messages';
 
 import '../globals.css';
 
+/** 分享卡片大图 */
+const OG_IMAGE = '/og.png';
+
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
@@ -28,6 +31,16 @@ export async function generateMetadata({
   return {
     title: { default: `${SITE.name} · ${t('meta.tagline')}`, template: `%s · ${SITE.name}` },
     description: t('meta.description'),
+    // 分享到社交平台时的卡片：站名、语言与大图（public/og.png，1200×630）
+    openGraph: {
+      type: 'website',
+      siteName: SITE.name,
+      locale: locale === 'zh' ? 'zh_CN' : 'en_US',
+      images: [
+        { url: OG_IMAGE, width: 1200, height: 630, alt: `${SITE.name} · ${t('meta.tagline')}` },
+      ],
+    },
+    twitter: { card: 'summary_large_image', images: [OG_IMAGE] },
   };
 }
 
