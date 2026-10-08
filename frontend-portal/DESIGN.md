@@ -107,10 +107,10 @@
 | `grid-line` / `grid-dot` / `beam` | #f0f0f0 / #e5e5e5 / #a3a3a3 | #161616 / #262626 / #737373 | 背景网格线、交点圆点、流动光线 |
 | `chart-1..4` | #2563eb #60a5fa #bfdbfe #e11d48 | #3b82f6 #60a5fa #1e3a8a #fb7185 | **只用于图形** |
 | `chart-5..7` / `chart-muted` | #10b981 #f59e0b #8b5cf6 / #d4d4d4 | #34d399 #fbbf24 #a78bfa / #525252 | 控制台多系列图表的补充色，「其他」用 `chart-muted`；**只用于图形** |
-| `success` / `success-soft` / `success-graphic` | #15803d / #dcfce7 / #22c55e | #4ade80 / 绿 14% / #22c55e | 折扣标、可用率；`*-graphic` 只做色块 |
-| `warning` / `warning-soft` / `warning-graphic` | #b45309 / #fef3c7 / #f59e0b | #fbbf24 / 琥珀 14% / #f59e0b | 降级 |
-| `danger` / `danger-soft` / `danger-graphic` | #dc2626 / #fee2e2 / #ef4444 | #f87171 / 红 14% / #ef4444 | 错误、中断 |
-| `info` / `info-soft` | #1d4ed8 / #dbeafe | #93c5fd / 蓝 16% | 「新」标记 |
+| `success` / `success-soft` / `success-graphic` | #15803d / #dcfce7 / #22c55e | #4ade80 / 绿 14% / #22c55e | 可用率、倍率徽标（低于 ×0.2）；`*-graphic` 只做色块 |
+| `warning` / `warning-soft` / `warning-graphic` | #b45309 / #fef3c7 / #f59e0b | #fbbf24 / 琥珀 14% / #f59e0b | 降级、倍率徽标（×0.5 到 ×1） |
+| `danger` / `danger-soft` / `danger-graphic` | #dc2626 / #fee2e2 / #ef4444 | #f87171 / 红 14% / #ef4444 | 错误、中断、倍率徽标（高于 ×1） |
+| `info` / `info-soft` | #1d4ed8 / #dbeafe | #93c5fd / 蓝 16% | 倍率徽标（×0.2 到 ×0.5） |
 
 **组件里禁止写十六进制色值和 `neutral-*` 以外的原色**。例外只有三处：页脚水印渐变用 `from-neutral-50 to-neutral-200 dark:from-neutral-950 dark:to-neutral-800`；CheckList 的圆点用 `text-neutral-700 dark:text-neutral-300`；SVG 渐变的 `stopColor` 用 `var(--chart-1)` 这类变量。白色文字和白色按钮可以直接用 `text-white`、`bg-white`（只出现在深色块上）。
 
@@ -263,13 +263,14 @@
 | `src/components/effects/globe.tsx`（`'use client'`） | `Globe` | `{ className?: string }`。`<canvas className="aspect-square size-full opacity-0 transition-opacity duration-700 [contain:layout_paint_size]">`，`useEffect` 里 `createGlobe(canvas, { devicePixelRatio: 2, width: 1200, height: 1200, phi: 0, theta: 0.25, dark: 1, diffuse: 1.2, mapSamples: 16000, mapBrightness: 6, baseColor: [0.3,0.3,0.3], markerColor: [0.15,0.55,1], glowColor: [1,1,1], markers: 北京 39.90,116.41 / 上海 31.23,121.47 / 香港 22.32,114.17 / 新加坡 1.35,103.82 / 东京 35.68,139.65 / 旧金山 37.77,-122.42 / 法兰克福 50.11,8.68 / 伦敦 51.51,-0.13，size 都是 0.06, onRender: phi 每帧 +0.004（减少动态效果时不转） })`，首帧后把 canvas 透明度设 1，卸载时 `destroy()`。`createGlobe` 抛错（无 WebGL）时改渲染 `<div className="aspect-square size-full rounded-full bg-[radial-gradient(circle_at_30%_30%,#3f3f46,#09090b_70%)]" />` |
 | `src/components/catalog/provider-logo.tsx`（无指令） | `ProviderLogo` | `{ provider: ProviderId; size?: number; className?: string }`，默认 20。`<img src={logo} alt={name} width={size} height={size} loading="lazy" decoding="async" className={cn('shrink-0 select-none', mono && 'dark:invert', className)} />`，数据取 `getProvider` |
 | `src/components/catalog/provider-logo-cloud.tsx`（`'use client'`） | `ProviderLogoCloud` | `{ className?: string }`。两组：A `openai anthropic google deepseek`，B `moonshot zhipu minimax qwen`，每 3000ms 换一组（减少动态效果时停在 A）。外层 `grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-4`，`data-logo-cloud`，`data-logo-set="0"`/`"1"`。每格 `flex h-14 items-center justify-center`，里面 `AnimatePresence mode="wait" initial={false}`（首组直接显示，不等水合）按厂商 id 换 `motion.div`：`initial={{ opacity: 0, y: 12, filter: 'blur(8px)' }}`、`animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}`、`exit={{ opacity: 0, y: -12, filter: 'blur(8px)' }}`、`transition={{ duration: 0.45, delay: 格序号 × 0.08, ease: [0.22,1,0.36,1] }}`；内容 `flex items-center gap-3`：`ProviderLogo size={32}` + `<span className="text-xl font-semibold tracking-tight text-foreground/85 md:text-2xl">{厂商名}</span>` |
-| `src/components/catalog/discount-badge.tsx`（无指令） | `DiscountBadge` | `{ discount: number \| null; locale: AppLocale; className? }`：`formatDiscount` 为空时返回 `null`；否则 `<Badge tone="success" data-discount className={className}>{文字}</Badge>` |
+| `src/components/catalog/rate-badge.tsx`（无指令） | `RateBadge`、`rateTone` | `{ rate: number; className? }`：`<Badge tone={rateTone(rate)} data-group-rate={rate} className={className}>{ratioLabel(rate)}</Badge>`，写成 ×0.15、×1.0；按档上色：低于 ×0.2 `success`、低于 ×0.5 `info`、低于 ×1 `warning`、正好 ×1 `neutral`、高于 ×1 `danger`。官网价格页、模型页、首页与控制台共用（2026-10-08 起取代折扣标，不写「几折」） |
+| `src/components/catalog/top-up-rate.tsx`（无指令） | `TopUpRate` | 无参数：`useTranslations('common').rich('units.topUpRate', { b })`，比例部分 `font-medium text-foreground`；放进 `PageHero` 的 `note`（模型页、价格页） |
 | `src/components/layout/brand.tsx`（无指令） | `Brand` | `{ className?: string }`：`<Link href="/" className="flex items-center gap-2 text-sm font-medium text-foreground">`，前面是品牌图形 `<BrandMark className="size-5" />`（`src/components/layout/brand-mark.tsx`，「C 抱 o」，颜色跟随文字，规格见 `docs/前端设计.md` 2.4），后面 `SITE.name` |
 | `src/components/layout/theme-toggle.tsx`（`'use client'`） | `ThemeToggle` | `{ className?: string }`：`<button type="button" data-theme-toggle aria-label={common.theme.toggle} className={buttonClass({ variant: 'ghost', size: 'sm', className: 'size-9 px-0 text-muted-foreground hover:text-foreground' })}>`，里面 `Sun className="size-4 dark:hidden"` 和 `Moon className="hidden size-4 dark:block"`，点击 `setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')` |
 | `src/components/layout/language-switcher.tsx`（`'use client'`） | `LanguageSwitcher` | `{ className?: string; full?: boolean }`。触发按钮 `data-lang-trigger`，`aria-label={common.language.label}`，类名 `buttonClass({ variant: 'ghost', size: 'sm', className: 'h-9 gap-1.5 px-3 text-muted-foreground hover:text-foreground' })`，内容 `Languages` 图标 + 文字（full 时显示 `简体中文`/`English`，否则 `中文`/`EN`）+ `ChevronDown size-3.5`。菜单是 `DropdownMenuRadioGroup value={locale}`，两项 `zh`「简体中文」、`en`「English」，每项 `data-lang={code}`。切换走 `useSwitchLocale()`（`src/i18n/use-switch-locale.ts`，控制台头像菜单共用）：`router.replace(\`${pathname}${window.location.search}\`, { locale: next, scroll: false })`（`useRouter`、`usePathname` 来自 `@/i18n/navigation`），保留 `?edition=` 等参数 |
 | `src/components/layout/site-header.tsx`（`'use client'`） | `SiteHeader` | 无参数。见 4.5 |
 | `src/components/layout/site-footer.tsx`（无指令） | `SiteFooter` | 无参数。见 4.6 |
-| `src/components/layout/page-hero.tsx`（无指令） | `PageHero` | `{ id: string; title: ReactNode; subtitle?: ReactNode; children?: ReactNode; className? }`：`<section id={id} className={cn('relative overflow-hidden pt-16 pb-12 md:pt-24 md:pb-16', className)}>` + `<GridBeams />` + `<Container className="relative">` + `<SectionHeading as="h1" title subtitle />` + children 时 `<div className="mt-8 flex flex-col items-center gap-5">{children}</div>`。模型、价格、通道三页的页首都用它 |
+| `src/components/layout/page-hero.tsx`（无指令） | `PageHero` | `{ id: string; title: ReactNode; subtitle?: ReactNode; note?: ReactNode; children?: ReactNode; className? }`：`<section id={id} className={cn('relative overflow-hidden pt-16 pb-12 md:pt-24 md:pb-16', className)}>` + `<GridBeams />` + `<Container className="relative">` + `<SectionHeading as="h1" title subtitle />` + note 时 `<p data-hero-note className="mt-3 text-center text-sm text-muted-foreground">{note}</p>`（副标题下面一行小字，如充值比例）+ children 时 `<div className="mt-8 flex flex-col items-center gap-5">{children}</div>`。模型、价格、通道三页的页首都用它 |
 
 ### 4.4 页内与跨区块状态（主控已写好，直接用）
 
@@ -390,7 +391,7 @@ pnpm format:check  # prettier
 |---|---|
 | 品牌名 Codu、标志色块 | 品牌名是用户定的（2026-10-03 由占位的 Nexus API 改名），改名只改 `src/lib/site.ts`；标志色块还是**编的** |
 | 模型清单 | 2026-10-05 起首页、模型页、价格页的模型清单与价格改读后台模型广场（技术设计 18.9）；官网目录 `src/lib/catalog/models.ts` 只补后台没有的展示名、厂商、上下文，目录里没有的模型显示原名（编的上线日期与「新」标记 2026-10-08 去掉）；协议只剩控制台模型页在用；模型介绍 2026-10-05 删除 |
-| 官方价 | 官网页面的折扣标用后台模型广场给的官方价；官网目录里的官方价（由 onehop.ai 2026-10-03 公开价目反推）只剩控制台占位页（对话、用量）在用 |
+| 官方价 | 控制台模型页「官方价」列用后台模型广场给的官方价（官网页面 2026-10-08 起只写分组倍率，不写「几折」）；官网目录里的官方价（由 onehop.ai 2026-10-03 公开价目反推）只剩控制台占位页（对话、用量）在用 |
 | 三种通道的分组倍率（共享通道 ×0.15、专用通道 ×0.3、企业通道定制） | 用户 2026-10-03 给定，`src/lib/catalog/editions.ts`；2026-10-05 起官网页面按后台分组的倍率算价，这里的倍率只剩控制台占位页在用；2026-10-06 起官网按后台分组展示，不做通道对应 |
 | 通道卡权益清单、权益对比各项 | 用户 2026-10-07 给定（`groups.ts`）：共享通道：全部文本模型、全部生图模型、7 天内可退款、客服 24 小时在线、基础安全防护；专用通道：包含共享通道全部权益，另有 ChatGPT 专业通道、高可用 / 低延迟 / 不降智、专属客服 24 小时一对一、可开发票；企业通道：包含专用通道全部权益，另有可开发票（专用、企业两张卡都写）、定制安全防护、企业级管理功能、专属客户经理、可选私有化部署。RPM、并发、组织成员上限、客服响应时限这些编的数字同日删掉；可用率目标、可用率赔付、对公转账 2026-10-06 已去掉 |
 | 模型卡的可用率 | 2026-10-05 接后台「对外服务状态」（渠道监测）：对话延迟、端点 PING、近 7 天可用性、近 60 次探测；后台给模型建监测项（名称 = 模型名、分组标签 = 后台分组名）才有，没建的不显示 |
@@ -452,7 +453,7 @@ pnpm format:check  # prettier
 | `ColumnPicker` | `column-picker.tsx` | 表格的「列设置」按钮 + 勾选面板 `{ name, columns: { id, label, locked? }[], visible, defaults, onSave }`：勾好点「保存」才生效，「重置」回到默认勾选，锁定的列置灰不能取消；按钮高 40，和筛选行按钮排在一起。设置存在浏览器里用 `useColumnPrefs(config)`（`src/lib/console/live/column-prefs.ts`，config 放模块常量）。按钮 `data-column-picker={name}`，勾选框 `data-column={id}`，`data-columns-reset` / `data-columns-save`。日志页在用 |
 | 外壳件 | `shell/*` | 页面不用直接引用；`Avatar` 可在设置页复用 |
 
-官网已有的基础组件照用（按钮除外，用上表的控制台按钮；`variant="danger"` 是红色按钮）：`Textarea`（`ui/textarea.tsx`，多行输入框，传 `footer` 时带字数底栏）、`Badge`、`Input`、`Field`、`SegmentedControl`、`DropdownMenu*`、`ProviderLogo`、`DiscountBadge`；切换语言用 `useSwitchLocale()`（`@/i18n/use-switch-locale`）。
+官网已有的基础组件照用（按钮除外，用上表的控制台按钮；`variant="danger"` 是红色按钮）：`Textarea`（`ui/textarea.tsx`，多行输入框，传 `footer` 时带字数底栏）、`Badge`、`Input`、`Field`、`SegmentedControl`、`DropdownMenu*`、`ProviderLogo`、`RateBadge`；切换语言用 `useSwitchLocale()`（`@/i18n/use-switch-locale`）。
 
 ### 10.3 控制台数据接口（`import { … } from '@/lib/console'`，一个字都不要改）
 
@@ -511,7 +512,6 @@ pnpm format:check  # prettier
 | `editionRatio(edition)`、`ratioLabel(r)`、`ratioText(r)`、`formatRatio(r, locale)`、`GROUP_HIGHLIGHTS`、`PRIVILEGE_ROWS` | 分组倍率（×0.15 / 定制，价格换算与控制台用）、通道卡比上一档多出的权益、权益对比（11 行，不含倍率和并发限额） |
 | `textPrice(model, edition)`、`textPriceAt(model, k)` | 文本单价（美元 / 百万 Token）：input、output、cacheRead、longContext；= 官方价 × 分组倍率，定制通道返回 null；`k = 1` 即官方价 |
 | `imagePrice(model, edition)`、`imagePriceAt(model, k)` | 生图价：按张（resolutions、from）或按 Token（perMTokens、estimatedPerImage）；规则同上 |
-| `formatDiscount(d, locale)` | 折扣标文字（「1.5折」/「85% off」，不打折时 null） |
 | `formatMoney(usd)`、`formatAmount(n)` | 美元金额（`$0.6`） |
 | `formatContext(tokens)`、`localize(value, locale)` | 上下文、中英文字段 |
 | `IMAGE_TOKENS_PER_IMAGE` | 按 Token 计费生图的每张估算 |
@@ -521,4 +521,4 @@ pnpm format:check  # prettier
 
 其他：`SITE`、`NAV_ITEMS`、`FOOTER_COLUMNS`（`@/lib/site`）；`useUrlState`、`useUrlList`、`useUrlText`（`@/lib/use-url-state`）；`initPage`、`LocaleParams`（`@/i18n/page`）。
 
-单测算出的几个关键数字（交互检查会用）：全部 30 / 文本 23 / 生图 7；厂商 OpenAI 10、Anthropic 6、Google 8；只看 Anthropic 文本 6 个；上下文 ≥1M 共 21 个；搜「nano」4 个、搜「gemini」8 个；默认排序第一个 Claude Sonnet 5.5；文本按价格从低到高第一个 GPT-6 Luna；Claude Sonnet 5.5 输入单价 共享通道 $0.3、专用通道 $0.6、企业通道定制（无单价），人民币共享通道 ¥2.13；折扣标 共享通道 1.5折、专用通道 3折、企业通道不显示。
+单测算出的几个关键数字（交互检查会用）：全部 30 / 文本 23 / 生图 7；厂商 OpenAI 10、Anthropic 6、Google 8；只看 Anthropic 文本 6 个；上下文 ≥1M 共 21 个；搜「nano」4 个、搜「gemini」8 个；默认排序第一个 Claude Sonnet 5.5；文本按价格从低到高第一个 GPT-6 Luna；Claude Sonnet 5.5 输入单价 共享通道 $0.3、专用通道 $0.6、企业通道定制（无单价）。
