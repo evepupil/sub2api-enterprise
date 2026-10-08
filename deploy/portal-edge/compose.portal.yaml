@@ -1,0 +1,60 @@
+# 客户官网 + nginx 入口：叠加在 deploy/docker-compose.yml 上使用（在 deploy/ 目录下执行）
+#   docker compose -f docker-compose.yml -f portal-edge/compose.portal.yaml up -d --wait
+# 对外由 Cloudflare 隧道接入：官网域名（如 codu.xyz）指到 127.0.0.1:8088（入口），
+# 管理后台域名（如 admin.codu.xyz）指到 127.0.0.1:8080（后台自带的管理前端）。
+# 入口按路径分流：模型调用与后台接口给后台，其余给官网；并从 CF-Connecting-IP 还原真实用户 IP。
+# 说明见 deploy/PORTAL.md。
+services:
+  sub2api:
+    networks:
+      - sub2api-network
+      - portal-edge
+
+  portal:
+    image: ${PORTAL_IMAGE:?set PORTAL_IMAGE to an immutable portal image tag}
+    pull_policy: never
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      # 官网服务器调后台的内网地址；不填时登录与控制台接口返回「服务暂时不可用」
+      SUB2API_INTERNAL_URL: http://sub2api:8080
+      TZ: ${TZ:-Asia/Shanghai}
+    depends_on:
+      sub2api:
+        condition: service_healthy
+    networks:
+      - portal-edge
+
+  edge:
+    image: ${NGINX_IMAGE:-nginx:stable-alpine}
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      PORTAL_UPSTREAM: portal:3000
+      GO_UPSTREAM: sub2api:8080
+      NGINX_ENVSUBST_FILTER: '^(PORTAL_UPSTREAM|GO_UPSTREAM)$$'
+    ports:
+      - '${PORTAL_BIND_HOST:-127.0.0.1}:${PORTAL_EDGE_PORT:-8088}:8080'
+    volumes:
+      - ./portal-edge/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      # 模板在容器启动时展开；改了模板要重启入口（restart edge），只 up 不会重建
+      - ./portal-edge/nginx/portal.conf.template:/etc/nginx/templates/portal.conf.template:ro
+    depends_on:
+      portal:
+        condition: service_healthy
+      sub2api:
+        condition: service_healthy
+    networks:
+      - portal-edge
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1:8080/api/health']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+networks:
+  portal-edge:
+    driver: bridge

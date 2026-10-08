@@ -1,68 +1,83 @@
 # 客户官网（frontend-portal）部署
 
-官网、客户控制台和模型调用接口共用一个域名（如 `codu.xyz`），入口反向代理按路径分流；旧管理后台另绑一个域名，整站交给 sub2api。官网服务器（Next.js）经内网地址调后台，浏览器从不直接访问后台。
+官网、客户控制台和模型调用接口共用一个域名（codu.xyz），由 nginx 入口按路径分流；旧管理后台另绑一个域名（admin.codu.xyz），直接指到后台。两边都经 Cloudflare 隧道接入，服务器只对外开 SSH。官网服务器（Next.js）经内网地址调后台，浏览器从不直接访问后台。
 
 ```
-浏览器 / API 客户端
-   │  https://codu.xyz
-   ▼
-入口反向代理（Caddy）
-   ├─ /v1/* /v1beta/* /backend-api/* /antigravity/* /api/v1/* /api/event_logging/*  →  sub2api :8080（生产先过 ACF 安全网关）
-   └─ 其余路径（官网页面、控制台、官网接口 /api/portal/*）                             →  官网 :3000
-                                                                                         │ SUB2API_INTERNAL_URL
-                                                                                         ▼
-                                                                                   sub2api（内网）
+用户 / API 客户端
+   │ https://codu.xyz                         https://admin.codu.xyz
+   ▼                                           ▼
+Cloudflare 隧道（cloudflared，令牌模式，公开主机名在 Cloudflare 后台配）
+   │ http://127.0.0.1:8088                    │ http://127.0.0.1:8080
+   ▼                                           ▼
+nginx 入口（edge）                           sub2api（后台 + 自带的管理前端）
+   ├─ /api/v1、/v1、/v1beta、/backend-api、/antigravity、/models、/responses、/images、
+   │  不带 /v1 的模型调用别名、其余 /api/*            → sub2api :8080
+   └─ /api/portal/*、/_next/* 与其余路径（官网页面、控制台）→ 官网 :3000 ──内网──▶ sub2api
 ```
+
+文件：`deploy/portal-edge/compose.portal.yaml`（叠加在 `deploy/docker-compose.yml` 上，加官网与入口两个服务）、`deploy/portal-edge/nginx/`（入口配置）、`frontend-portal/Dockerfile`（官网镜像）。
 
 ## 1. 构建镜像
 
+和上一次部署一样，把干净的源码包传到服务器上构建（服务器在海外，依赖源直接用官方的；本机构建会把 `.fleet`、各处依赖目录都打进构建上下文）：
+
 ```bash
-cd frontend-portal
-docker build -t sub2api-enterprise-portal:<版本> .
+# 本机：打包当前提交
+git archive --format=tar.gz -o codu-src-<提交>.tar.gz HEAD
+# 服务器：解压到 /opt/sub2api-enterprise/source-<提交> 后
+docker build -t sub2api-enterprise:<提交> --build-arg COMMIT=<提交> \
+  --build-arg GOPROXY=https://proxy.golang.org,direct --build-arg GOSUMDB=sum.golang.org source-<提交>
+docker build -t sub2api-enterprise-portal:<提交> --build-arg NPM_REGISTRY=https://registry.npmjs.org source-<提交>/frontend-portal
 ```
 
-- 依赖默认走 npmmirror；海外构建加 `--build-arg NPM_REGISTRY=https://registry.npmjs.org`。
-- 基础镜像拉不下来时用本地或镜像源里的 Node 24：`--build-arg NODE_IMAGE=node:24.18.0-alpine`。
-- 不走镜像仓库时和后台一样：`docker save sub2api-enterprise-portal:<版本> | gzip > portal.tar.gz`，传到服务器后 `docker load < portal.tar.gz`。
+国内构建时去掉这几个参数即可（默认走 goproxy.cn 与 npmmirror）。
 
 ## 2. 运行
 
-`deploy/docker-compose.yml` 里的 `portal` 服务，可调的环境变量：
+```bash
+cd deploy   # 服务器上是 /opt/sub2api-enterprise
+docker compose -f docker-compose.yml -f portal-edge/compose.portal.yaml up -d --wait
+```
 
-| 变量 | 默认 | 说明 |
-|---|---|---|
-| `PORTAL_IMAGE` | `sub2api-enterprise-portal:latest` | 镜像与版本标签 |
-| `PORTAL_BIND_HOST` / `PORTAL_PORT` | `127.0.0.1` / `3000` | 主机上的监听地址；入口代理在主机上时只听本机 |
-| `PORTAL_BACKEND_URL` | `http://sub2api:8080` | 官网服务器调后台的内网地址（容器里叫 `SUB2API_INTERNAL_URL`）；不填时登录与控制台接口返回「服务暂时不可用」 |
+| 变量 | 说明 |
+|---|---|
+| `PORTAL_IMAGE` | 官网镜像（必填，写明确的版本标签） |
+| `NGINX_IMAGE` | 入口镜像，默认 `nginx:stable-alpine`，生产钉成摘要 |
+| `PORTAL_BIND_HOST` / `PORTAL_EDGE_PORT` | 入口在主机上的监听，默认 `127.0.0.1:8088`，只给本机的 cloudflared 连 |
 
-健康检查：`GET /api/portal/health` 返回 `{"ok":true}`。它只看官网进程在不在、不连后台——后台暂时连不上时官网页面照样能打开，不会因此反复重启。
+- 官网健康检查 `GET /api/portal/health`（只看进程，不连后台；后台暂时连不上时官网照样能打开，不会被反复重启）。入口自己的健康检查查 `/api/health`，被转到同一个地址。
+- 入口的配置模板在容器启动时展开：改了 `portal.conf.template` 要 `restart edge`，只 `up` 不会重建。
 
-## 3. 入口分流
+## 3. 入口分流与真实 IP
 
-模板见 `deploy/Caddyfile.portal`（已用 `caddy validate` 校验）：
-
-- 交给后台的路径：`/v1/*`、`/v1beta/*`（OpenAI、Anthropic、Gemini 各家接口）、`/backend-api/*`（Codex 直连）、`/antigravity/*`、`/api/v1/*`（后台接口，以后的支付回调也走这里）、`/api/event_logging/*`（Claude Code 遥测上报）。其余路径全部给官网。
-- 流式回复：模型调用那段 `flush_interval -1`，压缩只列具体类型，不能写 `text/*`（否则 `text/event-stream` 被压缩攒包，看起来卡住）；长对话与生图的超时放宽到 10～15 分钟。
-- 生产服务器（141.11.138.251）现状是 Caddy 先把流量交给 ACF 安全网关（`acf-gateway:8080`）再到 sub2api：模型调用那段的上游写网关地址；官网那段写 `sub2api-portal:3000`（Caddy 接在 sub2api 的容器网络里）或 `localhost:3000`（Caddy 在主机上）。
+- 模型调用的各种写法都交给后台：带 `/v1` 的、Gemini 的 `/v1beta`、Codex 直连 `/backend-api`、`/antigravity`，以及不带 `/v1` 前缀的 `/models`、`/responses`、`/images`、`/chat/completions`、`/messages/count_tokens` 等（后者转成 `/v1` 再交给后台）。官网的模型页因此用 `/catalog`，不和后台的 `/models` 抢路径。
+- 流式回复：交给后台的路径都关了缓冲，超时 30 分钟，边生成边转发。
+- 真实 IP：cloudflared 从本机经端口映射连进来，入口看到的来源是容器网关地址；真实用户 IP 在 Cloudflare 带的 `CF-Connecting-IP` 里。入口先用它还原出用户 IP（只信任容器网段与本机发来的这个头），再以 `X-Forwarded-For` 交给后台和官网，并清掉客户端自带的同类头。后台按这个 IP 限流（登录每分钟 20 次，注册、发验证码、找回密码每分钟 5 次）、记审计日志；不还原的话所有用户都会被当成同一个地址一起限流。
 
 ## 4. 后台要改的配置
 
-1. **可信代理**：`SERVER_TRUSTED_PROXIES`（或配置文件 `server.trusted_proxies`）加上容器网络的网段，例如 `172.16.0.0/12`。官网把用户真实 IP 放在 `X-Forwarded-For` 里转给后台，后台按 IP 限流（登录每分钟 20 次，注册、发验证码、找回密码每分钟 5 次）；不加的话所有用户都会被当成官网容器这一个 IP，很快一起被限流。
-2. **站点前端地址**：系统设置填 `https://codu.xyz`，重置密码邮件里的链接才会落到官网。
-3. **谷歌登录**：Google Cloud「Web 应用」客户端的「已获授权的重定向 URI」与后台设置里的谷歌回调地址都填 `https://codu.xyz/api/portal/auth/oauth/google/callback`。
-4. **人机验证**：Cloudflare Turnstile 小组件的允许主机名加上 `codu.xyz`；后台打开 Turnstile，填站点公钥和密钥（只能开一家，腾讯、阿里的验证码官网不支持）。
-5. **官网展示数据**：后台打开「模型广场」（模型与价格）和「对外服务状态」（可用率：监测项名称写模型名、分组标签写分组名）。
-6. **站名**：系统设置里的站点名称改成 Codu（邮件模板里用到）。
-7. **后台版本**：官网控制台用到的用量总览、余额汇总与流水、邀请返利自动到账等接口，后台要包含提交 3f232ca1d（2026-10-04）及之后的版本；这几项没有数据库结构变化。
+1. **站点前端地址、接口地址**：都填 `https://codu.xyz`（重置密码邮件里的链接、管理前端显示的接口地址）。
+2. **模型广场**：要打开，并有渠道把对外卖的模型挂到分组上，官网首页、模型页、价格页才有模型和价格。渠道不填价格时，展示和扣费都按全局价格表，不改变现有计费。
+3. **对外服务状态**（可用率，可选）：打开并建渠道监测，监测项名称写模型名、分组标签写分组名。
+4. **谷歌登录**（可选）：Google Cloud「Web 应用」客户端的重定向 URI 与后台的谷歌回调都填 `https://codu.xyz/api/portal/auth/oauth/google/callback`。
+5. **人机验证**（可选）：Cloudflare Turnstile 小组件的允许主机名加 `codu.xyz`；后台打开 Turnstile、填站点公钥和密钥。
+6. **邮箱验证、找回密码**：要先配好发信服务（SMTP），否则开不了。
+7. **后台版本**：官网控制台用到的用量总览、余额汇总与流水、邀请返利自动到账等接口，需要提交 3f232ca1d（2026-10-04）及之后的后台；这几项没有数据库结构变化。
 
 ## 5. 升级与回滚
 
-- 升级：`docker load` 新镜像 → 改 `PORTAL_IMAGE` → `docker compose up -d portal`，切换只有几秒。想零中断可先用别的端口起新容器试跑，确认后再把入口代理指过去。
-- 回滚：`PORTAL_IMAGE` 改回上一个版本标签，再 `docker compose up -d portal`。服务器上至少保留上一版镜像。
-- 官网与后台可以分开升级；后台先升（新接口向前兼容），官网后升。
+- 升级前先备份：数据库导出（`pg_dump`）加 `.env`、编排与入口配置，放在 `/opt/sub2api-enterprise/backups/<时间>/`，数据库导出另拉一份回本机。
+- 升级：改 `.env` 里的 `SUB2API_IMAGE`、`PORTAL_IMAGE` 为新版本，`docker compose up -d --wait sub2api portal`。后台重启约十几秒，官网几秒；入口不用动。
+- 回滚：把这两个镜像改回上一个版本标签再 `up -d`；入口配置从备份目录拷回后 `restart edge`。服务器上至少保留上一版镜像。
+- 改 Cloudflare 公开主机名会立刻生效；回退时把官网域名指回原来的地址即可。
 
 ## 6. 上线后检查
 
 - `https://codu.xyz`、`/catalog`、`/pricing` 有模型和价格；`/api/portal/health` 返回 200；`curl -I https://codu.xyz` 带 `X-Frame-Options`、`Strict-Transport-Security` 等安全响应头。
-- 用新邮箱注册、登录，进控制台把各页点一遍；找回密码邮件里的链接能打开官网的重置页。
-- 用 API 密钥请求 `https://codu.xyz/v1/models` 返回模型列表；一次流式对话能边生成边显示；控制台日志页能看到这次调用。
+- `https://admin.codu.xyz` 是管理后台。
+- 新邮箱注册、登录，进控制台把各页点一遍。
+- 用 API 密钥请求 `https://codu.xyz/v1/models` 返回模型列表；一次流式对话边生成边显示；控制台日志页能看到这次调用，记录的 IP 是用户的真实 IP。
+
+## 7. 生产部署记录
+
+- 2026-10-08：codu 服务器从 9-27 的旧版（提交 ec4a85840，重做前的旧官网）升到 b3beb6d75（新官网 + 后台），镜像在服务器上构建；入口补「从 CF-Connecting-IP 还原真实 IP」并把健康检查转到新官网；后台填站点前端地址与接口地址；新建 OpenAI 渠道挂到「企业独享」分组（12 个 GPT 模型，价格按全局价格表）并打开模型广场；codu.xyz 改指入口 8088，admin.codu.xyz 指后台 8080（Cloudflare 公开主机名由用户改）。备份在服务器 `backups/pre-portal-20261008-093020/`，数据库导出另存本机。

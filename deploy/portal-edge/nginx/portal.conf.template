@@ -1,0 +1,87 @@
+server {
+  listen 8080 default_server;
+  listen [::]:8080 default_server;
+  server_name _;
+
+  # cloudflared 在本机经端口映射连进来（来源是容器网关地址），真实用户 IP 在 Cloudflare 带的 CF-Connecting-IP 里。
+  # 先还原成 $remote_addr，下面的 X-Real-IP / X-Forwarded-For 才是真实用户 IP（后台按它限流、记日志）。
+  set_real_ip_from 172.16.0.0/12;
+  set_real_ip_from 127.0.0.1;
+  real_ip_header CF-Connecting-IP;
+
+  # Keep runtime variables so Docker DNS is refreshed after a container is replaced.
+  set $portal_backend http://${PORTAL_UPSTREAM};
+  set $go_backend http://${GO_UPSTREAM};
+
+  # Go and the portal enforce their own body limits; do not impose Nginx's 1 MiB default.
+  client_max_body_size 0;
+
+  proxy_http_version 1.1;
+  proxy_set_header Host $http_host;
+  proxy_set_header X-Real-IP $remote_addr;
+  proxy_set_header X-Forwarded-For $remote_addr;
+  proxy_set_header X-Forwarded-Proto $scheme;
+  proxy_set_header X-Forwarded-Host $http_host;
+  proxy_set_header X-Forwarded-Port $server_port;
+  proxy_set_header Upgrade $http_upgrade;
+  proxy_set_header Connection $connection_upgrade;
+
+  # Do not trust client-supplied proxy identity headers.
+  proxy_set_header CF-Connecting-IP "";
+  proxy_set_header True-Client-IP "";
+  proxy_set_header Forwarded "";
+  proxy_set_header X-Client-IP "";
+  proxy_set_header X-Cluster-Client-IP "";
+  proxy_set_header X-Original-Forwarded-For "";
+  proxy_set_header X-Forwarded-Server "";
+
+  proxy_cache off;
+  proxy_no_cache 1;
+  proxy_cache_bypass 1;
+  proxy_intercept_errors off;
+
+  location ^~ /api/portal/ {
+    proxy_pass $portal_backend;
+  }
+
+  location = /api/portal {
+    proxy_pass $portal_backend;
+  }
+
+  # 入口自己的健康检查查这里；新官网的健康检查地址是 /api/portal/health
+  location = /api/health {
+    proxy_pass $portal_backend/api/portal/health;
+  }
+
+  location ^~ /_next/ {
+    proxy_pass $portal_backend;
+  }
+
+  # These aliases exist in Go, but older embedded frontends intercept them.
+  # Their canonical /v1 equivalents bypass that SPA while preserving the query/body.
+  location ~ ^/(?:messages/count_tokens|chat/completions|embeddings|web_search|x_search|tts|stt|realtime|custom-voices|videos)(?:/|$) {
+    proxy_buffering off;
+    proxy_request_buffering off;
+    proxy_read_timeout 1800s;
+    proxy_send_timeout 1800s;
+    proxy_pass $go_backend/v1$request_uri;
+  }
+
+  # Backend and model endpoints keep request bodies, streaming, and upgrades intact.
+  location ~ ^/(?:api/v1|v1|v1beta|backend-api|antigravity|models|responses|alpha/search|images|health)(?:/|$) {
+    proxy_buffering off;
+    proxy_request_buffering off;
+    proxy_read_timeout 1800s;
+    proxy_send_timeout 1800s;
+    proxy_pass $go_backend;
+  }
+
+  # Unknown API paths must reach the backend rather than a portal page fallback.
+  location /api/ {
+    proxy_pass $go_backend;
+  }
+
+  location / {
+    proxy_pass $portal_backend;
+  }
+}
