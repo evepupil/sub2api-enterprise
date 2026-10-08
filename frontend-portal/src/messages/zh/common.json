@@ -38,7 +38,8 @@
     "perRequest": "/ 次",
     "from": "起",
     "fromPrice": "{price} 起",
-    "approx": "≈"
+    "approx": "≈",
+    "topUpRate": "充值 <b>1 元 = 1 美元</b>"
   },
   "footer": {
     "rights": "保留所有权利",

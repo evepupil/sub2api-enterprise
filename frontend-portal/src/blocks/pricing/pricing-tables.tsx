@@ -5,13 +5,12 @@ import { useTranslations } from 'next-intl';
 import { Container } from '@/components/ui/container';
 import { distinctModelCount, type SiteCatalog } from '@/lib/catalog/live';
 
-import { CurrencyNote } from './pricing-tables-note';
 import { ImagePriceTable } from './pricing-tables-image';
 import { TextPriceTable } from './pricing-tables-text';
 
 /**
  * 价格页价目表：文本与生图两张大表，每个模型在各分组的实付价各占一行（来自后台，官网服务器读好后传进来）。
- * 币种从网址参数读取，变化时所有金额整体重算；跳转标签上的数量按不重复的模型算。
+ * 价格只写美元（充值比例写在页首）；跳转标签上的数量按不重复的模型算。
  * 后台读不到时只写一句「暂时没有可展示的价格」。
  */
 export function PricingTables({ catalog }: { catalog: SiteCatalog }) {
@@ -52,7 +51,7 @@ export function PricingTables({ catalog }: { catalog: SiteCatalog }) {
   return (
     <section id="price-list" className="pb-16 md:pb-20">
       <Container className="space-y-16">
-        <div className="flex flex-col gap-4 border-b border-border pb-6 md:flex-row md:items-center md:justify-between">
+        <div className="border-b border-border pb-6">
           <nav aria-label={t('tables.jump')} className="flex gap-2">
             {nav.map((item) => (
               <a
@@ -66,7 +65,6 @@ export function PricingTables({ catalog }: { catalog: SiteCatalog }) {
               </a>
             ))}
           </nav>
-          <CurrencyNote />
         </div>
         {textModels.length > 0 ? <TextPriceTable models={textModels} /> : null}
         {imageModels.length > 0 ? <ImagePriceTable models={imageModels} /> : null}

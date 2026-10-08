@@ -38,7 +38,8 @@
     "perRequest": "/ request",
     "from": "from",
     "fromPrice": "from {price}",
-    "approx": "≈"
+    "approx": "≈",
+    "topUpRate": "Top-ups: <b>¥1 = $1</b>"
   },
   "footer": {
     "rights": "All rights reserved",
