@@ -6,29 +6,28 @@ import { useState, type ReactNode } from 'react';
 
 import { Brand } from '@/components/layout/brand';
 import { usePathname } from '@/i18n/navigation';
-import { CONSOLE_FEATURES } from '@/lib/console/features';
 import { useAffiliateEnabled } from '@/lib/console/live/use-affiliate';
+import { useAnnouncements } from '@/lib/console/live/use-announcements';
 import { cn } from '@/lib/utils';
 
 import { Sheet } from '../dialog';
-import { AnnouncementBar } from './announcement-bar';
+import { AnnouncementsMenu } from './announcements-menu';
 import { ConsoleSidebar } from './console-sidebar';
-import { NotificationsMenu } from './notifications-menu';
 import { UserMenu } from './user-menu';
 
 /**
- * 控制台外壳：顶部公告条 + 左侧边栏 + 右侧内容区。整屏固定高度，只有内容区滚动。
+ * 控制台外壳：左侧边栏 + 右侧内容区。整屏固定高度，只有内容区滚动。
  * 桌面端侧边栏可收起成图标栏；大屏以下侧边栏换成左侧抽屉，由顶部一条手机栏的菜单按钮打开，换页自动关闭；
- * 手机栏右侧的头像点开的是同一个账号菜单。公告条与通知铃铛按控制台功能开关显示（首发都关着）。
+ * 手机栏右侧是公告铃铛和头像（点开是同一个账号菜单）。公告在这里读一次，几处铃铛共用。
  */
 export function ConsoleShell({ children }: { children: ReactNode }) {
   const t = useTranslations('console');
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [announcementOpen, setAnnouncementOpen] = useState(true);
   // 邀请返利开关只读一次，桌面侧栏和手机抽屉共用
   const affiliateEnabled = useAffiliateEnabled();
+  const announcements = useAnnouncements();
 
   // 换页时关掉手机抽屉（渲染时按外部值调整状态，不在副作用里改）
   const [lastPath, setLastPath] = useState(pathname);
@@ -39,9 +38,6 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
 
   return (
     <div data-console-shell className="flex h-dvh flex-col overflow-hidden bg-background">
-      {CONSOLE_FEATURES.announcements && announcementOpen ? (
-        <AnnouncementBar onClose={() => setAnnouncementOpen(false)} />
-      ) : null}
       <div className="flex min-h-0 flex-1">
         <aside
           data-sidebar
@@ -54,6 +50,7 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
           <ConsoleSidebar
             collapsed={collapsed}
             affiliateEnabled={affiliateEnabled}
+            announcements={announcements}
             onToggleCollapse={() => setCollapsed((c) => !c)}
           />
         </aside>
@@ -70,7 +67,7 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
             </button>
             <Brand />
             <span className="flex-1" />
-            {CONSOLE_FEATURES.notifications ? <NotificationsMenu side="bottom" /> : null}
+            <AnnouncementsMenu announcements={announcements} side="bottom" />
             <UserMenu placement="bar" />
           </div>
           <main
@@ -93,6 +90,7 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
         <ConsoleSidebar
           collapsed={false}
           affiliateEnabled={affiliateEnabled}
+          announcements={announcements}
           onNavigate={() => setDrawerOpen(false)}
         />
       </Sheet>

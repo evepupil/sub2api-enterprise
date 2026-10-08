@@ -24,15 +24,15 @@
     "site": "Back to website",
     "logout": "Log out"
   },
-  "notifications": {
-    "label": "Notifications",
-    "title": "Notifications"
-  },
-  "announcement": {
+  "announcements": {
     "label": "Announcements",
-    "view": "View",
-    "close": "Dismiss announcement",
-    "goto": "Announcement {index}"
+    "labelUnread": "Announcements, {count} unread",
+    "title": "Announcements",
+    "unread": "Unread",
+    "markAllRead": "Mark all as read",
+    "empty": "No announcements",
+    "loadFailed": "Couldn’t load announcements",
+    "retry": "Retry"
   },
   "range": {
     "label": "Date range",

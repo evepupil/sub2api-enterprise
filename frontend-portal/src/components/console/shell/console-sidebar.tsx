@@ -6,29 +6,33 @@ import { useTranslations } from 'next-intl';
 import { Brand } from '@/components/layout/brand';
 import { Link, usePathname } from '@/i18n/navigation';
 import { CONSOLE_FEATURES } from '@/lib/console/features';
+import type { AnnouncementsState } from '@/lib/console/live/use-announcements';
 import { useSession } from '@/lib/session/session-provider';
 import { cn } from '@/lib/utils';
 
 import { buttonClass } from '../button';
+import { AnnouncementsMenu } from './announcements-menu';
 import { isNavActive, visibleNav } from './nav-items';
-import { NotificationsMenu } from './notifications-menu';
 import { UserMenu } from './user-menu';
 
 /**
- * 控制台侧边栏：品牌与收起按钮、深色「对话」入口、菜单、底部头像菜单（含语言与主题切换）与通知。
- * 对话入口与通知铃铛按控制台功能开关显示（src/lib/console/features.ts，首发都关着）。
+ * 控制台侧边栏：品牌与收起按钮、深色「对话」入口、菜单、底部头像菜单（含语言与主题切换）与公告铃铛。
+ * 对话入口按控制台功能开关显示（src/lib/console/features.ts，首发关着）。
  * collapsed 为真时只显示图标（悬停有原生提示），桌面端可收起；手机端放进左侧抽屉，不收起。
  * 交互检查：菜单项 data-nav={key}，当前页带 aria-current="page"，收起按钮 data-sidebar-toggle。
  */
 export function ConsoleSidebar({
   collapsed,
   affiliateEnabled,
+  announcements,
   onToggleCollapse,
   onNavigate,
 }: {
   collapsed: boolean;
   /** 后台有没有开邀请返利；没开或还没读到时不显示「邀请」 */
   affiliateEnabled: boolean | null;
+  /** 公告（控制台外壳读一次，桌面侧栏和手机抽屉共用） */
+  announcements: AnnouncementsState;
   /** 只有桌面端传，手机抽屉里不显示收起按钮 */
   onToggleCollapse?: () => void;
   /** 点了菜单项之后（手机端用来关抽屉） */
@@ -128,7 +132,7 @@ export function ConsoleSidebar({
         )}
       >
         <UserMenu placement={collapsed ? 'rail' : 'sidebar'} />
-        {CONSOLE_FEATURES.notifications ? <NotificationsMenu /> : null}
+        <AnnouncementsMenu announcements={announcements} />
       </div>
     </div>
   );

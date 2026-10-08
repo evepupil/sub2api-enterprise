@@ -24,15 +24,15 @@
     "site": "返回官网",
     "logout": "退出登录"
   },
-  "notifications": {
-    "label": "通知",
-    "title": "通知"
-  },
-  "announcement": {
+  "announcements": {
     "label": "公告",
-    "view": "查看",
-    "close": "关闭公告",
-    "goto": "第 {index} 条公告"
+    "labelUnread": "公告，{count} 条未读",
+    "title": "公告",
+    "unread": "未读",
+    "markAllRead": "全部已读",
+    "empty": "暂无公告",
+    "loadFailed": "公告加载失败",
+    "retry": "重试"
   },
   "range": {
     "label": "时间范围",
