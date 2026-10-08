@@ -32,7 +32,7 @@
     "model": "Model",
     "channel": "Group",
     "price": "Price",
-    "discount": "Discount",
+    "official": "Official price",
     "type": "Type",
     "provider": "Provider",
     "protocols": "Protocols",

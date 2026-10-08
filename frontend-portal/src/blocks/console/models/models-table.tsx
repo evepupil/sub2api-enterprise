@@ -1,13 +1,12 @@
 'use client';
 
 import { Layers } from 'lucide-react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/console/button';
 import { Table, TableShell, Th } from '@/components/console/data-table';
 import { EmptyState } from '@/components/console/empty-state';
 import { Pagination, usePagination } from '@/components/console/pagination';
-import type { AppLocale } from '@/i18n/routing';
 import { CONSOLE_FEATURES } from '@/lib/console/features';
 import type { ModelRowView } from '@/lib/console/live/models-view';
 
@@ -36,7 +35,6 @@ export function ModelsTable({
 }) {
   const t = useTranslations('consoleModels');
   const tc = useTranslations('console');
-  const locale = useLocale() as AppLocale;
   const pager = usePagination(rows, resetKey);
 
   return (
@@ -62,7 +60,7 @@ export function ModelsTable({
             </Th>
             <Th>{t('table.channel')}</Th>
             <Th align="right">{t('table.price')}</Th>
-            <Th>{t('table.discount')}</Th>
+            <Th>{t('table.official')}</Th>
             <Th>{t('table.type')}</Th>
             <Th>{t('table.provider')}</Th>
             <Th>{t('table.protocols')}</Th>
@@ -75,7 +73,6 @@ export function ModelsTable({
             <ModelRow
               key={row.key}
               row={row}
-              locale={locale}
               favorite={favorites.includes(row.id)}
               onToggleFavorite={onToggleFavorite}
             />

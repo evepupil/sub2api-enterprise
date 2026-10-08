@@ -109,15 +109,15 @@ describe('官网按分组展示', () => {
 });
 
 describe('价格来自后台、乘各自分组的倍率', () => {
-  it('按 Token：输入输出与缓存读取都乘倍率，折扣 = 实付 ÷ 官方价', () => {
+  it('按 Token：输入输出与缓存读取都乘倍率，分组带着自己的倍率（分组名旁写 ×0.15）', () => {
     const shared = find(SONNET, '共享 Claude');
     expect(shared.price).toMatchObject({ kind: 'token', input: 0.3, output: 1.5 });
     expect(shared.cacheRead).toBe(0.03);
-    expect(shared.discount).toBe(0.15);
+    expect(shared.group.rate).toBe(0.15);
     expect(find(SONNET, '专用 Claude').price).toMatchObject({ input: 0.6, output: 3 });
-    expect(find(SONNET, '专用 Claude').discount).toBe(0.3);
-    // 倍率 1 不打折，不显示折扣标
-    expect(find(SONNET, 'default').discount).toBeNull();
+    expect(find(SONNET, '专用 Claude').group.rate).toBe(0.3);
+    // 倍率 1 即官方价，同样写出来
+    expect(find(SONNET, 'default').group.rate).toBe(1);
   });
 
   it('展示名、厂商、上下文取官网目录；目录里没有的显示原名', () => {

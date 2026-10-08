@@ -2,8 +2,6 @@
 
 import { useTranslations } from 'next-intl';
 
-import { DiscountBadge } from '@/components/catalog/discount-badge';
-import type { AppLocale } from '@/i18n/routing';
 import { formatContext } from '@/lib/catalog';
 import {
   formatLiveMoney,
@@ -77,23 +75,21 @@ export function ModelPrice({ row }: { row: ModelRowView }) {
 }
 
 /**
- * 折扣列：折扣标加一行官方价。打折时把官方价划掉，让人一眼看出省了多少；
- * 按张、按次计费的模型和官方价单位不同，不显示。
+ * 官方价列：输入 / 输出的官方价（分组倍率已写在分组列，这里不再写「几折」）。
+ * 比官方价便宜时把官方价划掉，让人一眼看出省了多少；按张、按次计费的模型和官方价单位不同，不显示。
  */
-export function ModelDiscount({ row, locale }: { row: ModelRowView; locale: AppLocale }) {
+export function ModelOfficialPrice({ row }: { row: ModelRowView }) {
   if (!row.official) return <span className="text-subtle-foreground">—</span>;
 
   return (
-    <div className="flex flex-col items-start gap-1">
-      <DiscountBadge discount={row.discount} locale={locale} />
-      <p
-        className={cn(
-          'text-xs tabular-nums text-subtle-foreground',
-          row.discount !== null && 'line-through',
-        )}
-      >
-        {`${money(row.official.input)} / ${money(row.official.output)}`}
-      </p>
-    </div>
+    <p
+      data-model-official={row.id}
+      className={cn(
+        'text-xs tabular-nums text-subtle-foreground',
+        row.discount !== null && 'line-through',
+      )}
+    >
+      {`${money(row.official.input)} / ${money(row.official.output)}`}
+    </p>
   );
 }

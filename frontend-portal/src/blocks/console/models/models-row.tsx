@@ -9,13 +9,12 @@ import { Td, Tr } from '@/components/console/data-table';
 import { GroupWithRate } from '@/components/console/group-rate';
 import { Badge } from '@/components/ui/badge';
 import { Link } from '@/i18n/navigation';
-import type { AppLocale } from '@/i18n/routing';
 import { PROTOCOL_LABELS, formatContext, getProvider } from '@/lib/catalog';
 import { CONSOLE_FEATURES } from '@/lib/console/features';
 import type { ModelRowView } from '@/lib/console/live/models-view';
 import { cn } from '@/lib/utils';
 
-import { ModelDiscount, ModelPrice } from './models-price';
+import { ModelOfficialPrice, ModelPrice } from './models-price';
 
 /**
  * 模型表的一行：一个分组里的一个模型（同一个模型在几个分组里就有几行）。
@@ -26,12 +25,10 @@ import { ModelDiscount, ModelPrice } from './models-price';
  */
 export function ModelRow({
   row,
-  locale,
   favorite,
   onToggleFavorite,
 }: {
   row: ModelRowView;
-  locale: AppLocale;
   favorite: boolean;
   onToggleFavorite: (id: string) => void;
 }) {
@@ -83,7 +80,7 @@ export function ModelRow({
       </Td>
 
       <Td className="whitespace-nowrap">
-        <ModelDiscount row={row} locale={locale} />
+        <ModelOfficialPrice row={row} />
       </Td>
 
       <Td>

@@ -32,7 +32,7 @@
     "model": "模型",
     "channel": "分组",
     "price": "价格",
-    "discount": "折扣",
+    "official": "官方价",
     "type": "类型",
     "provider": "厂商",
     "protocols": "协议",

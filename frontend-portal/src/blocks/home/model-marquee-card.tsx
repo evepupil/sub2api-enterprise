@@ -1,21 +1,19 @@
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 
-import { DiscountBadge } from '@/components/catalog/discount-badge';
 import { ProviderLogo } from '@/components/catalog/provider-logo';
-import type { AppLocale } from '@/i18n/routing';
+import { RateBadge } from '@/components/catalog/rate-badge';
 import { formatContext, formatMoney, getProvider } from '@/lib/catalog';
 import type { SiteModel } from '@/lib/catalog/live';
 
 /**
  * 模型瀑布流里的单张模型卡（服务端组件），数据来自后台、一律美元，价格取这个模型最便宜的分组：
  * 厂商与名称，下一行厂商 · 上下文（生图写「生图」）；建了监测项的模型写最近一次的对话延迟与端点 PING；
- * 底部文本显示输入单价，按张、按次显示单价。分辨率多档或别的分组更贵（from）时价格后面写「起」。
+ * 底部文本显示输入单价，按张、按次显示单价，右边是这个分组的倍率。分辨率多档或别的分组更贵（from）时价格后面写「起」。
  */
 export function ModelMarqueeCard({ model, from }: { model: SiteModel; from: boolean }) {
   const t = useTranslations('homeMore');
   const tc = useTranslations('common');
   const tm = useTranslations('models');
-  const locale = useLocale() as AppLocale;
 
   const providerName = model.provider ? getProvider(model.provider).name : null;
   const detail =
@@ -72,7 +70,7 @@ export function ModelMarqueeCard({ model, from }: { model: SiteModel; from: bool
       ) : null}
       <div className="mt-4 flex items-center justify-between gap-3 border-t border-border pt-4 text-xs">
         <span className="truncate tabular-nums text-foreground">{priceText}</span>
-        <DiscountBadge discount={model.discount} locale={locale} />
+        <RateBadge rate={model.group.rate} />
       </div>
     </article>
   );

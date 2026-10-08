@@ -19,7 +19,7 @@ const TONES: Record<BadgeTone, string> = {
   inverse: 'border border-white/15 bg-white/10 text-navy-foreground',
 };
 
-/** 小徽标：折扣、「新」标记、分类标签。 */
+/** 小徽标：分组倍率、分类标签等。 */
 export function Badge({
   tone = 'neutral',
   className,

@@ -76,16 +76,6 @@ export function imagePrice(model: Model, edition: EditionId): ImagePriceView | n
   return ratio === null ? null : imagePriceAt(model, ratio);
 }
 
-/** 折扣标：中文「3折」「1.5折」，英文「70% off」 */
-export function formatDiscount(discount: number | null, locale: AppLocale): string | null {
-  if (discount === null) return null;
-  if (locale === 'zh') {
-    const tenths = Math.round(discount * 100) / 10;
-    return `${Number(tenths.toFixed(1))}折`;
-  }
-  return `${Math.round((1 - discount) * 100)}% off`;
-}
-
 /** 金额数字：≥100 最多 1 位小数，≥1 最多 2 位，<1 最多 4 位，去掉末尾的 0 */
 export function formatAmount(value: number): string {
   const abs = Math.abs(value);

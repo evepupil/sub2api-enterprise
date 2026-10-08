@@ -42,6 +42,8 @@ export type ModelHealth = Omit<StatusEntry, 'name' | 'group'>;
 export interface SiteGroup {
   id: string;
   name: string;
+  /** 分组倍率（官方价 × 倍率 = 实付价），分组名旁写成 ×0.3 */
+  rate: number;
 }
 
 /** 某个分组里的一个模型 */
@@ -59,8 +61,6 @@ export interface SiteModel {
   price: LivePrice;
   /** 缓存读取价（每百万 Token，已乘分组倍率）；没有为 null */
   cacheRead: number | null;
-  /** 实付 ÷ 官方价，小于 1 时显示折扣标 */
-  discount: number | null;
   /** 价格排序用：按 Token 的取输入价，按次的取单价，没有价格的排最后 */
   sortPrice: number;
   health: ModelHealth | null;
@@ -86,13 +86,12 @@ function siteModels(
       key: row.key,
       id: row.id,
       name: row.name,
-      group: { id: channel.id, name: channel.name },
+      group: { id: channel.id, name: channel.name, rate: channel.rate },
       provider: row.provider,
       type: row.type,
       contextTokens: row.contextTokens,
       price: row.price,
       cacheRead: cacheRead === null ? null : round6(cacheRead * PER_MILLION * channel.rate),
-      discount: row.discount,
       sortPrice: row.sortPrice,
       health: entry
         ? {

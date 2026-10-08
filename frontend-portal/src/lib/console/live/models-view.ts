@@ -61,7 +61,7 @@ export interface ModelRowView {
   price: LivePrice;
   /** 官方价（每百万 Token，不乘倍率），只有按 Token 计费且后端查得到时才有 */
   official: TokenRates | null;
-  /** 实付 ÷ 官方，小于 1 时显示折扣标 */
+  /** 实付 ÷ 官方，小于 1 时把官方价划掉 */
   discount: number | null;
   windows: PriceWindow[];
   /** 价格排序用：按 Token 的取输入价，按次的取单价，没有价格的排最后 */
@@ -147,7 +147,7 @@ function livePrice(model: ChannelModel, channel: ConsoleChannel): LivePrice {
   };
 }
 
-/** 折扣 = 实付 ÷ 官方：优先比输出价，没有再比输入价；不打折（≥ 1）时不显示 */
+/** 实付 ÷ 官方：优先比输出价，没有再比输入价；不比官方便宜（≥ 1）时为空 */
 function discountOf(price: LivePrice, official: TokenRates | null): number | null {
   if (price.kind !== 'token' || !official) return null;
   const pairs: readonly (readonly [number | null, number | null])[] = [

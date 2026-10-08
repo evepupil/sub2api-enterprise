@@ -10,7 +10,7 @@
 import { useState } from 'react';
 
 import { ArrowUpDown, ChevronDown, Search, SlidersHorizontal } from 'lucide-react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 
 import { ProviderLogo } from '@/components/catalog/provider-logo';
 import { buttonClass } from '@/components/ui/button-styles';
@@ -75,7 +75,6 @@ const NO_MODELS: readonly SiteModel[] = [];
 
 export function ModelsExplorer({ catalog }: { catalog: SiteCatalog }) {
   const t = useTranslations('models');
-  const locale = useLocale();
 
   const models = catalog ?? NO_MODELS;
   const [type, setType] = useUrlState('type', TYPE_FILTERS, 'all');
@@ -339,7 +338,7 @@ export function ModelsExplorer({ catalog }: { catalog: SiteCatalog }) {
             ) : (
               <div data-model-grid className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {list.map((model) => (
-                  <ModelsExplorerCard key={model.key} model={model} locale={locale} />
+                  <ModelsExplorerCard key={model.key} model={model} />
                 ))}
               </div>
             )}

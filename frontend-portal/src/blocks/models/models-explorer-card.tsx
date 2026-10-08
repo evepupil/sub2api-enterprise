@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * 模型卡：某个分组里的一个模型（数据来自后台，见 src/lib/catalog/live.ts）。价格、折扣标、可用率都是这个分组的，
+ * 模型卡：某个分组里的一个模型（数据来自后台，见 src/lib/catalog/live.ts）。价格、倍率、可用率都是这个分组的，
  * 分组名写在价格上面。复制调用名成功后短暂换成对勾，1.5 秒恢复。
  */
 
@@ -10,11 +10,10 @@ import { useEffect, useRef, useState } from 'react';
 import { ArrowRight, Check, Copy } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
-import { DiscountBadge } from '@/components/catalog/discount-badge';
 import { ProviderLogo } from '@/components/catalog/provider-logo';
+import { RateBadge } from '@/components/catalog/rate-badge';
 import { Badge } from '@/components/ui/badge';
 import { Link } from '@/i18n/navigation';
-import type { AppLocale } from '@/i18n/routing';
 import { formatContext, formatMoney, getProvider } from '@/lib/catalog';
 import { priceRowId, type SiteModel } from '@/lib/catalog/live';
 
@@ -57,7 +56,7 @@ function CardPrice({ model }: { model: SiteModel }) {
   );
 }
 
-export function ModelsExplorerCard({ model, locale }: { model: SiteModel; locale: AppLocale }) {
+export function ModelsExplorerCard({ model }: { model: SiteModel }) {
   const t = useTranslations('models');
 
   const [copied, setCopied] = useState(false);
@@ -139,7 +138,7 @@ export function ModelsExplorerCard({ model, locale }: { model: SiteModel; locale
             <CardPrice model={model} />
           </div>
           <div className="flex shrink-0 flex-col items-end gap-1.5">
-            <DiscountBadge discount={model.discount} locale={locale} />
+            <RateBadge rate={model.group.rate} className="self-end" />
             {model.contextTokens !== null ? (
               <span className="text-xs tabular-nums text-muted-foreground">
                 {formatContext(model.contextTokens)} {t('card.context')}

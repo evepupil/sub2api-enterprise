@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 
-import { RateBadge } from '@/components/console/group-rate';
+import { RateBadge } from '@/components/catalog/rate-badge';
 import { InfoPopover } from '@/components/console/info-popover';
 import { Badge } from '@/components/ui/badge';
 import { formatUsd } from '@/lib/console';

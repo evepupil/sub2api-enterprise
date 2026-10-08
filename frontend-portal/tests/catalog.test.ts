@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest';
 import {
   formatAmount,
   formatContext,
-  formatDiscount,
   formatMoney,
   imagePrice,
   MODELS,
@@ -86,16 +85,6 @@ describe('通道价格 = 官方价 × 分组倍率', () => {
   it('文本模型没有图片价，生图模型没有文本价', () => {
     expect(imagePrice(model('gpt-6-sol'), 'personal')).toBeNull();
     expect(textPrice(model('gpt-image-2'), 'personal')).toBeNull();
-  });
-});
-
-describe('折扣标', () => {
-  it('实付是官方价的 15%、30% 时写 1.5折、3折，没有折扣不显示', () => {
-    expect(formatDiscount(0.15, 'zh')).toBe('1.5折');
-    expect(formatDiscount(0.3, 'zh')).toBe('3折');
-    expect(formatDiscount(0.15, 'en')).toBe('85% off');
-    expect(formatDiscount(0.3, 'en')).toBe('70% off');
-    expect(formatDiscount(null, 'zh')).toBeNull();
   });
 });
 
