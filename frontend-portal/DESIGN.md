@@ -422,8 +422,8 @@ pnpm format:check  # prettier
 ### 10.1 外壳（主控已写好）
 
 - `src/app/[locale]/console/layout.tsx`：换上控制台自己的一组文案（`CONSOLE_NAMESPACES`），套 `ConsoleShell`；控制台页面 `noindex`。
-- `ConsoleShell`：整屏固定高度，顶部公告条（深色，可关闭，多条轮换；按控制台功能开关 `src/lib/console/features.ts`（`CONSOLE_FEATURES`：chat 对话、announcements 公告条、notifications 通知铃铛），2026-10-07 起首发都关着，接好后改成 true 就回来）+ 左侧边栏（`w-64`，可收起成 `w-16` 图标栏）+ 右侧内容区（`<main data-console-main>`，只有它滚动）。大屏以下侧栏变成左侧抽屉，由顶部手机栏的菜单按钮（`data-mobile-nav`）打开，换页自动关闭；手机栏右侧的头像点开同一个账号菜单（`data-user-menu="bar"`，向下弹、右对齐）。
-- 侧栏：品牌、收起按钮（`data-sidebar-toggle`）、深色「对话」按钮（`data-nav="chat"`，对话开关关着时不显示）、菜单（`data-nav={key}`，当前页 `aria-current="page"`）、底部一行：头像菜单（`data-user-menu="sidebar"`，收起时 `"rail"` 只显示头像）+ 通知铃铛（通知开关关着时不显示，手机栏同）。头像菜单依次是名字与邮箱、账户设置、返回官网（菜单项 `data-user-item`）、语言与主题两行分段切换（`data-user-row="language" | "theme"`，每块 `data-option`：`zh` 中文 / `en` English、`light` 浅色 / `dark` 深色，点一下就切换，语言切换留在当前页）、退出登录。
+- `ConsoleShell`：整屏固定高度，左侧边栏（`w-64`，可收起成 `w-16` 图标栏）+ 右侧内容区（`<main data-console-main>`，只有它滚动）。大屏以下侧栏变成左侧抽屉，由顶部手机栏的菜单按钮（`data-mobile-nav`）打开，换页自动关闭；手机栏右侧是公告铃铛（向下弹）和头像（点开同一个账号菜单，`data-user-menu="bar"`，向下弹、右对齐）。公告在外壳里读一次（`useAnnouncements`），侧栏、手机抽屉、手机栏的铃铛共用。
+- 侧栏：品牌、收起按钮（`data-sidebar-toggle`）、深色「对话」按钮（`data-nav="chat"`，对话开关关着时不显示）、菜单（`data-nav={key}`，当前页 `aria-current="page"`）、底部一行：头像菜单（`data-user-menu="sidebar"`，收起时 `"rail"` 只显示头像）+ 公告铃铛（`AnnouncementsMenu`，手机栏同）。头像菜单依次是名字与邮箱、账户设置、返回官网（菜单项 `data-user-item`）、语言与主题两行分段切换（`data-user-row="language" | "theme"`，每块 `data-option`：`zh` 中文 / `en` English、`light` 浅色 / `dark` 深色，点一下就切换，语言切换留在当前页）、退出登录。
 - 每个页面最外层用 `ConsolePage`：顶部标题行（标题 + 右侧操作，底部一条通栏分隔线）+ 内容区（`space-y-6`）。标题行和内容区放在同一个居中容器里（`max-w-[1440px]`、左右 `px-4 sm:px-6 lg:px-8`），宽屏下标题、右侧按钮与下面的卡片左右边对齐；表单为主的页面传 `width="narrow"`（`max-w-3xl`，账户设置）。**只放标题，不加描述句。**
 
 ### 10.2 控制台共享组件（`src/components/console/`，主控已写好，直接用，不准再造）
@@ -467,7 +467,6 @@ pnpm format:check  # prettier
 | `maskKey(secret)`、`KEY_STATUSES`、`API_KEYS` | 密钥打码与状态；`API_KEYS` 是 5 条占位密钥，只给首发隐藏的对话页用 |
 | `RECHARGE_PRESETS`、`RECHARGE_BONUS_TIERS`、`rechargeBonus(a)`、`RECHARGE_LIMITS`、`PAYMENT_METHODS` | 充值弹窗的占位配置（账单页其余部分已接后端：`@/lib/console/live/billing-*`、`use-billing`） |
 | `CHAT_SAMPLE`、`CHAT_REPLIES`、`CHAT_MODEL_IDS`、`DEFAULT_CHAT_MODEL`、`CHAT_INPUT_MAX` | 对话页 |
-| `CURRENT_USER`、`ANNOUNCEMENTS`、`NOTIFICATIONS` | 当前用户、公告、通知 |
 | `paginate`、`pageButtons`、`PAGE_SIZES` | 分页（组件已封装） |
 
 模型、厂商、版本与价格照旧从 `@/lib/catalog` 取（`MODELS`、`getModel`、`getProvider`、`getEdition`、`EDITIONS`、`textPrice`、`imagePrice`、`textPriceAt`、`imagePriceAt`、`formatRatio`、`PROTOCOL_LABELS`、`formatMoney` 等）。版本名用 `getEdition(id).name[locale]`。
