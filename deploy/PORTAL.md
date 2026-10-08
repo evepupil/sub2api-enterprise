@@ -67,7 +67,7 @@ docker compose -f docker-compose.yml -f portal-edge/compose.portal.yaml up -d --
 ## 5. 升级与回滚
 
 - 升级前先备份：数据库导出（`pg_dump`）加 `.env`、编排与入口配置，放在 `/opt/sub2api-enterprise/backups/<时间>/`，数据库导出另拉一份回本机。
-- 升级：改 `.env` 里的 `SUB2API_IMAGE`、`PORTAL_IMAGE` 为新版本，`docker compose up -d --wait sub2api portal`。后台重启约十几秒，官网几秒；入口不用动。
+- 升级：改 `.env` 里的 `SUB2API_IMAGE`、`PORTAL_IMAGE` 为新版本，`docker compose up -d --wait sub2api portal`（只改了官网时只重建官网镜像，`up -d --no-deps --wait portal`）。后台重启约十几秒，官网几秒。换完容器执行 `docker compose exec edge nginx -s reload`：入口每 30 秒才重新解析一次容器地址，不重载可能有半分钟转到旧地址；重载不断开现有连接。
 - 回滚：把这两个镜像改回上一个版本标签再 `up -d`；入口配置从备份目录拷回后 `restart edge`。服务器上至少保留上一版镜像。
 - 改 Cloudflare 公开主机名会立刻生效；回退时把官网域名指回原来的地址即可。
 
@@ -81,3 +81,4 @@ docker compose -f docker-compose.yml -f portal-edge/compose.portal.yaml up -d --
 ## 7. 生产部署记录
 
 - 2026-10-08：codu 服务器从 9-27 的旧版（提交 ec4a85840，重做前的旧官网）升到 b3beb6d75（新官网 + 后台），镜像在服务器上构建；入口补「从 CF-Connecting-IP 还原真实 IP」并把健康检查转到新官网；后台填站点前端地址与接口地址；新建 OpenAI 渠道挂到「企业独享」分组（12 个 GPT 模型，价格按全局价格表）并打开模型广场；codu.xyz 改指入口 8088，admin.codu.xyz 指后台 8080（Cloudflare 公开主机名由用户改）。备份在服务器 `backups/pre-portal-20261008-093020/`，数据库导出另存本机。
+- 2026-10-08 下午：官网升到 d7b2eef09（分组旁直接写倍率 ×0.3、模型页与价格页页首写「充值 1 元 = 1 美元」、控制台「折扣」列改「官方价」），后台不变（b3beb6d75）。只在服务器上重建官网镜像，换官网后入口 `nginx -s reload`，切换 6 秒，入口没有出错的请求；经公网核对中英文页首小字与倍率写法。备份在服务器 `backups/pre-rate-20261008-163911/`（`.env` 与数据库导出）。
