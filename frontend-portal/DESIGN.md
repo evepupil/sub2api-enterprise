@@ -433,7 +433,7 @@ pnpm format:check  # prettier
 | `ConsolePage` | `console-page.tsx` | `{ id, title, actions?, width?: 'default' \| 'narrow', children, className? }`；`id` 写在 `data-console-page` 上，等于路由名；`className` 只加在内容区 |
 | `Panel` | `panel.tsx` | 白底圆角卡片，`{ id?, title?, actions?, children, className?, bodyClassName? }`；默认内边距 `p-5`，表格放进 Panel 时传 `bodyClassName="p-0"` |
 | `StatCard` | `stat-card.tsx` | `{ id, label, value, aside?, sub?, size?: 'md' \| 'sm' }`；`data-stat={id}`，数字在 `[data-stat-value]` |
-| `Select` | `select.tsx` | 单选下拉 `{ name, value, onChange, options: { value, label }[], ariaLabel, size?, align?, className? }`；触发按钮 `data-select={name}`，选项 `data-option={value}`；宽度默认撑满父级 |
+| `Select` | `select.tsx` | 单选下拉 `{ name, value, onChange, options: { value, label, display? }[], ariaLabel, size?, align?, className?, menuClassName? }`；`display` 是选中后按钮里的简短写法（菜单项内容多时给）；触发按钮 `data-select={name}`，选项 `data-option={value}`；宽度默认撑满父级；放在弹窗或抽屉里时自动用模态方式打开（`useInsideDialog`），列表才接得住滚轮与触摸滚动 |
 | `FilterField` / `SearchInput` | `filter-field.tsx` | 筛选项：上方小标签 + 控件；`SearchInput` 是带放大镜的输入框（`type="search"`） |
 | `DateRangePicker` | `date-range-picker.tsx` | `{ value: DateRange, onChange, today: string | null, since: string | null, align? }`；左侧常用范围立即生效，右侧月历自选后点「应用」；`today` 是真实的今天、`since` 是「全部」的起点（账号创建日），页面刚挂载还不知道时传 null，按钮先不可点（2026-10-08 起不再带写死的占位日期）；`rangeLabel()` 可复用 |
 | `TableShell` / `Table` / `Th` / `Td` / `Tr` | `data-table.tsx` | 外框可带 `footer`（放分页）；`Table` 传 `minWidth` 让小屏横向滚动；`Th`/`Td` 支持 `align` 与 `sticky: 'left' \| 'right'`（固定首列或操作列） |
@@ -442,7 +442,7 @@ pnpm format:check  # prettier
 | `CONTROL_BUTTON` | `control-button.ts` | 和输入框、下拉框、日期范围排在同一行的按钮（标题行操作、筛选行按钮）叠加的类 `h-10`：`<Button className={CONTROL_BUTTON}>` |
 | `Pagination` + `usePagination` | `pagination.tsx` | `const pager = usePagination(rows, resetKey)`，筛选条件变化（resetKey 变）自动回第 1 页；`<Pagination page={pager.page} pages={pager.pages} total={pager.total} pageSize={pager.pageSize} onPageChange={pager.setPage} onPageSizeChange={pager.setPageSize} />`，当前页数据在 `pager.items` |
 | `EmptyState` | `empty-state.tsx` | `{ id, icon, title, description?, action?, bordered? }`；`data-empty={id}`；表格内空状态传 `bordered={false}` |
-| `Dialog` / `Sheet` / `ConfirmDialog` | `dialog.tsx` | 居中弹窗 `data-dialog={id}`（`size: sm/md/lg`，`footer` 放按钮）；右侧抽屉 `data-sheet={id}`；确认弹窗确认按钮带 `data-confirm`，`tone="danger"` 时是红色按钮；`initialFocus` 传输入框 id 时打开后先聚焦它；关闭后焦点回到打开前的元素 |
+| `Dialog` / `Sheet` / `ConfirmDialog` | `dialog.tsx` | 居中弹窗 `data-dialog={id}`（`size: sm/md/lg`，`footer` 放按钮）；右侧抽屉 `data-sheet={id}`；确认弹窗确认按钮带 `data-confirm`，`tone="danger"` 时是红色按钮；`initialFocus` 传输入框 id 时打开后先聚焦它；关闭后焦点回到打开前的元素；弹窗与抽屉给里面的内容一个「在弹窗里」的标记（`useInsideDialog()`），里面的下拉据此用模态方式打开 |
 | `Switch` | `switch.tsx` | `{ name, checked, onCheckedChange, ariaLabel?, id?, disabled? }`；`data-switch={name}` |
 | `CopyButton` / `useCopy` | `copy-button.tsx` | 复制图标按钮（成功后变对勾 1.5 秒），`data-copy={name}`；菜单项里复制用 `useCopy()` |
 | `StackedBarChart` | `charts/stacked-bar-chart.tsx` | 堆叠柱状图 `{ id, labels: { axis, full }[], series: { id, label, color, values }[], formatValue, formatAxis?, ariaLabel, totalLabel, emptyLabel, height? }`；颜色用 `seriesColor(i)`，「其他」用 `OTHER_COLOR`；`data-chart={id}`、`data-buckets` |
