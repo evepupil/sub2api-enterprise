@@ -52,5 +52,8 @@
     "unavailable": "Usage couldn't be loaded",
     "tooMany": "Too many requests. Try again shortly.",
     "retry": "Retry"
+  },
+  "balance": {
+    "label": "Available balance"
   }
 }

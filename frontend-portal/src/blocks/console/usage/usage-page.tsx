@@ -31,6 +31,7 @@ import { useSession } from '@/lib/session/session-provider';
 import { cn } from '@/lib/utils';
 
 import { UsageActivity } from './usage-activity';
+import { UsageBalanceChip } from './usage-balance-chip';
 import { UsageBreakdown } from './usage-breakdown';
 import { UsageOrgQuota } from './usage-org-quota';
 import { UsageStats } from './usage-stats';
@@ -103,6 +104,7 @@ export function UsagePage() {
       title={t('meta.title')}
       actions={
         <>
+          <UsageBalanceChip reloadKey={reloadKey} />
           {/* 还不知道今天是哪天时（刚打开的一瞬间）先按默认范围显示按钮、按钮不可点，避免标题行跳动 */}
           <DateRangePicker
             value={range ?? presetRange(DEFAULT_PRESET)}

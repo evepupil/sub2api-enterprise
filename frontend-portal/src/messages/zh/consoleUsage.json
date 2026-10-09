@@ -52,5 +52,8 @@
     "unavailable": "用量暂时加载不出来",
     "tooMany": "查询太频繁，请稍后再试",
     "retry": "重试"
+  },
+  "balance": {
+    "label": "可用余额"
   }
 }
