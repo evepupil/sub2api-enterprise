@@ -15,11 +15,27 @@ export function rateTone(rate: number): BadgeTone {
 
 /**
  * 分组倍率徽标：×0.15、×1.0（2026-10-08 用户定：官网与控制台都直接写分组倍率，不写「几折」）。
- * 官网的价格页、模型页、首页与控制台共用。交互检查找 data-group-rate
+ * 官网的价格页、模型页、首页与控制台共用。传了 base 且和 rate 不同（账号有专属倍率）时，
+ * 先写划掉的分组原倍率、再写生效倍率，照原版 sub2api 选分组的写法。颜色按生效倍率。
+ * 交互检查找 data-group-rate
  */
-export function RateBadge({ rate, className }: { rate: number; className?: string }) {
+export function RateBadge({
+  rate,
+  base,
+  className,
+}: {
+  rate: number;
+  base?: number;
+  className?: string;
+}) {
+  const custom = base !== undefined && base !== rate;
   return (
     <Badge tone={rateTone(rate)} data-group-rate={rate} className={className}>
+      {custom ? (
+        <del data-base-rate={base} className="opacity-60">
+          {ratioLabel(base)}
+        </del>
+      ) : null}
       {ratioLabel(rate)}
     </Badge>
   );

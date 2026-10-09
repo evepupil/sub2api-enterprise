@@ -233,7 +233,7 @@ describe('能选的分组', () => {
     const response = await groupsRoute.GET(request('/api/portal/console/keys/groups'));
     expect(await response.json()).toEqual({
       ok: true,
-      groups: [{ id: 3, name: '标准分组', description: '', rate: 0.3 }],
+      groups: [{ id: 3, name: '标准分组', description: '', rate: 0.3, baseRate: 0.3, peak: null }],
     });
   });
 });

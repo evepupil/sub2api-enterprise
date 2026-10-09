@@ -3,9 +3,10 @@ import type {
   ChannelModel,
   ConsoleChannel,
   PriceTier,
-  TimeWindow,
   TokenRates,
 } from '@/lib/console/live/models-types';
+
+import { toTimeWindow } from './time-window';
 
 /**
  * 后端「模型广场」（/api/v1/model-plaza）→ 控制台模型页用的分组与模型。纯函数，单测锁住。
@@ -50,16 +51,6 @@ function toTiers(raw: unknown, base: TokenRates): PriceTier[] {
 }
 
 /** 「08:30:00」写成「08:30」 */
-const clock = (value: string) => value.replace(/^(\d{2}:\d{2}):00$/, '$1');
-
-function toWindow(start: unknown, end: unknown, multiplier: unknown): TimeWindow | null {
-  const rate = num(multiplier);
-  if (typeof start !== 'string' || typeof end !== 'string' || !start || !end || rate === null) {
-    return null;
-  }
-  return { start: clock(start), end: clock(end), multiplier: rate };
-}
-
 function toModel(raw: RawRecord): ChannelModel | null {
   if (typeof raw.name !== 'string' || raw.name.trim() === '') return null;
   const pricing = isRecord(raw.pricing) ? raw.pricing : {};
@@ -83,7 +74,7 @@ function toModel(raw: RawRecord): ChannelModel | null {
   const time = isRecord(raw.time_pricing) ? raw.time_pricing : null;
   const windows = time
     ? list(time.periods)
-        .map((period) => toWindow(period.start_time, period.end_time, period.multiplier))
+        .map((period) => toTimeWindow(period.start_time, period.end_time, period.multiplier))
         .filter(notNull)
     : [];
 
@@ -115,7 +106,7 @@ function toChannel(raw: RawRecord): ConsoleChannel | null {
     longContext: raw.long_context_pricing_enabled === true,
     peak:
       raw.peak_rate_enabled === true
-        ? toWindow(raw.peak_start, raw.peak_end, raw.peak_rate_multiplier)
+        ? toTimeWindow(raw.peak_start, raw.peak_end, raw.peak_rate_multiplier)
         : null,
     models: list(raw.models).map(toModel).filter(notNull),
   };

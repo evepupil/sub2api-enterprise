@@ -43,6 +43,7 @@
     "name": "Name",
     "group": "Group",
     "groupPlaceholder": "Choose a group",
+    "groupPeak": "Peak {window} ×{multiplier}",
     "customKey": "Custom key",
     "customKeyHint": "At least 16 characters: letters, digits, underscores and hyphens",
     "ipLimit": "IP restriction",

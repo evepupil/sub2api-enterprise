@@ -23,6 +23,7 @@ import {
 import type { KeyGroupOption, KeyWindows } from '@/lib/console/live/keys-types';
 import { addDays } from '@/lib/console/time';
 
+import { KeyGroupOptionContent } from './keys-group-option';
 import { EXPIRY_PRESETS, expiryPresetOf, type KeyFormErrors, type KeyFormMode } from './keys-model';
 
 /**
@@ -104,7 +105,10 @@ export function KeyNameField({
 /** 没选分组时下拉里的占位值（真实的分组 ID 不会是它） */
 const NO_GROUP = 'none';
 
-/** 分组下拉：每项是分组名 + 倍率徽标；现在的分组不在可选列表里时（比如后台收回了），也照样列出来 */
+/**
+ * 分组下拉：菜单里每项照原版 sub2api 写分组名、描述、倍率与高峰加价（见 KeyGroupOptionContent），
+ * 选好后框里只写分组名 + 倍率；现在的分组不在可选列表里时（比如后台收回了），也照样列出来。
+ */
 export function KeyGroupField({
   value,
   groups,
@@ -125,13 +129,16 @@ export function KeyGroupField({
   const t = useTranslations('consoleKeys');
   const message =
     useErrorText().group(error) ?? (unavailable ? t('errors.groupsUnavailable') : null);
-  const listed: { id: number; name: string; rate: number }[] = [...groups];
-  if (current && !groups.some((group) => group.id === current.id)) listed.push(current);
+  const listed: KeyGroupOption[] = [...groups];
+  if (current && !groups.some((group) => group.id === current.id)) {
+    listed.push({ ...current, description: '', baseRate: current.rate, peak: null });
+  }
   const options: SelectOption<string>[] = [
     ...(value === null ? [{ value: NO_GROUP, label: t('form.groupPlaceholder') }] : []),
     ...listed.map((group) => ({
       value: String(group.id),
-      label: <GroupWithRate name={group.name} rate={group.rate} />,
+      label: <KeyGroupOptionContent group={group} />,
+      display: <GroupWithRate name={group.name} rate={group.rate} />,
     })),
   ];
   return (
@@ -142,6 +149,7 @@ export function KeyGroupField({
         onChange={(next) => onChange(next === NO_GROUP ? null : Number(next))}
         options={options}
         ariaLabel={t('form.group')}
+        menuClassName="w-[var(--radix-dropdown-menu-trigger-width)] max-w-[calc(100vw-2rem)] max-h-[min(24rem,60dvh)]"
       />
     </Field>
   );

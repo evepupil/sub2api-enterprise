@@ -4,6 +4,8 @@
  * 金额一律美元。
  */
 
+import type { TimeWindow } from './models-types';
+
 /** 后端的四种状态：启用、已暂停（手动停用）、额度用完、已过期 */
 export type KeyStatus = 'active' | 'inactive' | 'quota_exhausted' | 'expired';
 
@@ -73,12 +75,21 @@ export interface KeysQuery {
   status: KeyStatusFilter;
 }
 
-/** 创建、修改密钥时能选的分组（账号能用的） */
+/**
+ * 创建、修改密钥时能选的分组（账号能用的）。下拉里照原版 sub2api 显示分组名、描述、倍率与高峰加价
+ * （2026-10-08 用户要求；描述只在控制台显示，官网不显示）。
+ */
 export interface KeyGroupOption {
   id: number;
   name: string;
+  /** 后台写的分组描述（可多行）；没写为空串 */
   description: string;
+  /** 生效倍率：有专属倍率时是专属倍率 */
   rate: number;
+  /** 分组本来的倍率；和 rate 不同说明这个账号有专属倍率，下拉里把它划掉 */
+  baseRate: number;
+  /** 高峰时段加价；分组没开为 null */
+  peak: TimeWindow | null;
 }
 
 /** 创建密钥：官网服务器校验过的请求 */

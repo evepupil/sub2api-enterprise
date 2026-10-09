@@ -14,7 +14,10 @@ import { cn } from '@/lib/utils';
 
 export interface SelectOption<T extends string> {
   value: T;
+  /** 下拉菜单里这一项的样子 */
   label: ReactNode;
+  /** 选中后按钮里的样子；不给就用 label（菜单项内容较多时给一个简短的） */
+  display?: ReactNode;
 }
 
 const TRIGGER =
@@ -36,6 +39,7 @@ export function Select<T extends string>({
   align = 'start',
   disabled,
   className,
+  menuClassName,
 }: {
   name: string;
   value: T;
@@ -46,6 +50,8 @@ export function Select<T extends string>({
   align?: 'start' | 'end';
   disabled?: boolean;
   className?: string;
+  /** 菜单的额外类名（如选项较高时放宽最大高度） */
+  menuClassName?: string;
 }) {
   const current = options.find((option) => option.value === value);
   const handleChange = (next: string) => {
@@ -62,13 +68,16 @@ export function Select<T extends string>({
           aria-label={ariaLabel}
           className={cn(TRIGGER, SIZES[size], className)}
         >
-          <span className="truncate">{current?.label ?? value}</span>
+          <span className="min-w-0 truncate">{current?.display ?? current?.label ?? value}</span>
           <ChevronDown aria-hidden className="size-4 shrink-0 text-subtle-foreground" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align={align}
-        className="max-h-72 min-w-[var(--radix-dropdown-menu-trigger-width)] overflow-y-auto"
+        className={cn(
+          'max-h-72 min-w-[var(--radix-dropdown-menu-trigger-width)] overflow-y-auto',
+          menuClassName,
+        )}
       >
         <DropdownMenuRadioGroup value={value} onValueChange={handleChange}>
           {options.map((option) => (

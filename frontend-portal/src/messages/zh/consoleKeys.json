@@ -43,6 +43,7 @@
     "name": "名称",
     "group": "分组",
     "groupPlaceholder": "请选择分组",
+    "groupPeak": "高峰 {window} ×{multiplier}",
     "customKey": "自定义密钥",
     "customKeyHint": "至少 16 位，只能用字母、数字、下划线和连字符",
     "ipLimit": "IP 限制",

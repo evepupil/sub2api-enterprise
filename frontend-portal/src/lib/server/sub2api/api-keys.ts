@@ -23,6 +23,7 @@ import { addDays } from '@/lib/console/time';
 
 import { CONSOLE_TIMEZONE } from './date-range';
 import type { BackendError } from './envelope';
+import { toTimeWindow } from './time-window';
 import { toUsageOverview } from './usage-overview';
 
 /**
@@ -210,7 +211,10 @@ export function toKeysPage(
   };
 }
 
-/** 能用的分组（沿用后端顺序），倍率按账号的专属倍率；看不懂时返回 null */
+/**
+ * 能用的分组（沿用后端顺序）：生效倍率按账号的专属倍率，同时留着分组本来的倍率（下拉里划掉它）；
+ * 分组开了高峰加价时带上时段。看不懂时返回 null
+ */
 export function toKeyGroupOptions(
   raw: unknown,
   rates: ReadonlyMap<number, number>,
@@ -219,12 +223,18 @@ export function toKeyGroupOptions(
   return raw.filter(isRecord).flatMap((group) => {
     const id = num(group.id);
     if (id === null) return [];
+    const baseRate = num(group.rate_multiplier) ?? 1;
     return [
       {
         id,
         name: text(group.name) ?? `#${id}`,
         description: text(group.description) ?? '',
-        rate: rates.get(id) ?? num(group.rate_multiplier) ?? 1,
+        rate: rates.get(id) ?? baseRate,
+        baseRate,
+        peak:
+          group.peak_rate_enabled === true
+            ? toTimeWindow(group.peak_start, group.peak_end, group.peak_rate_multiplier)
+            : null,
       },
     ];
   });

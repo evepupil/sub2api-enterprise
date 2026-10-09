@@ -203,16 +203,51 @@ describe('密钥列表与用量', () => {
     expect(
       toKeyGroupOptions(
         [
-          { id: 3, name: '标准分组', description: '日常用', rate_multiplier: 0.3 },
+          { id: 3, name: '标准分组', description: '日常用\n第二行', rate_multiplier: 0.3 },
           { id: 5, name: '高性能分组', rate_multiplier: 1 },
         ],
         toGroupRates({ 5: 0.8, bad: 1 }),
       ),
     ).toEqual([
-      { id: 3, name: '标准分组', description: '日常用', rate: 0.3 },
-      { id: 5, name: '高性能分组', description: '', rate: 0.8 },
+      {
+        id: 3,
+        name: '标准分组',
+        description: '日常用\n第二行',
+        rate: 0.3,
+        baseRate: 0.3,
+        peak: null,
+      },
+      // 有专属倍率：生效 0.8，同时留着分组本来的 1（下拉里划掉）
+      { id: 5, name: '高性能分组', description: '', rate: 0.8, baseRate: 1, peak: null },
     ]);
     expect(toKeyGroupOptions(null, new Map())).toBeNull();
+  });
+
+  it('分组开了高峰加价时带上时段（去掉秒），没开或时段不全时没有', () => {
+    const peakOf = (extra: Record<string, unknown>) =>
+      toKeyGroupOptions(
+        [{ id: 3, name: '标准分组', rate_multiplier: 0.3, ...extra }],
+        new Map(),
+      )?.[0]?.peak;
+    expect(
+      peakOf({
+        peak_rate_enabled: true,
+        peak_start: '20:00:00',
+        peak_end: '23:00',
+        peak_rate_multiplier: 1.5,
+      }),
+    ).toEqual({ start: '20:00', end: '23:00', multiplier: 1.5 });
+    expect(
+      peakOf({
+        peak_rate_enabled: false,
+        peak_start: '20:00',
+        peak_end: '23:00',
+        peak_rate_multiplier: 1.5,
+      }),
+    ).toBeNull();
+    expect(
+      peakOf({ peak_rate_enabled: true, peak_start: '20:00', peak_rate_multiplier: 1.5 }),
+    ).toBeNull();
   });
 });
 
@@ -298,7 +333,9 @@ describe('创建与修改的请求', () => {
 });
 
 describe('密钥表单', () => {
-  const groups = [{ id: 3, name: '标准分组', description: '', rate: 0.3 }];
+  const groups = [
+    { id: 3, name: '标准分组', description: '', rate: 0.3, baseRate: 0.3, peak: null },
+  ];
   const filled = (patch: Partial<KeyDraft> = {}): KeyDraft => ({
     ...emptyDraft(TODAY, groups),
     name: '生产',
