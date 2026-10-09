@@ -3,13 +3,24 @@
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useRef, type ReactNode } from 'react';
+import { createContext, useContext, useRef, type ReactNode } from 'react';
 
 import { cn } from '@/lib/utils';
 
 import { Button } from './button';
 
 const OVERLAY = 'fixed inset-0 z-50 bg-black/40 backdrop-blur-[2px]';
+
+/**
+ * 是否在弹窗或抽屉里。弹窗打开时会挡住它外面的滚轮和触摸滚动（免得背后的页面跟着动），而下拉菜单挂在页面最外层，
+ * 也算「外面」：弹窗里的下拉要用模态方式打开、自己接管滚动，否则列表滚轮滚不动、只能拖滚动条
+ * （2026-10-09 用户反馈创建密钥的分组下拉）。下拉选择与公告铃铛读它。
+ */
+const InsideDialogContext = createContext(false);
+
+export function useInsideDialog(): boolean {
+  return useContext(InsideDialogContext);
+}
 
 const DIALOG_SIZES = { sm: 'max-w-sm', md: 'max-w-lg', lg: 'max-w-2xl' } as const;
 
@@ -94,25 +105,27 @@ export function Dialog({
             DIALOG_SIZES[size],
           )}
         >
-          <div className="flex items-start justify-between gap-4 px-6 pt-6">
-            <div className="min-w-0">
-              <DialogPrimitive.Title className="text-base font-semibold text-foreground">
-                {title}
-              </DialogPrimitive.Title>
-              {description ? (
-                <DialogPrimitive.Description className="mt-1 text-sm text-muted-foreground">
-                  {description}
-                </DialogPrimitive.Description>
-              ) : null}
+          <InsideDialogContext.Provider value>
+            <div className="flex items-start justify-between gap-4 px-6 pt-6">
+              <div className="min-w-0">
+                <DialogPrimitive.Title className="text-base font-semibold text-foreground">
+                  {title}
+                </DialogPrimitive.Title>
+                {description ? (
+                  <DialogPrimitive.Description className="mt-1 text-sm text-muted-foreground">
+                    {description}
+                  </DialogPrimitive.Description>
+                ) : null}
+              </div>
+              <CloseButton />
             </div>
-            <CloseButton />
-          </div>
-          <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">{children}</div>
-          {footer ? (
-            <div className="flex flex-wrap justify-end gap-2 border-t border-border px-6 py-4">
-              {footer}
-            </div>
-          ) : null}
+            <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">{children}</div>
+            {footer ? (
+              <div className="flex flex-wrap justify-end gap-2 border-t border-border px-6 py-4">
+                {footer}
+              </div>
+            ) : null}
+          </InsideDialogContext.Provider>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>
@@ -161,18 +174,20 @@ export function Sheet({
             SHEET_SIDES[side],
           )}
         >
-          {titleHidden ? (
-            <DialogPrimitive.Title className="sr-only">{title}</DialogPrimitive.Title>
-          ) : (
-            <div className="flex items-start justify-between gap-4 border-b border-border px-5 py-4">
-              <DialogPrimitive.Title className="min-w-0 text-base font-semibold text-foreground">
-                {title}
-              </DialogPrimitive.Title>
-              <CloseButton />
-            </div>
-          )}
-          <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
-          {footer ? <div className="border-t border-border px-5 py-4">{footer}</div> : null}
+          <InsideDialogContext.Provider value>
+            {titleHidden ? (
+              <DialogPrimitive.Title className="sr-only">{title}</DialogPrimitive.Title>
+            ) : (
+              <div className="flex items-start justify-between gap-4 border-b border-border px-5 py-4">
+                <DialogPrimitive.Title className="min-w-0 text-base font-semibold text-foreground">
+                  {title}
+                </DialogPrimitive.Title>
+                <CloseButton />
+              </div>
+            )}
+            <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
+            {footer ? <div className="border-t border-border px-5 py-4">{footer}</div> : null}
+          </InsideDialogContext.Provider>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>

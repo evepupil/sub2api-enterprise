@@ -12,6 +12,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 
+import { useInsideDialog } from './dialog';
+
 export interface SelectOption<T extends string> {
   value: T;
   /** 下拉菜单里这一项的样子 */
@@ -54,13 +56,15 @@ export function Select<T extends string>({
   menuClassName?: string;
 }) {
   const current = options.find((option) => option.value === value);
+  // 在弹窗里时用模态方式打开，列表才接得住滚轮与触摸滚动（见 useInsideDialog）
+  const modal = useInsideDialog();
   const handleChange = (next: string) => {
     const option = options.find((o) => o.value === next);
     if (option) onChange(option.value);
   };
 
   return (
-    <DropdownMenu modal={false}>
+    <DropdownMenu modal={modal}>
       <DropdownMenuTrigger asChild disabled={disabled}>
         <button
           type="button"

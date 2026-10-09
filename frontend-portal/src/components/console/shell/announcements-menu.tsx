@@ -18,6 +18,7 @@ import { formatDateTimeShort } from '@/lib/console/time';
 import { cn } from '@/lib/utils';
 
 import { buttonClass } from '../button';
+import { useInsideDialog } from '../dialog';
 import { Skeleton } from '../skeleton';
 import { AnnouncementDialog } from './announcement-dialog';
 
@@ -38,6 +39,8 @@ export function AnnouncementsMenu({
   const { status, items, unread, reload, markRead } = announcements;
   const [selected, setSelected] = useState<ConsoleAnnouncement | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  // 手机抽屉里的铃铛：用模态方式打开，公告列表才接得住滚轮与触摸滚动（见 useInsideDialog）
+  const modal = useInsideDialog();
 
   const openAnnouncement = (item: ConsoleAnnouncement) => {
     setSelected(item);
@@ -47,7 +50,7 @@ export function AnnouncementsMenu({
 
   return (
     <>
-      <DropdownMenu modal={false}>
+      <DropdownMenu modal={modal}>
         <DropdownMenuTrigger asChild>
           <button
             type="button"
