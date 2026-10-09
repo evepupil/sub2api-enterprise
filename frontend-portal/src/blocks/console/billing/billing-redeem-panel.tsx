@@ -1,6 +1,6 @@
 'use client';
 
-import { TicketCheck } from 'lucide-react';
+import { ArrowUpRight, TicketCheck } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState, type FormEvent } from 'react';
 
@@ -23,7 +23,14 @@ const RESULT_VISIBLE_MS = 4000;
  * 兑换码：一整行的输入框加「兑换」按钮，交给后端兑换。成功后通知页面重新取余额卡与交易记录；
  * 余额码提示到账金额，并发数、订阅这类码只提示兑换成功。码区分大小写，原样提交（只去掉首尾空白）。
  */
-export function BillingRedeemPanel({ onRedeemed }: { onRedeemed: () => void }) {
+export function BillingRedeemPanel({
+  onRedeemed,
+  buyUrl,
+}: {
+  onRedeemed: () => void;
+  /** 卡网店铺地址：标题行右边「购买兑换码」在新窗口打开它；没有时不显示 */
+  buyUrl?: string | null;
+}) {
   const t = useTranslations('consoleBilling');
   const [value, setValue] = useState('');
   // 存错误类型而不是译好的文字，切换语言时提示跟着变
@@ -84,6 +91,20 @@ export function BillingRedeemPanel({ onRedeemed }: { onRedeemed: () => void }) {
           <TicketCheck aria-hidden className="size-4 text-muted-foreground" />
           {t('redeem.title')}
         </span>
+      }
+      actions={
+        buyUrl ? (
+          <a
+            href={buyUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-redeem-buy
+            className="inline-flex items-center gap-1 text-sm font-medium text-foreground underline-offset-4 hover:underline"
+          >
+            {t('redeem.buy')}
+            <ArrowUpRight aria-hidden className="size-3.5" />
+          </a>
+        ) : null
       }
       bodyClassName="pt-3"
     >

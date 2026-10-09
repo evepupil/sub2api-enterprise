@@ -67,6 +67,21 @@ describe('后端公开开关', () => {
     });
   });
 
+  it('充值链接取后台「余额不足提醒」里的充值链接，只认 http(s) 的完整地址', () => {
+    const shop = 'https://catfk.com/shop/W24ODYB1';
+    expect(toAuthSettings({ balance_low_notify_recharge_url: ` ${shop} ` }).rechargeUrl).toBe(shop);
+    expect(
+      toAuthSettings({ balance_low_notify_recharge_url: 'javascript:alert(1)' }).rechargeUrl,
+    ).toBe('');
+    expect(toAuthSettings({ balance_low_notify_recharge_url: 'catfk.com/shop' }).rechargeUrl).toBe(
+      '',
+    );
+    expect(toAuthSettings({}).rechargeUrl).toBe('');
+    expect(fromPortalSettings({ rechargeUrl: shop }).rechargeUrl).toBe(shop);
+    expect(fromPortalSettings({ rechargeUrl: 'javascript:alert(1)' }).rechargeUrl).toBe('');
+    expect(fromPortalSettings({ rechargeUrl: 3 }).rechargeUrl).toBe('');
+  });
+
   it('读不到或字段类型不对时用兜底值（与现有注册页一致）', () => {
     expect(toAuthSettings(null)).toEqual(DEFAULT_AUTH_SETTINGS);
     expect(toAuthSettings({ registration_enabled: 'yes' }).registrationEnabled).toBe(true);

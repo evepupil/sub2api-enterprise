@@ -18,7 +18,8 @@
     "placeholder": "输入兑换码",
     "submit": "兑换",
     "credited": "已到账 {amount}",
-    "done": "兑换成功"
+    "done": "兑换成功",
+    "buy": "购买兑换码"
   },
   "txn": {
     "title": "交易记录",

@@ -1,10 +1,10 @@
 'use client';
 
-import { Plus, RotateCw, TriangleAlert } from 'lucide-react';
+import { ArrowUpRight, Plus, RotateCw, TriangleAlert } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 
-import { Button } from '@/components/console/button';
+import { Button, buttonClass } from '@/components/console/button';
 import { Panel } from '@/components/console/panel';
 import { Skeleton } from '@/components/console/skeleton';
 import { formatUsd } from '@/lib/console';
@@ -60,12 +60,15 @@ export function BillingBalancePanel({
   error,
   onRetry,
   onRecharge,
+  rechargeUrl,
 }: {
   summary: BalanceSummary | null;
   error: 'too_many' | 'unavailable' | null;
   onRetry: () => void;
-  /** 不传时不显示「充值」按钮（首发在线支付没接，用兑换码） */
+  /** 在线支付的充值弹窗（还没接，控制台功能开关关着时不传） */
   onRecharge?: () => void;
+  /** 卡网店铺地址：「充值」在新窗口打开它（2026-10-09 起用卡网）；两样都没有时不显示「充值」 */
+  rechargeUrl?: string | null;
 }) {
   const t = useTranslations('consoleBilling');
   const low = summary !== null && isLowBalance(summary);
@@ -128,6 +131,18 @@ export function BillingBalancePanel({
             <Plus aria-hidden />
             {t('balance.recharge')}
           </Button>
+        ) : rechargeUrl ? (
+          <a
+            href={rechargeUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-recharge="shop"
+            className={buttonClass({ size: 'lg' })}
+          >
+            <Plus aria-hidden />
+            {t('balance.recharge')}
+            <ArrowUpRight aria-hidden />
+          </a>
         ) : null}
       </div>
 

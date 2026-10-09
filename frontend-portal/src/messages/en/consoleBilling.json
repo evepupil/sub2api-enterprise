@@ -18,7 +18,8 @@
     "placeholder": "Enter a redeem code",
     "submit": "Redeem",
     "credited": "{amount} credited",
-    "done": "Redeemed"
+    "done": "Redeemed",
+    "buy": "Buy codes"
   },
   "txn": {
     "title": "Transactions",
