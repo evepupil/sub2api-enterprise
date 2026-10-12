@@ -1,0 +1,75 @@
+# 直连入口：${API_DIRECT_HOST} 直接解析到服务器 IP、不经 Cloudflare（国内经 Cloudflare 常被掐连接），只接模型调用。
+# 由 compose.api-direct.yaml 挂进入口，说明见 deploy/PORTAL.md。
+# 证书由 nginx 自带的证书模块向 Let's Encrypt 申请、到期前自动续；验证走 443 本身（tls-alpn-01），不用开 80。
+# 申请记录和证书存在 /var/cache/nginx/acme-direct（编排里是单独的数据卷），重建容器不会重新申请。
+acme_issuer direct {
+  uri ${ACME_DIRECTORY};
+  challenge tls-alpn-01;
+  state_path /var/cache/nginx/acme-direct;
+  accept_terms_of_service;
+}
+
+server {
+  listen 8443 ssl;
+  http2 on;
+  server_name ${API_DIRECT_HOST};
+  server_tokens off;
+
+  acme_certificate direct;
+  ssl_certificate $acme_certificate;
+  ssl_certificate_key $acme_certificate_key;
+  # 证书换新时才重新读，不用每次握手都解析
+  ssl_certificate_cache max=2;
+  ssl_protocols TLSv1.2 TLSv1.3;
+  ssl_session_cache shared:api_direct_ssl:10m;
+  ssl_session_timeout 1d;
+
+  set $go_backend http://${GO_UPSTREAM};
+
+  # Go enforces its own body limits; do not impose Nginx's 1 MiB default.
+  client_max_body_size 0;
+
+  # 直连时连接来源就是用户 IP（Docker 端口映射保留来源地址），客户端自带的 IP 头一概不信，防止伪造 IP 绕过限流。
+  proxy_http_version 1.1;
+  proxy_set_header Host $http_host;
+  proxy_set_header X-Real-IP $remote_addr;
+  proxy_set_header X-Forwarded-For $remote_addr;
+  proxy_set_header X-Forwarded-Proto $scheme;
+  proxy_set_header X-Forwarded-Host $http_host;
+  proxy_set_header X-Forwarded-Port $server_port;
+  proxy_set_header Upgrade $http_upgrade;
+  proxy_set_header Connection $connection_upgrade;
+  proxy_set_header CF-Connecting-IP "";
+  proxy_set_header True-Client-IP "";
+  proxy_set_header Forwarded "";
+  proxy_set_header X-Client-IP "";
+  proxy_set_header X-Cluster-Client-IP "";
+  proxy_set_header X-Original-Forwarded-For "";
+  proxy_set_header X-Forwarded-Server "";
+
+  proxy_cache off;
+  proxy_no_cache 1;
+  proxy_cache_bypass 1;
+  proxy_intercept_errors off;
+
+  # 只放模型调用：OpenAI / Claude 兼容的 /v1 与 Gemini 原生的 /v1beta；边生成边转发，最长 30 分钟。
+  location ~ ^/(?:v1|v1beta)/ {
+    proxy_buffering off;
+    proxy_request_buffering off;
+    proxy_read_timeout 1800s;
+    proxy_send_timeout 1800s;
+    proxy_pass $go_backend;
+  }
+
+  location / {
+    return 404;
+  }
+}
+
+# 用 IP 或别的域名连过来的，握手时直接拒绝，扫端口的看不出这是什么服务。
+server {
+  listen 8443 ssl default_server;
+  server_name _;
+  ssl_reject_handshake on;
+  return 444;
+}

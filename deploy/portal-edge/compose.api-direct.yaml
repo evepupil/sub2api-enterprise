@@ -1,0 +1,22 @@
+# 直连域名（如 api.codu.xyz）：DNS 只加一条 A 记录直接指到服务器、不走 Cloudflare 代理，只接模型调用（/v1、/v1beta）。
+# 叠加在 compose.portal.yaml 之后使用（在 deploy/ 目录下执行）：
+#   docker compose -f docker-compose.yml -f portal-edge/compose.portal.yaml -f portal-edge/compose.api-direct.yaml up -d --wait
+# 入口对外加开 443；证书由入口 nginx 自带的证书模块向 Let's Encrypt 申请并自动续期，不用开 80。
+# 说明见 deploy/PORTAL.md。
+services:
+  edge:
+    environment:
+      API_DIRECT_HOST: ${API_DIRECT_HOST:?set API_DIRECT_HOST to the direct API domain, e.g. api.codu.xyz}
+      # 默认 Let's Encrypt 正式环境；试跑可换测试环境 https://acme-staging-v02.api.letsencrypt.org/directory
+      ACME_DIRECTORY: ${ACME_DIRECTORY:-https://acme-v02.api.letsencrypt.org/directory}
+      NGINX_ENVSUBST_FILTER: '^(PORTAL_UPSTREAM|GO_UPSTREAM|API_DIRECT_HOST|ACME_DIRECTORY)$$'
+    ports:
+      # 只开 IPv4：IPv6 经 Docker 转发进容器时看不到用户 IP
+      - '${API_DIRECT_BIND:-0.0.0.0}:${API_DIRECT_PORT:-443}:8443'
+    volumes:
+      - ./portal-edge/nginx/api-direct.conf.template:/etc/nginx/templates/api-direct.conf.template:ro
+      # 证书与申请记录；删掉会重新申请（Let's Encrypt 对同一域名每周签发次数有上限）
+      - edge-acme:/var/cache/nginx/acme-direct
+
+volumes:
+  edge-acme:
