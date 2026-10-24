@@ -255,6 +255,12 @@ type ccStreamScanState struct {
 // 哨兵处停止、保留最新 usage、记录首 token 时延，并把每个解析成功的 chunk 交给
 // emit 回调做各自的协议转换与写出。读错误按既有约定过滤 context 取消类噪声后
 // 记入 Warn 日志。
+//
+// keepalive 是下游心跳：配置了 gateway.stream_keepalive_interval 时，下游连续一个
+// 间隔没写出任何字节就调用一次，由调用方写出本协议的心跳帧；返回 false 表示客户端
+// 已断开，之后不再调用。上游推理、或桥接层还在累积工具调用时可能几分钟不出字，
+// Cloudflare 等代理约 100 秒收不到数据就会掐断连接（客户端报 stream disconnected
+// before completion）。其余流式路径早有心跳，这两条回退路径此前漏了。
 func (s *OpenAIGatewayService) scanCCStream(
 	c *gin.Context,
 	resp *http.Response,
@@ -262,23 +268,23 @@ func (s *OpenAIGatewayService) scanCCStream(
 	requestID string,
 	startTime time.Time,
 	emit func(*apicompat.ChatCompletionsChunk),
+	keepalive func() bool,
 ) ccStreamScanState {
 	var st ccStreamScanState
 
-	scanner := s.newUpstreamSSEScanner(resp.Body)
-	for scanner.Scan() {
-		line := scanner.Text()
+	// handleLine 处理一行上游 SSE；返回 true 表示读到 [DONE]，应停止读取。
+	handleLine := func(line string) bool {
 		payload, ok := extractOpenAISSEDataLine(line)
 		if !ok {
-			continue
+			return false
 		}
 		payload = strings.TrimSpace(payload)
 		if payload == "" {
-			continue
+			return false
 		}
 		if payload == "[DONE]" {
 			st.SawDone = true
-			break
+			return true
 		}
 		// 观察上游 CC chunk 回显的 model / service_tier（计费以回显为准）。
 		// CC chunk 无 type 字段，按 untyped payload 观察（上游约束：只有终止
@@ -297,16 +303,19 @@ func (s *OpenAIGatewayService) scanCCStream(
 				zap.Error(err),
 				zap.String("request_id", requestID),
 			)
-			continue
+			return false
 		}
 		if st.FirstTokenMs == nil && !isOpenAIChatUsageOnlyStreamChunk(payload) && chatChunkStartsResponsesOutput(&chunk) {
 			ms := int(time.Since(startTime).Milliseconds())
 			st.FirstTokenMs = &ms
 		}
 		emit(&chunk)
+		return false
 	}
-
-	if err := scanner.Err(); err != nil {
+	recordReadErr := func(err error) {
+		if err == nil {
+			return
+		}
 		if !errors.Is(err, context.Canceled) && !errors.Is(err, context.DeadlineExceeded) {
 			logger.L().Warn(logPrefix+": stream read error",
 				zap.Error(err),
@@ -315,7 +324,87 @@ func (s *OpenAIGatewayService) scanCCStream(
 		}
 		st.Err = err
 	}
-	return st
+
+	scanner := s.newUpstreamSSEScanner(resp.Body)
+	interval := s.ccStreamKeepaliveInterval()
+	if keepalive == nil || interval <= 0 {
+		for scanner.Scan() {
+			if handleLine(scanner.Text()) {
+				break
+			}
+		}
+		recordReadErr(scanner.Err())
+		return st
+	}
+
+	// 有心跳时单独开协程读上游，读阻塞期间主循环照样能按时写心跳。
+	// 下游写出（emit 与 keepalive）都留在当前协程，不与读协程争用 ResponseWriter。
+	type scanEvent struct {
+		line string
+		err  error
+	}
+	events := make(chan scanEvent, 16)
+	done := make(chan struct{})
+	defer close(done)
+	go func() {
+		defer close(events)
+		for scanner.Scan() {
+			select {
+			case events <- scanEvent{line: scanner.Text()}:
+			case <-done:
+				return
+			}
+		}
+		if err := scanner.Err(); err != nil {
+			select {
+			case events <- scanEvent{err: err}:
+			case <-done:
+			}
+		}
+	}()
+
+	idle := time.NewTimer(interval)
+	defer idle.Stop()
+	keepaliveActive := true
+	for {
+		select {
+		case ev, ok := <-events:
+			if !ok {
+				return st
+			}
+			if ev.err != nil {
+				recordReadErr(ev.err)
+				return st
+			}
+			sizeBefore := c.Writer.Size()
+			stop := handleLine(ev.line)
+			// 只有真往下游写出了字节才重新计时；还在累积、没产出事件的 chunk 不算。
+			if keepaliveActive && c.Writer.Size() != sizeBefore {
+				idle.Reset(interval)
+			}
+			if stop {
+				return st
+			}
+		case <-idle.C:
+			if !keepaliveActive {
+				continue
+			}
+			if !keepalive() {
+				keepaliveActive = false
+				continue
+			}
+			idle.Reset(interval)
+		}
+	}
+}
+
+// ccStreamKeepaliveInterval 返回 CC 回退路径的下游心跳间隔（gateway.stream_keepalive_interval，
+// 单位秒）；未配置或为 0 时不发心跳。
+func (s *OpenAIGatewayService) ccStreamKeepaliveInterval() time.Duration {
+	if s.cfg == nil || s.cfg.Gateway.StreamKeepaliveInterval <= 0 {
+		return 0
+	}
+	return time.Duration(s.cfg.Gateway.StreamKeepaliveInterval) * time.Second
 }
 
 // logCCStreamMissingDoneSentinel 记录"上游未发 [DONE] 哨兵即结束"的 debug 日志。

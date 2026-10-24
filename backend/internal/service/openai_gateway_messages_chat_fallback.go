@@ -214,7 +214,34 @@ func (s *OpenAIGatewayService) streamChatCompletionsAsAnthropic(
 		}
 	}
 
-	scan := s.scanCCStream(c, resp, "openai messages chat fallback", requestID, startTime, emitChunk)
+	// 下游心跳与原生 Anthropic 流一致：默认发 ping 事件；受影响版本的 Claude Code（见
+	// shouldUseClaudeCodeNoopDeltaKeepalive）在有内容块打开时改发该块的空增量。
+	// 心跳字节单独记账，不算作已向客户端写出响应。
+	useNoopDeltaKeepalive := c.Request != nil && shouldUseClaudeCodeNoopDeltaKeepalive(c.GetHeader("User-Agent"))
+	keepalive := func() bool {
+		if clientDisconnected {
+			return false
+		}
+		frame := "event: ping\ndata: {\"type\":\"ping\"}\n\n"
+		if useNoopDeltaKeepalive && anthropicState.ContentBlockOpen {
+			if deltaType := claudeCodeKeepaliveDeltaTypeForContentBlock(anthropicState.CurrentBlockType); deltaType != "" {
+				if block, ok := buildClaudeCodeNoopDeltaKeepalive(anthropicState.ContentBlockIndex, deltaType); ok {
+					frame = block
+				}
+			}
+		}
+		writeStreamHeaders()
+		n, err := fmt.Fprint(c.Writer, frame)
+		recordOpenAIStreamKeepaliveBytes(c, n)
+		if err != nil {
+			clientDisconnected = true
+			return false
+		}
+		c.Writer.Flush()
+		return true
+	}
+
+	scan := s.scanCCStream(c, resp, "openai messages chat fallback", requestID, startTime, emitChunk, keepalive)
 	usage := scan.Usage
 
 	if scan.Err != nil {

@@ -220,11 +220,28 @@ func (s *OpenAIGatewayService) streamChatCompletionsAsResponses(
 		c.Writer.Flush()
 	}
 
+	// 下游心跳写 SSE 注释行（客户端的 SSE 解析会忽略），与原生 /v1/responses 流一致。
+	// 心跳字节单独记账，不算作已向客户端写出响应（见 OpenAICompactKeepaliveAdjustedWrittenSize）。
+	keepalive := func() bool {
+		if clientDisconnected {
+			return false
+		}
+		writeStreamHeaders()
+		n, err := fmt.Fprint(c.Writer, ":\n\n")
+		recordOpenAIStreamKeepaliveBytes(c, n)
+		if err != nil {
+			clientDisconnected = true
+			return false
+		}
+		c.Writer.Flush()
+		return true
+	}
+
 	scan := s.scanCCStream(c, resp, "openai responses chat fallback", requestID, startTime, func(chunk *apicompat.ChatCompletionsChunk) {
 		events := apicompat.ChatCompletionsChunkToResponsesEvents(chunk, state)
 		s.cacheReasoningItemsFromEvents(events)
 		writeEvents(events)
-	})
+	}, keepalive)
 
 	if scan.Err != nil {
 		return &OpenAIForwardResult{

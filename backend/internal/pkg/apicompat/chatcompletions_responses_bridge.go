@@ -1532,6 +1532,9 @@ type ChatCompletionsToResponsesStreamState struct {
 	// 尚未到达时延迟宣告，待名字可判定类型后再补发（见 announceChatToolItem）。
 	toolAnnounced map[int]bool
 
+	// customInput 记录 custom 工具调用输入的流式还原进度（见 streamChatCustomToolInput）。
+	customInput map[int]*customToolInputStream
+
 	FinishReason string
 	Usage        *ResponsesUsage
 }
@@ -1549,6 +1552,7 @@ func NewChatCompletionsToResponsesStreamState(model string) *ChatCompletionsToRe
 		toolIsToolSearch: make(map[int]bool),
 		toolNamespace:    make(map[int]NamespacedToolName),
 		toolAnnounced:    make(map[int]bool),
+		customInput:      make(map[int]*customToolInputStream),
 	}
 }
 
@@ -1677,9 +1681,9 @@ func ChatCompletionsChunkToResponsesEvents(
 			if toolCall.Function.Arguments != "" {
 				stored.Function.Arguments += toolCall.Function.Arguments
 				// 未宣告（名字未到）时仅累积，宣告时统一补发；custom 调用的
-				// arguments 是包裹 input 的 JSON 片段，无法增量还原为自由文本
-				// 输入，缓冲整份 arguments 收尾时一次性下发（见 closeChatToolItems）；
-				// tool_search 调用同样收尾时随 output_item.done 全量下发。
+				// arguments 是包裹 input 的 JSON 片段，由下面的 streamChatCustomToolInput
+				// 边收边还原成 input 原文下发；tool_search 调用收尾时随 output_item.done
+				// 全量下发。
 				if state.toolAnnounced[idx] && !state.toolIsCustom[idx] && !state.toolIsToolSearch[idx] {
 					events = append(events, chatToResponsesEvent(state, "response.function_call_arguments.delta", &ResponsesStreamEvent{
 						OutputIndex: state.ToolOutputIndex[idx],
@@ -1690,6 +1694,7 @@ func ChatCompletionsChunkToResponsesEvents(
 					}))
 				}
 			}
+			events = append(events, streamChatCustomToolInput(state, idx, stored)...)
 		}
 		if choice.FinishReason != nil && *choice.FinishReason != "" {
 			state.FinishReason = *choice.FinishReason
@@ -1951,7 +1956,8 @@ func announceChatToolItem(
 			Status:    "in_progress",
 		},
 	})}
-	// 迟到宣告时补发已累积的参数增量（custom/tool_search 的输入收尾统一下发，不补发）。
+	// 迟到宣告时补发已累积的参数增量（custom 的输入由 streamChatCustomToolInput 补发，
+	// tool_search 的输入收尾统一下发）。
 	if !isCustom && !isToolSearch && stored.Function.Arguments != "" {
 		events = append(events, chatToResponsesEvent(state, "response.function_call_arguments.delta", &ResponsesStreamEvent{
 			OutputIndex: state.ToolOutputIndex[idx],
@@ -1990,14 +1996,16 @@ func closeChatToolItems(state *ChatCompletionsToResponsesStreamState) []Response
 		}
 		outputIndex := state.ToolOutputIndex[i]
 		if state.toolIsCustom[i] {
-			// custom 调用按 custom_tool_call 生命周期收尾：input 在此处一次性下发
-			// （流中不产出增量，见 ChatCompletionsChunkToResponsesEvents）。
+			// custom 调用按 custom_tool_call 生命周期收尾。流中已边生成边下发的部分
+			// （见 streamChatCustomToolInput）不再重复，只补发剩余原文；还原出的前缀与
+			// 最终 input 对不上时（模型没按 schema 输出）不再补发增量，以 done 携带的
+			// 整段为准。
 			input := extractCustomToolCallInput(arguments)
-			if input != "" {
+			if rest, ok := strings.CutPrefix(input, state.customInputSent(i)); ok && rest != "" {
 				events = append(events, chatToResponsesEvent(state, "response.custom_tool_call_input.delta", &ResponsesStreamEvent{
 					OutputIndex: outputIndex,
 					ItemID:      itemID,
-					Delta:       input,
+					Delta:       rest,
 				}))
 			}
 			events = append(events,
