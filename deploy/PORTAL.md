@@ -29,18 +29,24 @@ API 客户端
 
 ## 1. 构建镜像
 
-和上一次部署一样，把干净的源码包传到服务器上构建（服务器在海外，依赖源直接用官方的；本机构建会把 `.fleet`、各处依赖目录都打进构建上下文）：
+美国机 2026-10-27 到期后，镜像在本机 WSL 的 Docker 里编好再传到首尔加载。别在首尔编：那台只有 2 核、内存紧，编一次会拖慢上面所有项目。要用干净的源码包编，直接在仓库目录编会把 `.fleet`、各处依赖目录都打进构建上下文。
 
 ```bash
-# 本机：打包当前提交
-git archive --format=tar.gz -o codu-src-<提交>.tar.gz HEAD
-# 服务器：解压到 /opt/sub2api-enterprise/source-<提交> 后
-docker build -t sub2api-enterprise:<提交> --build-arg COMMIT=<提交> \
-  --build-arg GOPROXY=https://proxy.golang.org,direct --build-arg GOSUMDB=sum.golang.org source-<提交>
-docker build -t sub2api-enterprise-portal:<提交> --build-arg NPM_REGISTRY=https://registry.npmjs.org source-<提交>/frontend-portal
+# 本机（Windows，仓库根目录）：打包当前提交
+git archive --format=tar -o .fleet/codu-src-<提交>.tar HEAD
+# 本机 WSL：解到 Linux 目录里编（依赖默认走 goproxy.cn 与 npmmirror，基础镜像本机有缓存，拉新的走本机代理）
+mkdir -p ~/build/codu-<提交> && tar -xf /mnt/c/code/sub2api-enterprise/.fleet/codu-src-<提交>.tar -C ~/build/codu-<提交>
+cd ~/build/codu-<提交>
+docker build -t sub2api-enterprise:<提交> --build-arg COMMIT=<提交> .
+docker build -t sub2api-enterprise-portal:<提交> frontend-portal
+# 只打包这次要换的镜像
+docker save sub2api-enterprise:<提交> | gzip > /mnt/c/code/sub2api-enterprise/.fleet/codu-img-<提交>.tar.gz
+# 本机（Windows）：传到首尔加载
+scp .fleet/codu-img-<提交>.tar.gz ubuntu-43-133:/tmp/
+ssh ubuntu-43-133 "sudo docker load -i /tmp/codu-img-<提交>.tar.gz && rm /tmp/codu-img-<提交>.tar.gz"
 ```
 
-国内构建时去掉这几个参数即可（默认走 goproxy.cn 与 npmmirror）。
+本机到首尔上传约 2MB/s，后台镜像压缩后约 45MB，传一次半分钟左右（10-25 实测）。在海外机器上编时，依赖改走官方源：后台加 `--build-arg GOPROXY=https://proxy.golang.org,direct --build-arg GOSUMDB=sum.golang.org`，官网加 `--build-arg NPM_REGISTRY=https://registry.npmjs.org`。
 
 ## 2. 运行
 
@@ -117,5 +123,5 @@ docker compose -f docker-compose.yml -f portal-edge/compose.portal.yaml -f porta
 - 2026-10-09 晚上：官网升到 3cac1579d（充值走卡网：账单页「充值」「购买兑换码」打开后台「充值链接」里的店铺；用量页标题行加可用余额），后台不变（b3beb6d75）。后台设置「余额不足提醒 → 充值链接」由 https://codu.xyz 改成卡网店铺 https://catfk.com/shop/W24ODYB1。只重建官网镜像，换官网后重载入口，切换 6 秒，入口没有出错的请求；经公网核对官网读到的充值链接就是店铺地址。备份在服务器 `backups/pre-recharge-20261009-194232/`。同日渠道按分组账号重配（模型广场与官网价格页的模型），改前的渠道配置备份在 `backups/pre-channels-20261009-184337/`、`backups/pre-guankey-20261009-191511/`。
 - 2026-10-11：用户要求分组名去掉「共享通道」「专用通道」（客户总问区别，实际差别不大），直接改库改了 7 个分组（如 gemini-共享通道 → gemini、claude-max-专用通道 → claude-max）。改名只改显示，密钥、渠道、计费都按分组编号走；官网约 1 分钟后显示新名字。两个 claude-kiro 分组去掉后缀会重名，等用户定。镜像不变。备份在服务器 `backups/pre-rename-groups-20261011-071504/`。
 - 2026-10-14：开直连域名 api.codu.xyz（3.1，入口配置 1bf26d43f），镜像不变。A 记录由用户在 Cloudflare 加，直接指服务器。服务器的入口编排加 443 端口、直连模板与证书数据卷，重建入口用了 6.5 秒，codu.xyz 实际只断了不到 1 秒；Let's Encrypt 证书上线后几秒内签好（2027-01-12 到期，自动续）。经公网核对：不带密钥调 `/v1/models`、`/v1beta/models` 回 401，其余路径 404，IP 直连与别的域名握手被拒，80 连不上；后台日志里直连请求的来源是用户的真实公网 IP，伪造的 IP 头没传进去；国内直连建连约 0.3 秒。备份在服务器 `backups/pre-api-direct-20261014-155018/`。
-- 2026-10-25：生产从美国机（40.160.143.121，4 核 8G）迁到用户的首尔机（43.133.242.12，腾讯云 2 核 3.3G，同时跑着用户别的项目）。后台升到 889ce7804（线上 b3beb6d75 + 转换线路断流修复，见技术设计 18.13），官网不变（3cac1579d）。镜像在美国编好后直传首尔（两台之间几百 MB 十几秒；本机到美国很慢，大文件别经本机中转），数据库、缓存、入口按美国用的摘要在首尔拉。首尔先用一份库拷贝在 18080/18088 试跑通过；切换时美国停写入，数据库、后台数据卷（自动生成的 config.yaml、价格表）、缓存数据卷直传首尔，核对数量与余额合计一致后起服务，首尔隧道连上再停美国隧道。停服 2 分 12 秒，客户不用重新登录。首尔不开直连；隧道连接器作为 `codu-cloudflared` 容器跑在编排里（宿主机网络，监控端口 20251）。上线后经 codu.xyz 正式线路验证断流修复（临时假上游、专属分组、管理员密钥，测完删除并退回扣费）：上游 130 秒不出字时收到 12 次心跳、正常收完，补丁慢吐时分 25 段实时送达、正常收完。本机每小时备份加上首尔（来源 `codu-prod`，`useSudo: true`）。美国机容器已停、数据保留到它 2026-10-27 到期前备回退，备份在美国机 `backups/pre-seoul-20261025-064457/`，美国机上的全部备份与日志另打包存到本机。美国机到期后镜像改在本机 WSL 的 Docker 里编（默认走国内源），压缩后传首尔（本机到首尔上传约 2MB/s，10-25 实测）。
+- 2026-10-25：生产从美国机（40.160.143.121，4 核 8G）迁到用户的首尔机（43.133.242.12，腾讯云 2 核 3.3G，同时跑着用户别的项目）。后台升到 889ce7804（线上 b3beb6d75 + 转换线路断流修复，见技术设计 18.13），官网不变（3cac1579d）。镜像在美国编好后直传首尔（两台之间几百 MB 十几秒；本机到美国很慢，大文件别经本机中转），数据库、缓存、入口按美国用的摘要在首尔拉。首尔先用一份库拷贝在 18080/18088 试跑通过；切换时美国停写入，数据库、后台数据卷（自动生成的 config.yaml、价格表）、缓存数据卷直传首尔，核对数量与余额合计一致后起服务，首尔隧道连上再停美国隧道。停服 2 分 12 秒，客户不用重新登录。首尔不开直连；隧道连接器作为 `codu-cloudflared` 容器跑在编排里（宿主机网络，监控端口 20251）。上线后经 codu.xyz 正式线路验证断流修复（临时假上游、专属分组、管理员密钥，测完删除并退回扣费）：上游 130 秒不出字时收到 12 次心跳、正常收完，补丁慢吐时分 25 段实时送达、正常收完。本机每小时备份加上首尔（来源 `codu-prod`，`useSudo: true`）。美国机容器已停、数据保留到它 2026-10-27 到期前备回退，备份在美国机 `backups/pre-seoul-20261025-064457/`，美国机上的全部备份与日志另打包存到本机。美国机到期后镜像改在本机编好传首尔（见第 1 节）。
 - 2026-10-25 下午：隧道调整。迁移时首尔用「美国服务器」隧道的令牌另起了一个连接器，用户按「一台服务器一条隧道」把 codu.xyz、后台域名挪到「首尔服务器」隧道（后台域名回到 admin.codu.xyz）。因为先在旧隧道里改掉了 codu.xyz、解析还指着旧隧道，15:19～15:24 约 5 分钟 codu.xyz 返回 Cloudflare 的 404；把 codu.xyz 的解析改指新隧道后恢复。随后停掉并删除首尔上多出来的连接器和它的令牌。以后把域名挪到另一条隧道，先在新隧道加好、再改解析，最后才删旧隧道里的主机名。
