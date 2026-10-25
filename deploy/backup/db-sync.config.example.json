@@ -17,6 +17,15 @@
       "containerName": "sub2api-postgres",
       "databaseUser": "sub2api",
       "databaseName": "sub2api"
+    },
+    {
+      "name": "codu-prod",
+      "enabled": true,
+      "sshHost": "替换成要用 sudo 调 docker 的那台机器的主机别名",
+      "containerName": "codu-postgres",
+      "databaseUser": "sub2api",
+      "databaseName": "sub2api",
+      "useSudo": true
     }
   ]
 }

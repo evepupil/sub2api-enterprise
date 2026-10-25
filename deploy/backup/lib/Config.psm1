@@ -68,6 +68,8 @@ function Import-SyncConfig {
         $source['port'] = Get-OptionalValue -Table $source -Key 'port'
         $source['sshUser'] = Get-OptionalValue -Table $source -Key 'sshUser'
         $source['identityFile'] = Get-OptionalValue -Table $source -Key 'identityFile'
+        # 远端账号不在 docker 组、要用 sudo 调 docker 时设为 true
+        $source['useSudo'] = [bool](Get-OptionalValue -Table $source -Key 'useSudo' -Default $false)
         $normalized += $source
     }
     $config['sources'] = $normalized

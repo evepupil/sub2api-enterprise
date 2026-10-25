@@ -47,6 +47,7 @@
 | `sources[].port` / `sshUser` / `identityFile` | 不用别名时才需要填 |
 | `sources[].containerName` | 目标机器上 PostgreSQL 容器名 |
 | `sources[].databaseUser` / `databaseName` | 数据库账号与库名 |
+| `sources[].useSudo` | 远端账号不在 docker 组、要用 `sudo` 调 docker 时设为 `true`（要求免密 sudo），默认 `false` |
 
 推荐在 `~/.ssh/config` 里配好主机别名，把端口、密钥、保活参数都写进去，
 配置文件里只留一个别名，脚本这边就不用关心连接细节。
@@ -91,6 +92,7 @@ pwsh -File install-task.ps1 -Remove
 # 把文件送到目标机器后
 docker cp sub2api.dump sub2api-postgres:/tmp/
 docker exec sub2api-postgres pg_restore -U sub2api -d sub2api --clean --if-exists /tmp/sub2api.dump
+# 容器名按配置里的 containerName，比如首尔的 Codu 是 codu-postgres
 ```
 
 只想看余额不想还原，直接打开 `users-balance.csv`。
@@ -114,6 +116,7 @@ docker exec sub2api-postgres pg_restore -U sub2api -d sub2api --clean --if-exist
 
 ```powershell
 pwsh -File tests\Snapshot.Tests.ps1
+pwsh -File tests\Config.Tests.ps1
 ```
 
 覆盖轮转逻辑和文件校验。轮转是这套脚本里唯一会删除已有备份的地方，
@@ -130,3 +133,4 @@ pwsh -File tests\Snapshot.Tests.ps1
 | `lib/Snapshot.psm1` | 快照目录与轮转 |
 | `lib/Log.psm1` | 日志输出与截断 |
 | `tests/Snapshot.Tests.ps1` | 轮转与校验的单测 |
+| `tests/Config.Tests.ps1` | 配置加载的单测（必填项、默认值、来源重名） |

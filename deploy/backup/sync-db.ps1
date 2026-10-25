@@ -33,6 +33,8 @@ NAME="__NAME__"
 CONTAINER="__CONTAINER__"
 DB_USER="__DB_USER__"
 DB_NAME="__DB_NAME__"
+# 调 docker 的命令：默认 docker，来源配了 useSudo 时是 sudo -n docker（下面不加引号，好按空格拆成两段）
+DOCKER="__DOCKER__"
 WORK="/tmp/sub2api-db-sync/${NAME}"
 
 rm -rf "$WORK"
@@ -40,8 +42,8 @@ mkdir -p "$WORK"
 
 DUMP="$WORK/${DB_NAME}.dump"
 # 优先用 zstd 压缩（更小更快）；老版本 pg_dump 不支持就退回默认压缩。
-if ! docker exec "$CONTAINER" pg_dump -U "$DB_USER" -d "$DB_NAME" -Fc --compress=zstd:6 > "$DUMP" 2>"$WORK/dump.err"; then
-  if ! docker exec "$CONTAINER" pg_dump -U "$DB_USER" -d "$DB_NAME" -Fc > "$DUMP" 2>"$WORK/dump.err"; then
+if ! $DOCKER exec "$CONTAINER" pg_dump -U "$DB_USER" -d "$DB_NAME" -Fc --compress=zstd:6 > "$DUMP" 2>"$WORK/dump.err"; then
+  if ! $DOCKER exec "$CONTAINER" pg_dump -U "$DB_USER" -d "$DB_NAME" -Fc > "$DUMP" 2>"$WORK/dump.err"; then
     echo "DUMP_FAILED=1"
     cat "$WORK/dump.err" >&2
     exit 1
@@ -62,7 +64,7 @@ echo "DUMP_SHA=$(sha256sum "$DUMP" | cut -d" " -f1)"
 # 只取余额相关字段，不导出密码哈希、TOTP 密钥这类敏感列。
 CSV="$WORK/users-balance.csv"
 BALANCE_SQL="SELECT id, username, email, status, balance, frozen_balance, total_recharged, updated_at FROM users ORDER BY id"
-if docker exec "$CONTAINER" psql -U "$DB_USER" -d "$DB_NAME" --csv -c "$BALANCE_SQL" > "$CSV" 2>"$WORK/csv.err" && [ -s "$CSV" ]; then
+if $DOCKER exec "$CONTAINER" psql -U "$DB_USER" -d "$DB_NAME" --csv -c "$BALANCE_SQL" > "$CSV" 2>"$WORK/csv.err" && [ -s "$CSV" ]; then
   echo "CSV_NAME=users-balance.csv"
   echo "CSV_BYTES=$(stat -c %s "$CSV")"
   echo "CSV_SHA=$(sha256sum "$CSV" | cut -d" " -f1)"
@@ -72,7 +74,7 @@ else
 fi
 
 runquery() {
-  docker exec "$CONTAINER" psql -U "$DB_USER" -d "$DB_NAME" -tAc "$1" 2>/dev/null | tr -d "[:space:]"
+  $DOCKER exec "$CONTAINER" psql -U "$DB_USER" -d "$DB_NAME" -tAc "$1" 2>/dev/null | tr -d "[:space:]"
 }
 echo "USERS=$(runquery "SELECT count(*) FROM users")"
 echo "BALANCE_TOTAL=$(runquery "SELECT COALESCE(SUM(balance), 0) FROM users")"
@@ -109,7 +111,8 @@ function Sync-OneSource {
             -replace '__NAME__', $name `
             -replace '__CONTAINER__', [string]$Source['containerName'] `
             -replace '__DB_USER__', [string]$Source['databaseUser'] `
-            -replace '__DB_NAME__', [string]$Source['databaseName']
+            -replace '__DB_NAME__', [string]$Source['databaseName'] `
+            -replace '__DOCKER__', $(if ($Source['useSudo']) { 'sudo -n docker' } else { 'docker' })
 
         $output = Invoke-RemoteBash -Source $Source -Script $remoteScript -Retries $Retries
         $info = ConvertFrom-RemoteOutput -Text $output
