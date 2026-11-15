@@ -136,10 +136,15 @@ deploy/docker-compose.override.yml
 vite.config.js
 docs/*
 !docs/需求设计.md
+!docs/agent-resource-safety.md
+!docs/moego-json-batching.md
+!docs/admin-api-keys.md
+!docs/mcp.md
 !docs/PAYMENT.md
 !docs/PAYMENT_CN.md
 !docs/ADMIN_PAYMENT_INTEGRATION_API.md
 !docs/ASYNC_IMAGE_TASKS.md
+!docs/OPENAI_IMAGES_CODEX.md
 !docs/BATCH_IMAGE_MVP.md
 !docs/COMPOSITE_GROUPS.md
 !docs/PLUGIN_DEVELOPMENT.md
@@ -152,11 +157,14 @@ docs/*
 !docs/前端设计/**
 !docs/模块设计/
 !docs/模块设计/*.md
+!docs/codex-credits.md
 !docs/legal/
 !docs/legal/*.md
 !docs/screenshots/
 docs/screenshots/*
 !docs/screenshots/mobile-account-actions-menu.png
+!docs/screenshots/codex-referral-dialog.png
+!docs/screenshots/codex-referral-success.png
 .serena/
 .codex/
 frontend/coverage/
@@ -164,6 +172,7 @@ aicodex
 output/
 .codegraph/*
 !.codegraph/.gitignore
+issues/
 
 # Vitest / Vite cache at repo root
 .vite/

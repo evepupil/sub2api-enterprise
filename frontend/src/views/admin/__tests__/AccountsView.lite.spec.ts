@@ -13,7 +13,9 @@ const {
   getUpstreamBillingProbeSettings,
   getAllProxies,
   getAllGroups,
-  showError
+  refreshCredentials,
+  showError,
+  showWarning
 } = vi.hoisted(() => ({
   listAccounts: vi.fn(),
   listWithEtag: vi.fn(),
@@ -22,7 +24,9 @@ const {
   getUpstreamBillingProbeSettings: vi.fn(),
   getAllProxies: vi.fn(),
   getAllGroups: vi.fn(),
-  showError: vi.fn()
+  refreshCredentials: vi.fn(),
+  showError: vi.fn(),
+  showWarning: vi.fn()
 }))
 
 vi.mock('@/api/admin', () => ({
@@ -36,7 +40,8 @@ vi.mock('@/api/admin', () => ({
       delete: vi.fn(),
       batchClearError: vi.fn(),
       batchRefresh: vi.fn(),
-      toggleSchedulable: vi.fn()
+      toggleSchedulable: vi.fn(),
+      refreshCredentials
     },
     proxies: { getAll: getAllProxies },
     groups: { getAll: getAllGroups }
@@ -44,7 +49,7 @@ vi.mock('@/api/admin', () => ({
 }))
 
 vi.mock('@/stores/app', () => ({
-  useAppStore: () => ({ showError, showSuccess: vi.fn(), showInfo: vi.fn() })
+  useAppStore: () => ({ showError, showWarning, showSuccess: vi.fn(), showInfo: vi.fn() })
 }))
 
 vi.mock('@/stores/auth', () => ({
@@ -57,13 +62,13 @@ vi.mock('vue-i18n', async () => {
 })
 
 const DataTableStub = defineComponent({
-  props: { data: { type: Array, default: () => [] } },
+  props: { data: { type: Array, default: () => [] }, loading: Boolean },
   template: `
     <div>
-      <div v-for="row in data" :key="row.id">
+      <template v-if="!loading"><div v-for="row in data" :key="row.id" :data-account-name="row.name">
         <slot name="cell-groups" :row="row" />
         <slot name="cell-actions" :row="row" />
-      </div>
+      </div></template>
     </div>
   `
 })
@@ -96,7 +101,7 @@ function mountView(stubActionMenu = true) {
         AppLayout: { template: '<div><slot /></div>' },
         TablePageLayout: { template: '<div><slot name="filters" /><slot name="table" /><slot name="pagination" /></div>' },
         DataTable: DataTableStub,
-        AccountTableActions: { template: '<div><slot name="after" /></div>' },
+        AccountTableActions: { template: `<div><button data-test="manual-refresh" @click="$emit('refresh')">refresh</button><slot name="after" /></div>` },
         AccountTableFilters: true,
         AccountBulkActionsBar: true,
         Pagination: true,
@@ -161,7 +166,9 @@ describe('admin AccountsView lite account list', () => {
     getUpstreamBillingProbeSettings.mockReset().mockResolvedValue({ enabled: true })
     getAllProxies.mockReset().mockResolvedValue([])
     getAllGroups.mockReset().mockResolvedValue([{ id: 7, name: 'codex', platform: 'openai' }])
+    refreshCredentials.mockReset()
     showError.mockReset()
+    showWarning.mockReset()
   })
 
   afterEach(() => {
@@ -179,6 +186,35 @@ describe('admin AccountsView lite account list', () => {
       expect.objectContaining({ lite: '1' }),
       expect.objectContaining({ signal: expect.any(AbortSignal) })
     )
+    wrapper.unmount()
+  })
+
+  it('keeps existing rows mounted and busy while a manual list refresh is pending', async () => {
+    const wrapper = mountView()
+    await flushPromises()
+    const row = wrapper.get('[data-account-name="compact row"]').element
+    let finish: (value: unknown) => void = () => {}
+    listAccounts.mockImplementationOnce(() => new Promise(resolve => { finish = resolve }))
+    await wrapper.get('[data-test="manual-refresh"]').trigger('click')
+    await flushPromises()
+    expect(wrapper.getComponent(DataTableStub).props('loading')).toBe(false)
+    expect(wrapper.get('[data-account-name="compact row"]').element).toBe(row)
+    expect(wrapper.find('[aria-busy="true"]').attributes()).toHaveProperty('inert')
+    finish({ items: [{ ...listRow, name: 'updated row' }], total: 1, page: 1, page_size: 20, pages: 1 })
+    await flushPromises()
+    expect(wrapper.get('[data-account-name="updated row"]').element).toBe(row)
+    expect(wrapper.find('[aria-busy="true"]').exists()).toBe(false)
+    wrapper.unmount()
+  })
+
+  it('still shows initial loading when no rows are available', async () => {
+    let finish: (value: unknown) => void = () => {}
+    listAccounts.mockImplementationOnce(() => new Promise(resolve => { finish = resolve }))
+    const wrapper = mountView()
+    await flushPromises()
+    expect(wrapper.getComponent(DataTableStub).props('loading')).toBe(true)
+    finish({ items: [listRow], total: 1, page: 1, page_size: 20, pages: 1 })
+    await flushPromises()
     wrapper.unmount()
   })
 
@@ -251,6 +287,24 @@ describe('admin AccountsView lite account list', () => {
     await flushPromises()
     expect(getById).toHaveBeenCalledTimes(3)
     expect(wrapper.get('[data-test="stats-account"]').text()).toBe('compact row')
+    wrapper.unmount()
+  })
+
+  it('shows the warning and patches the account after a partial Antigravity refresh', async () => {
+    refreshCredentials.mockResolvedValue({
+      account: { ...fullAccount, name: 'refreshed account' },
+      message: 'Token refreshed, but project_id is temporarily unavailable',
+      warning: 'missing_project_id_temporary'
+    })
+    const wrapper = mountView(false)
+    await flushPromises()
+
+    wrapper.findComponent(AccountActionMenu).vm.$emit('refresh-token', listRow)
+    await flushPromises()
+
+    expect(refreshCredentials).toHaveBeenCalledWith(42)
+    expect(wrapper.get('[data-account-name]').attributes('data-account-name')).toBe('refreshed account')
+    expect(showWarning).toHaveBeenCalledWith('Token refreshed, but project_id is temporarily unavailable')
     wrapper.unmount()
   })
 

@@ -329,7 +329,7 @@ func (h *UsageHandler) List(c *gin.Context) {
 
 	out := make([]dto.UsageLog, 0, len(records))
 	for i := range records {
-		converted := dto.UsageLogFromService(&records[i])
+		converted := dto.UsageLogFromService(&records[i]).Localized(c.GetHeader("Accept-Language"))
 		trimUsageLogUser(converted)
 		out = append(out, *converted)
 	}
@@ -483,7 +483,7 @@ func (h *UsageHandler) GetByID(c *gin.Context) {
 		}
 	}
 
-	converted := dto.UsageLogFromService(record)
+	converted := dto.UsageLogFromService(record).Localized(c.GetHeader("Accept-Language"))
 	trimUsageLogUser(converted)
 	response.Success(c, converted)
 }
